@@ -1,7 +1,7 @@
-#include "Player/AuraPlayerController.h"
+#include "AuraPlayerController.h"
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
-#include "Interaction/EnemyInterface.h"
+#include "Aura/Interaction/EnemyInterface.h"
 
 AAuraPlayerController::AAuraPlayerController()
 {
@@ -25,12 +25,12 @@ void AAuraPlayerController::CursorTrace()
 	ThisActor = CursorHit.GetActor();
 
 	/**
-	 * Line Trace from cursor. There are several scenarios:
-	 *  1. LastActor is null && ThisActor is null
+	 * 커서에서 라인 트레이스, 아래는 경우의 수 5가지
+	 *  1. LastActor == null && ThisActor == null
 	 *		- Do nothing
-	 *	2. LastActor is null && ThisActor is valid
+	 *	2. LastActor == null && ThisActor == valid
 	 *		- Highlight ThisActor
-	 *	3. LastActor is valid && ThisActor is null
+	 *	3. LastActor == valid && ThisActor == null
 	 *		- UnHighlight LastActor
 	 *	4. Both actors are valid, but LastActor != ThisActor
 	 *		- UnHighlight LastActor

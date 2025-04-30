@@ -1,4 +1,4 @@
-#include "Character/AuraCharacter.h"
+#include "AuraCharacter.h"
 
 #include "GameFramework/CharacterMovementComponent.h"
 

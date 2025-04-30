@@ -1,4 +1,4 @@
-#include "Character/AuraEnemy.h"
+#include "AuraEnemy.h"
 
 #include "Aura/Aura.h"
 

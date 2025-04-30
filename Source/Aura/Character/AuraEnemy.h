@@ -2,7 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "AuraCharacterBase.h"
-#include "Interaction/EnemyInterface.h"
+#include "Aura/Interaction/EnemyInterface.h"
 #include "AuraEnemy.generated.h"
 
 UCLASS()
