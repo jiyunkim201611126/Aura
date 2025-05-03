@@ -15,6 +15,11 @@ public class Aura : ModuleRules
 			"Engine", 
 			"InputCore", 
 			"EnhancedInput",
+			
+			"UMG",
+			"Slate",
+			"SlateCore",
+			
 			"GameplayAbilities",
 		});
 
