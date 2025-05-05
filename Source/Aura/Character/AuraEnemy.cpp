@@ -8,7 +8,6 @@ AAuraEnemy::AAuraEnemy()
 {
 	GetMesh()->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
 
-	// Simulated Proxy의 AbilitySystemComponent은 Owner Actor == Avatar Actor로, 둘 모두 캐릭터다.
 	AbilitySystemComponent = CreateDefaultSubobject<UAuraAbilitySystemComponent>("AbilitySystemComponent");
 	AbilitySystemComponent->SetIsReplicated(true);
 	// Simulated Proxy는 최소한의 정보만 복제되도록 설정
@@ -35,6 +34,6 @@ void AAuraEnemy::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// Ability Actor 초기화
+	// Simulated Proxy의 AbilitySystemComponent는 Owner Actor == Avatar Actor로, 둘 모두 캐릭터다
 	AbilitySystemComponent->InitAbilityActorInfo(this, this);
 }
