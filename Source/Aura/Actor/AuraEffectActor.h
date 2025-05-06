@@ -30,6 +30,8 @@ struct FGameplayEffectInfo
 {
 	GENERATED_BODY()
 
+	FGameplayEffectInfo(){}
+
 	// 적용할 Effect
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TSubclassOf<UGameplayEffect> GameplayEffectClass;
