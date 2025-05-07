@@ -23,9 +23,9 @@ void UAuraAttributeSet::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 	DOREPLIFETIME_CONDITION_NOTIFY(UAuraAttributeSet, MaxMana, COND_None, REPNOTIFY_Always);
 }
 
-void UAuraAttributeSet::PreAttributeChange(const FGameplayAttribute& Attribute, float& NewValue)
+void UAuraAttributeSet::PreAttributeBaseChange(const FGameplayAttribute& Attribute, float& NewValue) const
 {
-	Super::PreAttributeChange(Attribute, NewValue);
+	Super::PreAttributeBaseChange(Attribute, NewValue);
 
 	if (Attribute == GetHealthAttribute())
 	{
@@ -47,7 +47,7 @@ void UAuraAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallba
 
 void UAuraAttributeSet::SetEffectProperties(const FGameplayEffectModCallbackData& Data, FEffectProperties& Props) const
 {
-	// Source = Effect를 발생시킨 것, Target = 이펙트를 받는 것 (AbilitySystem 소유자)
+	// Source = Effect를 발생시킨 것, Target = Effect를 받는 것 (AbilitySystemComponent 소유자)
 	// 아래 로직은 Source와 Target이 플레이어든 아니든 모든 상황에서 AbilitySystemComponent, OwnerActor, AvatarActor를 추적
 	Props.EffectContextHandle = Data.EffectSpec.GetContext();
 	Props.SourceASC = Props.EffectContextHandle.GetOriginalInstigatorAbilitySystemComponent();

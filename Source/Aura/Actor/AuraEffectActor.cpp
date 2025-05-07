@@ -36,7 +36,7 @@ void AAuraEffectActor::OnOverlap(AActor* TargetActor)
 			EffectContextHandle.AddSourceObject(this);
 	
 			// GameplayEffectSpecHandle 생성, Spec이란 Effect의 틀로서, 여러 곳에서 같은 효과를 적용하고 싶을 때 사용하면 좋음
-			FGameplayEffectSpecHandle EffectSpecHandle = TargetASC->MakeOutgoingSpec(Effect.GameplayEffectClass, 1.f, EffectContextHandle);
+			FGameplayEffectSpecHandle EffectSpecHandle = TargetASC->MakeOutgoingSpec(Effect.GameplayEffectClass, ActorLevel, EffectContextHandle);
 
 			// Spec 없이 재사용을 염두하지 않고 간편하게 사용하는 경우 ApplyGameplayEffectToSelf 호출
 			// 또한 원하는 타이밍에 제거하고 싶은 경우 추적할 수 있도록 구조체 내에 할당
@@ -58,7 +58,7 @@ void AAuraEffectActor::OnEndOverlap(AActor* TargetActor)
 			check(Effect.GameplayEffectClass);
 			FGameplayEffectContextHandle EffectContextHandle = TargetASC->MakeEffectContext();
 			EffectContextHandle.AddSourceObject(this);
-			FGameplayEffectSpecHandle EffectSpecHandle = TargetASC->MakeOutgoingSpec(Effect.GameplayEffectClass, 1.f, EffectContextHandle);
+			FGameplayEffectSpecHandle EffectSpecHandle = TargetASC->MakeOutgoingSpec(Effect.GameplayEffectClass, ActorLevel, EffectContextHandle);
 			Effect.ActiveGameplayEffectHandle = TargetASC->ApplyGameplayEffectSpecToSelf(*EffectSpecHandle.Data.Get());
 		}
 		

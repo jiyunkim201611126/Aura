@@ -77,4 +77,7 @@ protected:
 	// 해당 클래스를 상속받는 자손 블루프린트 액터의 디테일 패널에서 Element를 추가
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Applied Effects")
 	TArray<FGameplayEffectInfo> GameplayEffects;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Applied Effects")
+	float ActorLevel = 1.f;
 };
