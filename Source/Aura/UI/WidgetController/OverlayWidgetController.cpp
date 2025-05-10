@@ -32,12 +32,19 @@ void UOverlayWidgetController::BindCallbacksToDependencies()
 
 	// 적용된 Effect의 태그에 따라 호출될 함수를 Lambda식으로 바인드
 	Cast<UAuraAbilitySystemComponent>(AbilitySystemComponent)->EffectAssetTags.AddLambda(
-		[](const FGameplayTagContainer& AssetTags)
+		[this](const FGameplayTagContainer& AssetTags)
 		{
 			for (const FGameplayTag& Tag : AssetTags)
 			{
-				const FString Msg = FString::Printf(TEXT("GE Tag: %s"), *Tag.ToString());
-				GEngine->AddOnScreenDebugMessage(-1, 8.0f, FColor::Red, Msg);
+				FGameplayTag MessageTag = FGameplayTag::RequestGameplayTag(FName("Message"));
+				
+				// 상위 계층으로 물어보면 true, 하위 계층으로 물어보면 false를 반환함
+				// Message를 넣으면 Message.HealthPotion은 true를, Message.HealthPotion을 넣으면 Message는 false를 반환
+				if (Tag.MatchesTag(MessageTag))
+				{
+					const FUIWidgetRow* Row = GetDataTableRowByTag<FUIWidgetRow>(MessageWidgetDataTable, Tag);
+					MessageWidgetRowDelegate.Broadcast(*Row);
+				}
 			}
 		}
 	);
