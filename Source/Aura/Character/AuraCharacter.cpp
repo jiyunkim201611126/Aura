@@ -1,6 +1,6 @@
 #include "AuraCharacter.h"
 
-#include "AbilitySystemComponent.h"
+#include "Aura/AbilitySystem/AuraAbilitySystemComponent.h"
 #include "Aura/Player/AuraPlayerState.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Aura/Player/AuraPlayerController.h"
@@ -47,6 +47,7 @@ void AAuraCharacter::InitAbilityActorInfo()
 	// Autonomous Proxy의 AbilitySystemComponent은 Owner Actor가 PlayerState, Avatar Actor가 캐릭터다
 	// 이유는 리스폰 시 정보가 유지되어야 하는 상황이 존재하기 때문
 	AuraPlayerState->GetAbilitySystemComponent()->InitAbilityActorInfo(AuraPlayerState, this);
+	Cast<UAuraAbilitySystemComponent>(AuraPlayerState->GetAbilitySystemComponent())->AbilityActorInfoSet();
 	AbilitySystemComponent = AuraPlayerState->GetAbilitySystemComponent();
 	AttributeSet = AuraPlayerState->GetAttributeSet();
 

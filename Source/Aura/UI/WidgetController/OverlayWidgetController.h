@@ -19,6 +19,7 @@ public:
 	virtual void BroadcastInitialValue() override;
 	virtual void BindCallbacksToDependencies() override;
 
+	// 아래 델리게이트들에 위젯 블루프린트들이 각자 필요한 함수를 바인드
 	UPROPERTY(BlueprintAssignable, Category = "Gas|Attributes")
 	FOnHealthChangedSignature OnHealthChanged;
 	

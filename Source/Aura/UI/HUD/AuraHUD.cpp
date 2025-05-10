@@ -24,7 +24,10 @@ void AAuraHUD::InitOverlay(APlayerController* PC, APlayerState* PS, UAbilitySyst
 	const FWidgetControllerParams WidgetControllerParams(PC, PS, ASC, AS);
 	UOverlayWidgetController* WidgetController = GetOverlayWidgetController(WidgetControllerParams);
 
+	// OverlayWidget 및 그 하위 Widget들에게 Controller를 할당하며, 필요한 함수를 Controller에 바인드
 	OverlayWidget->SetWidgetController(WidgetController);
+
+	// Overlay가 Init되는 순간 모든 Attribute값을 한 번 Broadcast해줌
 	WidgetController->BroadcastInitialValue();
 	
 	OverlayWidget->AddToViewport();

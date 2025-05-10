@@ -1,1 +1,16 @@
 #include "AuraAbilitySystemComponent.h"
+
+void UAuraAbilitySystemComponent::AbilityActorInfoSet()
+{
+	OnGameplayEffectAppliedDelegateToSelf.AddUObject(this, &ThisClass::EffectApplied);
+}
+
+void UAuraAbilitySystemComponent::EffectApplied(UAbilitySystemComponent* AbilitySystemComponent,
+                                                const FGameplayEffectSpec& EffectSpec, FActiveGameplayEffectHandle ActiveEffectHandle)
+{
+	FGameplayTagContainer TagContainer;
+	EffectSpec.GetAllAssetTags(TagContainer);
+
+	// Widget Controller에게 Tag를 가진 Effect가 Apply되었음을 알림
+	EffectAssetTags.Broadcast(TagContainer);
+}
