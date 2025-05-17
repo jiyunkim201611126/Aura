@@ -55,7 +55,7 @@ void UOverlayWidgetController::BindCallbacksToDependencies()
 				FGameplayTag MessageTag = FGameplayTag::RequestGameplayTag(FName("Message"));
 				
 				// 상위 계층으로 물어보면 true, 하위 계층으로 물어보면 false를 반환함
-				// Message를 넣으면 Message.HealthPotion은 true를, Message.HealthPotion을 넣으면 Message는 false를 반환
+				// "Message.HealthPotion".MatchesTag("Message")는 true를, "Message".MatchesTag("Message.HealthPotion")는 false를 반환
 				if (Tag.MatchesTag(MessageTag))
 				{
 					const FUIWidgetRow* Row = GetDataTableRowByTag<FUIWidgetRow>(MessageWidgetDataTable, Tag);

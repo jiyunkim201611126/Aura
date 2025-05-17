@@ -1,5 +1,7 @@
 #include "AuraAbilitySystemComponent.h"
 
+#include "Aura/Manager/AuraGameplayTags.h"
+
 void UAuraAbilitySystemComponent::AbilityActorInfoSet()
 {
 	OnGameplayEffectAppliedDelegateToSelf.AddUObject(this, &ThisClass::EffectApplied);
