@@ -38,6 +38,7 @@ class AURA_API UAuraWidgetController : public UObject
 public:
 	UFUNCTION(BlueprintCallable)
 	void SetWidgetControllerParams(const FWidgetControllerParams& WidgetControllerParams);
+	UFUNCTION(BlueprintCallable)
 	virtual void BroadcastInitialValue();
 
 	// AttributeSet에 있는 변수의 값이 변할 때마다 호출되는 델리게이트에 자신의 함수를 바인드하는 함수

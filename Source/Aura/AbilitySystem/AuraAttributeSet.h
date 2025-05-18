@@ -48,6 +48,10 @@ struct FEffectProperties
 	ACharacter* TargetCharacter = nullptr;
 };
 
+// 극도로 추악하고 지저분하게 작성된 형태를 이쁘게 포장
+template<class T>
+using TStaticFuncPtr = typename TBaseStaticDelegateInstance<T, FDefaultDelegateUserPolicy>::FFuncPtr;
+
 UCLASS()
 class AURA_API UAuraAttributeSet : public UAttributeSet
 {
@@ -56,8 +60,14 @@ class AURA_API UAuraAttributeSet : public UAttributeSet
 public:
 	UAuraAttributeSet();
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
-
 	virtual void PostGameplayEffectExecute(const FGameplayEffectModCallbackData& Data) override;
+
+	/**
+	 * 델리게이트가 아닌 함수 포인터를 직접 Value로 선언한 TMap.
+	 * 저수준 방식으로 최적화를 위해서 사용하기도 하지만, Bind 과정을 거칠 필요가 없기 때문에 보일러 플레이트를 줄이는 데에도 사용 가능
+	 */
+	TMap<FGameplayTag, TStaticFuncPtr<FGameplayAttribute()>> TagsToAttributes;
+
 	
 	/**
 	 * Vital Attributes

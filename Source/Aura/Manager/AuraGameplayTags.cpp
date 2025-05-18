@@ -6,20 +6,16 @@ FAuraGameplayTags FAuraGameplayTags::GameplayTags;
 void FAuraGameplayTags::InitializeNativeGameplayTags()
 {
 	GameplayTags.Attributes_Vital_Health = UGameplayTagsManager::Get().AddNativeGameplayTag(
-		FName("Attributes.Vital.Health")), FString("");
-	GameplayTags.Attributes_Vital_MaxHealth = UGameplayTagsManager::Get().AddNativeGameplayTag(
-		FName("Attributes.Vital.MaxHealth")), FString("");
+		FName("Attributes.Vital.Health")), FString("Value needed for survival");
 	GameplayTags.Attributes_Vital_Mana = UGameplayTagsManager::Get().AddNativeGameplayTag(
-		FName("Attributes.Vital.Mana")), FString("");
-	GameplayTags.Attributes_Vital_MaxMana = UGameplayTagsManager::Get().AddNativeGameplayTag(
-		FName("Attributes.Vital.MaxMana")), FString("");
+		FName("Attributes.Vital.Mana")), FString("Value required to use the skills");
 	
 	GameplayTags.Attributes_Primary_Strength = UGameplayTagsManager::Get().AddNativeGameplayTag(
 		FName("Attributes.Primary.Strength")), FString("Increases physical damage");
 	GameplayTags.Attributes_Primary_Intelligence = UGameplayTagsManager::Get().AddNativeGameplayTag(
 		FName("Attributes.Primary.Intelligence")), FString("Increases magical damage");
 	GameplayTags.Attributes_Primary_Resilience = UGameplayTagsManager::Get().AddNativeGameplayTag(
-		FName("Attributes.Primary.Resilience")), FString("Increases Armor and Armor Penestration");
+		FName("Attributes.Primary.Resilience")), FString("Increases Armor and Armor Penetration");
 	GameplayTags.Attributes_Primary_Vigor = UGameplayTagsManager::Get().AddNativeGameplayTag(
 		FName("Attributes.Primary.Vigor")), FString("Increases Health");
 	
@@ -39,13 +35,17 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 		FName("Attributes.Secondary.HealthRegeneration")), FString("Amount of Health regenerated every 1 second");
 	GameplayTags.Attributes_Secondary_ManaRegeneration = UGameplayTagsManager::Get().AddNativeGameplayTag(
 		FName("Attributes.Secondary.ManaRegeneration")), FString("Amount of Mana regenerated every 1 second");
+	GameplayTags.Attributes_Secondary_MaxHealth = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("Attributes.Secondary.MaxHealth")), FString("The maximum amount of Health obtainable");
+	GameplayTags.Attributes_Secondary_MaxMana = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("Attributes.Secondary.MaxMana")), FString("The maximum amount of Mana obtainable");
 	
 	GameplayTags.Message_HealthCrystal = UGameplayTagsManager::Get().AddNativeGameplayTag(
-		FName("Message.HealthCrystal")), FString("");
+		FName("Message.HealthCrystal")), FString("Gradually recover Health");
 	GameplayTags.Message_HealthPotion = UGameplayTagsManager::Get().AddNativeGameplayTag(
-		FName("Message.HealthPotion")), FString("");
+		FName("Message.HealthPotion")), FString("Restore Health");
 	GameplayTags.Message_ManaCrystal = UGameplayTagsManager::Get().AddNativeGameplayTag(
-		FName("Message.ManaCrystal")), FString("");
+		FName("Message.ManaCrystal")), FString("Gradually recover Mana");
 	GameplayTags.Message_ManaPotion = UGameplayTagsManager::Get().AddNativeGameplayTag(
-		FName("Message.ManaPotion")), FString("");
+		FName("Message.ManaPotion")), FString("Restore Mana");
 }

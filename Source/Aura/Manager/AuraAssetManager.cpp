@@ -12,5 +12,6 @@ void UAuraAssetManager::StartInitialLoading()
 {
 	Super::StartInitialLoading();
 
+	// 전역으로 선언되어있는 GameplayTags 인스턴스를 초기화
 	FAuraGameplayTags::InitializeNativeGameplayTags();
 }
