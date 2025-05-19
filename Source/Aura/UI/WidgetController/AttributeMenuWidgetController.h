@@ -6,6 +6,8 @@
 
 struct FAuraAttributeInfo;
 class UAttributeInfo;
+struct FGameplayTag;
+struct FGameplayAttribute;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FAttributeInfoSignature, const FAuraAttributeInfo&, Info);
 
 UCLASS(BlueprintType, Blueprintable)
@@ -23,4 +25,7 @@ public:
 protected:
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<UAttributeInfo> AttributeInfo;
+
+private:
+	void BroadcastAttributeInfo(const FGameplayTag& AttributeTag, const FGameplayAttribute& Attribute) const;
 };
