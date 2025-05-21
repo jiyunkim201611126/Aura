@@ -33,10 +33,22 @@ struct FAuraGameplayTags
 	FGameplayTag Attributes_Secondary_MaxHealth;
 	FGameplayTag Attributes_Secondary_MaxMana;
 
+	// Message
+
 	FGameplayTag Message_HealthCrystal;
 	FGameplayTag Message_HealthPotion;
 	FGameplayTag Message_ManaCrystal;
 	FGameplayTag Message_ManaPotion;
+
+	// Input
+
+	FGameplayTag InputTag_Move;
+	FGameplayTag InputTag_1;
+	FGameplayTag InputTag_2;
+	FGameplayTag InputTag_3;
+	FGameplayTag InputTag_4;
+	FGameplayTag InputTag_LMB;
+	FGameplayTag InputTag_RMB;
 	
 private:
 	static FAuraGameplayTags GameplayTags;

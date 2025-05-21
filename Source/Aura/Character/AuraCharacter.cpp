@@ -68,5 +68,6 @@ void AAuraCharacter::InitAbilityActorInfo()
 		}
 	}
 
+	// 초기 Attribute 초기화
 	InitializeDefaultAttributes();
 }
