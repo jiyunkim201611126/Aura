@@ -42,7 +42,6 @@ struct FAuraGameplayTags
 
 	// Input
 
-	FGameplayTag InputTag_Move;
 	FGameplayTag InputTag_1;
 	FGameplayTag InputTag_2;
 	FGameplayTag InputTag_3;

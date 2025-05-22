@@ -1,11 +1,20 @@
 #include "AuraPlayerController.h"
+
 #include "EnhancedInputSubsystems.h"
 #include "Aura/Interaction/EnemyInterface.h"
 #include "Aura/Input/AuraInputComponent.h"
+#include "AbilitySystemBlueprintLibrary.h"
+#include "Aura/AbilitySystem/AuraAbilitySystemComponent.h"
+#include "Components/SplineComponent.h"
+#include "Aura/Manager/AuraGameplayTags.h"
+#include "NavigationSystem.h"
+#include "NavigationPath.h"
 
 AAuraPlayerController::AAuraPlayerController()
 {
 	bReplicates = true;
+
+	Spline = CreateDefaultSubobject<USplineComponent>("Spline");
 }
 
 void AAuraPlayerController::PlayerTick(float DeltaTime)
@@ -100,8 +109,6 @@ void AAuraPlayerController::SetupInputComponent()
 	// InputComponent는 ProjectSettings의 Input 탭에서 지정한다.
 	UAuraInputComponent* AuraInputComponent = CastChecked<UAuraInputComponent>(InputComponent);
 
-	//AuraInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AAuraPlayerController::Move);
-
 	// InputComponent에게 InputConfig(DataAsset)과 함수 포인터들을 전달
 	AuraInputComponent->BindAbilityActions(InputConfig, this,
 		&ThisClass::AbilityInputTagPressed, &ThisClass::AbilityInputTagReleased, &ThisClass::AbilityInputTagHeld);
@@ -125,15 +132,99 @@ void AAuraPlayerController::Move(const FInputActionValue& InputActionValue)
 
 void AAuraPlayerController::AbilityInputTagPressed(FGameplayTag InputTag)
 {
-	GEngine->AddOnScreenDebugMessage(1, 3.f, FColor::Red, *InputTag.ToString());
-}
-
-void AAuraPlayerController::AbilityInputTagReleased(FGameplayTag InputTag)
-{
-	GEngine->AddOnScreenDebugMessage(2, 3.f, FColor::Blue, *InputTag.ToString());
+	// RMB Input인 경우 들어가는 분기
+	if (InputTag.MatchesTagExact(FAuraGameplayTags::Get().InputTag_RMB))
+	{
+		// 현재 마우스 아래에 Enemy가 존재하면 bTargeting이 true가 됨
+		bTargeting = ThisActor ? true : false;
+	}
 }
 
 void AAuraPlayerController::AbilityInputTagHeld(FGameplayTag InputTag)
 {
-	GEngine->AddOnScreenDebugMessage(3, 3.f, FColor::Green, *InputTag.ToString());
+	// RMB Input이 아닌 경우 들어가는 분기
+	if (!InputTag.MatchesTagExact(FAuraGameplayTags::Get().InputTag_RMB))
+	{
+		if (GetASC())
+		{
+			GetASC()->AbilityInputTagHeld(InputTag);
+		}
+		return;
+	}
+
+	// RMB Input인 경우 들어가는 분기
+	if (bTargeting)
+	{
+		// 마우스 아래 Enemy가 있으면 Ability 사용
+		if (GetASC())
+		{
+			GetASC()->AbilityInputTagHeld(InputTag);
+		}
+	}
+	else
+	{
+		// 마우스 아래 Enemy가 없으면 Move를 원한다고 간주, 얼마나 오랜 시간 동안 누르고 있었는지 기록 시작
+		FollowTime += GetWorld()->GetDeltaSeconds();
+	}
+}
+
+void AAuraPlayerController::AbilityInputTagReleased(FGameplayTag InputTag)
+{
+	// RMB Input이 아닌 경우 들어가는 분기
+	if (!InputTag.MatchesTagExact(FAuraGameplayTags::Get().InputTag_RMB))
+	{
+		if (GetASC())
+		{
+			GetASC()->AbilityInputTagReleased(InputTag);
+		}
+		return;
+	}
+	
+	// RMB Input인 경우 들어가는 분기
+	if (bTargeting)
+	{
+		// 마우스 아래 Enemy가 있으면 Ability 사용
+		if (GetASC())
+		{
+			GetASC()->AbilityInputTagReleased(InputTag);
+		}
+	}
+	else
+	{
+		// 마우스 아래 Enemy가 없으면 Move를 원한다고 간주
+		APawn* ControlledPawn = GetPawn();
+		
+		// FollowTime(꾹 누르고 있던 시간)을 ShortPressThreshold와 비교
+		if (FollowTime <= ShortPressThreshold && ControlledPawn)
+		{
+			// 마우스 위치로 LineTrace해서 위치 캐싱
+			FHitResult Hit;
+			if (GetHitResultUnderCursor(ECC_Visibility, false, Hit))
+			{
+				CachedDestination = Hit.Location;
+			}
+			
+			// 경로 계산
+			if (UNavigationPath* NavPath = UNavigationSystemV1::FindPathToLocationSynchronously(this, ControlledPawn->GetActorLocation(), CachedDestination))
+			{
+				Spline->ClearSplinePoints();
+				for (const FVector& PointLoc : NavPath->PathPoints)
+				{
+					Spline->AddSplinePoint(PointLoc, ESplineCoordinateSpace::World);
+					DrawDebugSphere(GetWorld(), PointLoc, 8.f, 8, FColor::Green, false, 5.f);
+				}
+			}
+			FollowTime = 0.f;
+			bTargeting = false;
+		}
+	}
+}
+
+UAuraAbilitySystemComponent* AAuraPlayerController::GetASC()
+{
+	if (AuraAbilitySystemComponent == nullptr)
+	{
+		AuraAbilitySystemComponent = Cast<UAuraAbilitySystemComponent>(UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(GetPawn<APawn>()));
+	}
+	return AuraAbilitySystemComponent;
 }
