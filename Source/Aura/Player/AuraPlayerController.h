@@ -30,8 +30,6 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Input")
 	TObjectPtr<UInputMappingContext> AuraContext;
 
-	void Move(const FInputActionValue& InputActionValue);
-
 	void CursorTrace();
 
 	TScriptInterface<IEnemyInterface> LastActor;
@@ -54,10 +52,12 @@ private:
 	float FollowTime = 0.f;
 	float ShortPressThreshold = 0.5f;
 	bool bTargeting = false;
-
-	UPROPERTY(EditDefaultsOnly)
+	bool bAutoRunning = false;
 	float AutoRunAcceptanceRadius = 50.f;
 
+	// FVector들을 추가해주면 자동으로 곡선 경로를 생성해주는 컴포넌트
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<USplineComponent> Spline;
+
+	void AutoRun();
 };

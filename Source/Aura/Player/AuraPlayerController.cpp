@@ -22,6 +22,7 @@ void AAuraPlayerController::PlayerTick(float DeltaTime)
 	Super::PlayerTick(DeltaTime);
 
 	CursorTrace();
+	AutoRun();
 }
 
 void AAuraPlayerController::CursorTrace()
@@ -83,6 +84,26 @@ void AAuraPlayerController::CursorTrace()
 	}
 }
 
+void AAuraPlayerController::AutoRun()
+{
+	if (!bAutoRunning) return;
+	if (APawn* ControlledPawn = GetPawn())
+	{
+		// 곡선 경로 전체 중 캐릭터의 위치로부터 가장 가까운 Location을 구함 
+		const FVector LocationOnSpline = Spline->FindLocationClosestToWorldLocation(ControlledPawn->GetActorLocation(), ESplineCoordinateSpace::World);
+		// 구해진 해당 Location을 통해 곡선의 방향을 구함
+		const FVector Direction = Spline->FindDirectionClosestToWorldLocation(LocationOnSpline, ESplineCoordinateSpace::World);
+		// 해당 방향으로 이동 시작
+		ControlledPawn->AddMovementInput(Direction);
+
+		const float DistanceToDestination = (LocationOnSpline - CachedDestination).Length();
+		if (DistanceToDestination <= AutoRunAcceptanceRadius)
+		{
+			bAutoRunning = false;
+		}
+	}
+}
+
 void AAuraPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
@@ -114,22 +135,6 @@ void AAuraPlayerController::SetupInputComponent()
 		&ThisClass::AbilityInputTagPressed, &ThisClass::AbilityInputTagReleased, &ThisClass::AbilityInputTagHeld);
 }
 
-void AAuraPlayerController::Move(const FInputActionValue& InputActionValue)
-{
-	const FVector2d InputAxisVector = InputActionValue.Get<FVector2D>();
-	const FRotator Rotation = GetControlRotation();
-	const FRotator YawRotation(0.f, Rotation.Yaw, 0.f);
-
-	const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
-	const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
-
-	if (APawn* ControlledPawn = GetPawn<APawn>())
-	{
-		ControlledPawn->AddMovementInput(ForwardDirection, InputAxisVector.Y);
-		ControlledPawn->AddMovementInput(RightDirection, InputAxisVector.X);
-	}
-}
-
 void AAuraPlayerController::AbilityInputTagPressed(FGameplayTag InputTag)
 {
 	// RMB Input인 경우 들어가는 분기
@@ -137,6 +142,8 @@ void AAuraPlayerController::AbilityInputTagPressed(FGameplayTag InputTag)
 	{
 		// 현재 마우스 아래에 Enemy가 존재하면 bTargeting이 true가 됨
 		bTargeting = ThisActor ? true : false;
+		// 꾹 누른 시간 초기화하며 측정 시작
+		FollowTime = 0.f;
 	}
 }
 
@@ -194,28 +201,32 @@ void AAuraPlayerController::AbilityInputTagReleased(FGameplayTag InputTag)
 		// 마우스 아래 Enemy가 없으면 Move를 원한다고 간주
 		APawn* ControlledPawn = GetPawn();
 		
-		// FollowTime(꾹 누르고 있던 시간)을 ShortPressThreshold와 비교
+		// FollowTime(꾹 누르고 있던 시간)을 ShortPressThreshold(Released 이벤트가 발생하지 않는 임계점)와 비교
 		if (FollowTime <= ShortPressThreshold && ControlledPawn)
 		{
 			// 마우스 위치로 LineTrace해서 위치 캐싱
 			FHitResult Hit;
 			if (GetHitResultUnderCursor(ECC_Visibility, false, Hit))
 			{
-				CachedDestination = Hit.Location;
+				CachedDestination = Hit.ImpactPoint;
 			}
 			
-			// 경로 계산
+			// 캐릭터의 현재 위치로부터 마우스가 Release된 Location까지 최단거리 계산
 			if (UNavigationPath* NavPath = UNavigationSystemV1::FindPathToLocationSynchronously(this, ControlledPawn->GetActorLocation(), CachedDestination))
 			{
+				// 기존 경로 삭제
 				Spline->ClearSplinePoints();
+				// SplineComponent를 이용해 최단거리인 직선 경로를 곡선으로 변환 
 				for (const FVector& PointLoc : NavPath->PathPoints)
 				{
 					Spline->AddSplinePoint(PointLoc, ESplineCoordinateSpace::World);
 					DrawDebugSphere(GetWorld(), PointLoc, 8.f, 8, FColor::Green, false, 5.f);
 				}
+				// NavigationSystem이 지정한 목적지(곡선 경로의 끝)로 값 변경 
+				CachedDestination = NavPath->PathPoints[NavPath->PathPoints.Num() - 1];
+				// 목적지까지 자동 달리기 시작
+				bAutoRunning = true;
 			}
-			FollowTime = 0.f;
-			bTargeting = false;
 		}
 	}
 }
