@@ -20,7 +20,7 @@ public:
 
 protected:
 	/**
-	 * WidgetController가 바인드되는 순간 호출하는 함수
+	 * WidgetController가 바인드되는 순간, 즉 SetWidgetController에서 호출하는 함수
 	 * 주로 자신이 참조하고 있는 다른 위젯에 WidgetController를 할당하거나
 	 * WidgetController의 델리게이트에 자신의 함수를 바인드하는 데에 사용
 	 * 

@@ -27,60 +27,16 @@ void AAuraPlayerController::PlayerTick(float DeltaTime)
 
 void AAuraPlayerController::CursorTrace()
 {
-	FHitResult CursorHit;
 	GetHitResultUnderCursor(ECC_Visibility, false, CursorHit);
 	if (!CursorHit.bBlockingHit) return;
 
 	LastActor = ThisActor;
 	ThisActor = CursorHit.GetActor();
-
-	/**
-	 * 커서에서 라인 트레이스, 아래는 경우의 수 5가지
-	 *  1. LastActor == null && ThisActor == null
-	 *		- Do nothing
-	 *	2. LastActor == null && ThisActor == valid
-	 *		- Highlight ThisActor
-	 *	3. LastActor == valid && ThisActor == null
-	 *		- UnHighlight LastActor
-	 *	4. Both actors are valid, but LastActor != ThisActor
-	 *		- UnHighlight LastActor
-	 *		- Highlight ThisActor
-	 *	5. Both actors are valid, and LastActor == ThisActor
-	 *		- Do nothing
-	 */
-
-	if (LastActor == nullptr)
+	
+	if (LastActor != ThisActor)
 	{
-		if (ThisActor != nullptr)
-		{
-			// case 2
-			ThisActor->HighlightActor();
-		}
-		else
-		{
-			// case 1 - both are null
-		}
-	}
-	else // LastActor is valid
-	{
-		if (ThisActor == nullptr)
-		{
-			// case 3
-			LastActor->UnHighlightActor();
-		}
-		else
-		{
-			if (LastActor != ThisActor)
-			{
-				// case 4
-				LastActor->UnHighlightActor();
-				ThisActor->HighlightActor();
-			}
-			else
-			{
-				// case 5
-			}
-		}
+		if (LastActor) LastActor->UnHighlightActor();
+		if (ThisActor) ThisActor->HighlightActor();
 	}
 }
 
@@ -199,16 +155,15 @@ void AAuraPlayerController::AbilityInputTagReleased(FGameplayTag InputTag)
 	else
 	{
 		// 마우스 아래 Enemy가 없으면 Move를 원한다고 간주
-		APawn* ControlledPawn = GetPawn();
+		const APawn* ControlledPawn = GetPawn();
 		
 		// FollowTime(꾹 누르고 있던 시간)을 ShortPressThreshold(Released 이벤트가 발생하지 않는 임계점)와 비교
 		if (FollowTime <= ShortPressThreshold && ControlledPawn)
 		{
-			// 마우스 위치로 LineTrace해서 위치 캐싱
-			FHitResult Hit;
-			if (GetHitResultUnderCursor(ECC_Visibility, false, Hit))
+			// 마우스 위치로 라인트레이싱한 결과의 위치를 캐싱
+			if (CursorHit.bBlockingHit)
 			{
-				CachedDestination = Hit.ImpactPoint;
+				CachedDestination = CursorHit.ImpactPoint;
 			}
 			
 			// 캐릭터의 현재 위치로부터 마우스가 Release된 Location까지 최단거리 계산
@@ -220,9 +175,8 @@ void AAuraPlayerController::AbilityInputTagReleased(FGameplayTag InputTag)
 				for (const FVector& PointLoc : NavPath->PathPoints)
 				{
 					Spline->AddSplinePoint(PointLoc, ESplineCoordinateSpace::World);
-					DrawDebugSphere(GetWorld(), PointLoc, 8.f, 8, FColor::Green, false, 5.f);
 				}
-				// NavigationSystem이 지정한 목적지(곡선 경로의 끝)로 값 변경 
+				// 목적지 값 변경, 이 과정을 거치지 않으면 장애물을 클릭한 경우 목적지에 도달하지 못 해 영원히 달림
 				CachedDestination = NavPath->PathPoints[NavPath->PathPoints.Num() - 1];
 				// 목적지까지 자동 달리기 시작
 				bAutoRunning = true;
