@@ -54,11 +54,11 @@ protected:
 	void ApplyEffectToSelf(TSubclassOf<UGameplayEffect> GameplayEffectClass, float Level) const;
 	// 게임 시작 시 Attribute를 초기화하는 함수
 	void InitializeDefaultAttributes() const;
-	// 게임 시작 시 캐릭터가 Ability를 갖고 있도록 적용하는 함수 
+	// 게임 시작 시 캐릭터가 Ability를 장착하는 함수
 	void AddCharacterAbilities() const;
 
 private:
-	// 게임 시작 시 갖고 있는 Ability
+	// 게임 시작 시 장착하고 있는 Ability
 	UPROPERTY(EditAnywhere, Category = "Abilities")
 	TArray<TSubclassOf<UGameplayAbility>> StartupAbilities;
 };

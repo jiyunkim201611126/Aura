@@ -18,6 +18,10 @@ protected:
 		const FGameplayAbilityActivationInfo ActivationInfo,
 		const FGameplayEventData* TriggerEventData) override;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	// Montage의 Notify에 의해 실행되는 함수
+	UFUNCTION(BlueprintCallable, Category = "Projectile")
+	void SpawnProjectile();
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Projectile")
 	TSubclassOf<AAuraProjectile> ProjectileClass;
 };

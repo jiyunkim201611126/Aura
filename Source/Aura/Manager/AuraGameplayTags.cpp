@@ -40,17 +40,6 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 	GameplayTags.Attributes_Secondary_MaxMana = UGameplayTagsManager::Get().AddNativeGameplayTag(
 		FName("Attributes.Secondary.MaxMana")), FString("The maximum amount of Mana obtainable");
 
-	// Message
-	
-	GameplayTags.Message_HealthCrystal = UGameplayTagsManager::Get().AddNativeGameplayTag(
-		FName("Message.HealthCrystal")), FString("Gradually recover Health");
-	GameplayTags.Message_HealthPotion = UGameplayTagsManager::Get().AddNativeGameplayTag(
-		FName("Message.HealthPotion")), FString("Restore Health");
-	GameplayTags.Message_ManaCrystal = UGameplayTagsManager::Get().AddNativeGameplayTag(
-		FName("Message.ManaCrystal")), FString("Gradually recover Mana");
-	GameplayTags.Message_ManaPotion = UGameplayTagsManager::Get().AddNativeGameplayTag(
-		FName("Message.ManaPotion")), FString("Restore Mana");
-
 	// Input
 
 	GameplayTags.InputTag_LMB = UGameplayTagsManager::Get().AddNativeGameplayTag(

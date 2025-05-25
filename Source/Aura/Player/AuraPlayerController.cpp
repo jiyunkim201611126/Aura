@@ -88,7 +88,7 @@ void AAuraPlayerController::SetupInputComponent()
 
 	// InputComponent에게 InputConfig(DataAsset)과 함수 포인터들을 전달
 	AuraInputComponent->BindAbilityActions(InputConfig, this,
-		&ThisClass::AbilityInputTagPressed, &ThisClass::AbilityInputTagReleased, &ThisClass::AbilityInputTagHeld);
+		&ThisClass::AbilityInputTagPressed, &ThisClass::AbilityInputTagHeld, &ThisClass::AbilityInputTagReleased);
 }
 
 void AAuraPlayerController::AbilityInputTagPressed(FGameplayTag InputTag)
@@ -100,7 +100,11 @@ void AAuraPlayerController::AbilityInputTagPressed(FGameplayTag InputTag)
 		bTargeting = ThisActor ? true : false;
 		// 꾹 누른 시간 초기화하며 측정 시작
 		FollowTime = 0.f;
+		return;
 	}
+
+	// 이동이 아닌 다른 입력이 들어온 경우 이동 중단
+	bAutoRunning = false;
 }
 
 void AAuraPlayerController::AbilityInputTagHeld(FGameplayTag InputTag)

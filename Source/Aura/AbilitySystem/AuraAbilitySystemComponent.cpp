@@ -12,13 +12,13 @@ void UAuraAbilitySystemComponent::AddCharacterAbilities(const TArray<TSubclassOf
 {
 	for (TSubclassOf<UGameplayAbility> AbilityClass : StartupAbilities)
 	{
-		// 게임 시작 시 적용되는 Ability들
+		// 게임 시작 시 장착하는 Ability들
 		FGameplayAbilitySpec AbilitySpec = FGameplayAbilitySpec(AbilityClass, 1);
 		if (const UAuraGameplayAbility* AuraAbility = Cast<UAuraGameplayAbility>(AbilitySpec.Ability))
 		{
-			// Ability 적용을 기록하기 위해 태그 추가
+			// Ability 장착을 기록하기 위해 태그 추가
 			AbilitySpec.DynamicAbilityTags.AddTag(AuraAbility->StartupInputTag);
-			// Ability 적용
+			// Ability 장착
 			GiveAbility(AbilitySpec);
 		}
 	}
@@ -28,15 +28,15 @@ void UAuraAbilitySystemComponent::AbilityInputTagHeld(const FGameplayTag& InputT
 {
 	if (!InputTag.IsValid()) return;
 
-	// 현재 적용 중인 Ability 가져오기
+	// 현재 장착 중인 Ability 가져오기
 	for (FGameplayAbilitySpec& AbilitySpec : GetActivatableAbilities())
 	{
-		// 적용 중인 게 확실한지 Tag로 검증
+		// 장착 중인 Ability 중 Tag가 일치하는 Ability가 있는지 탐색
 		if (AbilitySpec.DynamicAbilityTags.HasTagExact(InputTag))
 		{
 			// Pressed 이벤트도 발생시킴
 			AbilitySpecInputPressed(AbilitySpec);
-			// Held 이벤트에 바인드된 Ability가 적용 중이지 않은 상태라면 적용 
+			// Ability가 이미 작동 중이라면 더 작동시키지 않음
 			if (!AbilitySpec.IsActive())
 			{
 				TryActivateAbility(AbilitySpec.Handle);

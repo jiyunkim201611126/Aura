@@ -36,10 +36,10 @@ class AURA_API UAttributeInfo : public UDataAsset
 	GENERATED_BODY()
 
 public:
-	// Tag를 매개변수로 받고, 아래 배열에서 해당되는 AttributeInfo를 찾아 반환합니다.
+	// Tag를 매개변수로 받고, 아래 배열에서 해당되는 AttributeInfo를 찾아 반환
 	FAuraAttributeInfo FindAttributeInfoForTag(const FGameplayTag& AttributeTag, bool bLogNotFound = false) const;
 
-	// 해당 클래스로부터 파생된 DataAsset에 위에서 선언된 구조체를 배열로 추가하여 초기화할 수 있습니다.
+	// 해당 클래스로부터 파생된 DataAsset에 위에서 선언된 구조체를 배열로 추가하여 초기화할 수 있음
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TArray<FAuraAttributeInfo> AttributeInformation;
 };
