@@ -4,7 +4,7 @@
 #include "Abilities/Tasks/AbilityTask.h"
 #include "TargetDataUnderMouse.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMouseTargetDataSignature, const FGameplayAbilityTargetDataHandle&, Data);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMouseTargetDataSignature, const FGameplayAbilityTargetDataHandle&, DataHandle);
 
 /**
  * AbilityTask는 GameplayAbility 안에서 '어떤 이벤트를 기다렸다가 처리하는' 비동기 작업을 담당하는 클래스
@@ -30,5 +30,9 @@ class AURA_API UTargetDataUnderMouse : public UAbilityTask
 
 protected:
 	virtual void Activate() override;
+
+private:
 	void SendMouseCursorData();
+
+	void OnTargetDataReplicatedCallback(const FGameplayAbilityTargetDataHandle& DataHandle, FGameplayTag ActivationTag);
 };

@@ -16,19 +16,31 @@ void UTargetDataUnderMouse::Activate()
 	const bool bIsLocallyControlled = Ability->GetCurrentActorInfo()->IsLocallyControlled();
 	if (bIsLocallyControlled)
 	{
+		// 클라이언트쪽 로직
 		SendMouseCursorData();
 	}
 	else
 	{
 		// 서버쪽 로직
+
+		// 현재 인스턴스를 식별하기 위한 고유 핸들
+		const FGameplayAbilitySpecHandle SpecHandle = GetAbilitySpecHandle();
+		// 이 Ability가 실행될 때 생성된 예측키
+		const FPredictionKey ActivationPredictionKey = GetActivationPredictionKey();
+		// 서버가 TargetData를 수신했을 때 호출할 델리게이트 등록
+		AbilitySystemComponent.Get()->AbilityTargetDataSetDelegate(GetAbilitySpecHandle(), GetActivationPredictionKey()).AddUObject(this, &UTargetDataUnderMouse::OnTargetDataReplicatedCallback);
+		// 이미 TargetData가 도착해있다면 위에서 등록한 콜백을 즉시 호출
+		const bool bCalledDelegate = AbilitySystemComponent.Get()->CallReplicatedTargetDataDelegatesIfSet(SpecHandle, ActivationPredictionKey);
+		if (!bCalledDelegate)
+		{
+			SetWaitingOnRemotePlayerData();
+		}
 	}
 }
 
 void UTargetDataUnderMouse::SendMouseCursorData()
 {
-	// GAS에서 네트워크 예측 작업의 범위를 명확히 지정해주는 역할
-	// 해당 작업이 예측적으로 진행되고 있음을 GAS에 알리기 위해 사용
-	// 여기서 PredictionKey란, 이 함수 흐름 전체에 Key를 부여해 다른 네트워크 작업과 섞이거나 충돌하지 않도록 방지함
+	// 이 함수 흐름 전체에 Key를 부여해 다른 네트워크 작업과 섞이거나 충돌하지 않도록 방지함
 	FScopedPredictionWindow ScopedPrediction(AbilitySystemComponent.Get());
 	
 	AAuraPlayerController* PC = Cast<AAuraPlayerController>(Ability->GetCurrentActorInfo()->PlayerController.Get());
@@ -37,15 +49,32 @@ void UTargetDataUnderMouse::SendMouseCursorData()
 	Data->HitResult = PC->CursorHit;
 	DataHandle.Add(Data);
 	
+	/*
+	Ability를 실행하게 되면 자동으로 예측키가 생성, 서버와의 소통을 시작
+	ServerSetReplicatedTargetData를 호출할 때 이 예측키를 2번째 매개변수로 사용해 '어떤 클라이언트에서, 어떤 Ability에서' 실행 중인지 GAS가 파악
+	마지막 매개변수로 들어간 ScopedPredictionKey는 함수의 첫 구문에서 선언되어 '이 함수'에서 예측 작업이 실행 중임을 명시
+	즉, GAS는 이 2개의 매개변수인 예측키를 통해 다른 클라이언트나 다른 Ability 혹은 다른 함수에서 실행 중인 예측 작업과 뒤섞이지 않도록 제어
+	*/
 	AbilitySystemComponent->ServerSetReplicatedTargetData(
 		GetAbilitySpecHandle(),											// 서버가 어떤 Ability 인스턴스에 대한 TargetData인지 식별할 때 사용
-		GetActivationPredictionKey(),									// Ability 실행 시점의 예측키. 동기화, 예측, 롤백 처리를 위해 사용
+		GetActivationPredictionKey(),									// Ability 실행 전체의 예측키. 동기화, 예측, 롤백 처리를 위해 사용
 		DataHandle,														// TargetData에 대한 실제 정보를 담고 있는 핸들
 		FGameplayTag(),													// 추가적인 태그 정보 전달을 위해 사용
-		AbilitySystemComponent->ScopedPredictionKey);	// 이 작업이 예측적으로 발생했음을 설명하는 부가 정보
+		AbilitySystemComponent->ScopedPredictionKey);	// 이 함수의 예측키. 가장 윗줄에서 선언되었음
 
 	// Ability를 실행해도 괜찮은지를 판별하는 함수
 	// 네트워크 예측 작업으로 인해 델리게이트가 중복으로 호출되는 것을 방지함
+	if (ShouldBroadcastAbilityTaskDelegates())
+	{
+		// 최종적으로 블루프린트에서 정의한 흐름을 호출
+		ValidData.Broadcast(DataHandle);
+	}
+}
+
+void UTargetDataUnderMouse::OnTargetDataReplicatedCallback(const FGameplayAbilityTargetDataHandle& DataHandle, FGameplayTag ActivationTag)
+{
+	// 이 Ability와 예측키에 해당하는 모든 네트워크로 복제된 데이터를 소모(중복 처리 방지)
+	AbilitySystemComponent->ConsumeAllReplicatedData(GetAbilitySpecHandle(), GetActivationPredictionKey());
 	if (ShouldBroadcastAbilityTaskDelegates())
 	{
 		ValidData.Broadcast(DataHandle);
