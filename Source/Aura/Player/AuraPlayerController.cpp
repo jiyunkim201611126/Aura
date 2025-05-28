@@ -130,6 +130,9 @@ void AAuraPlayerController::AbilityInputTagHeld(FGameplayTag InputTag)
 		if (GetASC())
 		{
 			GetASC()->AbilityInputTagHeld(InputTag);
+
+			// 이동 중단
+			bAutoRunning = false;
 		}
 	}
 	else

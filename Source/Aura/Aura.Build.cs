@@ -21,6 +21,7 @@ public class Aura : ModuleRules
 			"SlateCore",
 			
 			"GameplayAbilities",
+			"MotionWarping",
 		});
 
 		PrivateDependencyModuleNames.AddRange(new string[]
