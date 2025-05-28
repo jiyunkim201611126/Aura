@@ -86,6 +86,10 @@ void AAuraPlayerController::SetupInputComponent()
 	// InputComponent는 ProjectSettings의 Input 탭에서 지정한다.
 	UAuraInputComponent* AuraInputComponent = CastChecked<UAuraInputComponent>(InputComponent);
 
+	AuraInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AAuraPlayerController::Move);
+	AuraInputComponent->BindAction(ShiftAction, ETriggerEvent::Started, this, &AAuraPlayerController::ShiftPressed);
+	AuraInputComponent->BindAction(ShiftAction, ETriggerEvent::Completed, this, &AAuraPlayerController::ShiftReleased);
+
 	// InputComponent에게 InputConfig(DataAsset)과 함수 포인터들을 전달
 	AuraInputComponent->BindAbilityActions(InputConfig, this,
 		&ThisClass::AbilityInputTagPressed, &ThisClass::AbilityInputTagHeld, &ThisClass::AbilityInputTagReleased);
@@ -119,10 +123,10 @@ void AAuraPlayerController::AbilityInputTagHeld(FGameplayTag InputTag)
 		return;
 	}
 
-	// RMB Input인 경우 들어가는 분기
-	if (bTargeting)
+	// RMB Input인 경우 여기에 도달
+	if (bTargeting || bShiftKeyDown)
 	{
-		// 마우스 아래 Enemy가 있으면 Ability 사용
+		// 마우스 아래 Enemy가 있거나 Shift를 누른 상태면 Ability 사용
 		if (GetASC())
 		{
 			GetASC()->AbilityInputTagHeld(InputTag);
@@ -158,16 +162,15 @@ void AAuraPlayerController::AbilityInputTagReleased(FGameplayTag InputTag)
 		return;
 	}
 	
-	// RMB Input인 경우 들어가는 분기
-	if (bTargeting)
+	// RMB Input인 경우 여기에 도달
+	// GAS가 입력이 Release되었는지 알아야 하기 때문에 일단 호출
+	if (GetASC())
 	{
-		// 마우스 아래 Enemy가 있으면 Ability 사용
-		if (GetASC())
-		{
-			GetASC()->AbilityInputTagReleased(InputTag);
-		}
+		GetASC()->AbilityInputTagReleased(InputTag);
 	}
-	else
+
+	// 커서 아래에 적이 없으며 Shift를 누른 상태가 아니면 들어가는 분기
+	if (!bTargeting && !bShiftKeyDown)
 	{
 		// 마우스 아래 Enemy가 없으면 Move를 원한다고 간주
 		const APawn* ControlledPawn = GetPawn();
@@ -175,12 +178,6 @@ void AAuraPlayerController::AbilityInputTagReleased(FGameplayTag InputTag)
 		// FollowTime(꾹 누르고 있던 시간)을 ShortPressThreshold(Released 이벤트가 발생하지 않는 임계점)와 비교
 		if (FollowTime <= ShortPressThreshold && ControlledPawn)
 		{
-			// 마우스 위치로 라인트레이싱한 결과의 위치를 캐싱
-			if (CursorHit.bBlockingHit)
-			{
-				CachedDestination = CursorHit.ImpactPoint;
-			}
-			
 			// 캐릭터의 현재 위치로부터 마우스가 Release된 Location까지 최단거리 계산
 			if (UNavigationPath* NavPath = UNavigationSystemV1::FindPathToLocationSynchronously(this, ControlledPawn->GetActorLocation(), CachedDestination))
 			{
@@ -197,6 +194,25 @@ void AAuraPlayerController::AbilityInputTagReleased(FGameplayTag InputTag)
 				bAutoRunning = true;
 			}
 		}
+		// 관련 변수 초기화
+		FollowTime = 0.f;
+		bTargeting = false;
+	}
+}
+
+void AAuraPlayerController::Move(const FInputActionValue& InputActionValue)
+{
+	const FVector2D InputAxisVector = InputActionValue.Get<FVector2D>();
+	const FRotator Rotation = GetControlRotation();
+	const FRotator YawRotation(0.f, Rotation.Yaw, 0.f);
+
+	const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+	const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+
+	if (APawn* ControlledPawn = GetPawn<APawn>())
+	{
+		ControlledPawn->AddMovementInput(ForwardDirection, InputAxisVector.Y);
+		ControlledPawn->AddMovementInput(RightDirection, InputAxisVector.X);
 	}
 }
 

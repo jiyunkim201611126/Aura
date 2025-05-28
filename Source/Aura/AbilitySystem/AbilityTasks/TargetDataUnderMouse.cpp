@@ -41,6 +41,7 @@ void UTargetDataUnderMouse::Activate()
 void UTargetDataUnderMouse::SendMouseCursorData()
 {
 	// 이 함수 흐름 전체에 Key를 부여해 다른 네트워크 작업과 섞이거나 충돌하지 않도록 방지함
+	// 서버에게 TargetData를 보내는 작업 중이기 때문에 예측키가 필요함
 	FScopedPredictionWindow ScopedPrediction(AbilitySystemComponent.Get());
 	
 	AAuraPlayerController* PC = Cast<AAuraPlayerController>(Ability->GetCurrentActorInfo()->PlayerController.Get());
@@ -50,9 +51,9 @@ void UTargetDataUnderMouse::SendMouseCursorData()
 	DataHandle.Add(Data);
 	
 	/*
-	Ability를 실행하게 되면 자동으로 예측키가 생성, 서버와의 소통을 시작
-	ServerSetReplicatedTargetData를 호출할 때 이 예측키를 2번째 매개변수로 사용해 '어떤 클라이언트에서, 어떤 Ability에서' 실행 중인지 GAS가 파악
-	마지막 매개변수로 들어간 ScopedPredictionKey는 함수의 첫 구문에서 선언되어 '이 함수'에서 예측 작업이 실행 중임을 명시
+	Ability를 실행하게 되면 자동으로 예측키가 생성, 서버와의 소통을 시작(여기는 Task, 여기서 만든 거 아님)
+	아래 함수를 호출할 때 이 예측키를 2번째 매개변수로 사용해 '어떤 클라이언트에서, 어떤 Ability에서' 실행 중인지 GAS가 파악
+	마지막 매개변수로 들어간 예측키(여기서 만든 거 맞음)는 이 함수(SendMouseCursorData)의 첫 구문에서 선언되어 '이 함수'에서 예측 작업이 실행 중임을 명시
 	즉, GAS는 이 2개의 매개변수인 예측키를 통해 다른 클라이언트나 다른 Ability 혹은 다른 함수에서 실행 중인 예측 작업과 뒤섞이지 않도록 제어
 	*/
 	AbilitySystemComponent->ServerSetReplicatedTargetData(
@@ -66,7 +67,7 @@ void UTargetDataUnderMouse::SendMouseCursorData()
 	// 네트워크 예측 작업으로 인해 델리게이트가 중복으로 호출되는 것을 방지함
 	if (ShouldBroadcastAbilityTaskDelegates())
 	{
-		// 최종적으로 블루프린트에서 정의한 흐름을 호출
+		// 최종적으로 블루프린트에서 정의한 흐름을 호출, TargetData에 대한 정보를 담고 있는 핸들을 전달
 		ValidData.Broadcast(DataHandle);
 	}
 }
