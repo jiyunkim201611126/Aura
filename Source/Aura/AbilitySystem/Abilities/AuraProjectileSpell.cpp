@@ -2,6 +2,8 @@
 
 #include "Aura/Actor/AuraProjectile.h"
 #include "Aura/Interaction/CombatInterface.h"
+#include "AbilitySystemBlueprintLibrary.h"
+#include "AbilitySystemComponent.h"
 
 void UAuraProjectileSpell::ActivateAbility(
 	const FGameplayAbilitySpecHandle Handle,
@@ -37,6 +39,14 @@ void UAuraProjectileSpell::SpawnProjectile(const FVector& ProjectileTargetLocati
 			Cast<APawn>(GetOwningActorFromActorInfo()),
 			ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
 
+		// Ability를 소유한 AvatarActor의 AbilitySystemComponent 가져오기
+		const UAbilitySystemComponent* SourceASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(GetAvatarActorFromActorInfo());
+
+		// 할당받은 DamageEffectClass를 기반으로 SpecHandle 만들고 Projectile에 전달, Projectile이 가질 데미지 할당
+		const FGameplayEffectSpecHandle SpecHandle = SourceASC->MakeOutgoingSpec(DamageEffectClass, GetAbilityLevel(), SourceASC->MakeEffectContext());
+		Projectile->DamageEffectSpecHandle = SpecHandle;
+
+		// 액터 스폰
 		Projectile->FinishSpawning(SpawnTransform);
 	}
 }

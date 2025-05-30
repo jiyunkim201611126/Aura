@@ -6,6 +6,8 @@
 #include "Kismet/GameplayStatics.h"
 #include "NiagaraFunctionLibrary.h"
 #include "Components/AudioComponent.h"
+#include "AbilitySystemBlueprintLibrary.h"
+#include "AbilitySystemComponent.h"
 
 AAuraProjectile::AAuraProjectile()
 {
@@ -45,6 +47,7 @@ void AAuraProjectile::Destroyed()
 		UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation(), FRotator::ZeroRotator);
 		UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, ImpactEffect, GetActorLocation());
 		LoopingSoundComponent->Stop();
+		bHit = true;
 	}
 	
 	Super::Destroyed();
@@ -59,13 +62,21 @@ void AAuraProjectile::OnSphereOverlap(
 	const FHitResult& SweepResult)
 {
 	// 서버, 클라이언트 모두 사운드와 나이아가라 재생
-	UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation(), FRotator::ZeroRotator);
-	UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, ImpactEffect, GetActorLocation());
-	LoopingSoundComponent->Stop();
+	if (!bHit)
+	{
+		UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation(), FRotator::ZeroRotator);
+		UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, ImpactEffect, GetActorLocation());
+		LoopingSoundComponent->Stop();
+	}
 
 	if (HasAuthority())
 	{
-		// 서버라면 이 액터를 Destroy
+		// Overlap 대상에게 데미지 부여
+		if (UAbilitySystemComponent* TargetASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(OtherActor))
+		{
+			TargetASC->ApplyGameplayEffectSpecToSelf(*DamageEffectSpecHandle.Data.Get());
+		}
+		
 		Destroy();
 	}
 	else
