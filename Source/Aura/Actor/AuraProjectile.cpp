@@ -69,6 +69,7 @@ void AAuraProjectile::OnSphereOverlap(
 		LoopingSoundComponent->Stop();
 	}
 
+	// 서버인 경우 데미지를 주며 Destroy 이벤트 바인드
 	if (HasAuthority())
 	{
 		// Overlap 대상에게 데미지 부여
@@ -76,12 +77,22 @@ void AAuraProjectile::OnSphereOverlap(
 		{
 			TargetASC->ApplyGameplayEffectSpecToSelf(*DamageEffectSpecHandle.Data.Get());
 		}
-		
-		Destroy();
+
+		// 스폰과 동시에 Overlap 이벤트가 일어난 경우 바로 Destroy되면서 액터가 클라이언트로 복제되지 않는 현상이 있음
+		// 따라서 0.05초의 딜레이를 주어 액터 스폰이 클라이언트로 복제되는 것을 보장
+		FTimerHandle TimerHandle;
+		GetWorld()->GetTimerManager().SetTimer(
+			TimerHandle,
+			FTimerDelegate::CreateLambda([this]()
+			{
+				Destroy();
+			}),
+			0.05f,
+			false);
 	}
-	else
-	{
-		// 클라이언트라면 bHit을 true로 할당
-		bHit = true;
-	}
+
+	// 서버와 클라이언트 모두 Overlap 이벤트가 한 번 일어났음을 저장
+	bHit = true;
+	// 더이상 Overlap 이벤트가 필요하지 않으므로 바인드 해제
+	Sphere->OnComponentBeginOverlap.Clear();
 }
