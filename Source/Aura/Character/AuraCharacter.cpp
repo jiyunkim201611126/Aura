@@ -71,3 +71,10 @@ void AAuraCharacter::InitAbilityActorInfo()
 	// 초기 Attribute 초기화
 	InitializeDefaultAttributes();
 }
+
+void AAuraCharacter::InitializeDefaultAttributes() const
+{
+	ApplyEffectToSelf(DefaultPrimaryAttributes, 1.f);
+	ApplyEffectToSelf(DefaultSecondaryAttributes, 1.f);
+	ApplyEffectToSelf(DefaultVitalAttributes, 1.f);
+}

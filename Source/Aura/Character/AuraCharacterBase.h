@@ -39,21 +39,9 @@ protected:
 	TObjectPtr<UAttributeSet> AttributeSet;
 
 	virtual void InitAbilityActorInfo();
-	
-	// 게임 시작 시 Attribute 초기화를 위해 사용되는 GameplayEffect
-	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Attributes")
-	TSubclassOf<UGameplayEffect> DefaultPrimaryAttributes;
-
-	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Attributes")
-	TSubclassOf<UGameplayEffect> DefaultSecondaryAttributes;
-
-	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Attributes")
-	TSubclassOf<UGameplayEffect> DefaultVitalAttributes;
 
 	// GameplayEffect를 본인에게 적용하는 함수
 	void ApplyEffectToSelf(TSubclassOf<UGameplayEffect> GameplayEffectClass, float Level) const;
-	// 게임 시작 시 Attribute를 초기화하는 함수
-	void InitializeDefaultAttributes() const;
 	// 게임 시작 시 캐릭터가 Ability를 장착하는 함수
 	void AddCharacterAbilities() const;
 

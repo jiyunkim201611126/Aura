@@ -91,6 +91,8 @@ void AAuraProjectile::OnSphereOverlap(
 			false);
 	}
 
+	// 기존 수명으로 인해 Destroy되면 원치 않는 Destroy가 발생할 수 있으므로 LifeSpan 초기화
+	SetLifeSpan(0.f);
 	// 서버와 클라이언트 모두 Overlap 이벤트가 한 번 일어났음을 저장
 	bHit = true;
 	// 더이상 Overlap 이벤트가 필요하지 않으므로 바인드 해제
