@@ -182,13 +182,12 @@ public:
 
 	/**
 	 * Meta Attributes
-	 */
-
-	/**
+	 * 
 	 * 데미지가 들어올 때, Health에 바로 적용하는 게 아니라 중간다리 역할을 해주는 Attribute를 선언해 사용
-	 * Meta Attribute 없이 Health에 직접 적용하는 방식은 각 효과의 순서가 매우 중요해짐
-	 * 예를 들어 데미지 경감 효과를 나중에 계산한다면 캐릭터의 Health가 양수임에도 잠시 0 이하로 내려가는 상황이 발생, 캐릭터가 사망할 수 있음
-	 * 즉, Meta Attribute를 사용하면 여러 효과(데미지 경감, 쉴드, 추가 피해 등)가 동시에 적용될 때 로직 관리가 용이해짐
+	 * Meta Attribute 없이 직접 적용하는 방식은 각 효과의 순서가 매우 중요해짐
+	 * 예를 들어 데미지 경감 효과를 나중에 계산한다면 캐릭터의 Health가 양수임에도 잠시 0 이하로 내려가는 상황이 발생, 캐릭터가 의도치 않게 사망할 수 있음
+	 * 즉, Meta Attribute를 사용하면 여러 효과(데미지 경감, 추가 피해 등)가 동시에 적용될 때 로직 순서에 덜 신경 써도 되며
+	 * 중복 적용, 누락 등의 문제를 자연스럽게 방지할 수 있음
 	 */
 	UPROPERTY(BlueprintReadOnly, Category = "Meta Attributes")
 	FGameplayAttributeData IncomingDamage;

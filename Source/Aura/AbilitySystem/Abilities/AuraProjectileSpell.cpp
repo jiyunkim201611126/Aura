@@ -4,6 +4,7 @@
 #include "Aura/Interaction/CombatInterface.h"
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystemComponent.h"
+#include "Aura/Manager/AuraGameplayTags.h"
 
 void UAuraProjectileSpell::ActivateAbility(
 	const FGameplayAbilitySpecHandle Handle,
@@ -44,6 +45,12 @@ void UAuraProjectileSpell::SpawnProjectile(const FVector& ProjectileTargetLocati
 
 		// 할당받은 DamageEffectClass를 기반으로 SpecHandle 만들고 Projectile에 전달, Projectile이 가질 데미지 할당
 		const FGameplayEffectSpecHandle SpecHandle = SourceASC->MakeOutgoingSpec(DamageEffectClass, GetAbilityLevel(), SourceASC->MakeEffectContext());
+
+		// Damage 태그와 함께 Damage 값을 Set by Caller로 부여하기 위해 작성된 구문
+		// Magnitude Calculation Type은 Set by Caller, Data Tag는 Damage로 할당되어있어야 함
+		// Set by Caller를 사용하면 MMC 없이도 캐릭터의 레벨, 버프/디버프 상태, Attribute, 무기 종류나 등급 등을 고려한 계산 결과를 GE에 전달 가능
+		FAuraGameplayTags GameplayTags = FAuraGameplayTags::Get();
+		UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle, GameplayTags.Damage, 50.f);
 		Projectile->DamageEffectSpecHandle = SpecHandle;
 
 		// 액터 스폰

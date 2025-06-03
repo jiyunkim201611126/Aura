@@ -8,7 +8,7 @@ UMMC_MaxHealth::UMMC_MaxHealth()
 	// MaxHealth는 Vigor Attribute에 의해 결정되는 스탯
 	VigorDef.AttributeToCapture = UAuraAttributeSet::GetVigorAttribute();
 
-	// 캐릭터 자신의 스탯을 결정하는 중이므로 Target(캐릭터)에게서 가져옴
+	// 캐릭터 자신의 스탯을 결정하는 중이므로 Source든 Target이든 관계 없음
 	VigorDef.AttributeSource = EGameplayEffectAttributeCaptureSource::Target;
 
 	// true면 적용 즉시 계산 후 이후로는 반영 안 함, false면 관련 Attribute 갱신 시마다 함께 갱신
