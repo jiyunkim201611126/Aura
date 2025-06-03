@@ -12,11 +12,10 @@ void UAuraAbilitySystemComponent::AddCharacterAbilities(const TArray<TSubclassOf
 {
 	for (TSubclassOf<UGameplayAbility> AbilityClass : StartupAbilities)
 	{
-		// 게임 시작 시 장착하는 Ability들
 		FGameplayAbilitySpec AbilitySpec = FGameplayAbilitySpec(AbilityClass, 1);
 		if (const UAuraGameplayAbility* AuraAbility = Cast<UAuraGameplayAbility>(AbilitySpec.Ability))
 		{
-			// Ability 장착을 기록하기 위해 태그 추가
+			// 어떤 Input에 의해 사용될 Ability인지 기록
 			AbilitySpec.DynamicAbilityTags.AddTag(AuraAbility->StartupInputTag);
 			// Ability 장착
 			GiveAbility(AbilitySpec);

@@ -24,4 +24,8 @@ public:
 	// 적 캐릭터 직업군별로 Attribute를 초기화하는 함수
 	UFUNCTION(BlueprintCallable, Category = "AuraAbilitySystemLibrary|CahracterClassDefaults", meta = (WorldContext = "WorldContextObject"))
 	static void InitializeDefaultAttributes(const UObject* WorldContextObject, ECharacterClass CharacterClass, float Level, UAbilitySystemComponent* ASC);
+
+	// 게임 시작 시 모든 캐릭터가 기본으로 사용하는 Ability(HitReact 등)를 장착시키는 함수
+	UFUNCTION(BlueprintCallable, Category = "AuraAbilitySystemLibrary|CahracterClassDefaults", meta = (WorldContext = "WorldContextObject"))
+	static void GiveStartupAbilities(const UObject* WorldContextObject, UAbilitySystemComponent* ASC);
 };
