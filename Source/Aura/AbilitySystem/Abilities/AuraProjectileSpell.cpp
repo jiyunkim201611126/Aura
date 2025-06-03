@@ -43,14 +43,19 @@ void UAuraProjectileSpell::SpawnProjectile(const FVector& ProjectileTargetLocati
 		// Ability를 소유한 AvatarActor의 AbilitySystemComponent 가져오기
 		const UAbilitySystemComponent* SourceASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(GetAvatarActorFromActorInfo());
 
-		// 할당받은 DamageEffectClass를 기반으로 SpecHandle 만들고 Projectile에 전달, Projectile이 가질 데미지 할당
+		// 할당받은 DamageEffectClass를 기반으로 SpecHandle 만들고 Projectile에 전달, 즉 Projectile이 가질 GE 할당
 		const FGameplayEffectSpecHandle SpecHandle = SourceASC->MakeOutgoingSpec(DamageEffectClass, GetAbilityLevel(), SourceASC->MakeEffectContext());
 
-		// Damage 태그와 함께 Damage 값을 Set by Caller로 부여하기 위해 작성된 구문
-		// Magnitude Calculation Type은 Set by Caller, Data Tag는 Damage로 할당되어있어야 함
-		// Set by Caller를 사용하면 MMC 없이도 캐릭터의 레벨, 버프/디버프 상태, Attribute, 무기 종류나 등급 등을 고려한 계산 결과를 GE에 전달 가능
+		/**
+		 * Damage 태그와 함께 Damage 값을 Set by Caller로 부여하기 위해 작성된 구문
+		 * Magnitude Calculation Type은 Set by Caller, Data Tag는 Damage로 할당되어있어야 함
+		 * Set by Caller를 사용하면 MMC 없이도 캐릭터의 레벨, 버프/디버프 상태, Attribute, 무기 종류나 등급 등을 고려한 계산 결과를 GE에 전달 가능
+		 * 
+		 * 현재는 Ability의 레벨을 Curve Table에 넣어 값을 가져와 Damage 값 부여
+		 */
 		FAuraGameplayTags GameplayTags = FAuraGameplayTags::Get();
-		UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle, GameplayTags.Damage, 50.f);
+		const float ScaledDamage = Damage.GetValueAtLevel(GetAbilityLevel());
+		UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle, GameplayTags.Damage, ScaledDamage);
 		Projectile->DamageEffectSpecHandle = SpecHandle;
 
 		// 액터 스폰

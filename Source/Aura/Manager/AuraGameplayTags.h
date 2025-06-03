@@ -41,6 +41,8 @@ struct FAuraGameplayTags
 	FGameplayTag InputTag_RMB;
 	
 	FGameplayTag Damage;
+
+	FGameplayTag Effects_HitReact;
 	
 private:
 	static FAuraGameplayTags GameplayTags;
