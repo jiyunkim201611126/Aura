@@ -49,6 +49,8 @@ void AAuraCharacterBase::MulticastHandleDeath_Implementation()
 	GetMesh()->SetCollisionResponseToChannel(ECC_WorldStatic, ECR_Block);
 	
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	Dissolve();
 }
 
 // Called when the game starts or when spawned
@@ -86,4 +88,25 @@ void AAuraCharacterBase::AddCharacterAbilities() const
 	// ASC 가져와서 장착 함수 호출
 	UAuraAbilitySystemComponent* AuraASC = CastChecked<UAuraAbilitySystemComponent>(AbilitySystemComponent);
 	AuraASC->AddCharacterAbilities(StartupAbilities);
+}
+
+void AAuraCharacterBase::Dissolve()
+{
+	if (IsValid(DissolveMaterialInstance) && IsValid(WeaponDissolveMaterialInstance))
+	{
+		FTimerHandle TimerHandle;
+		GetWorld()->GetTimerManager().SetTimer(
+			TimerHandle,
+			FTimerDelegate::CreateLambda([this]()
+			{
+				UMaterialInstanceDynamic* DynamicMatInst = UMaterialInstanceDynamic::Create(DissolveMaterialInstance, this);
+				GetMesh()->SetMaterial(0, DynamicMatInst);
+				UMaterialInstanceDynamic* WeaponDynamicMatInst = UMaterialInstanceDynamic::Create(WeaponDissolveMaterialInstance, this);
+				Weapon->SetMaterial(0, WeaponDynamicMatInst);
+				StartDissolveTimeline(DynamicMatInst, WeaponDynamicMatInst);
+			}),
+			2.f,
+			false
+		);
+	}
 }

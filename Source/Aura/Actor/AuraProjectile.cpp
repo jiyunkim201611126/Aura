@@ -88,7 +88,8 @@ void AAuraProjectile::OnSphereOverlap(
 				Destroy();
 			}),
 			0.05f,
-			false);
+			false
+		);
 	}
 
 	// 기존 수명으로 인해 Destroy되면 원치 않는 Destroy가 발생할 수 있으므로 LifeSpan 초기화

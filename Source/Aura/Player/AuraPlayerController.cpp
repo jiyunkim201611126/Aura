@@ -28,7 +28,11 @@ void AAuraPlayerController::PlayerTick(float DeltaTime)
 void AAuraPlayerController::CursorTrace()
 {
 	GetHitResultUnderCursor(ECC_Visibility, false, CursorHit);
-	if (!CursorHit.bBlockingHit) return;
+	if (!CursorHit.bBlockingHit)
+	{
+		if (LastActor) LastActor->UnHighlightActor();
+		return;
+	}
 
 	LastActor = ThisActor;
 	ThisActor = CursorHit.GetActor();
