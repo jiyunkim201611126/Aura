@@ -12,6 +12,7 @@ class UAuraInputConfig;
 struct FGameplayTag;
 class UAuraAbilitySystemComponent;
 class USplineComponent;
+class UDamageTextComponent;
 
 UCLASS()
 class AURA_API AAuraPlayerController : public APlayerController
@@ -23,6 +24,10 @@ public:
 	virtual void PlayerTick(float DeltaTime) override;
 	
 	FHitResult CursorHit;
+
+	// Damage를 보여주는 위젯 컴포넌트를 스폰하는 함수
+	UFUNCTION(Client, Reliable)
+	void ShowDamageNumber(float DamageAmount, AActor* TargetActor);
 
 protected:
 	virtual void BeginPlay() override;
@@ -74,4 +79,7 @@ private:
 	TObjectPtr<USplineComponent> Spline;
 
 	void AutoRun();
+
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<UDamageTextComponent> DamageTextComponentClass;
 };

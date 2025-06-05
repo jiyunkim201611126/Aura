@@ -9,6 +9,7 @@
 #include "Aura/Manager/AuraGameplayTags.h"
 #include "NavigationSystem.h"
 #include "NavigationPath.h"
+#include "Aura/UI/Widget/WidgetComponent/DamageTextComponent.h"
 
 AAuraPlayerController::AAuraPlayerController()
 {
@@ -61,6 +62,18 @@ void AAuraPlayerController::AutoRun()
 		{
 			bAutoRunning = false;
 		}
+	}
+}
+
+void AAuraPlayerController::ShowDamageNumber_Implementation(float DamageAmount, AActor* TargetActor)
+{
+	if (IsValid(TargetActor) && DamageTextComponentClass)
+	{
+		UDamageTextComponent* DamageText = NewObject<UDamageTextComponent>(TargetActor, DamageTextComponentClass);
+		// Component 생성 후 등록하는 과정, 위젯의 AddToViewport 같은 개념
+		DamageText->RegisterComponent();
+		DamageText->SetWorldTransform(TargetActor->GetTransform());
+		DamageText->SetDamageText(DamageAmount);
 	}
 }
 

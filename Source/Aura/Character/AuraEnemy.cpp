@@ -24,14 +24,15 @@ AAuraEnemy::AAuraEnemy()
 
 	HealthBar = CreateDefaultSubobject<UWidgetComponent>("HealthBar");
 	HealthBar->SetupAttachment(GetRootComponent());
+	
+	GetMesh()->SetCustomDepthStencilValue(CUSTOM_DEPTH_RED);
+	Weapon->SetCustomDepthStencilValue(CUSTOM_DEPTH_RED);
 }
 
 void AAuraEnemy::HighlightActor()
 {
 	GetMesh()->SetRenderCustomDepth(true);
-	GetMesh()->SetCustomDepthStencilValue(CUSTOM_DEPTH_RED);
 	Weapon->SetRenderCustomDepth(true);
-	Weapon->SetCustomDepthStencilValue(CUSTOM_DEPTH_RED);
 }
 
 void AAuraEnemy::UnHighlightActor()

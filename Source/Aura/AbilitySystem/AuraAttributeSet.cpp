@@ -6,6 +6,7 @@
 #include "AbilitySystemBlueprintLibrary.h"
 #include "Aura/Manager/AuraGameplayTags.h"
 #include "Aura/Interaction/CombatInterface.h"
+#include "Aura/Player/AuraPlayerController.h"
 
 UAuraAttributeSet::UAuraAttributeSet()
 {
@@ -106,6 +107,19 @@ void UAuraAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallba
 				// Tag가 일치하는 Ability를 활성화하는 함수
 				Props.TargetASC->TryActivateAbilitiesByTag(TagContainer);
 			}
+			
+			ShowFloatingText(Props, LocalIncomingDamage);
+		}
+	}
+}
+
+void UAuraAttributeSet::ShowFloatingText(const FEffectProperties& Props, float Damage) const
+{
+	if (Props.SourceCharacter != Props.TargetCharacter)
+	{
+		if (AAuraPlayerController* PC = Cast<AAuraPlayerController>(Props.SourceController))
+		{
+			PC->ShowDamageNumber(Damage, Props.TargetCharacter);
 		}
 	}
 }
