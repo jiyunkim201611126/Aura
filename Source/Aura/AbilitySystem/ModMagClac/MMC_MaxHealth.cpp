@@ -14,7 +14,7 @@ UMMC_MaxHealth::UMMC_MaxHealth()
 	// true면 적용 즉시 계산 후 이후로는 반영 안 함, false면 관련 Attribute 갱신 시마다 함께 갱신
 	VigorDef.bSnapshot = false;
 
-	// 관련 Attribute로 추가
+	// 이 클래스의 계산과 관련된 Attribute로 등록
 	RelevantAttributesToCapture.Add(VigorDef);
 }
 

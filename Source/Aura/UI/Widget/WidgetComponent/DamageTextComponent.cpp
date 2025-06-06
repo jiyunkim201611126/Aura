@@ -8,7 +8,7 @@ void UDamageTextComponent::BeginPlay()
 
 void UDamageTextComponent::InitMovement()
 {
-	// 랜덤한 수평 방향 계산 (X,Y)
+	// 랜덤 수평 방향 선언
 	FVector HorizontalDir = FMath::VRand();
 	HorizontalDir.Z = 0;
 	HorizontalDir.Normalize();
@@ -26,13 +26,14 @@ void UDamageTextComponent::TickComponent(float DeltaTime, ELevelTick TickType, F
 	float AppliedGravity = Gravity;
 	if (bIsFalling)
 	{
-		AppliedGravity *= DescentGravityScale; // 하강 시 중력 감소
+		// 최고점 도달 이후 중력 약하게 적용
+		AppliedGravity *= DescentGravityScale;
 	}
 
-	// DeltaTime에 비례해 수직 속도 감소
+	// 수직 속도 감소
 	Velocity.Z -= AppliedGravity * DeltaTime;
 
-	// 최고점 도달 체크 (속도가 음수가 되는 순간)
+	// 최고점 도달 시 속도 음수로 전환 (하강 시작)
 	if (!bIsFalling && Velocity.Z < 0)
 	{
 		bIsFalling = true;
