@@ -18,10 +18,10 @@ public:
 
 private:
 	UPROPERTY(EditDefaultsOnly)
-	float InitialSpeed = 200.0f;
+	float InitialSpeed = 100.0f;
 
 	UPROPERTY(EditDefaultsOnly)
-	float Gravity = 500.0f;
+	float Gravity = 400.0f;
 
 	UPROPERTY(EditDefaultsOnly)
 	float DescentGravityScale = 0.5f;
