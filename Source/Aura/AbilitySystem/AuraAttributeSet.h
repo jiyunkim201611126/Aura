@@ -189,10 +189,10 @@ public:
 	 * 즉, Meta Attribute를 사용하면 여러 효과(데미지 경감, 추가 피해 등)가 동시에 적용될 때 로직 순서에 덜 신경 써도 되며
 	 * 중복 적용, 누락 등의 문제를 자연스럽게 방지할 수 있음
 	 */
+	
 	UPROPERTY(BlueprintReadOnly, Category = "Meta Attributes")
 	FGameplayAttributeData IncomingDamage;
 	ATTRIBUTE_ACCESSORS(UAuraAttributeSet, IncomingDamage);
-	
 
 private:
 	void SetEffectProperties(const FGameplayEffectModCallbackData& Data, FEffectProperties& Props) const;

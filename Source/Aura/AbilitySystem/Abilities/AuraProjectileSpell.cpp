@@ -43,8 +43,24 @@ void UAuraProjectileSpell::SpawnProjectile(const FVector& ProjectileTargetLocati
 		// Ability를 소유한 AvatarActor의 AbilitySystemComponent 가져오기
 		const UAbilitySystemComponent* SourceASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(GetAvatarActorFromActorInfo());
 
+		/**
+		 * Context란 로그 같은 개념
+		 * GE가 적용될 때 Ability로 적용한 건지, 그렇다면 Ability를 사용한 건 누구인지, 어떤 Ability인지 등등을 확인할 수 있음
+		 * 내부에 Instigator와 EffectCauser는 각각 OwnerActor와 AvatarActor로 할당되어있음
+		 */
+		
+		FGameplayEffectContextHandle EffectContextHandle = SourceASC->MakeEffectContext();
+		EffectContextHandle.SetAbility(this);
+		EffectContextHandle.AddSourceObject(Projectile);
+		TArray<TWeakObjectPtr<AActor>> Actors;
+		Actors.Add(Projectile);
+		EffectContextHandle.AddActors(Actors);
+		FHitResult HitResult;
+		HitResult.Location = ProjectileTargetLocation;
+		EffectContextHandle.AddHitResult(HitResult);
+
 		// 할당받은 DamageEffectClass를 기반으로 SpecHandle 만들고 Projectile에 전달, 즉 Projectile이 가질 GE 할당
-		const FGameplayEffectSpecHandle SpecHandle = SourceASC->MakeOutgoingSpec(DamageEffectClass, GetAbilityLevel(), SourceASC->MakeEffectContext());
+		const FGameplayEffectSpecHandle SpecHandle = SourceASC->MakeOutgoingSpec(DamageEffectClass, GetAbilityLevel(), EffectContextHandle);
 
 		/**
 		 * Damage 태그와 함께 Damage 값을 Set by Caller로 부여하기 위해 작성된 구문
@@ -53,6 +69,7 @@ void UAuraProjectileSpell::SpawnProjectile(const FVector& ProjectileTargetLocati
 		 * 
 		 * 현재는 Ability의 레벨을 Curve Table에 넣어 값을 가져와 Damage 값 부여
 		 */
+		
 		FAuraGameplayTags GameplayTags = FAuraGameplayTags::Get();
 		const float ScaledDamage = Damage.GetValueAtLevel(GetAbilityLevel());
 		UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle, GameplayTags.Damage, ScaledDamage);
