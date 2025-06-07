@@ -110,6 +110,12 @@ void UAuraAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallba
 			
 			ShowFloatingText(Props, LocalIncomingDamage);
 		}
+		else if (FMath::IsNearlyEqual(LocalIncomingDamage, 0.f))
+		{
+			// 데미지가 0이면 체력 감소나 애니메이션 재생 없이 데미지만 표기
+			SetIncomingDamage(0.f);
+			ShowFloatingText(Props, LocalIncomingDamage);
+		}
 	}
 }
 
