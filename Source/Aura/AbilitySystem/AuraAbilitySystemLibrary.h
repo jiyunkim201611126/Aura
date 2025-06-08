@@ -8,6 +8,7 @@
 class UOverlayWidgetController;
 class UAttributeMenuWidgetController;
 class UAbilitySystemComponent;
+struct FGameplayEffectContextHandle;
 
 UCLASS()
 class AURA_API UAuraAbilitySystemLibrary : public UBlueprintFunctionLibrary
@@ -31,4 +32,21 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category = "AuraAbilitySystemLibrary|CahracterClassDefaults", meta = (WorldContext = "WorldContextObject"))
 	static UCharacterClassInfo* GetCharacterClassInfo(const UObject* WorldContextObject);
+
+	// 데미지 계산 중 Block 되었는지 Context를 통해 확인하는 함수
+	UFUNCTION(BlueprintPure, Category = "AuraAbilitySystemLibrary|GameplayEffects")
+	static bool IsBlockedHit(const FGameplayEffectContextHandle& EffectContextHandle);
+	
+	// 데미지 계산 중 Critical 되었는지 Context를 통해 확인하는 함수
+	UFUNCTION(BlueprintPure, Category = "AuraAbilitySystemLibrary|GameplayEffects")
+	static bool IsCriticalHit(const FGameplayEffectContextHandle& EffectContextHandle);
+
+	// 데미지 계산 중 Block 되었는지 Context에 기록하는 함수
+	// UPARAM(ref)는 &가 output이 아니라는 걸 알려주는 매크로
+	UFUNCTION(BlueprintCallable, Category = "AuraAbilitySystemLibrary|GameplayEffects")
+	static void SetIsBlockedHit(UPARAM(ref) FGameplayEffectContextHandle& EffectContextHandle, bool bInIsBlockedHit);
+	
+	// 데미지 계산 중 Critical 되었는지 Context에 기록하는 함수
+	UFUNCTION(BlueprintCallable, Category = "AuraAbilitySystemLibrary|GameplayEffects")
+	static void SetIsCriticalHit(UPARAM(ref) FGameplayEffectContextHandle& EffectContextHandle, bool bInIsCriticalHit);
 };

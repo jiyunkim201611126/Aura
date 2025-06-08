@@ -7,6 +7,7 @@
 #include "Aura/Manager/AuraGameplayTags.h"
 #include "Aura/Interaction/CombatInterface.h"
 #include "Aura/Player/AuraPlayerController.h"
+#include "AuraAbilitySystemLibrary.h"
 
 UAuraAttributeSet::UAuraAttributeSet()
 {
@@ -108,24 +109,27 @@ void UAuraAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallba
 				Props.TargetASC->TryActivateAbilitiesByTag(TagContainer);
 			}
 			
-			ShowFloatingText(Props, LocalIncomingDamage);
+			const bool bBlockedHit = UAuraAbilitySystemLibrary::IsBlockedHit(Props.EffectContextHandle);
+			const bool bCriticalHit = UAuraAbilitySystemLibrary::IsCriticalHit(Props.EffectContextHandle);
+			
+			ShowFloatingText(Props, LocalIncomingDamage, bBlockedHit, bCriticalHit);
 		}
-		else if (FMath::IsNearlyEqual(LocalIncomingDamage, 0.f))
+		else if (FMath::IsNearlyEqual(LocalIncomingDamage, 0.f, 0.01f))
 		{
 			// 데미지가 0이면 체력 감소나 애니메이션 재생 없이 데미지만 표기
 			SetIncomingDamage(0.f);
-			ShowFloatingText(Props, LocalIncomingDamage);
+			ShowFloatingText(Props, LocalIncomingDamage, false, false);
 		}
 	}
 }
 
-void UAuraAttributeSet::ShowFloatingText(const FEffectProperties& Props, float Damage) const
+void UAuraAttributeSet::ShowFloatingText(const FEffectProperties& Props, float Damage, bool bBlockedHit, bool bCriticalHit) const
 {
 	if (Props.SourceCharacter != Props.TargetCharacter)
 	{
 		if (AAuraPlayerController* PC = Cast<AAuraPlayerController>(Props.SourceController))
 		{
-			PC->ShowDamageNumber(Damage, Props.TargetCharacter);
+			PC->ShowDamageNumber(Damage, Props.TargetCharacter, bBlockedHit, bCriticalHit);
 		}
 	}
 }

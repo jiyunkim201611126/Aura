@@ -6,6 +6,7 @@
 #include "Aura/AbilitySystem/Data/CharacterClassInfo.h"
 #include "Aura/AbilitySystem/AuraAbilitySystemLibrary.h"
 #include "Aura/Interaction/CombatInterface.h"
+#include "Aura/AuraAbilityTypes.h"
 
 /**
  * 아래 구문은 언리얼에서 제공하는 Capture 선언, 초기화 매크로입니다.
@@ -137,10 +138,27 @@ void UExecCalc_Damage::Execute_Implementation(
 	const float ArmorPenetrationCoefficient = ArmorPenetrationCurve->Eval(LevelGap);
 	const float EffectiveArmorCoefficient = EffectiveArmorCurve->Eval(LevelGap);
 	const float CriticalHitDamageCoefficient = CriticalHitDamage->Eval(LevelGap);
+
+	// 데미지 계산 시작
+	bool bBlocked = false;
+	bool bCritical = false;
 	
 	// Block 성공 시 데미지 절반
-	const bool bBlocked = FMath::RandRange(0.f, 100.f) < TargetBlockChance;
-	Damage = bBlocked ? Damage / 2.f : Damage;
+	if (FMath::RandRange(0.f, 100.f) < TargetBlockChance)
+	{
+		bBlocked = true;
+		Damage = Damage / 2.f;
+	}
+	else
+	{
+		// Critical 성공 시 데미지 증가
+		const float CriticalChance = FMath::Max<float>(0.f, SourceCriticalHitChance - TargetCriticalHitResistance);
+		if (FMath::RandRange(0.f, 100.f) < CriticalChance)
+		{
+			bCritical = true;
+			Damage = Damage * 2.f + SourceCriticalHitDamage * CriticalHitDamageCoefficient;
+		}
+	}
 
 	// 시전자의 관통력 %만큼 대상의 방어력 무시
 	// TargetArmor: 10, SourceArmorPenetration: 50 / 결과: 5로 적용 (레벨 차이 10 미만인 경우만)
@@ -148,10 +166,13 @@ void UExecCalc_Damage::Execute_Implementation(
 	// EffectiveArmor %만큼 데미지 경감
 	// EffectiveArmor: 5 / 결과: 데미지의 95%만 적용 (레벨 차이 10 미만인 경우만)
 	Damage *= FMath::Clamp(100 - EffectiveArmor * EffectiveArmorCoefficient, 0.f, 100.f) / 100.f;
+	
 
-	// Critical 성공 시 데미지 증가
-	const bool bCritical = FMath::RandRange(0.f, 100.f) < FMath::Max<float>(0.f, SourceCriticalHitChance - TargetCriticalHitResistance);
-	Damage = bCritical ? Damage * 2.f + SourceCriticalHitDamage * CriticalHitDamageCoefficient : Damage;
+	// Block 및 Critical 계산 결과를 Context에 기록
+	FGameplayEffectContextHandle EffectContextHandle = Spec.GetContext();
+	UAuraAbilitySystemLibrary::SetIsBlockedHit(EffectContextHandle, bBlocked);
+	UAuraAbilitySystemLibrary::SetIsCriticalHit(EffectContextHandle, bCritical);
+	
 	
 	// IncomingDamage Attribute에 Damage만큼 Additive(더하기) 연산을 적용하라는 Modifier 데이터를 생성
 	const FGameplayModifierEvaluatedData EvaluatedData(UAuraAttributeSet::GetIncomingDamageAttribute(), EGameplayModOp::Additive, Damage);

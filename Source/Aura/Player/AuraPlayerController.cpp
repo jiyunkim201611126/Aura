@@ -65,7 +65,7 @@ void AAuraPlayerController::AutoRun()
 	}
 }
 
-void AAuraPlayerController::ShowDamageNumber_Implementation(float DamageAmount, AActor* TargetActor)
+void AAuraPlayerController::ShowDamageNumber_Implementation(float DamageAmount, AActor* TargetActor, bool bBlockedHit, bool bCriticalHit)
 {
 	if (IsValid(TargetActor) && DamageTextComponentClass)
 	{
@@ -73,7 +73,7 @@ void AAuraPlayerController::ShowDamageNumber_Implementation(float DamageAmount, 
 		// Component 생성 후 등록하는 과정, 위젯의 AddToViewport 같은 개념
 		DamageText->RegisterComponent();
 		DamageText->SetWorldTransform(TargetActor->GetTransform());
-		DamageText->SetDamageText(DamageAmount);
+		DamageText->SetDamageText(DamageAmount, bBlockedHit, bCriticalHit);
 	}
 }
 

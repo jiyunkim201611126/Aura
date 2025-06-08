@@ -11,7 +11,7 @@ class AURA_API UDamageTextComponent : public UWidgetComponent
 
 public:	
 	UFUNCTION(BlueprintImplementableEvent)
-	void SetDamageText(float Damage);
+	void SetDamageText(float Damage, bool bBlockedHit, bool bCriticalHit);
 
 	virtual void BeginPlay() override;
 	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;

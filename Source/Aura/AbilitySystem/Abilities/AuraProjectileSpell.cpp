@@ -43,12 +43,7 @@ void UAuraProjectileSpell::SpawnProjectile(const FVector& ProjectileTargetLocati
 		// Ability를 소유한 AvatarActor의 AbilitySystemComponent 가져오기
 		const UAbilitySystemComponent* SourceASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(GetAvatarActorFromActorInfo());
 
-		/**
-		 * Context란 로그 같은 개념
-		 * GE가 적용될 때 Ability로 적용한 건지, 그렇다면 Ability를 사용한 건 누구인지, 어떤 Ability인지 등등을 확인할 수 있음
-		 * 내부에 Instigator와 EffectCauser는 각각 OwnerActor와 AvatarActor로 할당되어있음
-		 */
-		
+		// Context 생성 및 초기화
 		FGameplayEffectContextHandle EffectContextHandle = SourceASC->MakeEffectContext();
 		EffectContextHandle.SetAbility(this);
 		EffectContextHandle.AddSourceObject(Projectile);
