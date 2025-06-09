@@ -100,8 +100,13 @@ void UExecCalc_Damage::Execute_Implementation(
 	EvaluationParameters.SourceTags = SourceTags;
 	EvaluationParameters.TargetTags = TargetTags;
 
-	// GameplayTag를 통해 Damage 값 가져오기
-	float Damage = Spec.GetSetByCallerMagnitude(FAuraGameplayTags::Get().Damage);
+	// SetByCallerMagnitudes에서 Key인 GameplayTag를 통해 Value인 Damage 값 가져오기
+	float Damage = 0.f;
+	for (FGameplayTag DamageTypeTag : FAuraGameplayTags::Get().DamageTypes)
+	{
+		const float DamageTypeValue = Spec.GetSetByCallerMagnitude(DamageTypeTag);
+		Damage += DamageTypeValue;
+	}
 
 	// DamageStatics 구조체에 정의된 FGameplayEffectAttributeCaptureDefinition들을 통해 Source와 Target의 현재 Attribute 값을 캡쳐
 	float TargetBlockChance = 0.f;
@@ -151,7 +156,7 @@ void UExecCalc_Damage::Execute_Implementation(
 	}
 	else
 	{
-		// Critical 성공 시 데미지 증가
+		// Block된 경우 Critical은 발생하지 않음
 		const float CriticalChance = FMath::Max<float>(0.f, SourceCriticalHitChance - TargetCriticalHitResistance);
 		if (FMath::RandRange(0.f, 100.f) < CriticalChance)
 		{
