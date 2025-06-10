@@ -100,11 +100,11 @@ void UExecCalc_Damage::Execute_Implementation(
 	EvaluationParameters.SourceTags = SourceTags;
 	EvaluationParameters.TargetTags = TargetTags;
 
-	// SetByCallerMagnitudes에서 Key인 GameplayTag를 통해 Value인 Damage 값 가져오기
+	// 모든 데미지 타입을 순회하며 부여된 데미지가 있는지 확인
 	float Damage = 0.f;
-	for (FGameplayTag DamageTypeTag : FAuraGameplayTags::Get().DamageTypes)
+	for (auto& Pair : FAuraGameplayTags::Get().DamageTypesToResistances)
 	{
-		const float DamageTypeValue = Spec.GetSetByCallerMagnitude(DamageTypeTag);
+		const float DamageTypeValue = Spec.GetSetByCallerMagnitude(Pair.Key);
 		Damage += DamageTypeValue;
 	}
 
