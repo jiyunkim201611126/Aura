@@ -14,12 +14,14 @@ UAuraAttributeSet::UAuraAttributeSet()
 	const FAuraGameplayTags& GameplayTags = FAuraGameplayTags::Get();
 
 	// Primary Attributes
+
 	TagsToAttributes.Add(GameplayTags.Attributes_Primary_Strength, GetStrengthAttribute);
 	TagsToAttributes.Add(GameplayTags.Attributes_Primary_Intelligence, GetIntelligenceAttribute);
 	TagsToAttributes.Add(GameplayTags.Attributes_Primary_Resilience, GetResilienceAttribute);
 	TagsToAttributes.Add(GameplayTags.Attributes_Primary_Vigor, GetVigorAttribute);
 
 	// Secondary Attributes
+
 	TagsToAttributes.Add(GameplayTags.Attributes_Secondary_Armor, GetArmorAttribute);
 	TagsToAttributes.Add(GameplayTags.Attributes_Secondary_ArmorPenetration, GetArmorPenetrationAttribute);
 	TagsToAttributes.Add(GameplayTags.Attributes_Secondary_BlockChance, GetBlockChanceAttribute);
@@ -32,6 +34,7 @@ UAuraAttributeSet::UAuraAttributeSet()
 	TagsToAttributes.Add(GameplayTags.Attributes_Secondary_MaxMana, GetMaxManaAttribute);
 	
 	// Resistance Attributes
+
 	TagsToAttributes.Add(GameplayTags.Attributes_Resistance_Fire, GetFireResistanceAttribute);
 	TagsToAttributes.Add(GameplayTags.Attributes_Resistance_Lightning, GetLightningResistanceAttribute);
 	TagsToAttributes.Add(GameplayTags.Attributes_Resistance_Arcane, GetArcaneResistanceAttribute);
@@ -127,11 +130,11 @@ void UAuraAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallba
 			
 			ShowFloatingText(Props, LocalIncomingDamage, bBlockedHit, bCriticalHit);
 		}
-		else if (FMath::IsNearlyEqual(LocalIncomingDamage, 0.f, 0.01f))
+		else if (LocalIncomingDamage < 0.01f)
 		{
-			// 데미지가 0이면 체력 감소나 애니메이션 재생 없이 데미지만 표기
+			// 데미지가 0.01보다 작으면 체력 감소나 애니메이션 재생 없이 데미지만 표기
 			SetIncomingDamage(0.f);
-			ShowFloatingText(Props, LocalIncomingDamage, false, false);
+			ShowFloatingText(Props, 0.f, false, false);
 		}
 	}
 }

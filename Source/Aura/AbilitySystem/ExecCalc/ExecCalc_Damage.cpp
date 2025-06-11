@@ -40,21 +40,39 @@
 // 해당 cpp 파일에서만 사용하는 원시 구조체로, 블루프린트는 물론 다른 클래스에서도 노출되지 않기 때문에 네이밍에 F를 붙이지 않음
 struct AuraDamageStatics
 {
-	FGameplayEffectAttributeCaptureDefinition TargetBlockChanceDef;
-	FGameplayEffectAttributeCaptureDefinition TargetArmorDef;
+	FGameplayEffectAttributeCaptureDefinition TargetBlockChance;
+	FGameplayEffectAttributeCaptureDefinition TargetArmor;
 	FGameplayEffectAttributeCaptureDefinition SourceArmorPenetration;
 	FGameplayEffectAttributeCaptureDefinition SourceCriticalHitChance;
 	FGameplayEffectAttributeCaptureDefinition SourceCriticalHitDamage;
 	FGameplayEffectAttributeCaptureDefinition TargetCriticalHitResistance;
+	
+	FGameplayEffectAttributeCaptureDefinition TargetFireResistance;
+	FGameplayEffectAttributeCaptureDefinition TargetLightningResistance;
+	FGameplayEffectAttributeCaptureDefinition TargetArcaneResistance;
+	FGameplayEffectAttributeCaptureDefinition TargetPhysicalResistance;
+
+	// 데미지 계산 시 편의성을 위해 선언, 각 Resistance의 키와 TargetResistance를 매칭시켜 저장 
+	TMap<FGameplayTag, FGameplayEffectAttributeCaptureDefinition> TagsToCaptureResistanceDefs;
 
 	AuraDamageStatics() :
-	TargetBlockChanceDef(UAuraAttributeSet::GetBlockChanceAttribute(), EGameplayEffectAttributeCaptureSource::Target, false),
-	TargetArmorDef(UAuraAttributeSet::GetArmorAttribute(), EGameplayEffectAttributeCaptureSource::Target, false),
+	TargetBlockChance(UAuraAttributeSet::GetBlockChanceAttribute(), EGameplayEffectAttributeCaptureSource::Target, false),
+	TargetArmor(UAuraAttributeSet::GetArmorAttribute(), EGameplayEffectAttributeCaptureSource::Target, false),
 	SourceArmorPenetration(UAuraAttributeSet::GetArmorPenetrationAttribute(), EGameplayEffectAttributeCaptureSource::Source, false),
 	SourceCriticalHitChance(UAuraAttributeSet::GetCriticalHitChanceAttribute(), EGameplayEffectAttributeCaptureSource::Source, false),
 	SourceCriticalHitDamage(UAuraAttributeSet::GetCriticalHitDamageAttribute(), EGameplayEffectAttributeCaptureSource::Source, false),
-	TargetCriticalHitResistance(UAuraAttributeSet::GetCriticalHitResistanceAttribute(), EGameplayEffectAttributeCaptureSource::Target, false)
-	{}
+	TargetCriticalHitResistance(UAuraAttributeSet::GetCriticalHitResistanceAttribute(), EGameplayEffectAttributeCaptureSource::Target, false),
+	
+	TargetFireResistance(UAuraAttributeSet::GetFireResistanceAttribute(), EGameplayEffectAttributeCaptureSource::Target, false),
+	TargetLightningResistance(UAuraAttributeSet::GetLightningResistanceAttribute(), EGameplayEffectAttributeCaptureSource::Target, false),
+	TargetArcaneResistance(UAuraAttributeSet::GetArcaneResistanceAttribute(), EGameplayEffectAttributeCaptureSource::Target, false),
+	TargetPhysicalResistance(UAuraAttributeSet::GetPhysicalResistanceAttribute(), EGameplayEffectAttributeCaptureSource::Target, false)
+	{
+		TagsToCaptureResistanceDefs.Add(FAuraGameplayTags::Get().Attributes_Resistance_Fire, TargetFireResistance);
+		TagsToCaptureResistanceDefs.Add(FAuraGameplayTags::Get().Attributes_Resistance_Lightning, TargetLightningResistance);
+		TagsToCaptureResistanceDefs.Add(FAuraGameplayTags::Get().Attributes_Resistance_Arcane, TargetArcaneResistance);
+		TagsToCaptureResistanceDefs.Add(FAuraGameplayTags::Get().Attributes_Resistance_Physical, TargetPhysicalResistance);
+	}
 };
 
 static const AuraDamageStatics& DamageStatics()
@@ -67,12 +85,17 @@ static const AuraDamageStatics& DamageStatics()
 UExecCalc_Damage::UExecCalc_Damage()
 {
 	// 이 클래스의 계산과 관련된 Attribute로 등록
-	RelevantAttributesToCapture.Add(DamageStatics().TargetBlockChanceDef);
-	RelevantAttributesToCapture.Add(DamageStatics().TargetArmorDef);
+	RelevantAttributesToCapture.Add(DamageStatics().TargetBlockChance);
+	RelevantAttributesToCapture.Add(DamageStatics().TargetArmor);
 	RelevantAttributesToCapture.Add(DamageStatics().SourceArmorPenetration);
 	RelevantAttributesToCapture.Add(DamageStatics().SourceCriticalHitChance);
 	RelevantAttributesToCapture.Add(DamageStatics().SourceCriticalHitDamage);
 	RelevantAttributesToCapture.Add(DamageStatics().TargetCriticalHitResistance);
+	
+	RelevantAttributesToCapture.Add(DamageStatics().TargetFireResistance);
+	RelevantAttributesToCapture.Add(DamageStatics().TargetLightningResistance);
+	RelevantAttributesToCapture.Add(DamageStatics().TargetArcaneResistance);
+	RelevantAttributesToCapture.Add(DamageStatics().TargetPhysicalResistance);
 }
 
 void UExecCalc_Damage::Execute_Implementation(
@@ -100,21 +123,36 @@ void UExecCalc_Damage::Execute_Implementation(
 	EvaluationParameters.SourceTags = SourceTags;
 	EvaluationParameters.TargetTags = TargetTags;
 
-	// 모든 데미지 타입을 순회하며 부여된 데미지가 있는지 확인
+	// 모든 데미지 타입을 순회하며 부여된 데미지에 따라 계산 진행
 	float Damage = 0.f;
 	for (auto& Pair : FAuraGameplayTags::Get().DamageTypesToResistances)
 	{
-		const float DamageTypeValue = Spec.GetSetByCallerMagnitude(Pair.Key);
+		// 각 데미지 타입 모두 순회하며 태그 가져오기
+		const FGameplayTag DamageTypeTag = Pair.Key;
+		const FGameplayTag ResistanceTypeTag = Pair.Value;
+		checkf(AuraDamageStatics().TagsToCaptureResistanceDefs.Contains(ResistanceTypeTag), TEXT("TagsToCaptureResistanceDefs doesn't contain Tag: [%s] in ExecCalc_Damage."), *ResistanceTypeTag.ToString());
+
+		// Damage Value 가져오기
+		float DamageTypeValue = Spec.GetSetByCallerMagnitude(DamageTypeTag);
+
+		// Resistance Value 가져오기
+		const FGameplayEffectAttributeCaptureDefinition Resistance = AuraDamageStatics().TagsToCaptureResistanceDefs[ResistanceTypeTag];
+		float ResistanceTypeValue = 0.f;
+		ExecutionParams.AttemptCalculateCapturedAttributeMagnitude(Resistance, EvaluationParameters, ResistanceTypeValue);
+		// Resistance는 음수일 가능성도 있으므로 Clamp하지 않음
+
+		// 속성별 데미지 계산 결과 반영
+		DamageTypeValue *= ( 100.f - ResistanceTypeValue ) / 100.f;
 		Damage += DamageTypeValue;
 	}
 
 	// DamageStatics 구조체에 정의된 FGameplayEffectAttributeCaptureDefinition들을 통해 Source와 Target의 현재 Attribute 값을 캡쳐
 	float TargetBlockChance = 0.f;
-	ExecutionParams.AttemptCalculateCapturedAttributeMagnitude(DamageStatics().TargetBlockChanceDef, EvaluationParameters, TargetBlockChance);
+	ExecutionParams.AttemptCalculateCapturedAttributeMagnitude(DamageStatics().TargetBlockChance, EvaluationParameters, TargetBlockChance);
 	TargetBlockChance = FMath::Max<float>(0.0f, TargetBlockChance);
 	
 	float TargetArmor = 0.f;
-	ExecutionParams.AttemptCalculateCapturedAttributeMagnitude(DamageStatics().TargetArmorDef, EvaluationParameters, TargetArmor);
+	ExecutionParams.AttemptCalculateCapturedAttributeMagnitude(DamageStatics().TargetArmor, EvaluationParameters, TargetArmor);
 	TargetArmor = FMath::Max<float>(0.0f, TargetArmor);
 	
 	float SourceArmorPenetration = 0.f;

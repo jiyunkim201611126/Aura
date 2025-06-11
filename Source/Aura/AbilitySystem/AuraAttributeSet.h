@@ -60,7 +60,10 @@ class AURA_API UAuraAttributeSet : public UAttributeSet
 
 public:
 	UAuraAttributeSet();
+	
+	// 어떤 변수들이 Replicate될지, 어떻게 Replicate될지 지정하는 함수
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	// GameplayEffect의 적용으로 인해 Attribute에 변동사항이 있으면 호출되는 함수
 	virtual void PostGameplayEffectExecute(const FGameplayEffectModCallbackData& Data) override;
 
 	/**
