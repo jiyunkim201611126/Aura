@@ -26,8 +26,7 @@ public:
 	FHitResult CursorHit;
 
 	// Damage를 보여주는 위젯 컴포넌트를 스폰하는 함수
-	UFUNCTION(Client, Reliable)
-	void ShowDamageNumber(float DamageAmount, AActor* TargetActor, bool bBlockedHit, bool bCriticalHit);
+	void SpawnDamageText(float DamageAmount, AActor* TargetActor, bool bBlockedHit, bool bCriticalHit) const;
 
 protected:
 	virtual void BeginPlay() override;

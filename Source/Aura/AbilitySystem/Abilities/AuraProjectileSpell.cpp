@@ -26,7 +26,6 @@ void UAuraProjectileSpell::SpawnProjectile(const FVector& ProjectileTargetLocati
 	{
 		const FVector SocketLocation = CombatInterface->GetCombatSocketLocation();
 		FRotator Rotation = (ProjectileTargetLocation - SocketLocation).Rotation();
-		Rotation.Pitch = 0.f;
 		
 		FTransform SpawnTransform;
 		SpawnTransform.SetLocation(SocketLocation);
@@ -63,7 +62,8 @@ void UAuraProjectileSpell::SpawnProjectile(const FVector& ProjectileTargetLocati
 		for (auto& Pair : DamageTypes)
 		{
 			// Value는 FScalableFloat으로, 에디터에서 할당한 커브 테이블을 이용해 값을 가져옴
-			const float ScaledDamage = Pair.Value.GetValueAtLevel(GetAbilityLevel());
+			const float AbilityLevel = GetAbilityLevel();
+			const float ScaledDamage = Pair.Value.GetValueAtLevel(AbilityLevel);
 			// Spec 안에 SetByCallerMagnitudes라는 이름의 TMap이 있으며, 거기에 Tag를 키, Damage를 밸류로 값을 추가하는 함수
 			// 이 값은 GetSetByCallerMagnitude로 꺼내올 수 있음
 			UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle, Pair.Key, ScaledDamage);

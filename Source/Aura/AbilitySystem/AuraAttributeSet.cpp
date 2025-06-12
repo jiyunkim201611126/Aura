@@ -6,8 +6,8 @@
 #include "AbilitySystemBlueprintLibrary.h"
 #include "Aura/Manager/AuraGameplayTags.h"
 #include "Aura/Interaction/CombatInterface.h"
-#include "Aura/Player/AuraPlayerController.h"
 #include "AuraAbilitySystemLibrary.h"
+#include "Aura/Character/AuraCharacterBase.h"
 
 UAuraAttributeSet::UAuraAttributeSet()
 {
@@ -127,25 +127,20 @@ void UAuraAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallba
 			
 			const bool bBlockedHit = UAuraAbilitySystemLibrary::IsBlockedHit(Props.EffectContextHandle);
 			const bool bCriticalHit = UAuraAbilitySystemLibrary::IsCriticalHit(Props.EffectContextHandle);
-			
-			ShowFloatingText(Props, LocalIncomingDamage, bBlockedHit, bCriticalHit);
+
+			if (AAuraCharacterBase* HitCharacter = Cast<AAuraCharacterBase>(Props.TargetCharacter))
+			{
+				HitCharacter->MulticastSpawnDamageText(LocalIncomingDamage, bBlockedHit, bCriticalHit);
+			}
 		}
 		else if (LocalIncomingDamage < 0.01f)
 		{
 			// 데미지가 0.01보다 작으면 체력 감소나 애니메이션 재생 없이 데미지만 표기
 			SetIncomingDamage(0.f);
-			ShowFloatingText(Props, 0.f, false, false);
-		}
-	}
-}
-
-void UAuraAttributeSet::ShowFloatingText(const FEffectProperties& Props, float Damage, bool bBlockedHit, bool bCriticalHit) const
-{
-	if (Props.SourceCharacter != Props.TargetCharacter)
-	{
-		if (AAuraPlayerController* PC = Cast<AAuraPlayerController>(Props.SourceController))
-		{
-			PC->ShowDamageNumber(Damage, Props.TargetCharacter, bBlockedHit, bCriticalHit);
+			if (AAuraCharacterBase* HitCharacter = Cast<AAuraCharacterBase>(Props.TargetCharacter))
+			{
+				HitCharacter->MulticastSpawnDamageText(LocalIncomingDamage, false, false);
+			}
 		}
 	}
 }

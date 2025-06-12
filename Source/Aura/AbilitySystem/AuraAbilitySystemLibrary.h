@@ -42,7 +42,7 @@ public:
 	static bool IsCriticalHit(const FGameplayEffectContextHandle& EffectContextHandle);
 
 	// 데미지 계산 중 Block 되었는지 Context에 기록하는 함수
-	// UPARAM(ref)는 &가 output이 아니라는 걸 알려주는 매크로
+	// UPARAM(ref)는 &가 붙은 매개변수가 output이 아니라는 걸 알려주는 매크로
 	UFUNCTION(BlueprintCallable, Category = "AuraAbilitySystemLibrary|GameplayEffects")
 	static void SetIsBlockedHit(UPARAM(ref) FGameplayEffectContextHandle& EffectContextHandle, bool bInIsBlockedHit);
 	

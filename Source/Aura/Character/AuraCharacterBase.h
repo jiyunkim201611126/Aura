@@ -29,6 +29,9 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	virtual void MulticastHandleDeath();
 
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastSpawnDamageText(float Damage, bool bBlockedHit, bool bCriticalHit);
+
 protected:
 	virtual void BeginPlay() override;
 

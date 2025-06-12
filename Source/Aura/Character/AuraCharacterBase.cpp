@@ -4,6 +4,8 @@
 #include "Aura/Aura.h"
 #include "Aura/AbilitySystem/AuraAbilitySystemComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "EngineUtils.h"
+#include "Aura/Player/AuraPlayerController.h"
 
 // Sets default values
 AAuraCharacterBase::AAuraCharacterBase()
@@ -51,6 +53,19 @@ void AAuraCharacterBase::MulticastHandleDeath_Implementation()
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 	Dissolve();
+}
+
+void AAuraCharacterBase::MulticastSpawnDamageText_Implementation(float Damage, bool bBlockedHit, bool bCriticalHit)
+{
+	// 리슨 서버에서도 확실하게 자신의 컨트롤러만 추적할 수 있도록 안전장치
+	for (TActorIterator<AAuraPlayerController> It(GetWorld()); It; ++It)
+	{
+		if (It->IsLocalController())
+		{
+			It->SpawnDamageText(Damage, this, bBlockedHit, bCriticalHit);
+			break;
+		}
+	}
 }
 
 // Called when the game starts or when spawned

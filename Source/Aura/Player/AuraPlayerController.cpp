@@ -65,9 +65,9 @@ void AAuraPlayerController::AutoRun()
 	}
 }
 
-void AAuraPlayerController::ShowDamageNumber_Implementation(float DamageAmount, AActor* TargetActor, bool bBlockedHit, bool bCriticalHit)
+void AAuraPlayerController::SpawnDamageText(float DamageAmount, AActor* TargetActor, bool bBlockedHit, bool bCriticalHit) const
 {
-	if (IsValid(TargetActor) && DamageTextComponentClass)
+	if (IsValid(TargetActor) && DamageTextComponentClass && IsLocalController())
 	{
 		UDamageTextComponent* DamageText = NewObject<UDamageTextComponent>(TargetActor, DamageTextComponentClass);
 		// Component 생성 후 등록하는 과정, 위젯의 AddToViewport 같은 개념
