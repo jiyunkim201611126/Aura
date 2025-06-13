@@ -68,13 +68,6 @@ void AAuraCharacterBase::MulticastSpawnDamageText_Implementation(float Damage, b
 	}
 }
 
-// Called when the game starts or when spawned
-void AAuraCharacterBase::BeginPlay()
-{
-	Super::BeginPlay();
-	
-}
-
 FVector AAuraCharacterBase::GetCombatSocketLocation()
 {
 	check(Weapon);

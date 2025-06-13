@@ -130,6 +130,9 @@ void UAuraAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallba
 
 			if (AAuraCharacterBase* HitCharacter = Cast<AAuraCharacterBase>(Props.TargetCharacter))
 			{
+				// NetMulticast 함수는 그 Actor를 가진 클라이언트에서 호출됨
+				// PlayerController는 클라이언트마다 1개씩 있기 때문에, PlayerController를 거치는 경우 제대로 전파되지 않음
+				// 따라서 데미지를 입은 캐릭터를 통해 전파함
 				HitCharacter->MulticastSpawnDamageText(LocalIncomingDamage, bBlockedHit, bCriticalHit);
 			}
 		}

@@ -33,8 +33,6 @@ public:
 	void MulticastSpawnDamageText(float Damage, bool bBlockedHit, bool bCriticalHit);
 
 protected:
-	virtual void BeginPlay() override;
-
 	UPROPERTY(EditAnywhere, Category = "Combat")
 	TObjectPtr<USkeletalMeshComponent> Weapon;
 
