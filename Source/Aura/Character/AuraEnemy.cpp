@@ -36,6 +36,8 @@ void AAuraEnemy::PossessedBy(AController* NewController)
 {
 	Super::PossessedBy(NewController);
 
+	// AIController는 어떻게 행동할지 '판단'하는 클래스
+	// 클라이언트는 판단할 필요가 없으니 바로 return
 	if (!HasAuthority())
 	{
 		return;
