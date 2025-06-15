@@ -10,7 +10,7 @@
 #include "NavigationSystem.h"
 #include "NavigationPath.h"
 #include "Aura/UI/Widget/WidgetComponent/DamageTextComponent.h"
-#include "Aura/Manager/PlayerPawnManagerSubsystem.h"
+#include "Aura/Manager/PawnManagerSubsystem.h"
 
 AAuraPlayerController::AAuraPlayerController()
 {
@@ -33,7 +33,7 @@ void AAuraPlayerController::OnPossess(APawn* InPawn)
 
 	if (HasAuthority())
 	{
-		UPlayerPawnManagerSubsystem* PawnManager = GetGameInstance()->GetSubsystem<UPlayerPawnManagerSubsystem>();
+		UPawnManagerSubsystem* PawnManager = GetGameInstance()->GetSubsystem<UPawnManagerSubsystem>();
 		PawnManager->RegisterPlayerPawn(InPawn);
 	}
 }
@@ -42,7 +42,7 @@ void AAuraPlayerController::OnUnPossess()
 {
 	if (HasAuthority())
 	{
-		UPlayerPawnManagerSubsystem* PawnManager = GetGameInstance()->GetSubsystem<UPlayerPawnManagerSubsystem>();
+		UPawnManagerSubsystem* PawnManager = GetGameInstance()->GetSubsystem<UPawnManagerSubsystem>();
 		PawnManager->UnregisterPlayerPawn(GetPawn());
 	}
 	

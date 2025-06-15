@@ -45,7 +45,7 @@ struct FGameplayEffectInfo
 	EEffectRemovalPolicy RemovalPolicy = EEffectRemovalPolicy::RemoveOnEndOverlap;
 
 	// 제거가 필요한 경우 추적을 위해 사용
-	FActiveGameplayEffectHandle ActiveGameplayEffectHandle;
+	TMap<UAbilitySystemComponent*, FActiveGameplayEffectHandle> ActiveGameplayEffectHandle;
 };
 
 /**
@@ -72,7 +72,10 @@ protected:
 	void OnEndOverlap(AActor* TargetActor);
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Applied Effects")
-	bool bDestroyOnEffectRemoval = false;
+	bool bDestroyOnEffectApplication = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Applied Effects")
+	bool bApplyEffectsToEnemies = false;
 
 	// 해당 클래스를 상속받는 자손 블루프린트 액터의 디테일 패널에서 Element를 추가
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Applied Effects")

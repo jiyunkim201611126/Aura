@@ -14,6 +14,8 @@ class AURA_API AAuraAIController : public AAIController
 
 public:
 	AAuraAIController();
+	virtual void OnPossess(APawn* InPawn) override;
+	virtual void OnUnPossess() override;
 
 protected:
 	UPROPERTY()

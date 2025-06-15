@@ -17,9 +17,15 @@ void AAuraEffectActor::BeginPlay()
 
 void AAuraEffectActor::OnOverlap(AActor* TargetActor)
 {
+	if (!bApplyEffectsToEnemies && TargetActor->ActorHasTag(FName("Enemy")))
+	{
+		return;
+	}
+	
 	UAbilitySystemComponent* TargetASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(TargetActor);
 	if (TargetASC == nullptr) return;
 
+	bool bHasInfinite = false;
 	// GameplayEffects를 순회
 	for (auto& Effect : GameplayEffects)
 	{
@@ -29,7 +35,6 @@ void AAuraEffectActor::OnOverlap(AActor* TargetActor)
 			check(Effect.GameplayEffectClass);
 
 			// GameplayEffect가 어떻게 적용됐는지에 대한 정보를 가진 구조체 선언
-			// 누가 때렸는지, 누가 맞았는지, 어떤 속성의 공격인지, 데미지는 몇인지 등 로그 같은 개념
 			FGameplayEffectContextHandle EffectContextHandle = TargetASC->MakeEffectContext();
 	
 			// 어떤 객체에 의해 발생한 Effect인지 추가
@@ -40,34 +45,63 @@ void AAuraEffectActor::OnOverlap(AActor* TargetActor)
 
 			// Spec 없이 재사용을 염두하지 않고 간편하게 사용하는 경우 ApplyGameplayEffectToSelf 호출
 			// 또한 원하는 타이밍에 제거하고 싶은 경우 추적할 수 있도록 구조체 내에 할당
-			Effect.ActiveGameplayEffectHandle = TargetASC->ApplyGameplayEffectSpecToSelf(*EffectSpecHandle.Data.Get());
+			Effect.ActiveGameplayEffectHandle.Add(TargetASC, TargetASC->ApplyGameplayEffectSpecToSelf(*EffectSpecHandle.Data.Get()));
+
+			// Infinite Effect를 하나라도 갖고 있다면 true로 변경
+			if (!bHasInfinite && EffectSpecHandle.Data.Get())
+			{
+				bHasInfinite = EffectSpecHandle.Data.Get()->Def.Get()->DurationPolicy == EGameplayEffectDurationType::Infinite;
+			}
 		}
+	}
+
+	if (bDestroyOnEffectApplication && !bHasInfinite)
+	{
+		Destroy();
 	}
 }
 
 void AAuraEffectActor::OnEndOverlap(AActor* TargetActor)
 {
+	if (!bApplyEffectsToEnemies && TargetActor->ActorHasTag(FName("Enemy")))
+	{
+		return;
+	}
+	
 	UAbilitySystemComponent* TargetASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(TargetActor);
 	if (TargetASC == nullptr) return;
 	
+	bool bHasInfinite = false;
 	for (auto& Effect : GameplayEffects)
 	{
+		// EndOverlap할 때 Effect를 제거해야 하는 경우
+		if (Effect.RemovalPolicy == EEffectRemovalPolicy::RemoveOnEndOverlap)
+		{
+			check(Effect.GameplayEffectClass);
+
+			// OnOverlap에서 추적할 수 있도록 할당해뒀으므로 제거 가능
+			TargetASC->RemoveActiveGameplayEffect(Effect.ActiveGameplayEffectHandle.FindAndRemoveChecked(TargetASC), 1);
+		}
+		
+		FGameplayEffectSpecHandle EffectSpecHandle;
 		// EndOverlap할 때 Effect를 적용해야 하는 경우
 		if (Effect.ApplicationPolicy == EEffectApplicationPolicy::ApplyOnEndOverlap)
 		{
 			check(Effect.GameplayEffectClass);
 			FGameplayEffectContextHandle EffectContextHandle = TargetASC->MakeEffectContext();
 			EffectContextHandle.AddSourceObject(this);
-			FGameplayEffectSpecHandle EffectSpecHandle = TargetASC->MakeOutgoingSpec(Effect.GameplayEffectClass, ActorLevel, EffectContextHandle);
-			Effect.ActiveGameplayEffectHandle = TargetASC->ApplyGameplayEffectSpecToSelf(*EffectSpecHandle.Data.Get());
+			EffectSpecHandle = TargetASC->MakeOutgoingSpec(Effect.GameplayEffectClass, ActorLevel, EffectContextHandle);
+			Effect.ActiveGameplayEffectHandle.Add(TargetASC, TargetASC->ApplyGameplayEffectSpecToSelf(*EffectSpecHandle.Data.Get()));
 		}
 		
-		if (Effect.RemovalPolicy == EEffectRemovalPolicy::RemoveOnEndOverlap)
+		if (!bHasInfinite && EffectSpecHandle.Data.Get())
 		{
-			check(Effect.GameplayEffectClass);
-
-			// OnOverlap에서 추적할 수 있도록 할당해뒀으므로 제거 가능
-			TargetASC->RemoveActiveGameplayEffect(Effect.ActiveGameplayEffectHandle, 1);
+			bHasInfinite = EffectSpecHandle.Data.Get()->Def.Get()->DurationPolicy == EGameplayEffectDurationType::Infinite;
 		}
+	}
+
+	if (bDestroyOnEffectApplication && !bHasInfinite)
+	{
+		Destroy();
 	}
 }

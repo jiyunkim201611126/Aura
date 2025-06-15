@@ -5,6 +5,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Aura/Player/AuraPlayerController.h"
 #include "Aura/UI/HUD/AuraHUD.h"
+#include "Aura/Manager/PawnManagerSubsystem.h"
 
 AAuraCharacter::AAuraCharacter()
 {
@@ -46,6 +47,12 @@ int32 AAuraCharacter::GetPlayerLevel()
 	const AAuraPlayerState* AuraPlayerState = GetPlayerState<AAuraPlayerState>();
 	check(AuraPlayerState);
 	return AuraPlayerState->GetPlayerLevel();
+}
+
+void AAuraCharacter::UnregisterPawn()
+{
+	UPawnManagerSubsystem* PawnManager = GetGameInstance()->GetSubsystem<UPawnManagerSubsystem>();
+	PawnManager->UnregisterPlayerPawn(this);
 }
 
 void AAuraCharacter::InitAbilityActorInfo()

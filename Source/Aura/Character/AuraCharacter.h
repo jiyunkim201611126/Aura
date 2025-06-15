@@ -19,6 +19,7 @@ public:
 
 	/** Combat Interface */
 	virtual int32 GetPlayerLevel() override;
+	virtual void UnregisterPawn() override;
 	/** end Combat Interface*/
 
 protected:

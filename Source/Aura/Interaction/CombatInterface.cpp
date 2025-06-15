@@ -9,3 +9,7 @@ FVector ICombatInterface::GetCombatSocketLocation()
 {
 	return FVector();
 }
+
+void ICombatInterface::UnregisterPawn()
+{
+}
