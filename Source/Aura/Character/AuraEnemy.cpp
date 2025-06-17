@@ -16,8 +16,8 @@
 
 AAuraEnemy::AAuraEnemy()
 {
-	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
-	GetMesh()->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Enemy, ECR_Block);
+	GetMesh()->SetCollisionResponseToChannel(ECC_Enemy, ECR_Block);
 
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationRoll = false;
@@ -33,6 +33,7 @@ AAuraEnemy::AAuraEnemy()
 
 	HealthBar = CreateDefaultSubobject<UWidgetComponent>("HealthBar");
 	HealthBar->SetupAttachment(GetRootComponent());
+	HealthBar->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	
 	GetMesh()->SetCustomDepthStencilValue(CUSTOM_DEPTH_RED);
 	Weapon->SetCustomDepthStencilValue(CUSTOM_DEPTH_RED);

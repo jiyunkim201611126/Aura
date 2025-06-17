@@ -11,6 +11,7 @@
 #include "NavigationPath.h"
 #include "Aura/UI/Widget/WidgetComponent/DamageTextComponent.h"
 #include "Aura/Manager/PawnManagerSubsystem.h"
+#include "Aura/Aura.h"
 
 AAuraPlayerController::AAuraPlayerController()
 {
@@ -51,10 +52,30 @@ void AAuraPlayerController::OnUnPossess()
 
 void AAuraPlayerController::CursorTrace()
 {
-	GetHitResultUnderCursor(ECC_Visibility, false, CursorHit);
+	FVector CameraLocation = PlayerCameraManager->GetCameraLocation();
+	
+	FHitResult VisibilityHit;
+	FHitResult EnemyHit;
+	GetHitResultUnderCursor(ECC_Visibility, false, VisibilityHit);
+	GetHitResultUnderCursor(ECC_Enemy, false, EnemyHit);
+
+	if (VisibilityHit.bBlockingHit != EnemyHit.bBlockingHit)
+	{
+		CursorHit = VisibilityHit.bBlockingHit ? VisibilityHit : EnemyHit;
+	}
+	else
+	{
+		float VisibilityHitDist = FVector::Dist(CameraLocation, VisibilityHit.ImpactPoint);
+		float EnemyHitDist = FVector::Dist(CameraLocation, EnemyHit.ImpactPoint);
+
+		CursorHit = VisibilityHitDist < EnemyHitDist ? VisibilityHit : EnemyHit;
+	}
+	
 	if (!CursorHit.bBlockingHit)
 	{
 		if (LastActor) LastActor->UnHighlightActor();
+		LastActor = nullptr;
+		ThisActor = nullptr;
 		return;
 	}
 
@@ -231,10 +252,14 @@ void AAuraPlayerController::AbilityInputTagReleased(FGameplayTag InputTag)
 				{
 					Spline->AddSplinePoint(PointLoc, ESplineCoordinateSpace::World);
 				}
-				// 목적지 값 변경, 이 과정을 거치지 않으면 장애물을 클릭한 경우 목적지에 도달하지 못 해 영원히 달림
-				CachedDestination = NavPath->PathPoints[NavPath->PathPoints.Num() - 1];
-				// 목적지까지 자동 달리기 시작
-				bAutoRunning = true;
+				
+				if (NavPath->PathPoints.Num() > 0)
+				{
+					// 목적지 값 변경, 이 과정을 거치지 않으면 장애물을 클릭한 경우 목적지에 도달하지 못 해 영원히 달림
+					CachedDestination = NavPath->PathPoints[NavPath->PathPoints.Num() - 1];
+					// 목적지까지 자동 달리기 시작
+					bAutoRunning = true;
+				}
 			}
 		}
 		// 관련 변수 초기화

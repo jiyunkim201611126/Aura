@@ -1,5 +1,7 @@
 #include "AuraCharacter.h"
 
+#include "Aura/Aura.h"
+#include "Components/CapsuleComponent.h"
 #include "Aura/AbilitySystem/AuraAbilitySystemComponent.h"
 #include "Aura/Player/AuraPlayerState.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -9,6 +11,8 @@
 
 AAuraCharacter::AAuraCharacter()
 {
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Ally, ECR_Block);
+	GetMesh()->SetCollisionResponseToChannel(ECC_Ally, ECR_Block);
 }
 
 void AAuraCharacter::BeginPlay()
