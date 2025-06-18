@@ -28,7 +28,7 @@ public:
 
 	// 게임 시작 시 모든 캐릭터가 기본으로 사용하는 Ability(HitReact 등)를 장착시키는 함수
 	UFUNCTION(BlueprintCallable, Category = "AuraAbilitySystemLibrary|CahracterClassDefaults", meta = (WorldContext = "WorldContextObject"))
-	static void GiveStartupAbilities(const UObject* WorldContextObject, UAbilitySystemComponent* ASC);
+	static void GiveStartupAbilities(const UObject* WorldContextObject, UAbilitySystemComponent* ASC, ECharacterClass CharacterClass);
 	
 	UFUNCTION(BlueprintCallable, Category = "AuraAbilitySystemLibrary|CahracterClassDefaults", meta = (WorldContext = "WorldContextObject"))
 	static UCharacterClassInfo* GetCharacterClassInfo(const UObject* WorldContextObject);
