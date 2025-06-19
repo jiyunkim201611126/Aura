@@ -35,19 +35,20 @@ UAnimMontage* AAuraCharacterBase::GetHitReactMontage_Implementation()
 	return HitReactMontage;
 }
 
-void AAuraCharacterBase::Die()
+void AAuraCharacterBase::Die(bool bShouldAddImpulse, const FVector& Impulse)
 {
 	// 서버에서만 호출되는 함수임이 명확하므로 권한 확인 필요 없이 등록 해제
 	UnregisterPawn();
-	MulticastHandleDeath();
+	MulticastHandleDeath(bShouldAddImpulse, Impulse);
 }
 
-void AAuraCharacterBase::MulticastHandleDeath_Implementation()
+void AAuraCharacterBase::MulticastHandleDeath_Implementation(bool bShouldAddImpulse, const FVector& Impulse)
 {
 	// SetSimulatePhysics에서 자동으로 Detach를 호출
 	Weapon->SetSimulatePhysics(true);
 	Weapon->SetEnableGravity(true);
 	Weapon->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
+	Weapon->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
 	
 	GetMesh()->SetEnableGravity(true);
 	GetMesh()->SetSimulatePhysics(true);
@@ -55,6 +56,12 @@ void AAuraCharacterBase::MulticastHandleDeath_Implementation()
 	GetMesh()->SetCollisionResponseToChannel(ECC_WorldStatic, ECR_Block);
 	
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	if (bShouldAddImpulse)
+	{
+		Weapon->AddImpulse(Impulse * Weapon->GetMass() * 100.f);
+		GetMesh()->AddImpulse(Impulse * GetMesh()->GetMass() * 300.f);
+	}
 
 	Dissolve();
 }

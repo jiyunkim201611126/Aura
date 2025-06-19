@@ -68,15 +68,25 @@ void AAuraEnemy::UnHighlightActor()
 	Weapon->SetRenderCustomDepth(false);
 }
 
+void AAuraEnemy::SetCombatTarget_Implementation(AActor* InCombatTarget)
+{
+	CombatTarget = InCombatTarget;
+}
+
+AActor* AAuraEnemy::GetCombatTarget_Implementation() const
+{
+	return CombatTarget;
+}
+
 int32 AAuraEnemy::GetPlayerLevel()
 {
 	return Level;
 }
 
-void AAuraEnemy::Die()
+void AAuraEnemy::Die(bool bShouldAddImpulse, const FVector& Impulse)
 {
 	SetLifeSpan(LifeSpan);
-	Super::Die();
+	Super::Die(bShouldAddImpulse, Impulse);
 }
 
 void AAuraEnemy::UnregisterPawn()

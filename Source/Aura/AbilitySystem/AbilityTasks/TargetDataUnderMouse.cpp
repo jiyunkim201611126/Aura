@@ -43,19 +43,20 @@ void UTargetDataUnderMouse::SendMouseCursorData()
 	// 이 함수 흐름 전체에 Key를 부여해 다른 네트워크 작업과 섞이거나 충돌하지 않도록 방지함
 	// 서버에게 TargetData를 보내는 작업 중이기 때문에 예측키가 필요함
 	FScopedPredictionWindow ScopedPrediction(AbilitySystemComponent.Get());
-	
+
+	// PlayerController에서 HitResult 가져오기
 	AAuraPlayerController* PC = Cast<AAuraPlayerController>(Ability->GetCurrentActorInfo()->PlayerController.Get());
 	FGameplayAbilityTargetDataHandle DataHandle;
 	FGameplayAbilityTargetData_SingleTargetHit* Data = new FGameplayAbilityTargetData_SingleTargetHit();
 	Data->HitResult = PC->CursorHit;
 	DataHandle.Add(Data);
 	
-	/*
-	Ability를 실행하게 되면 자동으로 예측키가 생성, 서버와의 소통을 시작(여기는 Task, 여기서 만든 거 아님)
-	아래 함수를 호출할 때 이 예측키를 2번째 매개변수로 사용해 '어떤 클라이언트에서, 어떤 Ability에서' 실행 중인지 GAS가 파악
-	마지막 매개변수로 들어간 예측키(여기서 만든 거 맞음)는 이 함수(SendMouseCursorData)의 첫 구문에서 선언되어 '이 함수'에서 예측 작업이 실행 중임을 명시
-	즉, GAS는 이 2개의 매개변수인 예측키를 통해 다른 클라이언트나 다른 Ability 혹은 다른 함수에서 실행 중인 예측 작업과 뒤섞이지 않도록 제어
-	*/
+	/**
+	 * Ability를 실행하게 되면 자동으로 예측키가 생성, 서버와의 소통을 시작(여기는 Task, 여기서 만든 거 아님)
+	 * 아래 함수를 호출할 때 이 예측키를 2번째 매개변수로 사용해 '어떤 클라이언트에서, 어떤 Ability에서' 실행 중인지 GAS가 파악
+	 * 마지막 매개변수로 들어간 예측키(여기서 만든 거 맞음)는 이 함수(SendMouseCursorData)의 첫 구문에서 선언되어 '이 함수'에서 예측 작업이 실행 중임을 명시
+	 * 즉, GAS는 이 2개의 매개변수인 예측키를 통해 다른 클라이언트나 다른 Ability 혹은 다른 함수에서 실행 중인 예측 작업과 뒤섞이지 않도록 제어
+	 */
 	AbilitySystemComponent->ServerSetReplicatedTargetData(
 		GetAbilitySpecHandle(),											// 서버가 어떤 Ability 인스턴스에 대한 TargetData인지 식별할 때 사용
 		GetActivationPredictionKey(),									// Ability 실행 전체의 예측키. 동기화, 예측, 롤백 처리를 위해 사용

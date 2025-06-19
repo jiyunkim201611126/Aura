@@ -112,17 +112,20 @@ void UAuraAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallba
 				ICombatInterface* CombatInterface = Cast<ICombatInterface>(Props.TargetAvatarActor);
 				if (CombatInterface)
 				{
-					CombatInterface->Die();
+					bool bShouldAddImpulse = false;
+					FVector Impulse = FVector::ZeroVector;
 					const AActor* SourceObject = Cast<AActor>(Props.EffectContextHandle.Get()->GetSourceObject());
 					if (SourceObject)
 					{
+						bShouldAddImpulse = true;
 						FVector TargetLocation = Props.TargetCharacter->GetActorLocation();
 						TargetLocation.Z = 0.f;
 						FVector SourceLocation = SourceObject->GetActorLocation();
 						SourceLocation.Z = 0.f;
-						const FVector Impulse = (TargetLocation - SourceLocation).GetSafeNormal();
-						Props.TargetCharacter->GetMesh()->AddImpulse(Impulse * 10000.f);
+						Impulse = (TargetLocation - SourceLocation).GetSafeNormal();
+						Impulse.Z = 0.3f;
 					}
+					CombatInterface->Die(bShouldAddImpulse, Impulse);
 				}
 			}
 			else

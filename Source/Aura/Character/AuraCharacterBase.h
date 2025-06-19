@@ -24,10 +24,10 @@ public:
 
 	virtual UAnimMontage* GetHitReactMontage_Implementation() override;
 	
-	virtual void Die() override;
+	virtual void Die(bool bShouldAddImpulse, const FVector& Impulse) override;
 
 	UFUNCTION(NetMulticast, Reliable)
-	virtual void MulticastHandleDeath();
+	virtual void MulticastHandleDeath(bool bShouldAddImpulse, const FVector& Impulse);
 
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastSpawnDamageText(float Damage, bool bBlockedHit, bool bCriticalHit);
