@@ -30,6 +30,12 @@ UAbilitySystemComponent* AAuraCharacterBase::GetAbilitySystemComponent() const
 	return AbilitySystemComponent;
 }
 
+FVector AAuraCharacterBase::GetCombatSocketLocation_Implementation()
+{
+	check(Weapon);
+	return Weapon->GetSocketLocation(WeaponTipSocketName);
+}
+
 UAnimMontage* AAuraCharacterBase::GetHitReactMontage_Implementation()
 {
 	return HitReactMontage;
@@ -40,6 +46,16 @@ void AAuraCharacterBase::Die(bool bShouldAddImpulse, const FVector& Impulse)
 	// 서버에서만 호출되는 함수임이 명확하므로 권한 확인 필요 없이 등록 해제
 	UnregisterPawn();
 	MulticastHandleDeath(bShouldAddImpulse, Impulse);
+}
+
+bool AAuraCharacterBase::IsDead_Implementation()
+{
+	return bDead;
+}
+
+AActor* AAuraCharacterBase::GetAvatar_Implementation()
+{
+	return this;
 }
 
 void AAuraCharacterBase::MulticastHandleDeath_Implementation(bool bShouldAddImpulse, const FVector& Impulse)
@@ -64,6 +80,8 @@ void AAuraCharacterBase::MulticastHandleDeath_Implementation(bool bShouldAddImpu
 	}
 
 	Dissolve();
+
+	bDead = true;
 }
 
 void AAuraCharacterBase::MulticastSpawnDamageText_Implementation(float Damage, bool bBlockedHit, bool bCriticalHit)
@@ -77,12 +95,6 @@ void AAuraCharacterBase::MulticastSpawnDamageText_Implementation(float Damage, b
 			break;
 		}
 	}
-}
-
-FVector AAuraCharacterBase::GetCombatSocketLocation()
-{
-	check(Weapon);
-	return Weapon->GetSocketLocation(WeaponTipSocketName);
 }
 
 void AAuraCharacterBase::InitAbilityActorInfo()

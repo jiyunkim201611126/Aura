@@ -88,6 +88,6 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 		FName("Effects.HitReact"),FString("Tag granted when Hit Reacting"));
 
 	
-	GameplayTags.Effects_HitReact = UGameplayTagsManager::Get().AddNativeGameplayTag(
+	GameplayTags.Abilities_Attack = UGameplayTagsManager::Get().AddNativeGameplayTag(
 		FName("Abilities.Attack"),FString("Attack Ability Tag"));
 }
