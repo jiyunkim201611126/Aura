@@ -14,6 +14,7 @@ struct FAuraGameplayTags
 	static const FAuraGameplayTags& Get() { return GameplayTags; }
 	static void InitializeNativeGameplayTags();
 
+	/** Attributes */
 	FGameplayTag Attributes_Vital_Health;
 	FGameplayTag Attributes_Vital_Mana;
 	
@@ -37,26 +38,42 @@ struct FAuraGameplayTags
 	FGameplayTag Attributes_Resistance_Lightning;
 	FGameplayTag Attributes_Resistance_Arcane;
 	FGameplayTag Attributes_Resistance_Physical;
+	/** End Attributes */
 
+	/** Input Tags */
 	FGameplayTag InputTag_1;
 	FGameplayTag InputTag_2;
 	FGameplayTag InputTag_3;
 	FGameplayTag InputTag_4;
 	FGameplayTag InputTag_LMB;
 	FGameplayTag InputTag_RMB;
-	
+	/** End Input Tags */
+
+	/** Damage Type */
 	FGameplayTag Damage;
 	FGameplayTag Damage_Fire;
 	FGameplayTag Damage_Lightning;
 	FGameplayTag Damage_Arcane;
 	FGameplayTag Damage_Physical;
 
+	// 데미지 타입과 Resistance 타입을 묶는 TMap
 	TMap<FGameplayTag, FGameplayTag> DamageTypesToResistances;
-
-	FGameplayTag Effects_HitReact;
-
-	FGameplayTag Abilities_Attack;
+	/** End Damage Type */
 	
+	/** Common Abilities */
+	FGameplayTag Effects_HitReact;
+	/** End Common Abilities */
+
+	/** Abilities */
+	FGameplayTag Abilities_Attack;
+	/** End Abilities */
+
+	/** Anim Notify */
+	FGameplayTag Montage_Attack_Weapon;
+	FGameplayTag Montage_Attack_LeftHand;
+	FGameplayTag Montage_Attack_RightHand;
+	/** End Anim Notify */
+
 private:
 	static FAuraGameplayTags GameplayTags;
 };

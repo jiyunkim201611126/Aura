@@ -130,11 +130,9 @@ void UAuraAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallba
 			}
 			else
 			{
-				// 사망하지 않은 경우 태그를 통해 HitReact 애님 몽타주를 재생
+				// 사망하지 않은 경우 가진 Ability 중 Effects_HitReact 태그를 가진 Ability를 실행
 				FGameplayTagContainer TagContainer;
 				TagContainer.AddTag(FAuraGameplayTags::Get().Effects_HitReact);
-
-				// Tag가 일치하는 Ability를 활성화하는 함수
 				Props.TargetASC->TryActivateAbilitiesByTag(TagContainer);
 			}
 			
