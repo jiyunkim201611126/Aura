@@ -28,9 +28,10 @@ public:
 	/** end Enemy Interface */
 
 	/** Combat Interface */
+	virtual void RegisterPawn() override;
+	virtual void UnregisterPawn() override;
 	virtual int32 GetPlayerLevel() override;
 	virtual void Die(bool bShouldAddImpulse, const FVector& Impulse) override;
-	virtual void UnregisterPawn() override;
 	/** end Combat Interface */
 
 	// 아래 2개의 델리게이트 선언으로 인해 이 클래스가 OverlayWidgetController를 참조하게 되었으나,
@@ -47,10 +48,10 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = "Combat")
 	bool bHitReacting = false;
 
-	UPROPERTY(BlueprintReadOnly, Category = "Combat")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat")
 	float BaseWalkSpeed = 250.f;
 
-	UPROPERTY(BlueprintReadOnly, Category = "Combat")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat")
 	float LifeSpan = 5.f;
 
 	UPROPERTY(BlueprintReadWrite, Category = "Combat")

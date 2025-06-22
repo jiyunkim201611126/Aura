@@ -1,8 +1,8 @@
 ﻿#include "AuraAIController.h"
 
+#include "Aura/Interaction/CombatInterface.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "BehaviorTree/BehaviorTreeComponent.h"
-#include "Aura/Manager/PawnManagerSubsystem.h"
 
 AAuraAIController::AAuraAIController()
 {
@@ -18,8 +18,7 @@ void AAuraAIController::OnPossess(APawn* InPawn)
 
 	if (HasAuthority())
 	{
-		UPawnManagerSubsystem* PawnManager = GetGameInstance()->GetSubsystem<UPawnManagerSubsystem>();
-		PawnManager->RegisterAIPawn(InPawn);
+		Cast<ICombatInterface>(InPawn)->RegisterPawn();
 	}
 }
 
@@ -27,8 +26,7 @@ void AAuraAIController::OnUnPossess()
 {
 	if (HasAuthority())
 	{
-		UPawnManagerSubsystem* PawnManager = GetGameInstance()->GetSubsystem<UPawnManagerSubsystem>();
-		PawnManager->UnregisterAIPawn(GetPawn());
+		Cast<ICombatInterface>(GetPawn())->UnregisterPawn();
 	}
 	
 	Super::OnUnPossess();

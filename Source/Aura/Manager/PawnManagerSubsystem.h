@@ -24,9 +24,9 @@ private:
 	TArray<TWeakObjectPtr<APawn>> AIPawns;
 
 	UPROPERTY()
-	TArray<APawn*> CachedPlayerPawns;
+	TArray<TObjectPtr<APawn>> CachedPlayerPawns;
 	UPROPERTY()
-	TArray<APawn*> CachedAIPawns;
+	TArray<TObjectPtr<APawn>> CachedAIPawns;
 
 	bool bPlayerPawnsCacheDirty = true;
 	bool bAIPawnsCacheDirty = true;

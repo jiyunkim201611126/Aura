@@ -46,17 +46,33 @@ void AAuraCharacter::OnRep_PlayerState()
 	InitAbilityActorInfo();
 }
 
+void AAuraCharacter::RegisterPawn()
+{
+	if (HasAuthority())
+	{
+		if (UPawnManagerSubsystem* PawnManager = GetGameInstance()->GetSubsystem<UPawnManagerSubsystem>())
+		{
+			PawnManager->RegisterPlayerPawn(this);
+		}
+	}
+}
+
+void AAuraCharacter::UnregisterPawn()
+{
+	if (HasAuthority())
+	{
+		if (UPawnManagerSubsystem* PawnManager = GetGameInstance()->GetSubsystem<UPawnManagerSubsystem>())
+		{
+			PawnManager->UnregisterPlayerPawn(this);
+		}
+	}
+}
+
 int32 AAuraCharacter::GetPlayerLevel()
 {
 	const AAuraPlayerState* AuraPlayerState = GetPlayerState<AAuraPlayerState>();
 	check(AuraPlayerState);
 	return AuraPlayerState->GetPlayerLevel();
-}
-
-void AAuraCharacter::UnregisterPawn()
-{
-	UPawnManagerSubsystem* PawnManager = GetGameInstance()->GetSubsystem<UPawnManagerSubsystem>();
-	PawnManager->UnregisterPlayerPawn(this);
 }
 
 void AAuraCharacter::InitAbilityActorInfo()

@@ -10,8 +10,8 @@
 #include "NavigationSystem.h"
 #include "NavigationPath.h"
 #include "Aura/UI/Widget/WidgetComponent/DamageTextComponent.h"
-#include "Aura/Manager/PawnManagerSubsystem.h"
 #include "Aura/Aura.h"
+#include "Aura/Interaction/CombatInterface.h"
 
 AAuraPlayerController::AAuraPlayerController()
 {
@@ -34,8 +34,7 @@ void AAuraPlayerController::OnPossess(APawn* InPawn)
 
 	if (HasAuthority())
 	{
-		UPawnManagerSubsystem* PawnManager = GetGameInstance()->GetSubsystem<UPawnManagerSubsystem>();
-		PawnManager->RegisterPlayerPawn(InPawn);
+		Cast<ICombatInterface>(InPawn)->RegisterPawn();
 	}
 }
 
@@ -43,8 +42,7 @@ void AAuraPlayerController::OnUnPossess()
 {
 	if (HasAuthority())
 	{
-		UPawnManagerSubsystem* PawnManager = GetGameInstance()->GetSubsystem<UPawnManagerSubsystem>();
-		PawnManager->UnregisterPlayerPawn(GetPawn());
+		Cast<ICombatInterface>(GetPawn())->UnregisterPawn();
 	}
 	
 	Super::OnUnPossess();
@@ -54,7 +52,8 @@ void AAuraPlayerController::CursorTrace()
 {
 	/**
 	 * Player와 Enemy Pawn들은 Visibility Trace에 대해 Ignore 반응을 갖습니다.
-	 * 
+	 * 대신 Ally 혹은 Enemy Channel에 대해 Block 반응을 갖습니다.
+	 * 따라서 PlayerController는 Visibility와 Enemy, 2개의 채널을 동시에 Trace해서 우선순위를 판별해 사용합니다.
 	 */
 	FVector CameraLocation = PlayerCameraManager->GetCameraLocation();
 	

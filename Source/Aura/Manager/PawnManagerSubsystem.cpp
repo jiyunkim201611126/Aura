@@ -52,7 +52,7 @@ TArray<APawn*> UPawnManagerSubsystem::GetAllAIPawns()
 	if (bAIPawnsCacheDirty)
 	{
 		CachedAIPawns.Reset();
-		for (const TWeakObjectPtr<APawn>& AIPawn : CachedAIPawns)
+		for (const TWeakObjectPtr<APawn>& AIPawn : AIPawns)
 		{
 			if (AIPawn.IsValid())
 			{

@@ -78,6 +78,28 @@ AActor* AAuraEnemy::GetCombatTarget_Implementation() const
 	return CombatTarget;
 }
 
+void AAuraEnemy::RegisterPawn()
+{
+	if (HasAuthority())
+	{
+		if (UPawnManagerSubsystem* PawnManager = GetGameInstance()->GetSubsystem<UPawnManagerSubsystem>())
+		{
+			PawnManager->RegisterAIPawn(this);
+		}
+	}
+}
+
+void AAuraEnemy::UnregisterPawn()
+{
+	if (HasAuthority())
+	{
+		if (UPawnManagerSubsystem* PawnManager = GetGameInstance()->GetSubsystem<UPawnManagerSubsystem>())
+		{
+			PawnManager->UnregisterAIPawn(this);
+		}
+	}
+}
+
 int32 AAuraEnemy::GetPlayerLevel()
 {
 	return Level;
@@ -87,12 +109,6 @@ void AAuraEnemy::Die(bool bShouldAddImpulse, const FVector& Impulse)
 {
 	SetLifeSpan(LifeSpan);
 	Super::Die(bShouldAddImpulse, Impulse);
-}
-
-void AAuraEnemy::UnregisterPawn()
-{
-	UPawnManagerSubsystem* PawnManager = GetGameInstance()->GetSubsystem<UPawnManagerSubsystem>();
-	PawnManager->UnregisterAIPawn(this);
 }
 
 void AAuraEnemy::BeginPlay()

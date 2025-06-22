@@ -5,7 +5,9 @@
 #include "Aura/AbilitySystem/AuraAbilitySystemComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "EngineUtils.h"
+#include "Aura/Manager/AuraGameplayTags.h"
 #include "Aura/Player/AuraPlayerController.h"
+#include "Aura/Manager/PawnManagerSubsystem.h"
 
 // Sets default values
 AAuraCharacterBase::AAuraCharacterBase()
@@ -25,15 +27,30 @@ AAuraCharacterBase::AAuraCharacterBase()
 	Weapon->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
+void AAuraCharacterBase::BeginPlay()
+{
+	Super::BeginPlay();
+
+	RegisterPawn();
+}
+
 UAbilitySystemComponent* AAuraCharacterBase::GetAbilitySystemComponent() const
 {
 	return AbilitySystemComponent;
 }
 
-FVector AAuraCharacterBase::GetCombatSocketLocation_Implementation()
+FVector AAuraCharacterBase::GetCombatSocketLocation_Implementation(const FGameplayTag& MontageTag, const FName& SocketName)
 {
-	check(Weapon);
-	return Weapon->GetSocketLocation(WeaponTipSocketName);
+	const FAuraGameplayTags& GameplayTags = FAuraGameplayTags::Get();
+	
+	if (MontageTag.MatchesTagExact(GameplayTags.Montage_Attack_Weapon) && IsValid(Weapon))
+	{
+		return Weapon->GetSocketLocation(SocketName);
+	}
+	else
+	{
+		return GetMesh()->GetSocketLocation(SocketName);
+	}
 }
 
 UAnimMontage* AAuraCharacterBase::GetHitReactMontage_Implementation()
@@ -128,21 +145,26 @@ void AAuraCharacterBase::AddCharacterAbilities() const
 
 void AAuraCharacterBase::Dissolve()
 {
-	if (IsValid(DissolveMaterialInstance) && IsValid(WeaponDissolveMaterialInstance))
-	{
-		FTimerHandle TimerHandle;
-		GetWorld()->GetTimerManager().SetTimer(
-			TimerHandle,
-			FTimerDelegate::CreateLambda([this]()
+	FTimerHandle TimerHandle;
+	GetWorld()->GetTimerManager().SetTimer(
+		TimerHandle,
+		FTimerDelegate::CreateLambda([this]()
+		{
+			UMaterialInstanceDynamic* DynamicMatInst = nullptr;
+			UMaterialInstanceDynamic* WeaponDynamicMatInst = nullptr;
+			if (IsValid(DissolveMaterialInstance))
 			{
-				UMaterialInstanceDynamic* DynamicMatInst = UMaterialInstanceDynamic::Create(DissolveMaterialInstance, this);
+				DynamicMatInst = UMaterialInstanceDynamic::Create(DissolveMaterialInstance, this);
 				GetMesh()->SetMaterial(0, DynamicMatInst);
-				UMaterialInstanceDynamic* WeaponDynamicMatInst = UMaterialInstanceDynamic::Create(WeaponDissolveMaterialInstance, this);
+			}
+			if (IsValid(WeaponDissolveMaterialInstance))
+			{
+				WeaponDynamicMatInst = UMaterialInstanceDynamic::Create(WeaponDissolveMaterialInstance, this);
 				Weapon->SetMaterial(0, WeaponDynamicMatInst);
-				StartDissolveTimeline(DynamicMatInst, WeaponDynamicMatInst);
-			}),
-			2.f,
-			false
-		);
-	}
+			}
+			StartDissolveTimeline(DynamicMatInst, WeaponDynamicMatInst);
+		}),
+		2.f,
+		false
+	);
 }
