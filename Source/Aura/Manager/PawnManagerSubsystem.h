@@ -25,6 +25,7 @@ private:
 
 	UPROPERTY()
 	TArray<TObjectPtr<APawn>> CachedPlayerPawns;
+	
 	UPROPERTY()
 	TArray<TObjectPtr<APawn>> CachedAIPawns;
 

@@ -16,13 +16,9 @@ class AURA_API UTargetDataUnderMouse : public UAbilityTask
 {
 	GENERATED_BODY()
 
-	// OwningAbility 핀은 호출한 Ability가 매개변수로 들어가고, 핀으로 노출되지 않음
 	// TargetDataUnderMouse 객체를 생성해 반환하는 함수
-	UFUNCTION(BlueprintCallable, Category = "Ability|Tasks",
-		meta = (DisplayName = "TargetDataUnderMouse",
-				HidePin = "OwningAbility",
-				DefaultToSelf = "OwningAbility",
-				BlueprintInternalUseOnly = "true"))
+	// OwningAbility 핀은 호출한 Ability가 매개변수로 들어가고, 핀으로 노출되지 않음
+	UFUNCTION(BlueprintCallable, Category = "Ability|Tasks", meta = (DisplayName = "TargetDataUnderMouse", HidePin = "OwningAbility", DefaultToSelf = "OwningAbility", BlueprintInternalUseOnly = "true"))
 	static UTargetDataUnderMouse* CreateTargetDataUnderMouse(UGameplayAbility* OwningAbility);
 
 	UPROPERTY(BlueprintAssignable)
