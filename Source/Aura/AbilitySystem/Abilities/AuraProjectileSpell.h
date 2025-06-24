@@ -16,7 +16,7 @@ protected:
 
 	// Montage의 Notify에 의해 실행되는 함수
 	UFUNCTION(BlueprintCallable, Category = "Projectile")
-	void SpawnProjectile(UPARAM(ref) FVector& ProjectileTargetLocation);
+	void SpawnProjectile(UPARAM(ref) FVector& ProjectileSpawnLocation, UPARAM(ref) FVector& ProjectileTargetLocation);
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TSubclassOf<AAuraProjectile> ProjectileClass;

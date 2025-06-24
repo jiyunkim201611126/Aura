@@ -17,6 +17,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void UpdateFacingToCombatTarget() const;
 
+	UFUNCTION(BlueprintCallable)
+	FTaggedMontage GetRandomAttackMontage();
+
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TSubclassOf<UGameplayEffect> DamageEffectClass;

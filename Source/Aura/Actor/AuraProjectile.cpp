@@ -8,6 +8,7 @@
 #include "Components/AudioComponent.h"
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystemComponent.h"
+#include "Aura/AbilitySystem/AuraAbilitySystemLibrary.h"
 
 AAuraProjectile::AAuraProjectile()
 {
@@ -60,6 +61,11 @@ void AAuraProjectile::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, 
 {
 	// GameplayEffectSpec이 아직 유효하지 않을 때 Overlap되거나, Projectile을 발사한 캐릭터 자신이 부딪히면 이 이벤트를 무시함 
 	if (!DamageEffectSpecHandle.Data.IsValid() || DamageEffectSpecHandle.Data.Get()->GetContext().GetEffectCauser() == OtherActor)
+	{
+		return;
+	}
+	
+	if (UAuraAbilitySystemLibrary::IsFriend(GetOwner(), OtherActor))
 	{
 		return;
 	}

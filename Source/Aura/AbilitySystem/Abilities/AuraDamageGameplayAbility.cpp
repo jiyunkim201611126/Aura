@@ -4,6 +4,7 @@
 #include "AbilitySystemComponent.h"
 #include "Aura/Interaction/EnemyInterface.h"
 #include "Aura/Interaction/CombatInterface.h"
+#include "Kismet/KismetMathLibrary.h"
 
 void UAuraDamageGameplayAbility::CauseDamage(AActor* TargetActor)
 {
@@ -22,4 +23,10 @@ void UAuraDamageGameplayAbility::UpdateFacingToCombatTarget() const
 	const AActor* TargetActor = IEnemyInterface::Execute_GetCombatTarget(SourceActor);
 	const FVector TargetLocation = TargetActor->GetActorLocation();
 	ICombatInterface::Execute_UpdateFacingTarget(SourceActor, TargetLocation);
+}
+
+FTaggedMontage UAuraDamageGameplayAbility::GetRandomAttackMontage()
+{
+	TArray<FTaggedMontage> TaggedMontages = ICombatInterface::Execute_GetAttackMontages(GetAvatarActorFromActorInfo());
+	return TaggedMontages[UKismetMathLibrary::RandomInteger(TaggedMontages.Num())];
 }

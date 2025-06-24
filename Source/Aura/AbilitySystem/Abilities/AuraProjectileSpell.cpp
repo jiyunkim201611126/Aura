@@ -11,7 +11,7 @@ void UAuraProjectileSpell::ActivateAbility(const FGameplayAbilitySpecHandle Hand
 	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
 }
 
-void UAuraProjectileSpell::SpawnProjectile(FVector& ProjectileTargetLocation)
+void UAuraProjectileSpell::SpawnProjectile(FVector& ProjectileSpawnLocation, FVector& ProjectileTargetLocation)
 {
 	const bool bIsServer = GetAvatarActorFromActorInfo()->HasAuthority();
 	if (!bIsServer) return;
@@ -22,22 +22,16 @@ void UAuraProjectileSpell::SpawnProjectile(FVector& ProjectileTargetLocation)
 	{
 		// Projectile이 스폰될 위치와 날아갈 방향 결정
 		float ProjectileHeight = GetAvatarActorFromActorInfo()->GetActorLocation().Z / 2.f;
-		FVector SocketLocation = ICombatInterface::Execute_GetCombatSocketLocation(GetAvatarActorFromActorInfo(), FAuraGameplayTags::Get().Montage_Attack_Weapon, FName("TipSocket"));
-		SocketLocation.Z = ProjectileHeight;
+		ProjectileSpawnLocation.Z = ProjectileHeight;
 		ProjectileTargetLocation.Z = ProjectileHeight;
-		FRotator Rotation = (ProjectileTargetLocation - SocketLocation).Rotation();
+		FRotator Rotation = (ProjectileTargetLocation - ProjectileSpawnLocation).Rotation();
 		
 		FTransform SpawnTransform;
-		SpawnTransform.SetLocation(SocketLocation);
+		SpawnTransform.SetLocation(ProjectileSpawnLocation);
 		SpawnTransform.SetRotation(Rotation.Quaternion());
 
 		// SpawnActor는 생성 직후 BeginPlay까지 호출하지만 SpawnActorDeferred는 구성만 하고 생성은 대기함
-		AAuraProjectile* Projectile = GetWorld()->SpawnActorDeferred<AAuraProjectile>(
-			ProjectileClass,
-			SpawnTransform,
-			GetOwningActorFromActorInfo(),
-			Cast<APawn>(GetOwningActorFromActorInfo()),
-			ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
+		AAuraProjectile* Projectile = GetWorld()->SpawnActorDeferred<AAuraProjectile>(ProjectileClass, SpawnTransform, GetOwningActorFromActorInfo(), Cast<APawn>(GetOwningActorFromActorInfo()), ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
 
 		// Ability를 소유한 AvatarActor의 AbilitySystemComponent 가져오기
 		const UAbilitySystemComponent* SourceASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(GetAvatarActorFromActorInfo());
