@@ -21,6 +21,8 @@ public:
 	AAuraCharacterBase();
 
 	virtual void BeginPlay() override;
+
+	virtual void PossessedBy(AController* NewController) override;
 	
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 	UAttributeSet* GetAttributeSet() const { return AttributeSet; }
@@ -44,7 +46,7 @@ public:
 	TArray<FTaggedMontage> AttackMontages;
 
 protected:
-	UPROPERTY(EditAnywhere, Category = "Combat")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat")
 	TObjectPtr<USkeletalMeshComponent> Weapon;
 
 	UPROPERTY()
@@ -58,7 +60,7 @@ protected:
 	// GameplayEffect를 본인에게 적용하는 함수
 	void ApplyEffectToSelf(TSubclassOf<UGameplayEffect> GameplayEffectClass, float Level) const;
 	// 게임 시작 시 캐릭터가 Ability를 장착하는 함수
-	void AddCharacterAbilities() const;
+	void AddCharacterStartupAbilities() const;
 	
 	void Dissolve();
 

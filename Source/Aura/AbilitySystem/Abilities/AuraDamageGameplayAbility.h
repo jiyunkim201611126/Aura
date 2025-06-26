@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "AuraGameplayAbility.h"
+#include "Aura/Interaction/CombatInterface.h"
 #include "AuraDamageGameplayAbility.generated.h"
 
 UCLASS()

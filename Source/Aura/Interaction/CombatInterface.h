@@ -24,7 +24,7 @@ struct FTaggedMontage
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	FGameplayTag MontageTag;
 
-	// 공격 판정 위치
+	// 근접 공격 캐릭터에겐 공격 판정 위치, 원거리 공격 캐릭터에겐 투사체 발사 위치
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	FName SocketName = FName("TipSocket");
 };

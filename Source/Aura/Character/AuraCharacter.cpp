@@ -35,7 +35,7 @@ void AAuraCharacter::PossessedBy(AController* NewController)
 
 	// 서버의 Ability Actor 초기화
 	InitAbilityActorInfo();
-	AddCharacterAbilities();
+	AddCharacterStartupAbilities();
 }
 
 void AAuraCharacter::OnRep_PlayerState()

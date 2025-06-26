@@ -34,6 +34,11 @@ void AAuraCharacterBase::BeginPlay()
 	RegisterPawn();
 }
 
+void AAuraCharacterBase::PossessedBy(AController* NewController)
+{
+	Super::PossessedBy(NewController);
+}
+
 UAbilitySystemComponent* AAuraCharacterBase::GetAbilitySystemComponent() const
 {
 	return AbilitySystemComponent;
@@ -134,7 +139,7 @@ void AAuraCharacterBase::ApplyEffectToSelf(const TSubclassOf<UGameplayEffect> Ga
 	GetAbilitySystemComponent()->ApplyGameplayEffectSpecToTarget(*SpecHandle.Data.Get(), GetAbilitySystemComponent());
 }
 
-void AAuraCharacterBase::AddCharacterAbilities() const
+void AAuraCharacterBase::AddCharacterStartupAbilities() const
 {
 	if (!HasAuthority()) return;
 

@@ -119,7 +119,8 @@ void AAuraEnemy::BeginPlay()
 	InitAbilityActorInfo();
 	if (HasAuthority())
 	{
-		UAuraAbilitySystemLibrary::GiveStartupAbilities(this, AbilitySystemComponent, CharacterClass);
+		UAuraAbilitySystemLibrary::AddCommonAbilities(this, AbilitySystemComponent, CharacterClass);
+		AddCharacterStartupAbilities();
 	}
 
 	// WidgetController가 UObject로 선언되어있으므로 Character가 직접 Controller가 되는 것도 가능
