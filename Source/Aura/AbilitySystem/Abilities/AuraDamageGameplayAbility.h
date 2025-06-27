@@ -18,11 +18,8 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void UpdateFacingToCombatTarget() const;
 
-	UFUNCTION(BlueprintCallable)
-	FTaggedMontage GetRandomAttackMontage();
-
 protected:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Damage")
 	TSubclassOf<UGameplayEffect> DamageEffectClass;
 
 	// 데미지 타입과 그 속성 데미지

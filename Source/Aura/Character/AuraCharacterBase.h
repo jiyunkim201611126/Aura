@@ -33,7 +33,6 @@ public:
 	virtual void Die(bool bShouldAddImpulse, const FVector& Impulse) override;
 	virtual bool IsDead_Implementation() override;
 	virtual AActor* GetAvatar_Implementation() override;
-	virtual TArray<FTaggedMontage> GetAttackMontages_Implementation() override;
 	/** end Combat Interface*/
 
 	UFUNCTION(NetMulticast, Reliable)
@@ -41,9 +40,6 @@ public:
 
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastSpawnDamageText(float Damage, bool bBlockedHit, bool bCriticalHit);
-
-	UPROPERTY(EditAnywhere, Category = "Combat")
-	TArray<FTaggedMontage> AttackMontages;
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat")

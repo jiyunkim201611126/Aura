@@ -24,9 +24,3 @@ void UAuraDamageGameplayAbility::UpdateFacingToCombatTarget() const
 	const FVector TargetLocation = TargetActor->GetActorLocation();
 	ICombatInterface::Execute_UpdateFacingTarget(SourceActor, TargetLocation);
 }
-
-FTaggedMontage UAuraDamageGameplayAbility::GetRandomAttackMontage()
-{
-	TArray<FTaggedMontage> TaggedMontages = ICombatInterface::Execute_GetAttackMontages(GetAvatarActorFromActorInfo());
-	return TaggedMontages[UKismetMathLibrary::RandomInteger(TaggedMontages.Num())];
-}
