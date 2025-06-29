@@ -42,6 +42,11 @@ public:
 	FGameplayTag StartupInputTag;
 
 protected:
+	// 공격 애니메이션 몽타주 배열
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Montage")
-	TArray<FTaggedMontage> TaggedMontage;
+	TArray<FTaggedMontage> TaggedMontages;
+
+private:
+	UFUNCTION(BlueprintCallable, Category = "Montage")
+	FTaggedMontage GetRandomMontage();
 };
