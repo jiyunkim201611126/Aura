@@ -15,6 +15,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void CauseDamage(AActor* TargetActor);
 
+	// CombatTarget을 향해 몸을 돌리는 Enemy 전용 함수
 	UFUNCTION(BlueprintCallable)
 	void UpdateFacingToCombatTarget() const;
 

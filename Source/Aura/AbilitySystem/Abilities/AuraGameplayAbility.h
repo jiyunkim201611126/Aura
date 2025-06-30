@@ -24,6 +24,9 @@ struct FTaggedMontage
 	 */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	FName SocketName = FName("TipSocket");
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	USoundBase* ImpactSound = nullptr;
 };
 
 UCLASS()

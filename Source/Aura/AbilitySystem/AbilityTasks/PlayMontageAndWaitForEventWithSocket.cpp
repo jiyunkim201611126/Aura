@@ -20,9 +20,9 @@ UPlayMontageAndWaitForEventWithSocket::UPlayMontageAndWaitForEventWithSocket(con
 
 void UPlayMontageAndWaitForEventWithSocket::OnMontageBlendingOut(UAnimMontage* Montage, bool bInterrupted)
 {
-	if (Ability && Ability->GetCurrentMontage() == MontageToPlay)
+	if (Ability && Ability->GetCurrentMontage() == TaggedMontage.Montage)
 	{
-		if (Montage == MontageToPlay)
+		if (Montage == TaggedMontage.Montage)
 		{
 			if (UAbilitySystemComponent* ASC = AbilitySystemComponent.Get())
 			{
@@ -88,9 +88,7 @@ UPlayMontageAndWaitForEventWithSocket* UPlayMontageAndWaitForEventWithSocket::Cr
 	UAbilitySystemGlobals::NonShipping_ApplyGlobalAbilityScaler_Rate(Rate);
 
 	UPlayMontageAndWaitForEventWithSocket* MyObj = NewAbilityTask<UPlayMontageAndWaitForEventWithSocket>(OwningAbility, TaskInstanceName);
-	MyObj->MontageToPlay = TaggedMontage.Montage;
-	MyObj->MontageTag = TaggedMontage.MontageTag;
-	MyObj->SocketName = TaggedMontage.SocketName;
+	MyObj->TaggedMontage = TaggedMontage;
 	MyObj->Rate = Rate;
 	MyObj->StartSection = StartSection;
 	MyObj->AnimRootMotionTranslationScale = AnimRootMotionTranslationScale;
@@ -115,7 +113,7 @@ void UPlayMontageAndWaitForEventWithSocket::Activate()
 		UAnimInstance* AnimInstance = ActorInfo->GetAnimInstance();
 		if (AnimInstance != nullptr)
 		{
-			if (ASC->PlayMontage(Ability, Ability->GetCurrentActivationInfo(), MontageToPlay, Rate, StartSection, StartTimeSeconds) > 0.f)
+			if (ASC->PlayMontage(Ability, Ability->GetCurrentActivationInfo(), TaggedMontage.Montage, Rate, StartSection, StartTimeSeconds) > 0.f)
 			{
 				// Playing a montage could potentially fire off a callback into game code which could kill this ability! Early out if we are  pending kill.
 				if (ShouldBroadcastAbilityTaskDelegates() == false)
@@ -126,10 +124,10 @@ void UPlayMontageAndWaitForEventWithSocket::Activate()
 				InterruptedHandle = Ability->OnGameplayAbilityCancelled.AddUObject(this, &UPlayMontageAndWaitForEventWithSocket::OnMontageInterrupted);
 
 				BlendingOutDelegate.BindUObject(this, &UPlayMontageAndWaitForEventWithSocket::OnMontageBlendingOut);
-				AnimInstance->Montage_SetBlendingOutDelegate(BlendingOutDelegate, MontageToPlay);
+				AnimInstance->Montage_SetBlendingOutDelegate(BlendingOutDelegate, TaggedMontage.Montage);
 
 				MontageEndedDelegate.BindUObject(this, &UPlayMontageAndWaitForEventWithSocket::OnMontageEnded);
-				AnimInstance->Montage_SetEndDelegate(MontageEndedDelegate, MontageToPlay);
+				AnimInstance->Montage_SetEndDelegate(MontageEndedDelegate, TaggedMontage.Montage);
 
 				ACharacter* Character = Cast<ACharacter>(GetAvatarActor());
 				if (Character && (Character->GetLocalRole() == ROLE_Authority ||
@@ -141,7 +139,7 @@ void UPlayMontageAndWaitForEventWithSocket::Activate()
 				// 새로운 태스크를 직접 만들어 바인드 및 호출합니다.
 				if (Ability)
 				{
-					UAbilityTask_WaitGameplayEvent* WaitGameplayEvent = UAbilityTask_WaitGameplayEvent::WaitGameplayEvent(Ability, MontageTag);
+					UAbilityTask_WaitGameplayEvent* WaitGameplayEvent = UAbilityTask_WaitGameplayEvent::WaitGameplayEvent(Ability, TaggedMontage.MontageTag);
 					WaitGameplayEvent->EventReceived.AddDynamic(this, &ThisClass::HandleEventReceived);
 					WaitGameplayEvent->ReadyForActivation();
 				}
@@ -161,7 +159,7 @@ void UPlayMontageAndWaitForEventWithSocket::Activate()
 
 	if (!bPlayedMontage)
 	{
-		ABILITY_LOG(Warning, TEXT("UAbilityTask_PlayMontageAndWait called in Ability %s failed to play montage %s; Task Instance Name %s."), *Ability->GetName(), *GetNameSafe(MontageToPlay),*InstanceName.ToString());
+		ABILITY_LOG(Warning, TEXT("UAbilityTask_PlayMontageAndWait called in Ability %s failed to play montage %s; Task Instance Name %s."), *Ability->GetName(), *GetNameSafe(TaggedMontage.Montage),*InstanceName.ToString());
 		if (ShouldBroadcastAbilityTaskDelegates())
 		{
 			OnCancelled.Broadcast();
@@ -175,7 +173,7 @@ void UPlayMontageAndWaitForEventWithSocket::HandleEventReceived(FGameplayEventDa
 {
 	if (ShouldBroadcastAbilityTaskDelegates())
 	{
-		OnEventReceived.Broadcast(MontageTag, SocketName);
+		OnEventReceived.Broadcast(TaggedMontage);
 	}
 }
 
@@ -232,10 +230,10 @@ bool UPlayMontageAndWaitForEventWithSocket::StopPlayingMontage()
 	if (ASC && Ability)
 	{
 		if (ASC->GetAnimatingAbility() == Ability
-			&& ASC->GetCurrentMontage() == MontageToPlay)
+			&& ASC->GetCurrentMontage() == TaggedMontage.Montage)
 		{
 			// Unbind delegates so they don't get called as well
-			FAnimMontageInstance* MontageInstance = AnimInstance->GetActiveInstanceForMontage(MontageToPlay);
+			FAnimMontageInstance* MontageInstance = AnimInstance->GetActiveInstanceForMontage(TaggedMontage.Montage);
 			if (MontageInstance)
 			{
 				MontageInstance->OnMontageBlendingOutStarted.Unbind();
@@ -260,10 +258,10 @@ FString UPlayMontageAndWaitForEventWithSocket::GetDebugString() const
 
 		if (AnimInstance != nullptr)
 		{
-			PlayingMontage = AnimInstance->Montage_IsActive(MontageToPlay) ? ToRawPtr(MontageToPlay) : AnimInstance->GetCurrentActiveMontage();
+			PlayingMontage = AnimInstance->Montage_IsActive(TaggedMontage.Montage) ? ToRawPtr(TaggedMontage.Montage) : AnimInstance->GetCurrentActiveMontage();
 		}
 	}
 
-	return FString::Printf(TEXT("PlayMontageAndWait. MontageToPlay: %s  (Currently Playing): %s"), *GetNameSafe(MontageToPlay), *GetNameSafe(PlayingMontage));
+	return FString::Printf(TEXT("PlayMontageAndWait. MontageToPlay: %s  (Currently Playing): %s"), *GetNameSafe(TaggedMontage.Montage), *GetNameSafe(PlayingMontage));
 }
 

@@ -7,7 +7,7 @@
 #include "Aura/AbilitySystem/Abilities/AuraGameplayAbility.h"
 #include "PlayMontageAndWaitForEventWithSocket.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FMontageEventWithSocketDelegate, FGameplayTag, MontageTag, FName, SocketName);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMontageEventWithSocketDelegate, FTaggedMontage, TaggedMontage);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FMontageWaitSimpleDelegate);
 
 /** 
@@ -84,13 +84,7 @@ protected:
 	FDelegateHandle InterruptedHandle;
 
 	UPROPERTY()
-	TObjectPtr<UAnimMontage> MontageToPlay;
-
-	UPROPERTY()
-	FGameplayTag MontageTag;
-
-	UPROPERTY()
-	FName SocketName;
+	FTaggedMontage TaggedMontage;
 
 	UPROPERTY()
 	float Rate;

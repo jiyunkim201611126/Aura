@@ -33,6 +33,7 @@ public:
 	virtual void Die(bool bShouldAddImpulse, const FVector& Impulse) override;
 	virtual bool IsDead_Implementation() override;
 	virtual AActor* GetAvatar_Implementation() override;
+	virtual UNiagaraSystem* GetBloodEffect_Implementation() override;
 	/** end Combat Interface*/
 
 	UFUNCTION(NetMulticast, Reliable)

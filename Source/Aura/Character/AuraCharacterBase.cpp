@@ -75,6 +75,11 @@ AActor* AAuraCharacterBase::GetAvatar_Implementation()
 	return this;
 }
 
+UNiagaraSystem* AAuraCharacterBase::GetBloodEffect_Implementation()
+{
+	return BloodEffect;
+}
+
 void AAuraCharacterBase::MulticastHandleDeath_Implementation(bool bShouldAddImpulse, const FVector& Impulse)
 {
 	// SetSimulatePhysics에서 자동으로 Detach를 호출

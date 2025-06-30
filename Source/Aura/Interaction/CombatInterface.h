@@ -11,6 +11,7 @@
  * 이는 나중의 확장성을 위해 BlueprintNativeEvent로 미리 선언해놓은 상태입니다.
  */
 
+class UNiagaraSystem;
 class UAnimMontage;
 
 UINTERFACE(MinimalAPI, BlueprintType)
@@ -46,4 +47,7 @@ public:
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	AActor* GetAvatar();
+	
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	UNiagaraSystem* GetBloodEffect();
 };
