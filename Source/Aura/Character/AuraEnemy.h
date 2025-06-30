@@ -60,6 +60,7 @@ public:
 protected:
 	virtual void BeginPlay() override;
 	virtual void InitAbilityActorInfo() override;
+	virtual void AddCharacterStartupAbilities() const override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Character Class Defaults")
 	int32 Level = 1;

@@ -11,6 +11,7 @@ class UAttributeSet;
 class UGameplayEffect;
 class UGameplayAbility;
 class UAnimMontage;
+class UNiagaraSystem;
 
 UCLASS()
 class AURA_API AAuraCharacterBase : public ACharacter, public IAbilitySystemInterface, public ICombatInterface
@@ -29,7 +30,6 @@ public:
 	
 	/** Combat Interface */
 	virtual FVector GetCombatSocketLocation_Implementation(const FGameplayTag& MontageTag, const FName& SocketName) override;
-	virtual UAnimMontage* GetHitReactMontage_Implementation() override;
 	virtual void Die(bool bShouldAddImpulse, const FVector& Impulse) override;
 	virtual bool IsDead_Implementation() override;
 	virtual AActor* GetAvatar_Implementation() override;
@@ -55,8 +55,8 @@ protected:
 
 	// GameplayEffect를 본인에게 적용하는 함수
 	void ApplyEffectToSelf(TSubclassOf<UGameplayEffect> GameplayEffectClass, float Level) const;
-	// 게임 시작 시 캐릭터가 Ability를 장착하는 함수
-	void AddCharacterStartupAbilities() const;
+	// 적(BeginPlay)과 플레이어 캐릭터(Possess)가 Ability를 장착하는 함수
+	virtual void AddCharacterStartupAbilities() const;
 	
 	void Dissolve();
 
@@ -69,13 +69,13 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TObjectPtr<UMaterialInstance> WeaponDissolveMaterialInstance;
 
-private:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UNiagaraSystem* BloodEffect;
+	
 	// 게임 시작 시 장착하고 있는 Ability
 	UPROPERTY(EditAnywhere, Category = "Abilities")
 	TArray<TSubclassOf<UGameplayAbility>> StartupAbilities;
 
-	UPROPERTY(EditAnywhere, Category = "Combat")
-	TObjectPtr<UAnimMontage> HitReactMontage;
-
+private:
 	bool bDead = false;
 };

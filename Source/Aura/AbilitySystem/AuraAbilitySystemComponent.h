@@ -18,8 +18,10 @@ public:
 	// Widget Controller가 바인드할 델리게이트
 	FEffectAssetTags EffectAssetTags;
 
-	// 키 입력으로 발동하는 Ability를 장착하는 함수
+	// 키 입력에 따라 발동하는 Ability를 장착하는 플레이어 캐릭터용 함수, UAuraGameplayAbility를 사용합니다.
 	void AddCharacterAbilities(const TArray<TSubclassOf<UGameplayAbility>>& StartupAbilities);
+	// 키 입력과 관계 없는 Ability를 장착하는 범용 함수, UGameplayAbility를 사용합니다.
+	void AddAbilities(const TArray<TSubclassOf<UGameplayAbility>>& Abilities);
 
 	void AbilityInputTagHeld(const FGameplayTag& InputTag);
 	void AbilityInputTagReleased(const FGameplayTag& InputTag);

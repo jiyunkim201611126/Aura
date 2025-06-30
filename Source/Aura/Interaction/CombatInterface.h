@@ -39,9 +39,6 @@ public:
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
 	void UpdateFacingTarget(const FVector& FacingTarget);
 
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
-	UAnimMontage* GetHitReactMontage();
-
 	virtual void Die(bool bShouldAddImpulse, const FVector& Impulse) = 0;
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)

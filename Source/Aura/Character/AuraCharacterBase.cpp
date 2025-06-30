@@ -58,11 +58,6 @@ FVector AAuraCharacterBase::GetCombatSocketLocation_Implementation(const FGamepl
 	}
 }
 
-UAnimMontage* AAuraCharacterBase::GetHitReactMontage_Implementation()
-{
-	return HitReactMontage;
-}
-
 void AAuraCharacterBase::Die(bool bShouldAddImpulse, const FVector& Impulse)
 {
 	// 서버에서만 호출되는 함수임이 명확하므로 권한 확인 필요 없이 등록 해제

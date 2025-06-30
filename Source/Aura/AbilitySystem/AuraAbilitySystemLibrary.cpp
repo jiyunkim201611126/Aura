@@ -74,7 +74,7 @@ void UAuraAbilitySystemLibrary::AddCommonAbilities(const UObject* WorldContextOb
 		return;
 	}
 
-	// HitReact등 모든 ASC가 가지는 공통 Ability 부여
+	// 모든 ASC가 가지는 공통 Ability 부여
 	for (TSubclassOf<UGameplayAbility> AbilityClass : CharacterClassInfo->CommonAbilities)
 	{
 		FGameplayAbilitySpec AbilitySpec = FGameplayAbilitySpec(AbilityClass, 1);
