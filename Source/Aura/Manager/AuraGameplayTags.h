@@ -68,11 +68,22 @@ struct FAuraGameplayTags
 	FGameplayTag Abilities_Attack;
 	/** End Abilities */
 
-	/** Anim Notify */
-	FGameplayTag Montage_Attack_Weapon;
-	FGameplayTag Montage_Attack_LeftHand;
-	FGameplayTag Montage_Attack_RightHand;
-	/** End Anim Notify */
+	/** Combat Sockets */
+	FGameplayTag CombatSocket_Weapon;
+	FGameplayTag CombatSocket_LeftHand;
+	FGameplayTag CombatSocket_RightHand;
+	/** End Combat Sockets */
+
+	/** Attack Montages */
+	FGameplayTag Montage_Attack_1;
+	FGameplayTag Montage_Attack_2;
+	FGameplayTag Montage_Attack_3;
+	FGameplayTag Montage_Attack_4;
+	/** EndAttack Montages */
+
+	/** Sounds */
+	FGameplayTag Sound_Attack_Swipe;
+	/** End Sounds */
 
 private:
 	static FAuraGameplayTags GameplayTags;

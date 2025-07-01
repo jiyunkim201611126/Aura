@@ -10,23 +10,16 @@ struct FTaggedMontage
 	GENERATED_BODY()
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	UAnimMontage* Montage = nullptr;
+	TObjectPtr<UAnimMontage> Montage = nullptr;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	FGameplayTag MontageTag;
 
-	/**
-	 * 근접 공격 캐릭터에겐 공격 판정 위치, 원거리 공격 캐릭터에겐 투사체 발사 위치
-	 * 현재 목록
-	 * TipSocket (Weapon에서 사용)
-	 * LeftHandSocket
-	 * RightHandSocket
-	 */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	FName SocketName = FName("TipSocket");
+	FGameplayTag SocketTag;
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	USoundBase* ImpactSound = nullptr;
+	FGameplayTag ImpactSoundTag;
 };
 
 UCLASS()
