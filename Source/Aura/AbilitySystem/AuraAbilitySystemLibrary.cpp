@@ -166,3 +166,13 @@ bool UAuraAbilitySystemLibrary::IsFriend(const AActor* FirstActor, const AActor*
 	const bool bFriends = bBothArePlayers || bBothAreEnemies;
 	return bFriends;
 }
+
+TArray<AActor*> UAuraAbilitySystemLibrary::GetActorsFromContext(FGameplayEffectContextHandle& EffectContextHandle)
+{
+	TArray<AActor*> Actors;
+	for (auto Element : EffectContextHandle.GetActors())
+	{
+		Actors.Add(Element.Get());
+	}
+	return Actors;
+}

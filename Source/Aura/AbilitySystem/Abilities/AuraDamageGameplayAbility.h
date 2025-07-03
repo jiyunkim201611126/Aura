@@ -11,6 +11,8 @@ class AURA_API UAuraDamageGameplayAbility : public UAuraGameplayAbility
 	GENERATED_BODY()
 
 public:
+	virtual void EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled) override;
+	
 	// Target Actor의 ASC에 GameplayEffect를 적용하는 함수
 	UFUNCTION(BlueprintCallable)
 	void CauseDamage(AActor* TargetActor);
@@ -19,6 +21,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void UpdateFacingToCombatTarget() const;
 
+	UFUNCTION(BlueprintCallable)
+	FGameplayEffectContextHandle GetContext();
+
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Damage")
 	TSubclassOf<UGameplayEffect> DamageEffectClass;
@@ -26,4 +31,6 @@ protected:
 	// 데미지 타입과 그 속성 데미지
 	UPROPERTY(EditDefaultsOnly, Category = "Damage")
 	TMap<FGameplayTag, FScalableFloat> DamageTypes;
+
+	FGameplayEffectContextHandle EffectContextHandle;
 };

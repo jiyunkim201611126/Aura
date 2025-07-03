@@ -6,9 +6,9 @@ FAuraGameplayTags FAuraGameplayTags::GameplayTags;
 void FAuraGameplayTags::InitializeNativeGameplayTags()
 {
 	GameplayTags.Attributes_Vital_Health = UGameplayTagsManager::Get().AddNativeGameplayTag(
-		FName("Attributes.Vital.Health")), FString("Value needed for survival");
+		FName("Attributes.Vital.Health")), FString("Value needed to survive");
 	GameplayTags.Attributes_Vital_Mana = UGameplayTagsManager::Get().AddNativeGameplayTag(
-		FName("Attributes.Vital.Mana")), FString("Value required to use the skills");
+		FName("Attributes.Vital.Mana")), FString("Value needed to use the skills");
 	
 	GameplayTags.Attributes_Primary_Strength = UGameplayTagsManager::Get().AddNativeGameplayTag(
 		FName("Attributes.Primary.Strength")), FString("Increases physical damage");
@@ -116,4 +116,11 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 	
 	GameplayTags.Sound_Attack_Swipe = UGameplayTagsManager::Get().AddNativeGameplayTag(
 		FName("Sound.Attack.Swipe"),FString("Swipe Sound"));
+
+	// Niagaras
+	
+	GameplayTags.Niagara_BloodImpact_Red = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("Niagara.BloodImpact.Red"),FString("Red BloodImpact"));
+	GameplayTags.Niagara_BloodImpact_Green = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("Niagara.BloodImpact.Green"),FString("Green BloodImpact"));
 }

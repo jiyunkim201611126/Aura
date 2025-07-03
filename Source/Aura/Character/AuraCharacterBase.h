@@ -33,7 +33,6 @@ public:
 	virtual void Die(bool bShouldAddImpulse, const FVector& Impulse) override;
 	virtual bool IsDead_Implementation() override;
 	virtual AActor* GetAvatar_Implementation() override;
-	virtual UNiagaraSystem* GetBloodEffect_Implementation() override;
 	/** end Combat Interface*/
 
 	UFUNCTION(NetMulticast, Reliable)
@@ -69,9 +68,6 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TObjectPtr<UMaterialInstance> WeaponDissolveMaterialInstance;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	UNiagaraSystem* BloodEffect;
 	
 	// 게임 시작 시 장착하고 있는 Ability
 	UPROPERTY(EditAnywhere, Category = "Abilities")

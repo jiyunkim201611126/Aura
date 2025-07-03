@@ -85,6 +85,11 @@ struct FAuraGameplayTags
 	FGameplayTag Sound_Attack_Swipe;
 	/** End Sounds */
 
+	/** Niagaras */
+	FGameplayTag Niagara_BloodImpact_Red;
+	FGameplayTag Niagara_BloodImpact_Green;
+	/** End Niagaras */
+
 private:
 	static FAuraGameplayTags GameplayTags;
 };
