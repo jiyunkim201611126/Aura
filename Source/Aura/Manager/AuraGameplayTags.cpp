@@ -112,11 +112,20 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 	GameplayTags.Montage_Attack_4 = UGameplayTagsManager::Get().AddNativeGameplayTag(
 		FName("Montage.Attack.4"),FString("Attack 4"));
 
-	// Sounds
+	// Attack Sounds
 	
 	GameplayTags.Sound_Attack_Swipe = UGameplayTagsManager::Get().AddNativeGameplayTag(
 		FName("Sound.Attack.Swipe"),FString("Swipe Sound"));
 
+	// Death Sounds
+	
+	GameplayTags.Sound_Death_Aura = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("Sound.Death.Aura"),FString("Aura Death Sound"));
+	GameplayTags.Sound_Death_Goblin = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("Sound.Death.Goblin"),FString("Goblin Death Sound"));
+	GameplayTags.Sound_Death_Ghoul = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("Sound.Death.Ghoul"),FString("Ghoul Death Sound"));
+	
 	// Niagaras
 	
 	GameplayTags.Niagara_BloodImpact_Red = UGameplayTagsManager::Get().AddNativeGameplayTag(

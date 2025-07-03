@@ -81,9 +81,13 @@ struct FAuraGameplayTags
 	FGameplayTag Montage_Attack_4;
 	/** EndAttack Montages */
 
-	/** Sounds */
+	/** Attack Sounds */
 	FGameplayTag Sound_Attack_Swipe;
-	/** End Sounds */
+	/** End Attack Sounds */
+
+	/** Death Sounds */
+	FGameplayTag Sound_Death_Goblin;
+	/** End Death Sounds */
 
 	/** Niagaras */
 	FGameplayTag Niagara_BloodImpact_Red;

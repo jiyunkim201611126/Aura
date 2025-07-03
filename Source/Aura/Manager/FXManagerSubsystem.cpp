@@ -11,6 +11,8 @@ void UFXManagerSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 
 	StreamableManager = &UAssetManager::Get().GetStreamableManager();
 
+	// 모든 FX를 동기 로드합니다.
+
 	if (const UDataTable* SoundDataTable = SoundDataTablePath.LoadSynchronous())
 	{
 		const FString Context(TEXT("FXManagerSubsystem - Sound"));
@@ -45,6 +47,7 @@ void UFXManagerSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 void UFXManagerSubsystem::Deinitialize()
 {
 	FScopeLock Lock(&PendingRequestsLock);
+	// 안전하게 종료하기 위해 현재 로드 중인 에셋을 모두 취소합니다.
 	PendingSoundLoadRequests.Empty();
 	Super::Deinitialize();
 }
@@ -60,7 +63,7 @@ void UFXManagerSubsystem::AsyncPlaySoundAtLocation(const FGameplayTag SoundTag, 
 		return;
 	}
 	
-	// 이미 로드되어있는 경우
+	// 이미 에셋이 로드되어있는 경우 들어가는 분기입니다.
 	if (USoundBase* LoadedSound = SoundToLoad.Get())
 	{
 		if (GetWorld())
@@ -72,30 +75,33 @@ void UFXManagerSubsystem::AsyncPlaySoundAtLocation(const FGameplayTag SoundTag, 
 	
 	FSoftObjectPath AssetPath = SoundToLoad.ToSoftObjectPath();
 	
-	// 이미 로딩 중인 경우
+	// 이미 로딩 중인 경우 들어가는 분기입니다.
 	if (FSoundAsyncLoadRequest* ExistingRequest = PendingSoundLoadRequests.Find(AssetPath))
 	{
-		// 사운드를 재생할 위치에 추가
+		// 로딩 중인 에셋이 끝날 때 이 요청에 대해서도 함께 재생하기 위해 배열에 추가합니다.
 		ExistingRequest->LocationsToPlay.Add(Location);
 		ExistingRequest->RotationsToPlay.Add(Rotation);
 		ExistingRequest->VolumeMultiplier.Add(VolumeMultiplier);
 		ExistingRequest->PitchMultiplier.Add(PitchMultiplier);
+		
+		return;
 	}
 
-	// 새로 로드를 시작해야 하는 경우
+	// 새로 로드를 시작해야 하는 경우 들어가는 분기입니다.
 	if (!StreamableManager)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("StreamableManager가 유효하지 않습니다."))
 		return;
 	}
 
-	// 에셋 로드가 끝난 뒤 호출될 콜백 바인드 
+	// 함수를 바인드하기 위한 변수를 선언 및 초기화합니다.
 	FSoundAsyncLoadRequest NewRequest;
 	NewRequest.LocationsToPlay.Add(Location);
 	NewRequest.RotationsToPlay.Add(Rotation);
 	NewRequest.VolumeMultiplier.Add(VolumeMultiplier);
 	NewRequest.PitchMultiplier.Add(PitchMultiplier);
 
+	// 에셋 로드가 끝난 뒤 호출되는 델리게이트에 함수를 바인드합니다.
 	FStreamableDelegate StreamableCompleteDelegate = FStreamableDelegate::CreateUObject(this, &ThisClass::OnSoundAsyncLoadComplete, AssetPath);
 	NewRequest.StreamableHandle.Emplace(StreamableManager->RequestAsyncLoad(AssetPath, StreamableCompleteDelegate));
 
@@ -105,7 +111,8 @@ void UFXManagerSubsystem::AsyncPlaySoundAtLocation(const FGameplayTag SoundTag, 
 void UFXManagerSubsystem::OnSoundAsyncLoadComplete(FSoftObjectPath LoadedAssetPath)
 {
 	FScopeLock Lock(&PendingRequestsLock);
-	// 로드 완료 후 사운드 재생 시작
+	
+	// 로드 완료 후 사운드 재생을 시작합니다.
 	USoundBase* LoadedSound = Cast<USoundBase>(LoadedAssetPath.ResolveObject());
 
 	if (FSoundAsyncLoadRequest* CompletedRequest = PendingSoundLoadRequests.Find(LoadedAssetPath))
@@ -146,7 +153,6 @@ void UFXManagerSubsystem::AsyncPlayNiagaraAtLocation(const FGameplayTag NiagaraT
 		return;
 	}
 	
-	// 이미 로드되어있는 경우
 	if (UNiagaraSystem* LoadedNiagara = NiagaraToLoad.Get())
 	{
 		if (GetWorld())
@@ -158,25 +164,23 @@ void UFXManagerSubsystem::AsyncPlayNiagaraAtLocation(const FGameplayTag NiagaraT
 	
 	FSoftObjectPath AssetPath = NiagaraToLoad.ToSoftObjectPath();
 	
-	// 이미 로딩 중인 경우
 	if (FNiagaraAsyncLoadRequest* ExistingRequest = PendingNiagaraLoadRequests.Find(AssetPath))
 	{
-		// 사운드를 재생할 위치에 추가
 		ExistingRequest->LocationsToPlay.Add(Location);
 		ExistingRequest->RotationsToPlay.Add(Rotation);
 		ExistingRequest->ScalesToPlay.Add(Scale);
 		ExistingRequest->bAutoDestroy.Add(bAutoDestroy);
 		ExistingRequest->bAutoActivate.Add(bAutoActivate);
+
+		return;
 	}
 
-	// 새로 로드를 시작해야 하는 경우
 	if (!StreamableManager)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("StreamableManager가 유효하지 않습니다."))
 		return;
 	}
 
-	// 에셋 로드가 끝난 뒤 호출될 콜백 바인드 
 	FNiagaraAsyncLoadRequest NewRequest;
 	NewRequest.LocationsToPlay.Add(Location);
 	NewRequest.RotationsToPlay.Add(Rotation);
@@ -193,7 +197,7 @@ void UFXManagerSubsystem::AsyncPlayNiagaraAtLocation(const FGameplayTag NiagaraT
 void UFXManagerSubsystem::OnNiagaraAsyncLoadComplete(FSoftObjectPath LoadedAssetPath)
 {
 	FScopeLock Lock(&PendingRequestsLock);
-	// 로드 완료 후 나이아가라 재생 시작
+
 	UNiagaraSystem* LoadedNiagara = Cast<UNiagaraSystem>(LoadedAssetPath.ResolveObject());
 
 	if (FNiagaraAsyncLoadRequest* CompletedRequest = PendingNiagaraLoadRequests.Find(LoadedAssetPath))

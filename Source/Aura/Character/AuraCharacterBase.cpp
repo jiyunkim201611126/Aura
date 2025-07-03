@@ -6,6 +6,7 @@
 #include "Components/CapsuleComponent.h"
 #include "EngineUtils.h"
 #include "Aura/Manager/AuraGameplayTags.h"
+#include "Aura/Manager/FXManagerSubsystem.h"
 #include "Aura/Player/AuraPlayerController.h"
 #include "Aura/Manager/PawnManagerSubsystem.h"
 
@@ -81,6 +82,15 @@ AActor* AAuraCharacterBase::GetAvatar_Implementation()
 
 void AAuraCharacterBase::MulticastHandleDeath_Implementation(bool bShouldAddImpulse, const FVector& Impulse)
 {
+	if (DeathSoundTag.IsValid())
+	{
+		UFXManagerSubsystem* FXManager = GetWorld()->GetGameInstance()->GetSubsystem<UFXManagerSubsystem>();
+		if (FXManager)
+		{
+			FXManager->AsyncPlaySoundAtLocation(DeathSoundTag, GetActorLocation());
+		}
+	}
+	
 	// SetSimulatePhysics에서 자동으로 Detach를 호출
 	Weapon->SetSimulatePhysics(true);
 	Weapon->SetEnableGravity(true);
