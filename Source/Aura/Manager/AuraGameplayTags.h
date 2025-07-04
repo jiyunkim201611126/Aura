@@ -61,6 +61,8 @@ struct FAuraGameplayTags
 	/** End Damage Type */
 	
 	/** Common Abilities */
+	// GameplayEffect가 이 태그를 갖고 있어야 HitReact가 발동됩니다.
+	FGameplayTag Effects_GrantHitReact;
 	FGameplayTag Effects_HitReact;
 	/** End Common Abilities */
 
@@ -101,6 +103,7 @@ struct FAuraGameplayTags
 	FGameplayTag Niagara_BloodImpact_Green;
 	
 	FGameplayTag Niagara_Projectile_Impact_FireBolt;
+	FGameplayTag Niagara_Projectile_Impact_Rock;
 	/** End Niagaras */
 
 private:

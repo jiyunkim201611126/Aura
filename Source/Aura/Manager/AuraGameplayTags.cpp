@@ -85,6 +85,8 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 	GameplayTags.DamageTypesToResistances.Add(GameplayTags.Damage_Physical, GameplayTags.Attributes_Resistance_Physical);
 
 	
+	GameplayTags.Effects_GrantHitReact = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("Effects.GrantHitReact"),FString("Grant 'HitReact' tag if GameplayEffect has this tag"));
 	GameplayTags.Effects_HitReact = UGameplayTagsManager::Get().AddNativeGameplayTag(
 		FName("Effects.HitReact"),FString("Tag granted when Hit Reacting"));
 
@@ -141,4 +143,6 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 	
 	GameplayTags.Niagara_Projectile_Impact_FireBolt = UGameplayTagsManager::Get().AddNativeGameplayTag(
 		FName("Niagara.Projectile.Impact.FireBolt"),FString("FireBolt Impact"));
+	GameplayTags.Niagara_Projectile_Impact_Rock = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("Niagara.Projectile.Impact.Rock"),FString("Rock Impact"));
 }

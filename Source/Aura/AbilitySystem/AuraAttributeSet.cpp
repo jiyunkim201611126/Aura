@@ -130,10 +130,15 @@ void UAuraAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallba
 			}
 			else
 			{
-				// 사망하지 않은 경우 가진 Ability 중 Effects_HitReact 태그를 가진 Ability를 실행
-				FGameplayTagContainer TagContainer;
-				TagContainer.AddTag(FAuraGameplayTags::Get().Effects_HitReact);
-				Props.TargetASC->TryActivateAbilitiesByTag(TagContainer);
+				// 사망하지 않은 경우, 적용된 GE가 GrantHitReact 태그를 갖고 있으면 HitReact Ability 작동
+				FGameplayTagContainer EffectTags;
+				Data.EffectSpec.GetAllAssetTags(EffectTags);
+				if (EffectTags.HasTag(FAuraGameplayTags::Get().Effects_GrantHitReact))
+				{
+					FGameplayTagContainer HitReactTag;
+					HitReactTag.AddTag(FAuraGameplayTags::Get().Effects_HitReact);
+					Props.TargetASC->TryActivateAbilitiesByTag(HitReactTag);
+				}
 			}
 			
 			const bool bBlockedHit = UAuraAbilitySystemLibrary::IsBlockedHit(Props.EffectContextHandle);

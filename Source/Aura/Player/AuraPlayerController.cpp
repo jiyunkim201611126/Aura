@@ -273,6 +273,10 @@ void AAuraPlayerController::AbilityInputTagReleased(FGameplayTag InputTag)
 
 void AAuraPlayerController::Move(const FInputActionValue& InputActionValue)
 {
+	if (Spline->GetNumberOfSplinePoints())
+	{
+		Spline->ClearSplinePoints();
+	}
 	const FVector2D InputAxisVector = InputActionValue.Get<FVector2D>();
 	const FRotator Rotation = GetControlRotation();
 	const FRotator YawRotation(0.f, Rotation.Yaw, 0.f);
