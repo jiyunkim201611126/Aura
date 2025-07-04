@@ -23,6 +23,8 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	FGameplayEffectContextHandle GetContext();
+	
+	FGameplayEffectContextHandle EffectContextHandle;
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Damage")
@@ -32,5 +34,11 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Damage")
 	TMap<FGameplayTag, FScalableFloat> DamageTypes;
 
-	FGameplayEffectContextHandle EffectContextHandle;
+	// 피격당한 Actor를 Context에 담는 함수입니다. 반복문이 끝난 시점에서 호출합니다.
+	UFUNCTION(BlueprintCallable)
+	void SetTargetActorsToContext();
+
+private:
+	// 이 Ability에 의해 피격당한 Actor를 모아두는 배열입니다.
+	TArray<TWeakObjectPtr<AActor>> TargetActors;
 };

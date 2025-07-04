@@ -9,6 +9,7 @@
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystemComponent.h"
 #include "Aura/AbilitySystem/AuraAbilitySystemLibrary.h"
+#include "Aura/Manager/FXManagerSubsystem.h"
 
 AAuraProjectile::AAuraProjectile()
 {
@@ -36,7 +37,14 @@ void AAuraProjectile::BeginPlay()
 	SetLifeSpan(LifeSpan);
 	Sphere->OnComponentBeginOverlap.AddDynamic(this, &AAuraProjectile::OnSphereOverlap);
 
-	LoopingSoundComponent = UGameplayStatics::SpawnSoundAttached(LoopingSound, GetRootComponent());
+	if (const UFXManagerSubsystem* FXManagerSubsystem = GetWorld()->GetGameInstance()->GetSubsystem<UFXManagerSubsystem>())
+	{
+		USoundBase* LoopingSound = FXManagerSubsystem->GetSound(LoopingSoundTag);
+		if (LoopingSound)
+		{
+			LoopingSoundComponent = UGameplayStatics::SpawnSoundAttached(LoopingSound, GetRootComponent());
+		}
+	}
 }
 
 void AAuraProjectile::Destroyed()
@@ -45,8 +53,20 @@ void AAuraProjectile::Destroyed()
 	// 그 상태로 Destroyed 함수가 호출됐다면 사운드와 나이아가라를 재생해줌
 	if (!bHit && !HasAuthority())
 	{
-		UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation(), FRotator::ZeroRotator);
-		UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, ImpactEffect, GetActorLocation());
+		if (const UFXManagerSubsystem* FXManagerSubsystem = GetWorld()->GetGameInstance()->GetSubsystem<UFXManagerSubsystem>())
+		{
+			USoundBase* ImpactSound = FXManagerSubsystem->GetSound(ImpactSoundTag);
+			if (ImpactSound)
+			{
+				UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation(), FRotator::ZeroRotator);
+			}
+			UNiagaraSystem* ImpactEffect = FXManagerSubsystem->GetNiagara(ImpactEffectTag);
+			if (ImpactEffect)
+			{
+				UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, ImpactEffect, GetActorLocation());
+			}
+		}
+		
 		if (LoopingSoundComponent)
 		{
 			LoopingSoundComponent->Stop();
@@ -73,8 +93,20 @@ void AAuraProjectile::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, 
 	// 서버, 클라이언트 모두 사운드와 나이아가라 재생
 	if (!bHit)
 	{
-		UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation(), FRotator::ZeroRotator);
-		UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, ImpactEffect, GetActorLocation());
+		if (const UFXManagerSubsystem* FXManagerSubsystem = GetWorld()->GetGameInstance()->GetSubsystem<UFXManagerSubsystem>())
+		{
+			USoundBase* ImpactSound = FXManagerSubsystem->GetSound(ImpactSoundTag);
+			if (ImpactSound)
+			{
+				UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation(), FRotator::ZeroRotator);
+			}
+			UNiagaraSystem* ImpactEffect = FXManagerSubsystem->GetNiagara(ImpactEffectTag);
+			if (ImpactEffect)
+			{
+				UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, ImpactEffect, GetActorLocation());
+			}
+		}
+		
 		if (LoopingSoundComponent)
 		{
 			LoopingSoundComponent->Stop();

@@ -41,15 +41,15 @@ private:
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<USphereComponent> Sphere;
 
-	UPROPERTY(EditAnywhere)
-	TObjectPtr<UNiagaraSystem> ImpactEffect;
-
-	UPROPERTY(EditAnywhere)
-	TObjectPtr<USoundBase> ImpactSound;
-	
-	UPROPERTY(EditAnywhere)
-	TObjectPtr<USoundBase> LoopingSound;
-
 	UPROPERTY()
 	TObjectPtr<UAudioComponent> LoopingSoundComponent;
+	
+	UPROPERTY(EditAnywhere)
+	FGameplayTag LoopingSoundTag;
+
+	UPROPERTY(EditAnywhere)
+	FGameplayTag ImpactEffectTag;
+
+	UPROPERTY(EditAnywhere)
+	FGameplayTag ImpactSoundTag;
 };

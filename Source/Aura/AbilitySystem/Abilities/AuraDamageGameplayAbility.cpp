@@ -19,9 +19,7 @@ void UAuraDamageGameplayAbility::CauseDamage(AActor* TargetActor)
 		EffectContextHandle = GetAbilitySystemComponentFromActorInfo()->MakeEffectContext();
 	}
 
-	TArray<TWeakObjectPtr<AActor>> Actors;
-	Actors.Add(TWeakObjectPtr<AActor>(TargetActor));
-	EffectContextHandle.AddActors(Actors);
+	TargetActors.Add(TargetActor);
 	
 	FGameplayEffectSpecHandle DamageSpecHandle = MakeOutgoingGameplayEffectSpec(DamageEffectClass, 1.f);
 	for (TTuple<FGameplayTag, FScalableFloat> Pair : DamageTypes)
@@ -40,9 +38,19 @@ void UAuraDamageGameplayAbility::UpdateFacingToCombatTarget() const
 	ICombatInterface::Execute_UpdateFacingTarget(SourceActor, TargetLocation);
 }
 
+void UAuraDamageGameplayAbility::SetTargetActorsToContext()
+{
+	if (EffectContextHandle.IsValid())
+	{
+		EffectContextHandle.AddActors(TargetActors);
+	}
+
+	TargetActors.Empty();
+}
+
 FGameplayEffectContextHandle UAuraDamageGameplayAbility::GetContext()
 {
-	if (EffectContextHandle.Get())
+	if (EffectContextHandle.IsValid())
 	{
 		return EffectContextHandle;
 	}

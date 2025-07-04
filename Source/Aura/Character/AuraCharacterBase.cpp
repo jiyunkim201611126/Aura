@@ -92,10 +92,11 @@ void AAuraCharacterBase::MulticastHandleDeath_Implementation(bool bShouldAddImpu
 	}
 	
 	// SetSimulatePhysics에서 자동으로 Detach를 호출
-	Weapon->SetSimulatePhysics(true);
 	Weapon->SetEnableGravity(true);
+	Weapon->SetSimulatePhysics(true);
 	Weapon->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
 	Weapon->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
+	Weapon->SetCollisionResponseToChannel(ECC_WorldStatic, ECR_Block);
 	
 	GetMesh()->SetEnableGravity(true);
 	GetMesh()->SetSimulatePhysics(true);

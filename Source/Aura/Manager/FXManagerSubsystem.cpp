@@ -23,10 +23,12 @@ void UFXManagerSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 		{
 			if (Row && Row->SoundTag.IsValid() && !Row->SoundAsset.IsNull())
 			{
-				SoundInfos.Add(Row->SoundTag, Row->SoundAsset);
+				SoundMap.Add(Row->SoundTag, Row->SoundAsset);
 			}
 		}
 	}
+
+	SoundDataTablePath.Reset();
 
 	if (const UDataTable* NiagaraDataTable = NiagaraDataTablePath.LoadSynchronous())
 	{
@@ -38,10 +40,12 @@ void UFXManagerSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 		{
 			if (Row && Row->NiagaraTag.IsValid() && !Row->NiagaraAsset.IsNull())
 			{
-				NiagaraInfos.Add(Row->NiagaraTag, Row->NiagaraAsset);
+				NiagaraMap.Add(Row->NiagaraTag, Row->NiagaraAsset);
 			}
 		}
 	}
+	
+	NiagaraDataTablePath.Reset();
 }
 
 void UFXManagerSubsystem::Deinitialize()
@@ -56,10 +60,10 @@ void UFXManagerSubsystem::AsyncPlaySoundAtLocation(const FGameplayTag SoundTag, 
 {
 	FScopeLock Lock(&PendingRequestsLock);
 	
-	const TSoftObjectPtr<USoundBase> SoundToLoad = SoundInfos.FindRef(SoundTag);
+	const TSoftObjectPtr<USoundBase> SoundToLoad = SoundMap.FindRef(SoundTag);
 	if (SoundToLoad.IsNull())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("SoundTag %s에 해당하는 사운드를 찾을 수 없거나 유효하지 않습니다."), *SoundTag.ToString());
+		UE_LOG(LogTemp, Warning, TEXT("SoundTag %s에 해당하는 사운드를 찾을 수 없습니다."), *SoundTag.ToString());
 		return;
 	}
 	
@@ -90,7 +94,6 @@ void UFXManagerSubsystem::AsyncPlaySoundAtLocation(const FGameplayTag SoundTag, 
 	// 새로 로드를 시작해야 하는 경우 들어가는 분기입니다.
 	if (!StreamableManager)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("StreamableManager가 유효하지 않습니다."))
 		return;
 	}
 
@@ -146,10 +149,10 @@ void UFXManagerSubsystem::AsyncPlayNiagaraAtLocation(const FGameplayTag NiagaraT
 {
 	FScopeLock Lock(&PendingRequestsLock);
 	
-	const TSoftObjectPtr<UNiagaraSystem> NiagaraToLoad = NiagaraInfos.FindRef(NiagaraTag);
+	const TSoftObjectPtr<UNiagaraSystem> NiagaraToLoad = NiagaraMap.FindRef(NiagaraTag);
 	if (NiagaraToLoad.IsNull())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("NiagaraTag %s에 해당하는 나이아가라를 찾을 수 없거나 유효하지 않습니다."), *NiagaraTag.ToString());
+		UE_LOG(LogTemp, Warning, TEXT("NiagaraTag %s에 해당하는 나이아가라를 찾을 수 없습니다."), *NiagaraTag.ToString());
 		return;
 	}
 	
@@ -177,7 +180,6 @@ void UFXManagerSubsystem::AsyncPlayNiagaraAtLocation(const FGameplayTag NiagaraT
 
 	if (!StreamableManager)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("StreamableManager가 유효하지 않습니다."))
 		return;
 	}
 
@@ -226,4 +228,28 @@ void UFXManagerSubsystem::OnNiagaraAsyncLoadComplete(FSoftObjectPath LoadedAsset
 	{
 		UE_LOG(LogTemp, Warning, TEXT("로딩 후, 등록된 콜백 요청을 찾을 수 없습니다."));
 	}
+}
+
+USoundBase* UFXManagerSubsystem::GetSound(const FGameplayTag SoundTag) const
+{
+	const TSoftObjectPtr<USoundBase> SoundToLoad = SoundMap.FindRef(SoundTag);
+	if (SoundToLoad.IsNull())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("SoundTag %s에 해당하는 사운드를 찾을 수 없습니다."), *SoundTag.ToString());
+		return nullptr;
+	}
+
+	return SoundToLoad.LoadSynchronous();
+}
+
+UNiagaraSystem* UFXManagerSubsystem::GetNiagara(const FGameplayTag NiagaraTag) const
+{
+	const TSoftObjectPtr<UNiagaraSystem> NiagaraToLoad = NiagaraMap.FindRef(NiagaraTag);
+	if (NiagaraToLoad.IsNull())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("NiagaraTag %s에 해당하는 나이아가라를 찾을 수 없습니다."), *NiagaraTag.ToString());
+		return nullptr;
+	}
+
+	return NiagaraToLoad.LoadSynchronous();
 }

@@ -85,6 +85,13 @@ struct FAuraGameplayTags
 	FGameplayTag Sound_Attack_Swipe;
 	/** End Attack Sounds */
 
+	/** Projectile Sounds */
+	FGameplayTag Sound_Projectile_Looping_FireBolt;
+	
+	FGameplayTag Sound_Projectile_Impact_FireBolt;
+	FGameplayTag Sound_Projectile_Impact_Rock;
+	/** End Projectile Sounds */
+
 	/** Death Sounds */
 	FGameplayTag Sound_Death_Goblin;
 	/** End Death Sounds */
@@ -92,6 +99,8 @@ struct FAuraGameplayTags
 	/** Niagaras */
 	FGameplayTag Niagara_BloodImpact_Red;
 	FGameplayTag Niagara_BloodImpact_Green;
+	
+	FGameplayTag Niagara_Projectile_Impact_FireBolt;
 	/** End Niagaras */
 
 private:

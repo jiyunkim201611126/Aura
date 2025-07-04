@@ -107,6 +107,10 @@ public:
 	void AsyncPlayNiagaraAtLocation(const FGameplayTag NiagaraTag, const FVector Location, const FRotator Rotation = FRotator::ZeroRotator, const FVector Scale = FVector(1.f), bool bAutoDestroy = true, bool bAutoActivate = true);
 	void OnNiagaraAsyncLoadComplete(FSoftObjectPath LoadedAssetPath);
 
+	// 비동기 로드를 원하는 경우 사용하는 함수
+	USoundBase* GetSound(const FGameplayTag SoundTag) const;
+	UNiagaraSystem* GetNiagara(const FGameplayTag NiagaraTag) const;
+
 private:
 	// DataTable에 매핑되어있는 Tag와 에셋들은 탐색 효율을 위해 TMap으로 재구성되므로, 메모리 효율을 위해 Soft로 선언합니다.
 	UPROPERTY(Config)
@@ -116,10 +120,10 @@ private:
 	TSoftObjectPtr<UDataTable> NiagaraDataTablePath;
 
 	UPROPERTY()
-	TMap<FGameplayTag, TSoftObjectPtr<USoundBase>> SoundInfos;
+	TMap<FGameplayTag, TSoftObjectPtr<USoundBase>> SoundMap;
 	
 	UPROPERTY()
-	TMap<FGameplayTag, TSoftObjectPtr<UNiagaraSystem>> NiagaraInfos;
+	TMap<FGameplayTag, TSoftObjectPtr<UNiagaraSystem>> NiagaraMap;
 	
 	FStreamableManager* StreamableManager;
 	
