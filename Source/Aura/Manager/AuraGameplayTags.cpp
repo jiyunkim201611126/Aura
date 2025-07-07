@@ -133,6 +133,8 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 	
 	GameplayTags.Sound_Death_Goblin = UGameplayTagsManager::Get().AddNativeGameplayTag(
 		FName("Sound.Death.Goblin"),FString("Goblin Death Sound"));
+	GameplayTags.Sound_Death_Ghoul = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("Sound.Death.Ghoul"),FString("Ghoul Death Sound"));
 	
 	// Niagaras
 	
