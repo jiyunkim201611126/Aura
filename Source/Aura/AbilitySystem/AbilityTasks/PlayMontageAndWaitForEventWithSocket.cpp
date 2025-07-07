@@ -130,8 +130,7 @@ void UPlayMontageAndWaitForEventWithSocket::Activate()
 				AnimInstance->Montage_SetEndDelegate(MontageEndedDelegate, TaggedMontage.Montage);
 
 				ACharacter* Character = Cast<ACharacter>(GetAvatarActor());
-				if (Character && (Character->GetLocalRole() == ROLE_Authority ||
-								  (Character->GetLocalRole() == ROLE_AutonomousProxy && Ability->GetNetExecutionPolicy() == EGameplayAbilityNetExecutionPolicy::LocalPredicted)))
+				if (Character && (Character->GetLocalRole() == ROLE_Authority || (Character->GetLocalRole() == ROLE_AutonomousProxy && Ability->GetNetExecutionPolicy() == EGameplayAbilityNetExecutionPolicy::LocalPredicted)))
 				{
 					Character->SetAnimRootMotionTranslationScale(AnimRootMotionTranslationScale);
 				}

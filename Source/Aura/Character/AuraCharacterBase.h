@@ -42,6 +42,8 @@ public:
 	void MulticastSpawnDamageText(float Damage, bool bBlockedHit, bool bCriticalHit);
 
 protected:
+	// 모든 캐릭터가 무기를 사용하는 건 아니지만, 확장성과 유연성을 위해 선언해놓습니다.
+	// 무기가 없는 캐릭터라도, 캐릭터에게 '무기처럼 보이는 이펙트'나 '임시 무기'를 쥐여줘야 하는 때에 무리 없이 구현할 수 있습니다.
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat")
 	TObjectPtr<USkeletalMeshComponent> Weapon;
 
