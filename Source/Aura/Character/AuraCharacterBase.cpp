@@ -61,10 +61,12 @@ FVector AAuraCharacterBase::GetCombatSocketLocation_Implementation(const FGamepl
 	{
 		return GetMesh()->GetSocketLocation(FName("RightHandSocket"));
 	}
-	else // if (SocketTag.MatchesTagExact(GameplayTags.CombatSocket_Tail))
+	else if (SocketTag.MatchesTagExact(GameplayTags.CombatSocket_Tail))
 	{
 		return GetMesh()->GetSocketLocation(FName("TailSocket"));
 	}
+
+	return FVector::ZeroVector;
 }
 
 void AAuraCharacterBase::Die(bool bShouldAddImpulse, const FVector& Impulse)
