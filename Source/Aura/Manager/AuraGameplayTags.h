@@ -98,6 +98,7 @@ struct FAuraGameplayTags
 	/** Death Sounds */
 	FGameplayTag Sound_Death_Goblin;
 	FGameplayTag Sound_Death_Ghoul;
+	FGameplayTag Sound_Death_Demon;
 	/** End Death Sounds */
 
 	/** Niagaras */
