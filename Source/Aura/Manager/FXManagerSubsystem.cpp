@@ -58,6 +58,11 @@ void UFXManagerSubsystem::Deinitialize()
 
 void UFXManagerSubsystem::AsyncPlaySoundAtLocation(const FGameplayTag SoundTag, const FVector Location, const FRotator Rotation, float VolumeMultiplier, float PitchMultiplier)
 {
+	if (!SoundTag.IsValid())
+	{
+		return;
+	}
+	
 	FScopeLock Lock(&PendingRequestsLock);
 	
 	const TSoftObjectPtr<USoundBase> SoundToLoad = SoundMap.FindRef(SoundTag);
@@ -147,6 +152,11 @@ void UFXManagerSubsystem::OnSoundAsyncLoadComplete(FSoftObjectPath LoadedAssetPa
 
 void UFXManagerSubsystem::AsyncPlayNiagaraAtLocation(const FGameplayTag NiagaraTag, const FVector Location, const FRotator Rotation, const FVector Scale, bool bAutoDestroy, bool bAutoActivate)
 {
+	if (!NiagaraTag.IsValid())
+	{
+		return;
+	}
+	
 	FScopeLock Lock(&PendingRequestsLock);
 	
 	const TSoftObjectPtr<UNiagaraSystem> NiagaraToLoad = NiagaraMap.FindRef(NiagaraTag);
@@ -232,6 +242,11 @@ void UFXManagerSubsystem::OnNiagaraAsyncLoadComplete(FSoftObjectPath LoadedAsset
 
 USoundBase* UFXManagerSubsystem::GetSound(const FGameplayTag SoundTag) const
 {
+	if (!SoundTag.IsValid())
+	{
+		return nullptr;
+	}
+	
 	const TSoftObjectPtr<USoundBase> SoundToLoad = SoundMap.FindRef(SoundTag);
 	if (SoundToLoad.IsNull())
 	{
@@ -244,6 +259,11 @@ USoundBase* UFXManagerSubsystem::GetSound(const FGameplayTag SoundTag) const
 
 UNiagaraSystem* UFXManagerSubsystem::GetNiagara(const FGameplayTag NiagaraTag) const
 {
+	if (!NiagaraTag.IsValid())
+	{
+		return nullptr;
+	}
+	
 	const TSoftObjectPtr<UNiagaraSystem> NiagaraToLoad = NiagaraMap.FindRef(NiagaraTag);
 	if (NiagaraToLoad.IsNull())
 	{
