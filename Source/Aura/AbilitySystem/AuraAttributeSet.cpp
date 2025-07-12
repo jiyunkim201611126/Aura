@@ -158,7 +158,7 @@ void UAuraAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallba
 			SetIncomingDamage(0.f);
 			if (AAuraCharacterBase* HitCharacter = Cast<AAuraCharacterBase>(Props.TargetCharacter))
 			{
-				HitCharacter->MulticastSpawnDamageText(LocalIncomingDamage, false, false);
+				HitCharacter->MulticastSpawnDamageText(0.f, false, false);
 			}
 		}
 	}

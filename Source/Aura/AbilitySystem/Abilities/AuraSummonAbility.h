@@ -9,7 +9,8 @@ class AURA_API UAuraSummonAbility : public UAuraGameplayAbility
 {
 	GENERATED_BODY()
 
-public:
+private:
+	// 한 번에 스폰하는 하수인 수
 	UPROPERTY(EditAnywhere, Category = "Summoning")
 	int32 NumMinions = 5;
 
@@ -24,6 +25,12 @@ public:
 	
 	UPROPERTY(EditAnywhere, Category = "Summoning")
 	float SpawnSpread = 90.f;
+
+protected:
+	virtual void OnGiveAbility(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec) override;
+	
+	UPROPERTY(EditAnywhere, Category = "Summoning")
+	int32 MaxMinionCount = 3;
 
 public:
 	UFUNCTION(BlueprintCallable)

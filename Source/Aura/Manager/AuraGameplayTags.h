@@ -68,6 +68,7 @@ struct FAuraGameplayTags
 
 	/** Abilities */
 	FGameplayTag Abilities_Attack;
+	FGameplayTag Abilities_Summon;
 	/** End Abilities */
 
 	/** Combat Sockets */
@@ -76,13 +77,6 @@ struct FAuraGameplayTags
 	FGameplayTag CombatSocket_RightHand;
 	FGameplayTag CombatSocket_Tail;
 	/** End Combat Sockets */
-
-	/** Attack Montages */
-	FGameplayTag Montage_Attack_1;
-	FGameplayTag Montage_Attack_2;
-	FGameplayTag Montage_Attack_3;
-	FGameplayTag Montage_Attack_4;
-	/** EndAttack Montages */
 
 	/** Attack Sounds */
 	FGameplayTag Sound_Attack_Swipe;

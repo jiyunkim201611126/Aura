@@ -5,9 +5,9 @@
 #include "Animation/AnimInstance.h"
 #include "Abilities/Tasks/AbilityTask.h"
 #include "Aura/AbilitySystem/Abilities/AuraGameplayAbility.h"
-#include "PlayMontageAndWaitForEventWithSocket.generated.h"
+#include "PlayMontageAndWaitForEvent.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMontageEventWithSocketDelegate, FTaggedMontage, TaggedMontage);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMontageEventDelegate, FTaggedMontage, TaggedMontage);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FMontageWaitSimpleDelegate);
 
 /** 
@@ -15,12 +15,12 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FMontageWaitSimpleDelegate);
  * 호출 시 자동으로 WaitGameplayEvent도 호출합니다.
  */
 UCLASS()
-class AURA_API UPlayMontageAndWaitForEventWithSocket : public UAbilityTask
+class AURA_API UPlayMontageAndWaitForEvent : public UAbilityTask
 {
 	GENERATED_UCLASS_BODY()
 	
 	UPROPERTY(BlueprintAssignable)
-	FMontageEventWithSocketDelegate OnEventReceived;
+	FMontageEventDelegate OnEventReceived;
 
 	UPROPERTY(BlueprintAssignable)
 	FMontageWaitSimpleDelegate	OnCompleted;
@@ -57,9 +57,9 @@ class AURA_API UPlayMontageAndWaitForEventWithSocket : public UAbilityTask
 	 * @param AnimRootMotionTranslationScale Change to modify size of root motion or set to 0 to block it entirely
 	 * @param StartTimeSeconds Starting time offset in montage, this will be overridden by StartSection if that is also set
 	 */
-	UFUNCTION(BlueprintCallable, Category="Ability|Tasks", meta = (DisplayName="PlayMontageAndWaitForEventWithSocket",
+	UFUNCTION(BlueprintCallable, Category="Ability|Tasks", meta = (DisplayName="PlayMontageAndWaitForEvent",
 		HidePin = "OwningAbility", DefaultToSelf = "OwningAbility", BlueprintInternalUseOnly = "TRUE"))
-	static UPlayMontageAndWaitForEventWithSocket* CreatePlayMontageAndWaitProxy(UGameplayAbility* OwningAbility,
+	static UPlayMontageAndWaitForEvent* CreatePlayMontageAndWaitProxy(UGameplayAbility* OwningAbility,
 		FName TaskInstanceName, FTaggedMontage TaggedMontage, float Rate = 1.f, FName StartSection = NAME_None, bool bStopWhenAbilityEnds = true, float AnimRootMotionTranslationScale = 1.f, float StartTimeSeconds = 0.f);
 
 	virtual void Activate() override;

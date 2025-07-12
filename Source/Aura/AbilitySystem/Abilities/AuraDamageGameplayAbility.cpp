@@ -30,14 +30,6 @@ void UAuraDamageGameplayAbility::CauseDamage(AActor* TargetActor)
 	GetAbilitySystemComponentFromActorInfo()->ApplyGameplayEffectSpecToTarget(*DamageSpecHandle.Data.Get(), UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(TargetActor));
 }
 
-void UAuraDamageGameplayAbility::UpdateFacingToCombatTarget() const
-{
-	UObject* SourceActor = GetAvatarActorFromActorInfo();
-	const AActor* TargetActor = IEnemyInterface::Execute_GetCombatTarget(SourceActor);
-	const FVector TargetLocation = TargetActor->GetActorLocation();
-	ICombatInterface::Execute_UpdateFacingTarget(SourceActor, TargetLocation);
-}
-
 void UAuraDamageGameplayAbility::SetTargetActorsToContext()
 {
 	if (EffectContextHandle.IsValid())
