@@ -15,7 +15,7 @@ void UAuraSummonAbility::OnGiveAbility(const FGameplayAbilityActorInfo* ActorInf
 			USummonComponent* NewComponent = Cast<USummonComponent>(Avatar->AddComponentByClass(USummonComponent::StaticClass(), false, FTransform::Identity, true));
 			if (NewComponent)
 			{
-				NewComponent->MaxMinionCount = MaxMinionCount;
+				NewComponent->SpawnableSummonMinionCount = MaxMinionCount;
 			}
 
 			Avatar->FinishAddComponent(NewComponent, false, FTransform::Identity);
@@ -34,7 +34,7 @@ TArray<FVector> UAuraSummonAbility::GetSpawnLocations()
 	{
 		if (USummonComponent* SummonComponent = Avatar->FindComponentByClass<USummonComponent>())
 		{
-			SpawnableCount = SummonComponent->MaxMinionCount - SummonComponent->CurrentMinion.Num();
+			SpawnableCount = SummonComponent->SpawnableSummonMinionCount;
 			SpawnableCount = FMath::Min(SpawnableCount, NumMinions);
 		}
 	}

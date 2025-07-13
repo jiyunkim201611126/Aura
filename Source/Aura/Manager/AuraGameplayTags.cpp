@@ -142,4 +142,11 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 		FName("Niagara.Projectile.Impact.FireBolt"),FString("FireBolt Impact"));
 	GameplayTags.Niagara_Projectile_Impact_Rock = UGameplayTagsManager::Get().AddNativeGameplayTag(
 		FName("Niagara.Projectile.Impact.Rock"),FString("Rock Impact"));
+
+	// BehaviorTree
+	
+	GameplayTags.BT_Sub_Agro = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("BT.Sub.Agro"),FString(""));
+	GameplayTags.BT_Sub_Combat = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("BT.Sub.Combat"),FString(""));
 }

@@ -51,9 +51,22 @@ void AAuraEnemy::PossessedBy(AController* NewController)
 	}
 	AuraAIController = Cast<AAuraAIController>(NewController);
 	AuraAIController->GetBlackboardComponent()->InitializeBlackboard(*BehaviorTree->BlackboardAsset);
+	// 아래 값 할당 함수들은 반드시 RunBehaviorTree 이후에 호출합니다.
 	AuraAIController->RunBehaviorTree(BehaviorTree);
+	
 	AuraAIController->GetBlackboardComponent()->SetValueAsBool(FName("HitReacting"), false);
-	AuraAIController->GetBlackboardComponent()->SetValueAsBool(FName("RangedAttacker"), CharacterClass != ECharacterClass::Warrior);
+	AuraAIController->GetBlackboardComponent()->SetValueAsFloat(FName("AgroRange"), AgroRange);
+	AuraAIController->GetBlackboardComponent()->SetValueAsFloat(FName("CombatRange"), CombatRange);
+	if (AgroBehaviorTree.IsValid())
+	{
+		UBehaviorTree* AgroBT = AgroBehaviorTree.LoadSynchronous();
+		AuraAIController->BehaviorTreeComponent->SetDynamicSubtree(FAuraGameplayTags::Get().BT_Sub_Agro, AgroBT);
+	}
+	if (CombatBehaviorTree.IsValid())
+	{
+		UBehaviorTree* CombatBT = CombatBehaviorTree.LoadSynchronous();
+		AuraAIController->BehaviorTreeComponent->SetDynamicSubtree(FAuraGameplayTags::Get().BT_Sub_Combat, CombatBT);
+	}
 }
 
 void AAuraEnemy::HighlightActor()

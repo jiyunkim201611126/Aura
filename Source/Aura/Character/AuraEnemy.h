@@ -65,15 +65,30 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Character Class Defaults")
 	int32 Level = 1;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Character Class Defaults")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Character Class Defaults")
 	ECharacterClass CharacterClass = ECharacterClass::Elementalist;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<UWidgetComponent> HealthBar;
 
+	UPROPERTY()
+	TObjectPtr<AAuraAIController> AuraAIController;
+
 	UPROPERTY(EditAnywhere, Category = "AI")
 	TObjectPtr<UBehaviorTree> BehaviorTree;
 
-	UPROPERTY()
-	TObjectPtr<AAuraAIController> AuraAIController;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AI")
+	float AgroRange = 1000.f;
+
+	// 일반적으로 근접 공격 캐릭터는 150, 원거리 공격 캐릭터는 600을 사용합니다.
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AI")
+	float CombatRange = 150.f;
+	
+	// 메인 BT 안에 서브로 들어가는 Tree들입니다.
+	// 기본값은 메인 BT에서 직접 할당하기 때문에, 범용 SubTree를 사용하는 경우 값을 할당하지 않습니다.
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AI")
+	TSoftObjectPtr<UBehaviorTree> AgroBehaviorTree;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AI")
+	TSoftObjectPtr<UBehaviorTree> CombatBehaviorTree;
 };

@@ -103,6 +103,11 @@ struct FAuraGameplayTags
 	FGameplayTag Niagara_Projectile_Impact_Rock;
 	/** End Niagaras */
 
+	/** BehaviorTree */
+	FGameplayTag BT_Sub_Agro;
+	FGameplayTag BT_Sub_Combat;
+	/** End BehaviorTree */
+
 private:
 	static FAuraGameplayTags GameplayTags;
 };

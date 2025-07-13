@@ -5,6 +5,7 @@ void USummonComponent::AddMinion(AActor* InMinion)
 	if (!CurrentMinion.Contains(InMinion))
 	{
 		CurrentMinion.Add(InMinion);
+		--SpawnableSummonMinionCount;
 		InMinion->OnDestroyed.AddDynamic(this, &ThisClass::RemoveMinion);
 	}
 }
