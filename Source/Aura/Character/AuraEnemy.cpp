@@ -57,15 +57,14 @@ void AAuraEnemy::PossessedBy(AController* NewController)
 	AuraAIController->GetBlackboardComponent()->SetValueAsBool(FName("HitReacting"), false);
 	AuraAIController->GetBlackboardComponent()->SetValueAsFloat(FName("AgroRange"), AgroRange);
 	AuraAIController->GetBlackboardComponent()->SetValueAsFloat(FName("CombatRange"), CombatRange);
-	if (AgroBehaviorTree.IsValid())
+	
+	if (AgroBehaviorTree)
 	{
-		UBehaviorTree* AgroBT = AgroBehaviorTree.LoadSynchronous();
-		AuraAIController->BehaviorTreeComponent->SetDynamicSubtree(FAuraGameplayTags::Get().BT_Sub_Agro, AgroBT);
+		AuraAIController->BehaviorTreeComponent->SetDynamicSubtree(FAuraGameplayTags::Get().BT_Sub_Agro, AgroBehaviorTree);
 	}
-	if (CombatBehaviorTree.IsValid())
+	if (CombatBehaviorTree)
 	{
-		UBehaviorTree* CombatBT = CombatBehaviorTree.LoadSynchronous();
-		AuraAIController->BehaviorTreeComponent->SetDynamicSubtree(FAuraGameplayTags::Get().BT_Sub_Combat, CombatBT);
+		AuraAIController->BehaviorTreeComponent->SetDynamicSubtree(FAuraGameplayTags::Get().BT_Sub_Combat, CombatBehaviorTree);
 	}
 }
 

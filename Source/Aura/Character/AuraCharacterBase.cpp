@@ -88,9 +88,15 @@ AActor* AAuraCharacterBase::GetAvatar_Implementation()
 
 void AAuraCharacterBase::MulticastHandleDeath_Implementation(bool bShouldAddImpulse, const FVector& Impulse)
 {
+	UWorld* World = GetWorld();
+	if (!World)
+	{
+		return;
+	}
+	
 	if (DeathSoundTag.IsValid())
 	{
-		UFXManagerSubsystem* FXManager = GetWorld()->GetGameInstance()->GetSubsystem<UFXManagerSubsystem>();
+		UFXManagerSubsystem* FXManager = World->GetGameInstance()->GetSubsystem<UFXManagerSubsystem>();
 		if (FXManager)
 		{
 			FXManager->AsyncPlaySoundAtLocation(DeathSoundTag, GetActorLocation());
@@ -161,8 +167,14 @@ void AAuraCharacterBase::AddCharacterStartupAbilities() const
 
 void AAuraCharacterBase::Dissolve()
 {
+	UWorld* World = GetWorld();
+	if (!World)
+	{
+		return;
+	}
+	
 	FTimerHandle TimerHandle;
-	GetWorld()->GetTimerManager().SetTimer(
+	World->GetTimerManager().SetTimer(
 		TimerHandle,
 		FTimerDelegate::CreateLambda([this]()
 		{

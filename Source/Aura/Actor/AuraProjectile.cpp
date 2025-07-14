@@ -49,9 +49,14 @@ void AAuraProjectile::BeginPlay()
 
 void AAuraProjectile::Destroyed()
 {
+	if (!GetWorld() || !GetWorld()->GetGameInstance())
+	{
+		return;
+	}
+	
 	// 클라이언트에서 bHit이 false라면 아직 사운드와 나이아가라가 재생되지 않은 상태
 	// 그 상태로 Destroyed 함수가 호출됐다면 사운드와 나이아가라를 재생해줌
-	if (!bHit && !HasAuthority())
+	if (!bHit)
 	{
 		if (const UFXManagerSubsystem* FXManagerSubsystem = GetWorld()->GetGameInstance()->GetSubsystem<UFXManagerSubsystem>())
 		{
@@ -79,6 +84,11 @@ void AAuraProjectile::Destroyed()
 
 void AAuraProjectile::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
+	if (!GetWorld() || !GetWorld()->GetGameInstance())
+	{
+		return;
+	}
+	
 	// GameplayEffectSpec이 아직 유효하지 않을 때 Overlap되거나, Projectile을 발사한 캐릭터 자신이 부딪히면 이 이벤트를 무시함 
 	if (!DamageEffectSpecHandle.Data.IsValid() || DamageEffectSpecHandle.Data.Get()->GetContext().GetEffectCauser() == OtherActor)
 	{

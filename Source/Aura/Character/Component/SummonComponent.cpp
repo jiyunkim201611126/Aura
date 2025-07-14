@@ -16,4 +16,14 @@ void USummonComponent::RemoveMinion(AActor* DestroyedActor)
 	{
 		CurrentMinion.Remove(DestroyedActor);
 	}
+
+	if (ResetCountThreshold >= CurrentMinion.Num())
+	{
+		ResetSpawnableCount();
+	}
+}
+
+void USummonComponent::ResetSpawnableCount()
+{
+	SpawnableSummonMinionCount = MaxSummonMinionCount;
 }

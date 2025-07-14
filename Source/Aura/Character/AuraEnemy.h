@@ -87,8 +87,8 @@ protected:
 	// 메인 BT 안에 서브로 들어가는 Tree들입니다.
 	// 기본값은 메인 BT에서 직접 할당하기 때문에, 범용 SubTree를 사용하는 경우 값을 할당하지 않습니다.
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AI")
-	TSoftObjectPtr<UBehaviorTree> AgroBehaviorTree;
+	TObjectPtr<UBehaviorTree> AgroBehaviorTree;
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AI")
-	TSoftObjectPtr<UBehaviorTree> CombatBehaviorTree;
+	TObjectPtr<UBehaviorTree> CombatBehaviorTree;
 };
