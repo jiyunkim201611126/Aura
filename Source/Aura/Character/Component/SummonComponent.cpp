@@ -2,6 +2,11 @@
 
 void USummonComponent::AddMinion(AActor* InMinion)
 {
+	if (!InMinion)
+	{
+		return;
+	}
+	
 	if (!CurrentMinion.Contains(InMinion))
 	{
 		CurrentMinion.Add(InMinion);
@@ -12,6 +17,11 @@ void USummonComponent::AddMinion(AActor* InMinion)
 
 void USummonComponent::RemoveMinion(AActor* DestroyedActor)
 {
+	if (!DestroyedActor)
+	{
+		return;
+	}
+	
 	if (CurrentMinion.Contains(DestroyedActor))
 	{
 		CurrentMinion.Remove(DestroyedActor);

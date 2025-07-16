@@ -109,11 +109,13 @@ void AAuraCharacterBase::MulticastHandleDeath_Implementation(bool bShouldAddImpu
 	Weapon->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
 	Weapon->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
 	Weapon->SetCollisionResponseToChannel(ECC_WorldStatic, ECR_Block);
+	Weapon->SetAnimationMode(EAnimationMode::Type::AnimationSingleNode);
 	
 	GetMesh()->SetEnableGravity(true);
 	GetMesh()->SetSimulatePhysics(true);
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
 	GetMesh()->SetCollisionResponseToChannel(ECC_WorldStatic, ECR_Block);
+	GetMesh()->SetAnimationMode(EAnimationMode::Type::AnimationSingleNode);
 	
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 

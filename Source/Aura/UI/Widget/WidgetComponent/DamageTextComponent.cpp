@@ -4,6 +4,15 @@ void UDamageTextComponent::BeginPlay()
 {
 	Super::BeginPlay();
 	InitMovement();
+
+	FTimerHandle DestroyTimerHandle;
+	GetWorld()->GetTimerManager().SetTimer(DestroyTimerHandle,
+		[this]()
+		{
+			DestroyComponent();
+		},
+		2.0f,
+		false);
 }
 
 void UDamageTextComponent::InitMovement()

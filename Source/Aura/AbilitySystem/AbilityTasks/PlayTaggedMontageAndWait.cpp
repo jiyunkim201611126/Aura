@@ -1,7 +1,6 @@
 ﻿// Copyright Epic Games, Inc. All Rights Reserved.
 
-#include "PlayMontageAndWaitForEvent.h"
-#include "Abilities/Tasks/AbilityTask_WaitGameplayEvent.h"
+#include "PlayTaggedMontageAndWait.h"
 
 #include "Animation/AnimMontage.h"
 #include "GameFramework/Character.h"
@@ -9,16 +8,16 @@
 #include "AbilitySystemLog.h"
 #include "AbilitySystemGlobals.h"
 
-#include UE_INLINE_GENERATED_CPP_BY_NAME(PlayMontageAndWaitForEvent)
+#include UE_INLINE_GENERATED_CPP_BY_NAME(PlayTaggedMontageAndWait)
 
-UPlayMontageAndWaitForEvent::UPlayMontageAndWaitForEvent(const FObjectInitializer& ObjectInitializer)
+UPlayTaggedMontageAndWait::UPlayTaggedMontageAndWait(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
 	Rate = 1.f;
 	bStopWhenAbilityEnds = true;
 }
 
-void UPlayMontageAndWaitForEvent::OnMontageBlendingOut(UAnimMontage* Montage, bool bInterrupted)
+void UPlayTaggedMontageAndWait::OnMontageBlendingOut(UAnimMontage* Montage, bool bInterrupted)
 {
 	if (Ability && Ability->GetCurrentMontage() == TaggedMontage.Montage)
 	{
@@ -56,7 +55,7 @@ void UPlayMontageAndWaitForEvent::OnMontageBlendingOut(UAnimMontage* Montage, bo
 	}
 }
 
-void UPlayMontageAndWaitForEvent::OnMontageInterrupted()
+void UPlayTaggedMontageAndWait::OnMontageInterrupted()
 {
 	if (StopPlayingMontage())
 	{
@@ -68,7 +67,7 @@ void UPlayMontageAndWaitForEvent::OnMontageInterrupted()
 	}
 }
 
-void UPlayMontageAndWaitForEvent::OnMontageEnded(UAnimMontage* Montage, bool bInterrupted)
+void UPlayTaggedMontageAndWait::OnMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 {
 	if (!bInterrupted)
 	{
@@ -81,13 +80,13 @@ void UPlayMontageAndWaitForEvent::OnMontageEnded(UAnimMontage* Montage, bool bIn
 	EndTask();
 }
 
-UPlayMontageAndWaitForEvent* UPlayMontageAndWaitForEvent::CreatePlayMontageAndWaitProxy(UGameplayAbility* OwningAbility,
+UPlayTaggedMontageAndWait* UPlayTaggedMontageAndWait::CreatePlayMontageAndWaitProxy(UGameplayAbility* OwningAbility,
 	FName TaskInstanceName, FTaggedMontage TaggedMontage, float Rate, FName StartSection, bool bStopWhenAbilityEnds, float AnimRootMotionTranslationScale, float StartTimeSeconds)
 {
 
 	UAbilitySystemGlobals::NonShipping_ApplyGlobalAbilityScaler_Rate(Rate);
 
-	UPlayMontageAndWaitForEvent* MyObj = NewAbilityTask<UPlayMontageAndWaitForEvent>(OwningAbility, TaskInstanceName);
+	UPlayTaggedMontageAndWait* MyObj = NewAbilityTask<UPlayTaggedMontageAndWait>(OwningAbility, TaskInstanceName);
 	MyObj->TaggedMontage = TaggedMontage;
 	MyObj->Rate = Rate;
 	MyObj->StartSection = StartSection;
@@ -98,7 +97,7 @@ UPlayMontageAndWaitForEvent* UPlayMontageAndWaitForEvent::CreatePlayMontageAndWa
 	return MyObj;
 }
 
-void UPlayMontageAndWaitForEvent::Activate()
+void UPlayTaggedMontageAndWait::Activate()
 {
 	if (Ability == nullptr)
 	{
@@ -121,26 +120,18 @@ void UPlayMontageAndWaitForEvent::Activate()
 					return;
 				}
 
-				InterruptedHandle = Ability->OnGameplayAbilityCancelled.AddUObject(this, &UPlayMontageAndWaitForEvent::OnMontageInterrupted);
+				InterruptedHandle = Ability->OnGameplayAbilityCancelled.AddUObject(this, &UPlayTaggedMontageAndWait::OnMontageInterrupted);
 
-				BlendingOutDelegate.BindUObject(this, &UPlayMontageAndWaitForEvent::OnMontageBlendingOut);
+				BlendingOutDelegate.BindUObject(this, &UPlayTaggedMontageAndWait::OnMontageBlendingOut);
 				AnimInstance->Montage_SetBlendingOutDelegate(BlendingOutDelegate, TaggedMontage.Montage);
 
-				MontageEndedDelegate.BindUObject(this, &UPlayMontageAndWaitForEvent::OnMontageEnded);
+				MontageEndedDelegate.BindUObject(this, &UPlayTaggedMontageAndWait::OnMontageEnded);
 				AnimInstance->Montage_SetEndDelegate(MontageEndedDelegate, TaggedMontage.Montage);
 
 				ACharacter* Character = Cast<ACharacter>(GetAvatarActor());
 				if (Character && (Character->GetLocalRole() == ROLE_Authority || (Character->GetLocalRole() == ROLE_AutonomousProxy && Ability->GetNetExecutionPolicy() == EGameplayAbilityNetExecutionPolicy::LocalPredicted)))
 				{
 					Character->SetAnimRootMotionTranslationScale(AnimRootMotionTranslationScale);
-				}
-
-				// 새로운 태스크를 직접 만들어 바인드 및 호출합니다.
-				if (Ability)
-				{
-					UAbilityTask_WaitGameplayEvent* WaitGameplayEvent = UAbilityTask_WaitGameplayEvent::WaitGameplayEvent(Ability, TaggedMontage.MontageTag);
-					WaitGameplayEvent->EventReceived.AddDynamic(this, &ThisClass::HandleEventReceived);
-					WaitGameplayEvent->ReadyForActivation();
 				}
 
 				bPlayedMontage = true;
@@ -168,15 +159,7 @@ void UPlayMontageAndWaitForEvent::Activate()
 	SetWaitingOnAvatar();
 }
 
-void UPlayMontageAndWaitForEvent::HandleEventReceived(FGameplayEventData Payload)
-{
-	if (ShouldBroadcastAbilityTaskDelegates())
-	{
-		OnEventReceived.Broadcast(TaggedMontage);
-	}
-}
-
-void UPlayMontageAndWaitForEvent::ExternalCancel()
+void UPlayTaggedMontageAndWait::ExternalCancel()
 {
 	if (ShouldBroadcastAbilityTaskDelegates())
 	{
@@ -185,7 +168,7 @@ void UPlayMontageAndWaitForEvent::ExternalCancel()
 	Super::ExternalCancel();
 }
 
-void UPlayMontageAndWaitForEvent::OnDestroy(bool AbilityEnded)
+void UPlayTaggedMontageAndWait::OnDestroy(bool AbilityEnded)
 {
 	// Note: Clearing montage end delegate isn't necessary since its not a multicast and will be cleared when the next montage plays.
 	// (If we are destroyed, it will detect this and not do anything)
@@ -204,7 +187,7 @@ void UPlayMontageAndWaitForEvent::OnDestroy(bool AbilityEnded)
 
 }
 
-bool UPlayMontageAndWaitForEvent::StopPlayingMontage()
+bool UPlayTaggedMontageAndWait::StopPlayingMontage()
 {
 	if (Ability == nullptr)
 	{
@@ -247,7 +230,7 @@ bool UPlayMontageAndWaitForEvent::StopPlayingMontage()
 	return false;
 }
 
-FString UPlayMontageAndWaitForEvent::GetDebugString() const
+FString UPlayTaggedMontageAndWait::GetDebugString() const
 {
 	UAnimMontage* PlayingMontage = nullptr;
 	if (Ability)
