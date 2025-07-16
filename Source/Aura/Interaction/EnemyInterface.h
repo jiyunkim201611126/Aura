@@ -18,9 +18,12 @@ public:
 	virtual void HighlightActor() = 0;
 	virtual void UnHighlightActor() = 0;
 
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	void SetCombatTarget(AActor* InCombatTarget);
 
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	AActor* GetCombatTarget() const;
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	void PlaySpawnAnimation();
 };
