@@ -20,10 +20,9 @@ void UAuraProjectileSpell::SpawnProjectile(FVector& ProjectileSpawnLocation, FVe
 	ICombatInterface* CombatInterface = Cast<ICombatInterface>(GetAvatarActorFromActorInfo());
 	if (CombatInterface)
 	{
-		// Projectile이 스폰될 위치와 날아갈 방향 결정
+		// Projectile이 스폰될 위치와 날아갈 방향 결정		
 		float ProjectileHeight = GetAvatarActorFromActorInfo()->GetActorLocation().Z;
 		ProjectileSpawnLocation.Z = ProjectileHeight;
-		ProjectileTargetLocation.Z = ProjectileHeight;
 		FRotator Rotation = (ProjectileTargetLocation - GetAvatarActorFromActorInfo()->GetActorLocation()).Rotation();
 		
 		FTransform SpawnTransform;
