@@ -30,10 +30,10 @@ protected:
 
 private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true", BindWidget = "true"))
-	TObjectPtr<UProgressBar> ProgressBar_Front;
+	TObjectPtr<UProgressBar> FrontProgressBar;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true", BindWidget = "true"))
-	TObjectPtr<UProgressBar> ProgressBar_Ghost;
+	TObjectPtr<UProgressBar> GhostProgressBar;
 
 	FTimerHandle GhostPercentSetTimerHandle;
 

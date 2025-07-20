@@ -6,7 +6,7 @@
 void UAuraProgressBar::SetBarPercent_Implementation(const float Value, const float MaxValue)
 {
 	const float Percent = UKismetMathLibrary::SafeDivide(Value, MaxValue);
-	ProgressBar_Front->SetPercent(Percent);
+	FrontProgressBar->SetPercent(Percent);
 
 	FTimerHandle PercentSetTimerHandle;
 	GetWorld()->GetTimerManager().SetTimer(
@@ -19,7 +19,7 @@ void UAuraProgressBar::SetBarPercent_Implementation(const float Value, const flo
 
 void UAuraProgressBar::BarPercentSet_Implementation()
 {
-	GhostPercentTarget = ProgressBar_Front->GetPercent();
+	GhostPercentTarget = FrontProgressBar->GetPercent();
 
 	GetWorld()->GetTimerManager().ClearTimer(GhostPercentSetTimerHandle);
 	GetWorld()->GetTimerManager().SetTimer(
@@ -32,9 +32,9 @@ void UAuraProgressBar::BarPercentSet_Implementation()
 
 void UAuraProgressBar::InterpGhostBar_Implementation()
 {
-	const float CurrentGhostBarPercent = ProgressBar_Ghost->GetPercent();
+	const float CurrentGhostBarPercent = GhostProgressBar->GetPercent();
 	const float NextGhostBarPercent = UKismetMathLibrary::FInterpTo(CurrentGhostBarPercent, GhostPercentTarget, GetWorld()->GetDeltaSeconds(), GhostInterpSpeed);
-	ProgressBar_Ghost->SetPercent(NextGhostBarPercent);
+	GhostProgressBar->SetPercent(NextGhostBarPercent);
 
 	if (!UKismetMathLibrary::NearlyEqual_FloatFloat(NextGhostBarPercent, GhostPercentTarget))
 	{
