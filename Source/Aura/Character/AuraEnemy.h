@@ -80,7 +80,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AI")
 	float AgroRange = 1000.f;
 
-	// 일반적으로 근접 공격 캐릭터는 150, 원거리 공격 캐릭터는 600을 사용합니다.
+	// 일반적으로 근접 공격 캐릭터는 150 이상, 원거리 공격 캐릭터는 600을 사용합니다.
+	// 너무 낮게 설정하는 경우, 최대한 가까워져도 사정거리보다 멀어 공격하지 못 하는 현상이 있습니다.
+	// 따라서 캐릭터의 Capsule Collision의 크기를 생각해 설정해줍니다.
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AI")
 	float CombatRange = 150.f;
 	
