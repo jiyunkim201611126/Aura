@@ -66,12 +66,13 @@ struct FAuraGameplayTags
 	FGameplayTag Effects_HitReact;
 	/** End Common Abilities */
 
-	/** Abilities */
+	/** Abilities and Cooldown */
 	FGameplayTag Abilities_Attack;
 	FGameplayTag Abilities_Summon;
 	
 	FGameplayTag Abilities_Fire_FireBolt;
-	/** End Abilities */
+	FGameplayTag Cooldown_Fire_FireBolt;
+	/** End Abilities and Cooldown */
 
 	/** Combat Sockets */
 	FGameplayTag CombatSocket_Weapon;

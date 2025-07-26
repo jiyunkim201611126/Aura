@@ -33,7 +33,7 @@ void AAuraCharacter::PossessedBy(AController* NewController)
 {
 	Super::PossessedBy(NewController);
 
-	// 서버의 Ability Actor 초기화
+	// 서버의 Ability Actor 초기화 및 HUD 초기화
 	InitAbilityActorInfo();
 	AddCharacterStartupAbilities();
 }
@@ -42,7 +42,7 @@ void AAuraCharacter::OnRep_PlayerState()
 {
 	Super::OnRep_PlayerState();
 
-	// 클라이언트의 Ability Actor 초기화
+	// 클라이언트의 Ability Actor 초기화 및 HUD 초기화
 	InitAbilityActorInfo();
 }
 
