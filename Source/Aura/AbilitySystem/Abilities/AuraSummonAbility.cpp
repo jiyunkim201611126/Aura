@@ -13,14 +13,31 @@ void UAuraSummonAbility::OnGiveAbility(const FGameplayAbilityActorInfo* ActorInf
 		if (!Avatar->FindComponentByClass<USummonComponent>())
 		{
 			USummonComponent* NewComponent = Cast<USummonComponent>(Avatar->AddComponentByClass(USummonComponent::StaticClass(), false, FTransform::Identity, true));
-			if (NewComponent)
-			{
-				NewComponent->SpawnableSummonMinionCount = MaxMinionCount;
-			}
-
 			Avatar->FinishAddComponent(NewComponent, false, FTransform::Identity);
 		}
 	}
+}
+
+bool UAuraSummonAbility::CheckCost(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, FGameplayTagContainer* OptionalRelevantTags) const
+{
+	// 소환 가능한 하수인 수를 계산합니다.
+	int32 SpawnableCount = 0;
+	if (AActor* Avatar = GetAvatarActorFromActorInfo())
+	{
+		if (USummonComponent* SummonComponent = Avatar->FindComponentByClass<USummonComponent>())
+		{
+			SpawnableCount = SummonComponent->SpawnableSummonMinionCount;
+			SpawnableCount = FMath::Min(SpawnableCount, NumMinions);
+		}
+	}
+
+	// 소환 가능한 하수인이 없다면 false를 반환합니다.
+	if (SpawnableCount <= 0)
+	{
+		return false;
+	}
+	
+	return Super::CheckCost(Handle, ActorInfo, OptionalRelevantTags);
 }
 
 TArray<FVector> UAuraSummonAbility::GetSpawnLocations()

@@ -12,7 +12,7 @@ class AURA_API UAuraSummonAbility : public UAuraGameplayAbility
 private:
 	// 한 번에 스폰하는 하수인 수
 	UPROPERTY(EditAnywhere, Category = "Summoning")
-	int32 NumMinions = 5;
+	int32 NumMinions = 1;
 
 	UPROPERTY(EditAnywhere, Category = "Summoning")
 	TArray<TSubclassOf<APawn>> MinionClasses;
@@ -28,9 +28,8 @@ private:
 
 protected:
 	virtual void OnGiveAbility(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec) override;
-	
-	UPROPERTY(EditAnywhere, Category = "Summoning")
-	int32 MaxMinionCount = 3;
+
+	virtual bool CheckCost(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, FGameplayTagContainer* OptionalRelevantTags = nullptr) const override;
 
 public:
 	UFUNCTION(BlueprintCallable)

@@ -1,5 +1,34 @@
 ﻿#include "SummonComponent.h"
 
+#include "AbilitySystemComponent.h"
+#include "Aura/AbilitySystem/AuraAttributeSet.h"
+#include "Aura/Character/AuraCharacterBase.h"
+
+void USummonComponent::BeginPlay()
+{
+	Super::BeginPlay();
+
+	UAbilitySystemComponent* OwnerASC = GetOwner()->FindComponentByClass<UAbilitySystemComponent>();
+	if (OwnerASC)
+	{
+		OwnerASC->GetGameplayAttributeValueChangeDelegate(UAuraAttributeSet::GetHealthAttribute()).AddUObject(this, &ThisClass::CheckOwnerDie);
+	}
+}
+
+void USummonComponent::CheckOwnerDie(const FOnAttributeChangeData& OnAttributeChangeData)
+{
+	float NewHealth = OnAttributeChangeData.NewValue;
+	float OldHealth = OnAttributeChangeData.OldValue;
+
+	if (NewHealth <= 0.f && OldHealth > 0.f)
+	{
+		for (auto Minion : CurrentMinions)
+		{
+			Cast<AAuraCharacterBase>(Minion.Get())->Die(false, FVector::ZeroVector);
+		}
+	}
+}
+
 void USummonComponent::AddMinion(AActor* InMinion)
 {
 	if (!InMinion)
@@ -7,9 +36,9 @@ void USummonComponent::AddMinion(AActor* InMinion)
 		return;
 	}
 	
-	if (!CurrentMinion.Contains(InMinion))
+	if (!CurrentMinions.Contains(InMinion))
 	{
-		CurrentMinion.Add(InMinion);
+		CurrentMinions.Add(InMinion);
 		--SpawnableSummonMinionCount;
 		InMinion->OnDestroyed.AddDynamic(this, &ThisClass::RemoveMinion);
 	}
@@ -22,12 +51,12 @@ void USummonComponent::RemoveMinion(AActor* DestroyedActor)
 		return;
 	}
 	
-	if (CurrentMinion.Contains(DestroyedActor))
+	if (CurrentMinions.Contains(DestroyedActor))
 	{
-		CurrentMinion.Remove(DestroyedActor);
+		CurrentMinions.Remove(DestroyedActor);
 	}
 
-	if (ResetCountThreshold >= CurrentMinion.Num())
+	if (ResetCountThreshold >= CurrentMinions.Num())
 	{
 		ResetSpawnableCount();
 	}

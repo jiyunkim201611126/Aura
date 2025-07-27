@@ -1,8 +1,14 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
+#include "GameplayEffectTypes.h"
 #include "Components/ActorComponent.h"
 #include "SummonComponent.generated.h"
+
+/**
+ * 단순히 '충전식 스킬'을 구현하려면 굳이 Component까진 필요없으나,
+ * '하수인 소환 스킬'의 경우 모든 하수인 통합 최대 소환 가능 수가 있어야 한다고 생각해 따로 Component를 선언해 관리합니다.
+ */
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class AURA_API USummonComponent : public UActorComponent
@@ -10,8 +16,8 @@ class AURA_API USummonComponent : public UActorComponent
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Summoning")
-	TArray<AActor*> CurrentMinion;
+	UPROPERTY()
+	TArray<TWeakObjectPtr<AActor>> CurrentMinions;
 
 	// 현재 소환 가능한 하수인 수입니다.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Summoning")
@@ -26,8 +32,13 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Summoning")
 	int32 ResetCountThreshold = 0;
 
+public:
+	virtual void BeginPlay() override;
+	
+	void CheckOwnerDie(const FOnAttributeChangeData& OnAttributeChangeData);
+	
 	UFUNCTION(BlueprintCallable, Category = "Summoning")
-	bool CanSummon() const { return SpawnableSummonMinionCount > 0 && MaxSummonMinionCount > CurrentMinion.Num(); }
+	bool CanSummon() const { return SpawnableSummonMinionCount > 0 && MaxSummonMinionCount > CurrentMinions.Num(); }
 
 	UFUNCTION(BlueprintCallable, Category = "Summoning")
 	void AddMinion(AActor* InMinion);
@@ -35,6 +46,5 @@ public:
 	UFUNCTION()
 	void RemoveMinion(AActor* DestroyedActor);
 	
-	UFUNCTION(BlueprintCallable, Category = "Summoning")
 	void ResetSpawnableCount();
 };
