@@ -2,44 +2,6 @@
 
 #include "Aura/Character/Component/SummonComponent.h"
 
-void UAuraSummonAbility::OnGiveAbility(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec)
-{
-	Super::OnGiveAbility(ActorInfo, Spec);
-
-	// 이 Ability가 부여될 때, 대상에게 SummonComponent를 붙여줍니다.
-	AActor* Avatar = ActorInfo->AvatarActor.Get();
-	if (Avatar)
-	{
-		if (!Avatar->FindComponentByClass<USummonComponent>())
-		{
-			USummonComponent* NewComponent = Cast<USummonComponent>(Avatar->AddComponentByClass(USummonComponent::StaticClass(), false, FTransform::Identity, true));
-			Avatar->FinishAddComponent(NewComponent, false, FTransform::Identity);
-		}
-	}
-}
-
-bool UAuraSummonAbility::CheckCost(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, FGameplayTagContainer* OptionalRelevantTags) const
-{
-	// 소환 가능한 하수인 수를 계산합니다.
-	int32 SpawnableCount = 0;
-	if (AActor* Avatar = GetAvatarActorFromActorInfo())
-	{
-		if (USummonComponent* SummonComponent = Avatar->FindComponentByClass<USummonComponent>())
-		{
-			SpawnableCount = SummonComponent->SpawnableSummonMinionCount;
-			SpawnableCount = FMath::Min(SpawnableCount, NumMinions);
-		}
-	}
-
-	// 소환 가능한 하수인이 없다면 false를 반환합니다.
-	if (SpawnableCount <= 0)
-	{
-		return false;
-	}
-	
-	return Super::CheckCost(Handle, ActorInfo, OptionalRelevantTags);
-}
-
 TArray<FVector> UAuraSummonAbility::GetSpawnLocations()
 {
 	const FVector Location = GetAvatarActorFromActorInfo()->GetActorLocation();
@@ -86,4 +48,99 @@ TSubclassOf<APawn> UAuraSummonAbility::GetRandomMinionClass() const
 {
 	const int32 Selection = FMath::RandRange(0, MinionClasses.Num() - 1);
 	return MinionClasses[Selection];
+}
+
+void UAuraSummonAbility::OnGiveAbility(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec)
+{
+	Super::OnGiveAbility(ActorInfo, Spec);
+
+	// 이 Ability가 부여될 때, 대상에게 SummonComponent를 붙여줍니다.
+	AActor* Avatar = ActorInfo->AvatarActor.Get();
+	if (Avatar)
+	{
+		if (!Avatar->FindComponentByClass<USummonComponent>())
+		{
+			USummonComponent* NewComponent = Cast<USummonComponent>(Avatar->AddComponentByClass(USummonComponent::StaticClass(), false, FTransform::Identity, true));
+			Avatar->FinishAddComponent(NewComponent, false, FTransform::Identity);
+		}
+	}
+
+	// 이 Ability가 부여될 때, 대상에게 StackableAbilityComponent를 붙여줍니다.
+	if (UStackableAbilityComponent* Comp = GetStackableAbilityComponent(ActorInfo))
+	{
+		// 이 Ability의 충전 타이머를 등록합니다.
+		Comp->RegisterAbility(AbilityTags.First(), StackData.MaxStack, StackData.RechargeTime);
+	}
+}
+
+bool UAuraSummonAbility::CheckCost(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, FGameplayTagContainer* OptionalRelevantTags) const
+{
+	// 소환 가능한 하수인 수를 계산합니다.
+	int32 SpawnableCount = 0;
+	if (AActor* Avatar = GetAvatarActorFromActorInfo())
+	{
+		if (USummonComponent* SummonComponent = Avatar->FindComponentByClass<USummonComponent>())
+		{
+			SpawnableCount = SummonComponent->SpawnableSummonMinionCount;
+			SpawnableCount = FMath::Min(SpawnableCount, NumMinions);
+		}
+	}
+
+	// 소환 가능한 하수인이 없다면 false를 반환합니다.
+	if (SpawnableCount <= 0)
+	{
+		return false;
+	}
+
+	// 충전된 스택이 없다면 false를 반환합니다.
+	if (UStackableAbilityComponent* Comp = GetStackableAbilityComponent(ActorInfo))
+	{
+		if (!Comp->CheckCost(AbilityTags.First()))
+		{
+			return false;
+		}
+	}
+	
+	return Super::CheckCost(Handle, ActorInfo, OptionalRelevantTags);
+}
+
+void UAuraSummonAbility::ApplyCost(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo) const
+{
+	// 충전된 스택을 소모합니다.
+	if (UStackableAbilityComponent* Comp = GetStackableAbilityComponent(ActorInfo))
+	{
+		Comp->ApplyCost(AbilityTags.First());
+	}
+	
+	Super::ApplyCost(Handle, ActorInfo, ActivationInfo);
+}
+
+void UAuraSummonAbility::OnRemoveAbility(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec)
+{
+	// 이 Ability가 제거될 때, 이 Ability의 충전 타이머를 제거합니다.
+	if (UStackableAbilityComponent* Comp = GetStackableAbilityComponent(ActorInfo))
+	{
+		Comp->UnregisterAbility(AbilityTags.First());
+	}
+	
+	Super::OnRemoveAbility(ActorInfo, Spec);
+}
+
+UStackableAbilityComponent* UAuraSummonAbility::GetStackableAbilityComponent(const FGameplayAbilityActorInfo* ActorInfo) const
+{
+	// 이미 StackableAbilityComponent가 있다면 그 컴포넌트에 이 Ability를 등록하고, 없다면 직접 스폰 후 붙여줍니다.
+	if (AActor* AvatarActor = ActorInfo ? ActorInfo->AvatarActor.Get() : nullptr)
+	{
+		UStackableAbilityComponent* Comp = AvatarActor->FindComponentByClass<UStackableAbilityComponent>();
+		if (Comp)
+		{
+			return Comp;
+		}
+		
+		Comp = Cast<UStackableAbilityComponent>(AvatarActor->AddComponentByClass(UStackableAbilityComponent::StaticClass(), false, FTransform::Identity, true));
+		AvatarActor->FinishAddComponent(Comp, false, FTransform::Identity);
+		return Comp;
+	}
+
+	return nullptr;
 }

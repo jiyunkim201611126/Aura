@@ -31,7 +31,6 @@ class AURA_API UAuraGameplayAbility : public UGameplayAbility
 	GENERATED_BODY()
 
 public:
-	UAuraGameplayAbility();
 	/**
 	 * 플레이어의 캐릭터만 사용하는 태그입니다.
 	 * Input과 관련된 태그들은 AuraInputConfig를 통해 InputAction과 이어져있습니다.
@@ -56,30 +55,21 @@ private:
 
 public:
 	/**
-	 * 이 아래로는 충전식 스킬을 구현하기 위한 구문들입니다.
+	 * 이 아래로는 스택형 스킬을 구현하기 위한 구문 예시입니다.
+	 * 스택형 Ability로 만들고 싶다면 이 아래의 구문들와 cpp의 구현부를 작성하면 됩니다.
 	 * Ability 객체가 충전 로직을 담당하게 되므로, 꼭 Instanced per Actor로 설정해줍니다.
-	 */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Chargeable")
-	bool bUseCharges = false;
-
-	UPROPERTY(BlueprintReadOnly, Category = "Chargeable", meta = (EditCondition = "bUseCharges"))
-	int32 CurrentCharges = 0;
+	 *
 	
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Chargeable", meta = (EditCondition = "bUseCharges"))
-	int32 MaxCharges = 3;
-	
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Chargeable", meta = (EditCondition = "bUseCharges"))
-	float RechargeTime = 5.f;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Stackable")
+	FAbilityStackData StackData;
 
 protected:
-	FTimerHandle RechargeTimerHandle;
-
 	virtual void OnGiveAbility(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec) override;
 	virtual bool CheckCost(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, FGameplayTagContainer* OptionalRelevantTags = nullptr) const override;
 	virtual void ApplyCost(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo) const override;
 	virtual void OnRemoveAbility(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec) override;
 	
-	void StartRecharge();
-	void StopRecharge();
-	void Recharge();
+	UStackableAbilityComponent* GetStackableAbilityComponent(const FGameplayAbilityActorInfo* ActorInfo) const;
+	
+	*/
 };
