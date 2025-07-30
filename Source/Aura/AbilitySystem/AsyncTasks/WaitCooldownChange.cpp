@@ -40,13 +40,7 @@ void UWaitCooldownChange::EndTask()
 void UWaitCooldownChange::OnActiveEffectAdded(UAbilitySystemComponent* TargetASC, const FGameplayEffectSpec& SpecApplied, FActiveGameplayEffectHandle ActiveGameplayEffect)
 {
 	// 부여된 GE 중 Cooldown Tag를 가진 GE를 찾습니다.
-	FGameplayTagContainer AssetTags;
-	SpecApplied.GetAllAssetTags(AssetTags);
-
-	FGameplayTagContainer GrantedTags;
-	SpecApplied.GetAllGrantedTags(GrantedTags);
-
-	if (AssetTags.HasTagExact(CooldownTag) || GrantedTags.HasTagExact(CooldownTag))
+	if (TargetASC->HasMatchingGameplayTag(CooldownTag))
 	{
 		FGameplayEffectQuery GameplayEffectQuery = FGameplayEffectQuery::MakeQuery_MatchAnyOwningTags(CooldownTag.GetSingleTagContainer());
 

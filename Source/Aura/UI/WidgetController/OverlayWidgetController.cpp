@@ -51,7 +51,7 @@ void UOverlayWidgetController::BindCallbacksToDependencies()
 	{
 		// Ability가 부여될 때, OverlayWidget이 이를 알 수 있도록 함수를 바인드합니다.
 		// HUD에 대한 초기화가 모두 이루어지고 나서 GameAbility를 부여하기 때문에, 여기서 바인드하면 정상 작동합니다.
-		AuraASC->AbilitiesGivenDelegate.AddUObject(this, &ThisClass::OnInitializeStartupAbilities);
+		AuraASC->AbilitiesGivenDelegate.AddUObject(this, &ThisClass::OnAbilitiesGiven);
 
 		// GameplayEffect가 적용될 때 화면에 메시지를 띄울 수 있도록 함수를 바인드합니다.
 		AuraASC->EffectAssetTags.AddLambda([this](const FGameplayTagContainer& AssetTags)
@@ -72,7 +72,7 @@ void UOverlayWidgetController::BindCallbacksToDependencies()
 	}
 }
 
-void UOverlayWidgetController::OnInitializeStartupAbilities(const FGameplayAbilitySpec& AbilitySpec)
+void UOverlayWidgetController::OnAbilitiesGiven(const FGameplayAbilitySpec& AbilitySpec)
 {
 	if (UAuraAbilitySystemComponent* AuraASC = Cast<UAuraAbilitySystemComponent>(AbilitySystemComponent))
 	{

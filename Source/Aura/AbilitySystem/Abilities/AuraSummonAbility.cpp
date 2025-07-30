@@ -129,14 +129,15 @@ void UAuraSummonAbility::OnRemoveAbility(const FGameplayAbilityActorInfo* ActorI
 UStackableAbilityComponent* UAuraSummonAbility::GetStackableAbilityComponent(const FGameplayAbilityActorInfo* ActorInfo) const
 {
 	// 이미 StackableAbilityComponent가 있다면 그 컴포넌트에 이 Ability를 등록하고, 없다면 직접 스폰 후 붙여줍니다.
-	if (AActor* AvatarActor = ActorInfo ? ActorInfo->AvatarActor.Get() : nullptr)
+	if (AActor* AvatarActor = ActorInfo ? ActorInfo->AvatarActor.Get() : GetAvatarActorFromActorInfo())
 	{
 		UStackableAbilityComponent* Comp = AvatarActor->FindComponentByClass<UStackableAbilityComponent>();
 		if (Comp)
 		{
 			return Comp;
 		}
-		
+
+		// Component가 없는 경우 여기로 내려옵니다. OnGiveAbility를 통해 들어온 경우에만 작동되는 구문입니다.
 		Comp = Cast<UStackableAbilityComponent>(AvatarActor->AddComponentByClass(UStackableAbilityComponent::StaticClass(), false, FTransform::Identity, true));
 		AvatarActor->FinishAddComponent(Comp, false, FTransform::Identity);
 		return Comp;

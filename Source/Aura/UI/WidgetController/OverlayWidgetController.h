@@ -72,7 +72,7 @@ protected:
 	template<typename T>
 	T* GetDataTableRowByTag(UDataTable* DataTable, const FGameplayTag& Tag);
 
-	void OnInitializeStartupAbilities(const FGameplayAbilitySpec& AbilitySpec);
+	void OnAbilitiesGiven(const FGameplayAbilitySpec& AbilitySpec);
 };
 
 template <typename T>
