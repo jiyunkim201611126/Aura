@@ -44,23 +44,26 @@ public:
 	virtual void BindCallbacksToDependencies() override;
 
 	// 아래 델리게이트들에 위젯 블루프린트들이 각자 필요한 함수를 바인드
-	UPROPERTY(BlueprintAssignable, Category = "GAS|Attributes")
+	UPROPERTY(BlueprintAssignable, Category = "GAS | Attributes")
 	FOnAttributeChangedSignature OnHealthChanged;
 	
-	UPROPERTY(BlueprintAssignable, Category = "GAS|Attributes")
+	UPROPERTY(BlueprintAssignable, Category = "GAS | Attributes")
 	FOnAttributeChangedSignature OnMaxHealthChanged;
 
-	UPROPERTY(BlueprintAssignable, Category = "GAS|Attributes")
+	UPROPERTY(BlueprintAssignable, Category = "GAS | Attributes")
 	FOnAttributeChangedSignature OnManaChanged;
 
-	UPROPERTY(BlueprintAssignable, Category = "GAS|Attributes")
+	UPROPERTY(BlueprintAssignable, Category = "GAS | Attributes")
 	FOnAttributeChangedSignature OnMaxManaChanged;
 
-	UPROPERTY(BlueprintAssignable, Category = "GAS|Messages")
+	UPROPERTY(BlueprintAssignable, Category = "GAS | Messages")
 	FMessageWidgetRowSignature MessageWidgetRowDelegate;
 
-	UPROPERTY(BlueprintAssignable, Category = "GAS|Messages")
+	UPROPERTY(BlueprintAssignable, Category = "GAS | Messages")
 	FAbilityInfoSignature AbilityInfoDelegate;
+	
+	UPROPERTY(BlueprintAssignable, Category = "GAS | XP")
+	FOnAttributeChangedSignature OnXPBarPercentChangedDelegate;
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Widget Data")
@@ -73,6 +76,8 @@ protected:
 	T* GetDataTableRowByTag(UDataTable* DataTable, const FGameplayTag& Tag);
 
 	void OnAbilitiesGiven(const FGameplayAbilitySpec& AbilitySpec);
+	
+	void OnXPChanged(int32 InXP) const;
 };
 
 template <typename T>

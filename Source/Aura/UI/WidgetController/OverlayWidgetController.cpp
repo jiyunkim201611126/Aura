@@ -3,6 +3,7 @@
 #include "Aura/AbilitySystem/AuraAttributeSet.h"
 #include "Aura/AbilitySystem/AuraAbilitySystemComponent.h"
 #include "Aura/AbilitySystem/Data/AbilityInfo.h"
+#include "Aura/Player/AuraPlayerState.h"
 
 void UOverlayWidgetController::BroadcastInitialValue()
 {
@@ -16,6 +17,9 @@ void UOverlayWidgetController::BroadcastInitialValue()
 
 void UOverlayWidgetController::BindCallbacksToDependencies()
 {
+	AAuraPlayerState* AuraPlayerState = Cast<AAuraPlayerState>(PlayerState);
+	AuraPlayerState->OnXPChangedDelegate.AddUObject(this, &ThisClass::OnXPChanged);
+	
 	const UAuraAttributeSet* AuraAttributeSet = CastChecked<UAuraAttributeSet>(AttributeSet);
 
 	// 선언된 Attribute들에게 변동사항이 있는 경우 Widget Controller가 알 수 있도록 각 Attribute에게 함수를 바인드
@@ -83,5 +87,28 @@ void UOverlayWidgetController::OnAbilitiesGiven(const FGameplayAbilitySpec& Abil
 		FAuraAbilityInfo Info = AbilityInfo->FindAbilityInfoForTag(AuraASC->GetAbilityTagFromSpec(AbilitySpec));
 		Info.InputTag = AuraASC->GetInputTagFromSpec(AbilitySpec);
 		AbilityInfoDelegate.Broadcast(Info);
+	}
+}
+
+void UOverlayWidgetController::OnXPChanged(const int32 InXP) const
+{
+	AAuraPlayerState* AuraPlayerState = CastChecked<AAuraPlayerState>(PlayerState);
+	const ULevelUpInfo* LevelUpInfo = AuraPlayerState->LevelUpInfo;
+	checkf(LevelUpInfo, TEXT("LevelUpInfo를 찾을 수 없습니다. 블루프린트 에디터에서 할당해주세요."))
+
+	const int32 Level = LevelUpInfo->FindLevelForXP(InXP);
+	const int32 MaxLevel = LevelUpInfo->LevelUpInformation.Num();
+
+	if (Level <= MaxLevel && Level > 0)
+	{
+		// LevelUpInfo를 토대로 XP Bar Percent를 계산합니다.
+		const int32 LevelUpRequirement = LevelUpInfo->LevelUpInformation[Level].LevelUpRequirement;
+		const int32 PreviousLevelUpRequirement = LevelUpInfo->LevelUpInformation[Level - 1].LevelUpRequirement;
+
+		const int32 DeltaLevelUpRequirement = LevelUpRequirement - PreviousLevelUpRequirement;
+		const int32 XPForThisLevel = InXP - PreviousLevelUpRequirement;
+
+		const float XPBarPercent = static_cast<float>(XPForThisLevel / DeltaLevelUpRequirement);
+		OnXPBarPercentChangedDelegate.Broadcast(XPBarPercent);
 	}
 }
