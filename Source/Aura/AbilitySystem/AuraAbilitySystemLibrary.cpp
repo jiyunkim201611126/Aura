@@ -176,3 +176,25 @@ TArray<AActor*> UAuraAbilitySystemLibrary::GetActorsFromContext(FGameplayEffectC
 	}
 	return Actors;
 }
+
+float UAuraAbilitySystemLibrary::GetRemainingTimeByTag(UAbilitySystemComponent* ASC, FGameplayTag Tag)
+{
+	if (!ASC)
+	{
+		return 0.0f;
+	}
+
+	FGameplayEffectQuery Query = FGameplayEffectQuery::MakeQuery_MatchAllOwningTags(Tag.GetSingleTagContainer());
+	TArray<float> TimesRemaining = ASC->GetActiveEffectsTimeRemaining(Query);
+
+	float MaxTime = 0.f;
+	for (float Time : TimesRemaining)
+	{
+		if (Time > MaxTime)
+		{
+			MaxTime = Time;
+		}
+	}
+	
+	return MaxTime;
+}

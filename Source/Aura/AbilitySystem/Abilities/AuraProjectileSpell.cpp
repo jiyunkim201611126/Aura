@@ -45,8 +45,6 @@ void UAuraProjectileSpell::SpawnProjectile(FVector& ProjectileSpawnLocation, FVe
 		// 할당받은 DamageEffectClass를 기반으로 Projectile이 가질 GameplayEffectSpecHandle을 생성
 		const FGameplayEffectSpecHandle SpecHandle = SourceASC->MakeOutgoingSpec(DamageEffectClass, GetAbilityLevel(), EffectContextHandle);
 
-		FAuraGameplayTags GameplayTags = FAuraGameplayTags::Get();
-
 		// 바로 위에서 만든 GE에 Damage 값을 할당해주기 위한 구문, Damage 타입별 태그와 함께 Damage 값을 부여
 		for (auto& Pair : DamageTypes)
 		{

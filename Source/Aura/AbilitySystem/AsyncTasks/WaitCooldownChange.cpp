@@ -58,7 +58,7 @@ void UWaitCooldownChange::OnActiveEffectAdded(UAbilitySystemComponent* TargetASC
 				}
 
 				// 남은 시간을 알립니다.
-				CooldownStart.Broadcast(TimeRemaining);
+				CooldownStart.Broadcast();
 			}
 		}
 	}
@@ -69,6 +69,6 @@ void UWaitCooldownChange::CooldownTagChanged(const FGameplayTag InCooldownTag, i
 	if (NewCount == 0)
 	{
 		// 부여된 Tag가 제거된 경우 들어오는 분기입니다.
-		CooldownEnd.Broadcast(0.f);
+		CooldownEnd.Broadcast();
 	}
 }

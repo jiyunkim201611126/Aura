@@ -8,7 +8,7 @@
 struct FActiveGameplayEffectHandle;
 struct FGameplayEffectSpec;
 class UAbilitySystemComponent;
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FCooldownChangeSignature, float, TimeRemaining);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FCooldownChangeSignature);
 
 /**
  * ASC에게 Cooldown Tag가 부여 및 제거되는 이벤트를 지켜보는 태스크입니다.
