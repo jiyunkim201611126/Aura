@@ -22,12 +22,6 @@ public:
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 	UAttributeSet* GetAttributeSet() const { return AttributeSet; }
 
-	UPROPERTY(EditDefaultsOnly)
-	TObjectPtr<ULevelUpInfo> LevelUpInfo;
-
-	FOnPlayerStatChangedSignature OnLevelChangedDelegate;
-	FOnPlayerStatChangedSignature OnXPChangedDelegate;
-
 	FORCEINLINE int32 GetPlayerLevel() const { return Level; }
 	FORCEINLINE int32 GetXP() const { return XP; }
 	
@@ -36,6 +30,13 @@ public:
 
 	void AddToLevel(int32 InLevel);
 	void AddToXP(const int32 InXP);
+
+public:
+	UPROPERTY(EditDefaultsOnly)
+	TObjectPtr<ULevelUpInfo> LevelUpInfo;
+
+	FOnPlayerStatChangedSignature OnLevelChangedDelegate;
+	FOnPlayerStatChangedSignature OnXPChangedDelegate;
 
 protected:
 	// Simulated Proxy와 다르게 Autonomous Proxy의 경우, 리스폰 시 유지되어야 하는 정보가 존재할 수 있습니다.
@@ -48,6 +49,12 @@ protected:
 	TObjectPtr<UAttributeSet> AttributeSet;
 
 private:
+	// PlayerState -> WidgetController -> Widget 로 로직 흐름을 구성했습니다.
+	// 위 흐름은 델리게이트를 통해 제어됩니다.
+	// 1. WidgetController가 PlayerState의 델리게이트에 콜백 바인드
+	// 2. Widget이 WidgetController의 델리게이트에 콜백 바인드
+	// 3. PlayerState에서 XP 변경 시 이 순서를 통해 전파됩니다.
+	
 	UPROPERTY(VisibleAnywhere, ReplicatedUsing = OnRep_Level)
 	int32 Level = 1;
 

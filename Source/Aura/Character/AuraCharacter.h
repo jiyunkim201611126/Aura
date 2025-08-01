@@ -11,17 +11,29 @@ class AURA_API AAuraCharacter : public AAuraCharacterBase
 
 public:
 	AAuraCharacter();
-
-	virtual void BeginPlay() override;
-
-	virtual void PossessedBy(AController* NewController) override;
+	
 	virtual void OnRep_PlayerState() override;
 
-	/** Combat Interface */
+	// ~Combat Interface
 	virtual void RegisterPawn() override;
 	virtual void UnregisterPawn() override;
 	virtual int32 GetPlayerLevel() override;
-	/** end Combat Interface*/
+	// ~End of Combat Interface
+
+protected:
+	// ~AActor Interface
+	virtual void BeginPlay() override;
+	// ~End of AActor Interface
+
+	// ~APawn Interface
+	virtual void PossessedBy(AController* NewController) override;
+	// ~End of APawn Interface
+	
+	// 게임 시작 시 Attribute를 초기화하는 함수
+	void InitializeDefaultAttributes() const;
+
+private:
+	virtual void InitAbilityActorInfo() override;
 
 protected:
 	// 게임 시작 시 Attribute 초기화를 위해 사용되는 GameplayEffect
@@ -33,10 +45,4 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Attributes")
 	TSubclassOf<UGameplayEffect> DefaultVitalAttributes;
-	
-	// 게임 시작 시 Attribute를 초기화하는 함수
-	void InitializeDefaultAttributes() const;
-
-private:
-	virtual void InitAbilityActorInfo() override;
 };

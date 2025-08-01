@@ -33,6 +33,7 @@ public:
 	// Tag를 매개변수로 받아 해당하는 InputAction을 아래 구조체 배열에서 탐색, 반환
 	const UInputAction* FindAbilityInputActionForTag(const FGameplayTag& InputTag, bool bLogNotFount);
 
+public:
 	// 블루프린트로 확장한 DataAsset에서 이 배열의 값을 초기화
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TArray<FAuraInputAction> AbilityInputActions;

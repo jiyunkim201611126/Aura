@@ -42,9 +42,10 @@ public:
 	int32 GetCurrentStack(FGameplayTag AbilityTag) const;
 
 private:
-	TMap<FGameplayTag, FAbilityStackData> AbilityStacks;
-
 	void StartRecharge(FGameplayTag AbilityTag);
 	void StopRecharge(FGameplayTag AbilityTag);
 	void Recharge(FGameplayTag AbilityTag);
+
+private:
+	TMap<FGameplayTag, FAbilityStackData> AbilityStacks;
 };

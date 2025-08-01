@@ -45,6 +45,7 @@ struct FGameplayEffectInfo
 	EEffectRemovalPolicy RemovalPolicy = EEffectRemovalPolicy::RemoveOnEndOverlap;
 
 	// 제거가 필요한 경우 추적을 위해 사용
+	UPROPERTY()
 	TMap<UAbilitySystemComponent*, FActiveGameplayEffectHandle> ActiveGameplayEffectHandle;
 };
 
@@ -61,9 +62,11 @@ class AURA_API AAuraEffectActor : public AActor
 
 public:
 	AAuraEffectActor();
-
+	
 protected:
+	// ~AActor Interface
 	virtual void BeginPlay() override;
+	// ~End of AActor Interface
 
 	UFUNCTION(BlueprintCallable)
 	void OnOverlap(AActor* TargetActor);
@@ -71,6 +74,7 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	void OnEndOverlap(AActor* TargetActor);
 
+protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Applied Effects")
 	bool bDestroyOnEffectApplication = false;
 

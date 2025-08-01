@@ -12,9 +12,14 @@ class AURA_API UDamageTextComponent : public UWidgetComponent
 public:	
 	UFUNCTION(BlueprintImplementableEvent)
 	void SetDamageText(float Damage, bool bBlockedHit, bool bCriticalHit);
-
+	
+	// ~UActorComponent Interface
 	virtual void BeginPlay() override;
 	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	// ~End of UActorComponent Interface
+
+private:
+	void InitMovement();
 
 private:
 	UPROPERTY(EditDefaultsOnly)
@@ -28,8 +33,7 @@ private:
 
 	// 현재 속도
 	FVector Velocity;
+	
 	// 하강 상태 여부
 	bool bIsFalling = false;
-	
-	void InitMovement();
 };

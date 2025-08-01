@@ -28,9 +28,10 @@ class AURA_API ULevelUpInfo : public UDataAsset
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(EditDefaultsOnly)
-	TArray<FAuraLevelUpInfo> LevelUpInformation;
-
 	// XP 보유량에 따라 레벨이 몇인지 탐색하는 함수입니다.
 	int32 FindLevelForXP(int32 XP) const;
+
+public:
+	UPROPERTY(EditDefaultsOnly)
+	TArray<FAuraLevelUpInfo> LevelUpInformation;
 };

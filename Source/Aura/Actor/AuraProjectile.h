@@ -17,18 +17,21 @@ class AURA_API AAuraProjectile : public AActor
 public:
 	AAuraProjectile();
 
+protected:
+	// ~AActor Interface
+	virtual void BeginPlay() override;
+	virtual void Destroyed() override;
+	// ~End of AActor Interface
+
+	UFUNCTION()
+	void OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+public:
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UProjectileMovementComponent> ProjectileMovement;
 
 	UPROPERTY(BlueprintReadWrite, meta = (ExposeOnSpawn = true))
 	FGameplayEffectSpecHandle DamageEffectSpecHandle;
-
-protected:
-	virtual void BeginPlay() override;
-	virtual void Destroyed() override;
-
-	UFUNCTION()
-	void OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
 private:
 	UPROPERTY(EditAnywhere)

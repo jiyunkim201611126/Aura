@@ -40,35 +40,6 @@ AAuraEnemy::AAuraEnemy()
 	Weapon->SetCustomDepthStencilValue(CUSTOM_DEPTH_RED);
 }
 
-void AAuraEnemy::PossessedBy(AController* NewController)
-{
-	Super::PossessedBy(NewController);
-
-	// AIController는 어떻게 행동할지 '판단'하는 클래스
-	// 클라이언트는 판단할 필요가 없으니 바로 return
-	if (!HasAuthority())
-	{
-		return;
-	}
-	AuraAIController = Cast<AAuraAIController>(NewController);
-	AuraAIController->GetBlackboardComponent()->InitializeBlackboard(*BehaviorTree->BlackboardAsset);
-	// 아래 값 할당 함수들은 반드시 RunBehaviorTree 이후에 호출합니다.
-	AuraAIController->RunBehaviorTree(BehaviorTree);
-	
-	AuraAIController->GetBlackboardComponent()->SetValueAsBool(FName("HitReacting"), false);
-	AuraAIController->GetBlackboardComponent()->SetValueAsFloat(FName("AgroRange"), AgroRange);
-	AuraAIController->GetBlackboardComponent()->SetValueAsFloat(FName("CombatRange"), CombatRange);
-	
-	if (AgroBehaviorTree)
-	{
-		AuraAIController->BehaviorTreeComponent->SetDynamicSubtree(FAuraGameplayTags::Get().BT_Sub_Agro, AgroBehaviorTree);
-	}
-	if (CombatBehaviorTree)
-	{
-		AuraAIController->BehaviorTreeComponent->SetDynamicSubtree(FAuraGameplayTags::Get().BT_Sub_Combat, CombatBehaviorTree);
-	}
-}
-
 void AAuraEnemy::HighlightActor()
 {
 	GetMesh()->SetRenderCustomDepth(true);
@@ -181,13 +152,32 @@ void AAuraEnemy::BeginPlay()
 	}
 }
 
-void AAuraEnemy::HitReactTagChanged(const FGameplayTag CallbackTag, int32 NewCount)
+void AAuraEnemy::PossessedBy(AController* NewController)
 {
-	bHitReacting = NewCount > 0;
-	GetCharacterMovement()->MaxWalkSpeed = bHitReacting ? 0.f : BaseWalkSpeed;
-	if (AuraAIController && AuraAIController->GetBlackboardComponent())
+	Super::PossessedBy(NewController);
+
+	// AIController는 어떻게 행동할지 '판단'하는 클래스
+	// 클라이언트는 판단할 필요가 없으니 바로 return
+	if (!HasAuthority())
 	{
-		AuraAIController->GetBlackboardComponent()->SetValueAsBool(FName("HitReacting"), bHitReacting);
+		return;
+	}
+	AuraAIController = Cast<AAuraAIController>(NewController);
+	AuraAIController->GetBlackboardComponent()->InitializeBlackboard(*BehaviorTree->BlackboardAsset);
+	// 아래 값 할당 함수들은 반드시 RunBehaviorTree 이후에 호출합니다.
+	AuraAIController->RunBehaviorTree(BehaviorTree);
+	
+	AuraAIController->GetBlackboardComponent()->SetValueAsBool(FName("HitReacting"), false);
+	AuraAIController->GetBlackboardComponent()->SetValueAsFloat(FName("AgroRange"), AgroRange);
+	AuraAIController->GetBlackboardComponent()->SetValueAsFloat(FName("CombatRange"), CombatRange);
+	
+	if (AgroBehaviorTree)
+	{
+		AuraAIController->BehaviorTreeComponent->SetDynamicSubtree(FAuraGameplayTags::Get().BT_Sub_Agro, AgroBehaviorTree);
+	}
+	if (CombatBehaviorTree)
+	{
+		AuraAIController->BehaviorTreeComponent->SetDynamicSubtree(FAuraGameplayTags::Get().BT_Sub_Combat, CombatBehaviorTree);
 	}
 }
 
@@ -210,4 +200,14 @@ void AAuraEnemy::AddCharacterStartupAbilities() const
 	// ASC 가져와서 장착 함수 호출
 	UAuraAbilitySystemComponent* AuraASC = CastChecked<UAuraAbilitySystemComponent>(AbilitySystemComponent);
 	AuraASC->AddAbilities(StartupAbilities);
+}
+
+void AAuraEnemy::HitReactTagChanged(const FGameplayTag CallbackTag, int32 NewCount)
+{
+	bHitReacting = NewCount > 0;
+	GetCharacterMovement()->MaxWalkSpeed = bHitReacting ? 0.f : BaseWalkSpeed;
+	if (AuraAIController && AuraAIController->GetBlackboardComponent())
+	{
+		AuraAIController->GetBlackboardComponent()->SetValueAsBool(FName("HitReacting"), bHitReacting);
+	}
 }

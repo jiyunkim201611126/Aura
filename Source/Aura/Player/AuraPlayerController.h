@@ -21,31 +21,48 @@ class AURA_API AAuraPlayerController : public APlayerController
 
 public:
 	AAuraPlayerController();
-	virtual void PlayerTick(float DeltaTime) override;
-	virtual void OnPossess(APawn* InPawn) override;
-	virtual void OnUnPossess() override;
-	
-	FHitResult CursorHit;
 
 	// Damage를 보여주는 위젯 컴포넌트를 스폰하는 함수
 	void SpawnDamageText(float DamageAmount, AActor* TargetActor, bool bBlockedHit, bool bCriticalHit) const;
 
 protected:
+	// ~AActor Interface
 	virtual void BeginPlay() override;
+	// ~End of AActor Interface
+	
+	// ~AController Interface
+	virtual void PlayerTick(float DeltaTime) override;
+	virtual void OnPossess(APawn* InPawn) override;
+	virtual void OnUnPossess() override;
+	// ~End of AController Interface
+
+	// ~APlayerController Interface
 	virtual void SetupInputComponent() override;
+	// ~End of APlayerController Interface
 
 private:
-	UPROPERTY(EditAnywhere, Category = "Input")
-	TObjectPtr<UInputMappingContext> AuraContext;
-
 	void CursorTrace();
-
-	TScriptInterface<IEnemyInterface> LastActor;
-	TScriptInterface<IEnemyInterface> ThisActor;
 
 	void AbilityInputTagPressed(FGameplayTag InputTag);
 	void AbilityInputTagHeld(FGameplayTag InputTag);
 	void AbilityInputTagReleased(FGameplayTag InputTag);
+	void ShiftPressed() { bShiftKeyDown = true; }
+	void ShiftReleased() { bShiftKeyDown = false; }
+
+	void Move(const FInputActionValue& InputActionValue);
+	void AutoRun();
+
+	UAuraAbilitySystemComponent* GetASC();
+
+public:
+	FHitResult CursorHit;
+	
+private:
+	UPROPERTY(EditAnywhere, Category = "Input")
+	TObjectPtr<UInputMappingContext> AuraContext;
+
+	TScriptInterface<IEnemyInterface> LastActor;
+	TScriptInterface<IEnemyInterface> ThisActor;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	TObjectPtr<UAuraInputConfig> InputConfig;
@@ -55,17 +72,11 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	TObjectPtr<UInputAction> ShiftAction;
-
-	void Move(const FInputActionValue& InputActionValue);
-
-	void ShiftPressed() { bShiftKeyDown = true; }
-	void ShiftReleased() { bShiftKeyDown = false; }
+	
 	bool bShiftKeyDown = false;
 
 	UPROPERTY()
 	TObjectPtr<UAuraAbilitySystemComponent> AuraAbilitySystemComponent;
-
-	UAuraAbilitySystemComponent* GetASC();
 
 	// 마우스 입력을 통한 Move를 구현하기 위한 관련 변수
 	FVector CachedDestination = FVector::ZeroVector;
@@ -78,8 +89,6 @@ private:
 	// FVector들을 추가해주면 자동으로 곡선 경로를 생성해주는 컴포넌트
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<USplineComponent> Spline;
-
-	void AutoRun();
 
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<UDamageTextComponent> DamageTextComponentClass;

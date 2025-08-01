@@ -16,6 +16,19 @@ class AURA_API UPawnManagerSubsystem : public UGameInstanceSubsystem
 {
 	GENERATED_BODY()
 
+public:
+	void RegisterPlayerPawn(APawn* InPawn);
+	void UnregisterPlayerPawn(APawn* InPawn);
+
+	UFUNCTION(BlueprintCallable)
+	TArray<APawn*> GetAllPlayerPawns();
+	
+	void RegisterAIPawn(APawn* InPawn);
+	void UnregisterAIPawn(APawn* InPawn);
+
+	UFUNCTION(BlueprintCallable)
+	TArray<APawn*> GetAllAIPawns();
+
 private:
 	UPROPERTY()
 	TArray<TWeakObjectPtr<APawn>> PlayerPawns;
@@ -31,17 +44,4 @@ private:
 
 	bool bPlayerPawnsCacheDirty = true;
 	bool bAIPawnsCacheDirty = true;
-
-public:
-	void RegisterPlayerPawn(APawn* InPawn);
-	void UnregisterPlayerPawn(APawn* InPawn);
-
-	UFUNCTION(BlueprintCallable)
-	TArray<APawn*> GetAllPlayerPawns();
-	
-	void RegisterAIPawn(APawn* InPawn);
-	void UnregisterAIPawn(APawn* InPawn);
-
-	UFUNCTION(BlueprintCallable)
-	TArray<APawn*> GetAllAIPawns();
 };

@@ -14,8 +14,12 @@ class AURA_API AAuraAIController : public AAIController
 
 public:
 	AAuraAIController();
+
+	
+	// ~AController Interface
 	virtual void OnPossess(APawn* InPawn) override;
 	virtual void OnUnPossess() override;
+	// ~End of AController Interface
 
 	UPROPERTY()
 	TObjectPtr<UBehaviorTreeComponent> BehaviorTreeComponent;

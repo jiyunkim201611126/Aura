@@ -36,6 +36,9 @@ class AURA_API UCharacterClassInfo : public UDataAsset
 	GENERATED_BODY()
 
 public:
+	FCharacterClassDefaultInfo GetClassDefaultInfo(ECharacterClass CharacterClass);
+
+public:
 	UPROPERTY(EditDefaultsOnly, Category = "Character Class Defaults")
 	TMap<ECharacterClass, FCharacterClassDefaultInfo> CharacterClassInformation;
 	
@@ -50,6 +53,4 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Common Class Defaults|Damage")
 	TObjectPtr<UCurveTable> DamageCalculationCoefficients;
-
-	FCharacterClassDefaultInfo GetClassDefaultInfo(ECharacterClass CharacterClass);
 };

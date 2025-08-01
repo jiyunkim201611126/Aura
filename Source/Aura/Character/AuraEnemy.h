@@ -18,24 +18,38 @@ class AURA_API AAuraEnemy : public AAuraCharacterBase, public IEnemyInterface
 
 public:
 	AAuraEnemy();
-	virtual void PossessedBy(AController* NewController) override;
 
-	/** Enemy Interface */
+	// ~Enemy Interface
 	virtual void HighlightActor() override;
 	virtual void UnHighlightActor() override;
 	virtual void SetCombatTarget_Implementation(AActor* InCombatTarget) override;
 	virtual AActor* GetCombatTarget_Implementation() const override;
-	/** end Enemy Interface */
+	// ~End of Enemy Interface
 
-	/** Combat Interface */
+	// ~Combat Interface
 	virtual void RegisterPawn() override;
 	virtual void UnregisterPawn() override;
 	virtual int32 GetPlayerLevel() override;
 	virtual void Die(bool bShouldAddImpulse, const FVector& Impulse) override;
-	/** end Combat Interface */
+	// ~End of Combat Interface
 
 	virtual void MulticastHandleDeath_Implementation(bool bShouldAddImpulse, const FVector& Impulse) override;
+	
+protected:
+	// ~AActor Interface
+	virtual void BeginPlay() override;
+	// ~End of AActor Interface
+	
+	// ~APawn Interface
+	virtual void PossessedBy(AController* NewController) override;
+	// ~End of APawn Interface
+	
+	virtual void InitAbilityActorInfo() override;
+	virtual void AddCharacterStartupAbilities() const override;
+	
+	void HitReactTagChanged(const FGameplayTag CallbackTag, int32 NewCount);
 
+public:
 	// 아래 2개의 델리게이트 선언으로 인해 이 클래스가 OverlayWidgetController를 참조하게 되었으나,
 	// 여기서 같은 델리게이트를 선언하거나 WidgetComponent를 위한 또 다른 WidgetController 클래스를 만드는 것보다 이게 더 단순함
 	// 물론 이 델리게이트의 선언부만 따로 클래스로 뽑아낼 수도 있겠지만, 당장은 이렇게 구현
@@ -44,8 +58,6 @@ public:
 	
 	UPROPERTY(BlueprintAssignable)
 	FOnAttributeChangedSignature OnMaxHealthChanged;
-	
-	void HitReactTagChanged(const FGameplayTag CallbackTag, int32 NewCount);
 
 	UPROPERTY(BlueprintReadOnly, Category = "Combat")
 	bool bHitReacting = false;
@@ -58,11 +70,6 @@ public:
 
 	UPROPERTY(BlueprintReadWrite, Category = "Combat")
 	TObjectPtr<AActor> CombatTarget;
-
-protected:
-	virtual void BeginPlay() override;
-	virtual void InitAbilityActorInfo() override;
-	virtual void AddCharacterStartupAbilities() const override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Character Class Defaults")
 	int32 Level = 1;

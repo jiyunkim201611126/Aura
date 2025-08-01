@@ -20,6 +20,37 @@ AAuraPlayerController::AAuraPlayerController()
 	Spline = CreateDefaultSubobject<USplineComponent>("Spline");
 }
 
+void AAuraPlayerController::SpawnDamageText(float DamageAmount, AActor* TargetActor, bool bBlockedHit, bool bCriticalHit) const
+{
+	if (IsValid(TargetActor) && DamageTextComponentClass && IsLocalController())
+	{
+		UDamageTextComponent* DamageText = NewObject<UDamageTextComponent>(TargetActor, DamageTextComponentClass);
+		// Component 생성 후 등록하는 과정, 위젯의 AddToViewport 같은 개념
+		DamageText->RegisterComponent();
+		DamageText->SetWorldTransform(TargetActor->GetTransform());
+		DamageText->SetDamageText(DamageAmount, bBlockedHit, bCriticalHit);
+	}
+}
+
+void AAuraPlayerController::BeginPlay()
+{
+	Super::BeginPlay();
+	check(AuraContext);
+
+	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
+	{
+		Subsystem->AddMappingContext(AuraContext, 0);
+	}
+
+	bShowMouseCursor = true;
+	DefaultMouseCursor = EMouseCursor::Default;
+
+	FInputModeGameAndUI InputModeData;
+	InputModeData.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+	InputModeData.SetHideCursorDuringCapture(false);
+	SetInputMode(InputModeData);
+}
+
 void AAuraPlayerController::PlayerTick(float DeltaTime)
 {
 	Super::PlayerTick(DeltaTime);
@@ -46,6 +77,22 @@ void AAuraPlayerController::OnUnPossess()
 	}
 	
 	Super::OnUnPossess();
+}
+
+void AAuraPlayerController::SetupInputComponent()
+{
+	Super::SetupInputComponent();
+
+	// InputComponent는 ProjectSettings의 Input 탭에서 지정한다.
+	UAuraInputComponent* AuraInputComponent = CastChecked<UAuraInputComponent>(InputComponent);
+
+	AuraInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AAuraPlayerController::Move);
+	AuraInputComponent->BindAction(ShiftAction, ETriggerEvent::Started, this, &AAuraPlayerController::ShiftPressed);
+	AuraInputComponent->BindAction(ShiftAction, ETriggerEvent::Completed, this, &AAuraPlayerController::ShiftReleased);
+
+	// InputComponent에게 InputConfig(DataAsset)과 함수 포인터들을 전달
+	AuraInputComponent->BindAbilityActions(InputConfig, this,
+		&ThisClass::AbilityInputTagPressed, &ThisClass::AbilityInputTagHeld, &ThisClass::AbilityInputTagReleased);
 }
 
 void AAuraPlayerController::CursorTrace()
@@ -90,73 +137,6 @@ void AAuraPlayerController::CursorTrace()
 		if (LastActor) LastActor->UnHighlightActor();
 		if (ThisActor) ThisActor->HighlightActor();
 	}
-}
-
-void AAuraPlayerController::AutoRun()
-{
-	if (!bAutoRunning) return;
-	if (APawn* ControlledPawn = GetPawn())
-	{
-		// 곡선 경로 전체 중 캐릭터의 위치로부터 가장 가까운 Location을 구함 
-		const FVector LocationOnSpline = Spline->FindLocationClosestToWorldLocation(ControlledPawn->GetActorLocation(), ESplineCoordinateSpace::World);
-		// 구해진 해당 Location을 통해 곡선의 방향을 구함
-		const FVector Direction = Spline->FindDirectionClosestToWorldLocation(LocationOnSpline, ESplineCoordinateSpace::World);
-		// 해당 방향으로 이동 시작
-		ControlledPawn->AddMovementInput(Direction);
-
-		const float DistanceToDestination = (LocationOnSpline - CachedDestination).Length();
-		if (DistanceToDestination <= AutoRunAcceptanceRadius)
-		{
-			bAutoRunning = false;
-		}
-	}
-}
-
-void AAuraPlayerController::SpawnDamageText(float DamageAmount, AActor* TargetActor, bool bBlockedHit, bool bCriticalHit) const
-{
-	if (IsValid(TargetActor) && DamageTextComponentClass && IsLocalController())
-	{
-		UDamageTextComponent* DamageText = NewObject<UDamageTextComponent>(TargetActor, DamageTextComponentClass);
-		// Component 생성 후 등록하는 과정, 위젯의 AddToViewport 같은 개념
-		DamageText->RegisterComponent();
-		DamageText->SetWorldTransform(TargetActor->GetTransform());
-		DamageText->SetDamageText(DamageAmount, bBlockedHit, bCriticalHit);
-	}
-}
-
-void AAuraPlayerController::BeginPlay()
-{
-	Super::BeginPlay();
-	check(AuraContext);
-
-	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
-	{
-		Subsystem->AddMappingContext(AuraContext, 0);
-	}
-
-	bShowMouseCursor = true;
-	DefaultMouseCursor = EMouseCursor::Default;
-
-	FInputModeGameAndUI InputModeData;
-	InputModeData.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
-	InputModeData.SetHideCursorDuringCapture(false);
-	SetInputMode(InputModeData);
-}
-
-void AAuraPlayerController::SetupInputComponent()
-{
-	Super::SetupInputComponent();
-
-	// InputComponent는 ProjectSettings의 Input 탭에서 지정한다.
-	UAuraInputComponent* AuraInputComponent = CastChecked<UAuraInputComponent>(InputComponent);
-
-	AuraInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AAuraPlayerController::Move);
-	AuraInputComponent->BindAction(ShiftAction, ETriggerEvent::Started, this, &AAuraPlayerController::ShiftPressed);
-	AuraInputComponent->BindAction(ShiftAction, ETriggerEvent::Completed, this, &AAuraPlayerController::ShiftReleased);
-
-	// InputComponent에게 InputConfig(DataAsset)과 함수 포인터들을 전달
-	AuraInputComponent->BindAbilityActions(InputConfig, this,
-		&ThisClass::AbilityInputTagPressed, &ThisClass::AbilityInputTagHeld, &ThisClass::AbilityInputTagReleased);
 }
 
 void AAuraPlayerController::AbilityInputTagPressed(FGameplayTag InputTag)
@@ -288,6 +268,26 @@ void AAuraPlayerController::Move(const FInputActionValue& InputActionValue)
 	{
 		ControlledPawn->AddMovementInput(ForwardDirection, InputAxisVector.Y);
 		ControlledPawn->AddMovementInput(RightDirection, InputAxisVector.X);
+	}
+}
+
+void AAuraPlayerController::AutoRun()
+{
+	if (!bAutoRunning) return;
+	if (APawn* ControlledPawn = GetPawn())
+	{
+		// 곡선 경로 전체 중 캐릭터의 위치로부터 가장 가까운 Location을 구함 
+		const FVector LocationOnSpline = Spline->FindLocationClosestToWorldLocation(ControlledPawn->GetActorLocation(), ESplineCoordinateSpace::World);
+		// 구해진 해당 Location을 통해 곡선의 방향을 구함
+		const FVector Direction = Spline->FindDirectionClosestToWorldLocation(LocationOnSpline, ESplineCoordinateSpace::World);
+		// 해당 방향으로 이동 시작
+		ControlledPawn->AddMovementInput(Direction);
+
+		const float DistanceToDestination = (LocationOnSpline - CachedDestination).Length();
+		if (DistanceToDestination <= AutoRunAcceptanceRadius)
+		{
+			bAutoRunning = false;
+		}
 	}
 }
 

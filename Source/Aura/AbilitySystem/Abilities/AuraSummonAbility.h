@@ -10,6 +10,13 @@ class AURA_API UAuraSummonAbility : public UAuraGameplayAbility
 {
 	GENERATED_BODY()
 
+public:
+	UFUNCTION(BlueprintCallable)
+	TArray<FVector> GetSpawnLocations();
+
+	UFUNCTION(BlueprintPure, Category = "Summoning")
+	TSubclassOf<APawn> GetRandomMinionClass() const;
+
 private:
 	// 한 번에 스폰하는 하수인 수
 	UPROPERTY(EditAnywhere, Category = "Summoning")
@@ -27,17 +34,8 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Summoning")
 	float SpawnSpread = 90.f;
 
-public:
-	UFUNCTION(BlueprintCallable)
-	TArray<FVector> GetSpawnLocations();
-
-	UFUNCTION(BlueprintPure, Category = "Summoning")
-	TSubclassOf<APawn> GetRandomMinionClass() const;
-
-public:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Stackable")
-	FAbilityStackData StackData;
-
+	
+	// ~Stackable Ability Interface
 protected:
 	virtual void OnGiveAbility(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec) override;
 	virtual bool CheckCost(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, FGameplayTagContainer* OptionalRelevantTags = nullptr) const override;
@@ -45,4 +43,9 @@ protected:
 	virtual void OnRemoveAbility(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec) override;
 	
 	UStackableAbilityComponent* GetStackableAbilityComponent(const FGameplayAbilityActorInfo* ActorInfo) const;
+	
+public:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Stackable")
+	FAbilityStackData StackData;
+	// ~End of Stackable Ability Interface
 };

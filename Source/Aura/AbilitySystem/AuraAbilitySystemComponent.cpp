@@ -21,6 +21,7 @@ void UAuraAbilitySystemComponent::AddCharacterAbilities(const TArray<TSubclassOf
 			// Ability 장착
 			GiveAbility(AbilitySpec);
 			// 부여된 Ability를 HUD에 스킬 아이콘으로 표시하기 위해 델리게이트를 Broadcast합니다.
+			// 해당 함수는 서버에서만 호출되기 때문에, 클라이언트에서 OnRep 함수로 따로 Broadcast해줍니다.
 			AbilitiesGivenDelegate.Broadcast(AbilitySpec);
 		}
 	}
