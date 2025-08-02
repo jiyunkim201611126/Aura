@@ -23,6 +23,7 @@ public:
 	AAuraPlayerController();
 
 	// Damage를 보여주는 위젯 컴포넌트를 스폰하는 함수
+	UFUNCTION(Reliable, Client)
 	void SpawnDamageText(float DamageAmount, AActor* TargetActor, bool bBlockedHit, bool bCriticalHit) const;
 
 protected:

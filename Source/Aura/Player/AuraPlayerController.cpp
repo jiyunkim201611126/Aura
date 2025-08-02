@@ -20,7 +20,7 @@ AAuraPlayerController::AAuraPlayerController()
 	Spline = CreateDefaultSubobject<USplineComponent>("Spline");
 }
 
-void AAuraPlayerController::SpawnDamageText(float DamageAmount, AActor* TargetActor, bool bBlockedHit, bool bCriticalHit) const
+void AAuraPlayerController::SpawnDamageText_Implementation(float DamageAmount, AActor* TargetActor, bool bBlockedHit, bool bCriticalHit) const
 {
 	if (IsValid(TargetActor) && DamageTextComponentClass && IsLocalController())
 	{

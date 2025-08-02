@@ -44,6 +44,7 @@ protected:
 	// ~End of APawn Interface
 	
 	virtual void InitAbilityActorInfo() override;
+	virtual void AddCharacterStartupAbilities() const override;
 	
 	void HitReactTagChanged(const FGameplayTag CallbackTag, int32 NewCount);
 

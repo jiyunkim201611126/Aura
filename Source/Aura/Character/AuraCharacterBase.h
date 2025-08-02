@@ -35,10 +35,7 @@ public:
 
 	UFUNCTION(NetMulticast, Reliable)
 	virtual void MulticastHandleDeath(bool bShouldAddImpulse, const FVector& Impulse);
-
-	UFUNCTION(NetMulticast, Reliable)
-	void MulticastSpawnDamageText(float Damage, bool bBlockedHit, bool bCriticalHit);
-
+	
 protected:
 	// ~AActor Interface
 	virtual void BeginPlay() override;
@@ -88,13 +85,13 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Combat")
 	FGameplayTag DeathSoundTag;
 	
-private:
 	// 게임 시작 시 장착하고 있는 Ability
 	UPROPERTY(EditAnywhere, Category = "Abilities")
 	TArray<TSubclassOf<UGameplayAbility>> StartupAbilities;
 	
 	UPROPERTY(EditAnywhere, Category = "Abilities")
 	TArray<TSubclassOf<UGameplayAbility>> StartupPassiveAbilities;
-
+	
+private:
 	bool bDead = false;
 };

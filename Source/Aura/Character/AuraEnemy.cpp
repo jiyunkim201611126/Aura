@@ -193,6 +193,16 @@ void AAuraEnemy::InitAbilityActorInfo()
 	}
 }
 
+void AAuraEnemy::AddCharacterStartupAbilities() const
+{
+	if (!HasAuthority()) return;
+
+	// ASC 가져와서 부여 함수 호출
+	UAuraAbilitySystemComponent* AuraASC = CastChecked<UAuraAbilitySystemComponent>(AbilitySystemComponent);
+	AuraASC->AddAbilities(StartupAbilities);
+	AuraASC->AddCharacterPassiveAbilities(StartupPassiveAbilities);
+}
+
 void AAuraEnemy::HitReactTagChanged(const FGameplayTag CallbackTag, int32 NewCount)
 {
 	bHitReacting = NewCount > 0;

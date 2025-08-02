@@ -2,12 +2,13 @@
 
 #include "Net/UnrealNetwork.h"
 #include "GameplayEffectExtension.h"
-#include "GameFramework/Character.h"
 #include "AbilitySystemBlueprintLibrary.h"
 #include "Aura/Manager/AuraGameplayTags.h"
 #include "Aura/Interaction/CombatInterface.h"
 #include "AuraAbilitySystemLibrary.h"
+#include "EngineUtils.h"
 #include "Aura/Character/AuraCharacterBase.h"
+#include "Aura/Player/AuraPlayerController.h"
 
 UAuraAttributeSet::UAuraAttributeSet()
 {
@@ -147,19 +148,26 @@ void UAuraAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallba
 
 			if (AAuraCharacterBase* HitCharacter = Cast<AAuraCharacterBase>(Props.TargetCharacter))
 			{
-				// NetMulticast 함수는 그 Actor를 가진 클라이언트에서 호출됨
-				// PlayerController는 클라이언트마다 1개씩 있기 때문에, PlayerController를 거치는 경우 제대로 전파되지 않음
-				// 따라서 데미지를 입은 캐릭터를 통해 전파함
-				HitCharacter->MulticastSpawnDamageText(LocalIncomingDamage, bBlockedHit, bCriticalHit);
+				// 데미지를 Text로 표시하는 위젯 컴포넌트를 AttributeSet이 직접 스폰하려면 그 클래스를 참조하고 있어야 합니다.
+				// 즉, 클라이언트당 하나만 있어도 되는 포인터가 AttributeSet마다 하나씩 있게 되기 때문에 메모리가 낭비됩니다.
+				// 따라서 클라이언트당 하나만 있는 PlayerController를 통해 스폰시켜주는 편이 메모리면에서 이득입니다.
+				// 다만 NetMulticast 함수는 '그 액터가 클라이언트에 존재할 때'만 호출되므로, PlayerController를 순회하며 Client함수를 호출합니다.
+				for (TActorIterator<AAuraPlayerController> It(GetWorld()); It; ++It)
+				{
+					It->SpawnDamageText(LocalIncomingDamage, HitCharacter, bBlockedHit, bCriticalHit);
+				}
 			}
 		}
 		else if (LocalIncomingDamage < 0.01f)
 		{
-			// 데미지가 0.01보다 작으면 체력 감소나 애니메이션 재생 없이 데미지만 표기
+			// 데미지가 0.01보다 작으면 체력 감소나 애니메이션 재생 없이 NoDamage 표시
 			SetIncomingDamage(0.f);
 			if (AAuraCharacterBase* HitCharacter = Cast<AAuraCharacterBase>(Props.TargetCharacter))
 			{
-				HitCharacter->MulticastSpawnDamageText(0.f, false, false);
+				for (TActorIterator<AAuraPlayerController> It(GetWorld()); It; ++It)
+				{
+					It->SpawnDamageText(LocalIncomingDamage, HitCharacter, false, false);
+				}
 			}
 		}
 	}

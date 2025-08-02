@@ -215,7 +215,7 @@ public:
 	 * Meta Attributes
 	 * 
 	 * 값 변화가 있을 때 위에서 선언한 Attribute에 바로 적용하는 게 아니라 중간다리 역할을 해주는 Attribute를 선언해 사용합니다.
-	 * Meta Attribute는 클라이언트에서만 사용되는 변수입니다.
+	 * Meta Attribute는 복제되지 않습니다.
 	 * 
 	 * Meta Attribute 없이 직접 적용하는 방식은 각 효과의 순서가 매우 중요해집니다.
 	 * 예를 들어 데미지 경감 효과를 나중에 계산한다면 캐릭터의 Health가 양수임에도 잠시 0 이하로 내려가는 상황이 발생, 캐릭터가 의도치 않게 사망할 수 있습니다.
