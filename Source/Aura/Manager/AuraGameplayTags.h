@@ -14,7 +14,7 @@ struct FAuraGameplayTags
 	static const FAuraGameplayTags& Get() { return GameplayTags; }
 	static void InitializeNativeGameplayTags();
 
-	/** Attributes */
+	// ~Attributes
 	FGameplayTag Attributes_Vital_Health;
 	FGameplayTag Attributes_Vital_Mana;
 	
@@ -38,18 +38,20 @@ struct FAuraGameplayTags
 	FGameplayTag Attributes_Resistance_Lightning;
 	FGameplayTag Attributes_Resistance_Arcane;
 	FGameplayTag Attributes_Resistance_Physical;
-	/** End Attributes */
+	
+	FGameplayTag Attributes_Meta_IncomingXP;
+	// ~End of Attributes
 
-	/** Input Tags */
+	// ~Input Tags
 	FGameplayTag InputTag_1;
 	FGameplayTag InputTag_2;
 	FGameplayTag InputTag_3;
 	FGameplayTag InputTag_4;
 	FGameplayTag InputTag_LMB;
 	FGameplayTag InputTag_RMB;
-	/** End Input Tags */
+	// ~End of Input Tags
 
-	/** Damage Type */
+	// ~Damage Type
 	FGameplayTag Damage;
 	FGameplayTag Damage_Fire;
 	FGameplayTag Damage_Lightning;
@@ -58,58 +60,58 @@ struct FAuraGameplayTags
 
 	// 데미지 타입과 Resistance 타입을 묶는 TMap
 	TMap<FGameplayTag, FGameplayTag> DamageTypesToResistances;
-	/** End Damage Type */
+	// ~End of Damage Type
 	
-	/** Common Abilities */
+	// ~Common Abilities
 	// GameplayEffect가 이 태그를 갖고 있어야 HitReact가 발동됩니다.
 	FGameplayTag Effects_GrantHitReact;
 	FGameplayTag Effects_HitReact;
-	/** End Common Abilities */
+	// ~End of Common Abilities
 
-	/** Abilities and Cooldown */
+	// ~Abilities and Cooldown
 	FGameplayTag Abilities_Attack;
 	FGameplayTag Abilities_Summon;
 	
 	FGameplayTag Abilities_Fire_FireBolt;
 	FGameplayTag Cooldown_Fire_FireBolt;
-	/** End Abilities and Cooldown */
+	// ~End of Abilities and Cooldown
 
-	/** Combat Sockets */
+	// ~Combat Sockets
 	FGameplayTag CombatSocket_Weapon;
 	FGameplayTag CombatSocket_LeftHand;
 	FGameplayTag CombatSocket_RightHand;
 	FGameplayTag CombatSocket_Tail;
-	/** End Combat Sockets */
+	// ~End of Combat Sockets
 
-	/** Attack Sounds */
+	// ~Attack Sounds
 	FGameplayTag Sound_Attack_Swipe;
-	/** End Attack Sounds */
+	// ~End of Attack Sounds
 
-	/** Projectile Sounds */
+	// ~Projectile Sounds
 	FGameplayTag Sound_Projectile_Looping_FireBolt;
 	
 	FGameplayTag Sound_Projectile_Impact_FireBolt;
 	FGameplayTag Sound_Projectile_Impact_Rock;
-	/** End Projectile Sounds */
+	// ~End of Projectile Sounds
 
-	/** Death Sounds */
+	// ~Death Sounds
 	FGameplayTag Sound_Death_Goblin;
 	FGameplayTag Sound_Death_Ghoul;
 	FGameplayTag Sound_Death_Demon;
-	/** End Death Sounds */
+	// ~End of Death Sounds
 
-	/** Niagaras */
+	// ~Niagaras
 	FGameplayTag Niagara_BloodImpact_Red;
 	FGameplayTag Niagara_BloodImpact_Green;
 	
 	FGameplayTag Niagara_Projectile_Impact_FireBolt;
 	FGameplayTag Niagara_Projectile_Impact_Rock;
-	/** End Niagaras */
+	// ~End of Niagaras
 
-	/** BehaviorTree */
+	// ~BehaviorTree
 	FGameplayTag BT_Sub_Agro;
 	FGameplayTag BT_Sub_Combat;
-	/** End BehaviorTree */
+	// ~End of BehaviorTree
 
 private:
 	static FAuraGameplayTags GameplayTags;

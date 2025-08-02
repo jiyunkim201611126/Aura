@@ -1,8 +1,9 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "GameplayTagContainer.h"
 #include "UObject/Interface.h"
+#include "GameplayTagContainer.h"
+#include "Aura/AbilitySystem/Data/EliminateRewardInfo.h"
 #include "CombatInterface.generated.h"
 
 /**
@@ -47,4 +48,7 @@ public:
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	AActor* GetAvatar();
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	ECharacterRank GetCharacterRank();
 };

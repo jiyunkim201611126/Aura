@@ -86,6 +86,11 @@ AActor* AAuraCharacterBase::GetAvatar_Implementation()
 	return this;
 }
 
+ECharacterRank AAuraCharacterBase::GetCharacterRank_Implementation()
+{
+	return CharacterRank;
+}
+
 void AAuraCharacterBase::MulticastHandleDeath_Implementation(bool bShouldAddImpulse, const FVector& Impulse)
 {
 	UWorld* World = GetWorld();
@@ -162,9 +167,10 @@ void AAuraCharacterBase::AddCharacterStartupAbilities() const
 {
 	if (!HasAuthority()) return;
 
-	// ASC 가져와서 장착 함수 호출
+	// ASC 가져와서 부여 함수 호출
 	UAuraAbilitySystemComponent* AuraASC = CastChecked<UAuraAbilitySystemComponent>(AbilitySystemComponent);
 	AuraASC->AddCharacterAbilities(StartupAbilities);
+	AuraASC->AddCharacterPassiveAbilities(StartupPassiveAbilities);
 }
 
 void AAuraCharacterBase::Dissolve()

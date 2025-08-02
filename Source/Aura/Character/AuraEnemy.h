@@ -4,7 +4,6 @@
 #include "AuraCharacterBase.h"
 #include "Aura/Interaction/EnemyInterface.h"
 #include "Aura/UI/WidgetController/OverlayWidgetController.h"
-#include "Aura/AbilitySystem/Data/CharacterClassInfo.h"
 #include "AuraEnemy.generated.h"
 
 class UWidgetComponent;
@@ -45,7 +44,6 @@ protected:
 	// ~End of APawn Interface
 	
 	virtual void InitAbilityActorInfo() override;
-	virtual void AddCharacterStartupAbilities() const override;
 	
 	void HitReactTagChanged(const FGameplayTag CallbackTag, int32 NewCount);
 
@@ -65,6 +63,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat")
 	float BaseWalkSpeed = 250.f;
 
+	// Die 함수 호출 시 해당 시간 이후 객체가 파괴됩니다.
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat")
 	float LifeSpan = 5.f;
 
@@ -74,12 +73,13 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Character Class Defaults")
 	int32 Level = 1;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Character Class Defaults")
-	ECharacterClass CharacterClass = ECharacterClass::Elementalist;
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<UWidgetComponent> HealthBar;
 
+	/**
+	 * AI
+	 */
+	
 	UPROPERTY()
 	TObjectPtr<AAuraAIController> AuraAIController;
 

@@ -18,6 +18,8 @@ public:
 
 	// 키 입력에 따라 발동하는 Ability를 장착하는 플레이어 캐릭터용 함수입니다. UAuraGameplayAbility를 사용합니다.
 	void AddCharacterAbilities(const TArray<TSubclassOf<UGameplayAbility>>& StartupAbilities);
+	// 키 입력과 관계 없는 PassiveAbility를 장착하는 범용 함수입니다. UAuraGameplayAbility를 사용합니다.
+	void AddCharacterPassiveAbilities(const TArray<TSubclassOf<UGameplayAbility>>& StartupAbilities);
 	// 키 입력과 관계 없는 Ability를 장착하는 범용 함수입니다. UGameplayAbility를 사용합니다.
 	void AddAbilities(const TArray<TSubclassOf<UGameplayAbility>>& Abilities);
 	

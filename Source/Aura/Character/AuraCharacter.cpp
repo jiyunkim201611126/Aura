@@ -13,6 +13,8 @@ AAuraCharacter::AAuraCharacter()
 {
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Ally, ECR_Block);
 	GetMesh()->SetCollisionResponseToChannel(ECC_Ally, ECR_Block);
+
+	CharacterClass = ECharacterClass::Elementalist;
 }
 
 void AAuraCharacter::BeginPlay()

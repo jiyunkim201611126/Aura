@@ -96,6 +96,7 @@ void UAuraAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallba
 		SetMana(FMath::Clamp(GetMana(), 0.f, GetMaxMana()));
 	}
 
+	// IncomingDamage Attribute에 값 변화가 있는 경우 데미지 로직 시작
 	if (Data.EvaluatedData.Attribute == GetIncomingDamageAttribute())
 	{
 		const float LocalIncomingDamage = GetIncomingDamage();
@@ -161,6 +162,14 @@ void UAuraAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallba
 				HitCharacter->MulticastSpawnDamageText(0.f, false, false);
 			}
 		}
+	}
+
+	// IncomingXP Attribute에 값 변화가 있는 경우 경험치 증가 및 레벨업 로직 시작
+	if (Data.EvaluatedData.Attribute == GetIncomingXPAttribute())
+	{
+		const float LocalIncomingXP = GetIncomingXP();
+		SetIncomingXP(0.f);
+		SetMana(FMath::Clamp(GetMana(), 0.f, GetMaxMana()));
 	}
 }
 

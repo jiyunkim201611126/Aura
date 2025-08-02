@@ -4,6 +4,7 @@
 #include "AbilitySystemInterface.h"
 #include "Aura/Interaction/CombatInterface.h"
 #include "GameFramework/Character.h"
+#include "Aura/AbilitySystem/Data/CharacterClassInfo.h"
 #include "AuraCharacterBase.generated.h"
 
 class UAbilitySystemComponent;
@@ -29,6 +30,7 @@ public:
 	virtual void Die(bool bShouldAddImpulse, const FVector& Impulse) override;
 	virtual bool IsDead_Implementation() override;
 	virtual AActor* GetAvatar_Implementation() override;
+	virtual ECharacterRank GetCharacterRank_Implementation() override;
 	// ~End of Combat Interface
 
 	UFUNCTION(NetMulticast, Reliable)
@@ -58,6 +60,13 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent)
 	void StartDissolveTimeline(UMaterialInstanceDynamic* DynamicMaterialInstance, UMaterialInstanceDynamic* WeaponDynamicMaterialInstance);
 
+public:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Character Class Defaults")
+	ECharacterClass CharacterClass = ECharacterClass::Elementalist;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Character Rank")
+	ECharacterRank CharacterRank = ECharacterRank::Normal;
+
 protected:
 	// 모든 캐릭터가 무기를 사용하는 건 아니지만, 확장성과 유연성을 위해 선언해놓습니다.
 	// 무기가 없는 캐릭터라도, 캐릭터에게 '무기처럼 보이는 이펙트'나 '임시 무기'를 쥐여줘야 하는 때에 무리 없이 구현할 수 있습니다.
@@ -75,14 +84,17 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TObjectPtr<UMaterialInstance> WeaponDissolveMaterialInstance;
-	
-	// 게임 시작 시 장착하고 있는 Ability
-	UPROPERTY(EditAnywhere, Category = "Abilities")
-	TArray<TSubclassOf<UGameplayAbility>> StartupAbilities;
 
 	UPROPERTY(EditAnywhere, Category = "Combat")
 	FGameplayTag DeathSoundTag;
-
+	
 private:
+	// 게임 시작 시 장착하고 있는 Ability
+	UPROPERTY(EditAnywhere, Category = "Abilities")
+	TArray<TSubclassOf<UGameplayAbility>> StartupAbilities;
+	
+	UPROPERTY(EditAnywhere, Category = "Abilities")
+	TArray<TSubclassOf<UGameplayAbility>> StartupPassiveAbilities;
+
 	bool bDead = false;
 };

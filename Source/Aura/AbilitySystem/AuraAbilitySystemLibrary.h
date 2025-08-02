@@ -64,4 +64,7 @@ public:
 	// 적용된 Duration 기반 GameplayEffect를 Tag로 추적, 남은 시간을 반환하는 함수입니다.
 	UFUNCTION(BlueprintCallable, Category = "AuraAbilitySystemLibrary | GameplayEffects")
 	static float GetRemainingTimeByTag(UAbilitySystemComponent* ASC, FGameplayTag Tag);
+
+	UFUNCTION(BlueprintCallable, Category = "AuraAbilitySystemLibrary | GameplayEffects", meta = (WorldContext = "WorldContextObject"))
+	static int32 GetXPRewardForRankAndLevel(const UObject* WorldContextObject, ECharacterRank CharacterRank, int32 CharacterLevel);
 };

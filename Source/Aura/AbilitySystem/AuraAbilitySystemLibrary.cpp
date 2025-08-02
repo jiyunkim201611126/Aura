@@ -9,7 +9,7 @@
 #include "AuraAttributeSet.h"
 #include "Aura/AuraAbilityTypes.h"
 #include "Aura/Interaction/CombatInterface.h"
-#include "Aura/Aura.h"
+#include "Data/EliminateRewardInfo.h"
 
 UOverlayWidgetController* UAuraAbilitySystemLibrary::GetOverlayWidgetController(const UObject* WorldContextObject)
 {
@@ -197,4 +197,18 @@ float UAuraAbilitySystemLibrary::GetRemainingTimeByTag(UAbilitySystemComponent* 
 	}
 	
 	return MaxTime;
+}
+
+int32 UAuraAbilitySystemLibrary::GetXPRewardForRankAndLevel(const UObject* WorldContextObject, ECharacterRank CharacterRank, int32 CharacterLevel)
+{
+	AAuraGameModeBase* AuraGameMode = Cast<AAuraGameModeBase>(UGameplayStatics::GetGameMode(WorldContextObject));
+	if (AuraGameMode == nullptr)
+	{
+		return 0;
+	}
+
+	const FEliminateRewardDefaultInfo Info = AuraGameMode->EliminateRewardInfo->GetEliminateRewardInfoByRank(CharacterRank);
+	const float XPReward = Info.XPReward.GetValueAtLevel(CharacterLevel);
+
+	return XPReward;
 }
