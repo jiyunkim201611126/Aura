@@ -120,7 +120,7 @@ void UAuraAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallba
 					if (SourceObject)
 					{
 						bShouldAddImpulse = true;
-						FVector TargetLocation = Props.TargetCharacter->GetActorLocation();
+						FVector TargetLocation = Props.TargetAvatarActor->GetActorLocation();
 						TargetLocation.Z = 0.f;
 						FVector SourceLocation = SourceObject->GetActorLocation();
 						SourceLocation.Z = 0.f;
@@ -129,6 +129,7 @@ void UAuraAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallba
 					}
 					CombatInterface->Die(bShouldAddImpulse, Impulse);
 				}
+				SendXPEvent(Props);
 			}
 			else
 			{
@@ -146,28 +147,22 @@ void UAuraAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallba
 			const bool bBlockedHit = UAuraAbilitySystemLibrary::IsBlockedHit(Props.EffectContextHandle);
 			const bool bCriticalHit = UAuraAbilitySystemLibrary::IsCriticalHit(Props.EffectContextHandle);
 
-			if (AAuraCharacterBase* HitCharacter = Cast<AAuraCharacterBase>(Props.TargetCharacter))
+			// 데미지를 Text로 표시하는 위젯 컴포넌트를 AttributeSet이 직접 스폰하려면 그 클래스를 참조하고 있어야 합니다.
+			// 즉, 클라이언트당 하나만 있어도 되는 포인터가 AttributeSet마다 하나씩 있게 되기 때문에 메모리가 낭비됩니다.
+			// 따라서 클라이언트당 하나만 있는 PlayerController를 통해 스폰시켜주는 편이 메모리면에서 이득입니다.
+			// 다만 NetMulticast 함수는 '그 액터가 클라이언트에 존재할 때'만 호출되므로, PlayerController를 순회하며 Client함수를 호출합니다.
+			for (TActorIterator<AAuraPlayerController> It(GetWorld()); It; ++It)
 			{
-				// 데미지를 Text로 표시하는 위젯 컴포넌트를 AttributeSet이 직접 스폰하려면 그 클래스를 참조하고 있어야 합니다.
-				// 즉, 클라이언트당 하나만 있어도 되는 포인터가 AttributeSet마다 하나씩 있게 되기 때문에 메모리가 낭비됩니다.
-				// 따라서 클라이언트당 하나만 있는 PlayerController를 통해 스폰시켜주는 편이 메모리면에서 이득입니다.
-				// 다만 NetMulticast 함수는 '그 액터가 클라이언트에 존재할 때'만 호출되므로, PlayerController를 순회하며 Client함수를 호출합니다.
-				for (TActorIterator<AAuraPlayerController> It(GetWorld()); It; ++It)
-				{
-					It->SpawnDamageText(LocalIncomingDamage, HitCharacter, bBlockedHit, bCriticalHit);
-				}
+				It->SpawnDamageText(LocalIncomingDamage, Props.TargetAvatarActor, bBlockedHit, bCriticalHit);
 			}
 		}
 		else if (LocalIncomingDamage < 0.01f)
 		{
 			// 데미지가 0.01보다 작으면 체력 감소나 애니메이션 재생 없이 NoDamage 표시
 			SetIncomingDamage(0.f);
-			if (AAuraCharacterBase* HitCharacter = Cast<AAuraCharacterBase>(Props.TargetCharacter))
+			for (TActorIterator<AAuraPlayerController> It(GetWorld()); It; ++It)
 			{
-				for (TActorIterator<AAuraPlayerController> It(GetWorld()); It; ++It)
-				{
-					It->SpawnDamageText(LocalIncomingDamage, HitCharacter, false, false);
-				}
+				It->SpawnDamageText(LocalIncomingDamage, Props.TargetAvatarActor, false, false);
 			}
 		}
 	}
@@ -177,7 +172,6 @@ void UAuraAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallba
 	{
 		const float LocalIncomingXP = GetIncomingXP();
 		SetIncomingXP(0.f);
-		SetMana(FMath::Clamp(GetMana(), 0.f, GetMaxMana()));
 	}
 }
 
@@ -211,6 +205,22 @@ void UAuraAttributeSet::SetEffectProperties(const FGameplayEffectModCallbackData
 		Props.TargetController = Data.Target.AbilityActorInfo->PlayerController.Get();
 		Props.TargetCharacter = Cast<ACharacter>(Props.TargetAvatarActor);
 		Props.TargetASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(Props.TargetAvatarActor);
+	}
+}
+
+void UAuraAttributeSet::SendXPEvent(const FEffectProperties& Props)
+{
+	if (ICombatInterface* CombatInterface = Cast<ICombatInterface>(Props.TargetAvatarActor))
+	{
+		const int32 TargetLevel = CombatInterface->GetPlayerLevel();
+		const ECharacterRank TargetRank = ICombatInterface::Execute_GetCharacterRank(Props.TargetAvatarActor);
+		const int32 XPReward = UAuraAbilitySystemLibrary::GetXPRewardForRankAndLevel(Props.TargetAvatarActor, TargetRank, TargetLevel);
+
+		const FAuraGameplayTags& GameplayTags = FAuraGameplayTags::Get();
+		FGameplayEventData Payload;
+		Payload.EventTag = GameplayTags.Attributes_Meta_IncomingXP;
+		Payload.EventMagnitude = XPReward;
+		UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(Props.SourceCharacter, GameplayTags.Attributes_Meta_IncomingXP, Payload);
 	}
 }
 
