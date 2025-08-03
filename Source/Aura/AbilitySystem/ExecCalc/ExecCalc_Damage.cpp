@@ -107,9 +107,17 @@ void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecuti
 	// 스킬 시전자와 피격자의 AvatarActor 가져오기
 	AActor* SourceAvatar = SourceASC ? SourceASC->GetAvatarActor() : nullptr;
 	AActor* TargetAvatar = TargetASC ? TargetASC->GetAvatarActor() : nullptr;
-	ICombatInterface* SourceCombatInterface = Cast<ICombatInterface>(SourceAvatar);
-	ICombatInterface* TargetCombatInterface = Cast<ICombatInterface>(TargetAvatar);
-	
+
+	int32 SourcePlayerLevel = 1;
+	if (SourceAvatar->Implements<UCombatInterface>())
+	{
+		SourcePlayerLevel = ICombatInterface::Execute_GetPlayerLevel(SourceAvatar);
+	}
+	int32 TargetPlayerLevel = 1;
+	if (TargetAvatar->Implements<UCombatInterface>())
+	{
+		TargetPlayerLevel = ICombatInterface::Execute_GetPlayerLevel(TargetAvatar);
+	}	
 
 	// 지금 적용 중인 GE에 대한 정보
 	const FGameplayEffectSpec& Spec = ExecutionParams.GetOwningSpec();
@@ -168,7 +176,7 @@ void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecuti
 	ExecutionParams.AttemptCalculateCapturedAttributeMagnitude(DamageStatics().TargetCriticalHitResistance, EvaluationParameters, TargetCriticalHitResistance);
 
 	// Attribute를 그대로 사용하는 게 아닌, 시전자와 대상자의 레벨 차이에 따라 차등 적용
-	const int32 LevelGap = FMath::Max<int32>(0, TargetCombatInterface->GetPlayerLevel() - SourceCombatInterface->GetPlayerLevel());
+	const int32 LevelGap = FMath::Max<int32>(0, TargetPlayerLevel - SourcePlayerLevel);
 
 	// 어떤 수치로 차등 적용할 것인지 결정하기 위해 Curve Table 및 그 값 가져오기
 	UCharacterClassInfo* CharacterClassInfo = UAuraAbilitySystemLibrary::GetCharacterClassInfo(SourceAvatar);

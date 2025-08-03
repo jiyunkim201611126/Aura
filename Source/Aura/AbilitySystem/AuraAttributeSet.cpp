@@ -8,6 +8,7 @@
 #include "AuraAbilitySystemLibrary.h"
 #include "EngineUtils.h"
 #include "Aura/Character/AuraCharacterBase.h"
+#include "Aura/Interaction/PlayerInterface.h"
 #include "Aura/Player/AuraPlayerController.h"
 
 UAuraAttributeSet::UAuraAttributeSet()
@@ -129,6 +130,8 @@ void UAuraAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallba
 					}
 					CombatInterface->Die(bShouldAddImpulse, Impulse);
 				}
+
+				// 적을 처치했으므로, XP 이벤트를 송신합니다.
 				SendXPEvent(Props);
 			}
 			else
@@ -172,6 +175,11 @@ void UAuraAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallba
 	{
 		const float LocalIncomingXP = GetIncomingXP();
 		SetIncomingXP(0.f);
+
+		if (Props.SourceCharacter->Implements<UPlayerInterface>())
+		{
+			IPlayerInterface::Execute_AddToXP(Props.SourceCharacter, LocalIncomingXP);
+		}
 	}
 }
 
@@ -208,11 +216,19 @@ void UAuraAttributeSet::SetEffectProperties(const FGameplayEffectModCallbackData
 	}
 }
 
-void UAuraAttributeSet::SendXPEvent(const FEffectProperties& Props)
+void UAuraAttributeSet::SendXPEvent(const FEffectProperties& Props) const
 {
-	if (ICombatInterface* CombatInterface = Cast<ICombatInterface>(Props.TargetAvatarActor))
+	if (Props.TargetAvatarActor->Implements<UCombatInterface>())
 	{
-		const int32 TargetLevel = CombatInterface->GetPlayerLevel();
+		ECharacterRank Rank = ICombatInterface::Execute_GetCharacterRank(Props.TargetAvatarActor);
+		// Rank가 None인 경우(소환된 하수인이거나, 경험치를 얻을 수 없는 적), 이벤트를 발생시키지 않습니다.
+		if (Rank == ECharacterRank::None)
+		{
+			return;
+		}
+		
+		// XP 변화량을 계산해 이벤트를 송신합니다.
+		const int32 TargetLevel = ICombatInterface::Execute_GetPlayerLevel(Props.TargetAvatarActor);
 		const ECharacterRank TargetRank = ICombatInterface::Execute_GetCharacterRank(Props.TargetAvatarActor);
 		const int32 XPReward = UAuraAbilitySystemLibrary::GetXPRewardForRankAndLevel(Props.TargetAvatarActor, TargetRank, TargetLevel);
 

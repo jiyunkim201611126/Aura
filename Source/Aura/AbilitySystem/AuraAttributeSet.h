@@ -234,5 +234,5 @@ public:
 private:
 	// GE 적용 시점에 Source와 Target을 편리하게 추적하기 위해 구조체에 그 정보를 채워주는 함수
 	void SetEffectProperties(const FGameplayEffectModCallbackData& Data, FEffectProperties& Props) const;
-	void SendXPEvent(const FEffectProperties& Props);
+	void SendXPEvent(const FEffectProperties& Props) const;
 };

@@ -30,8 +30,9 @@ public:
 	// Controller만 해도 작동엔 문제가 없으나, 멀티플레이 환경에서 강제종료 등의 상황 발생 시 문제가 생길 수 있으므로 Controller와 Character가 모두 한 번씩 호출
 	virtual void RegisterPawn();
 	virtual void UnregisterPawn();
-	
-	virtual int32 GetPlayerLevel();
+
+	UFUNCTION(BlueprintNativeEvent)
+	int32 GetPlayerLevel();
 	
 	// 무기의 Socket으로부터 위치를 가져오는 함수
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
