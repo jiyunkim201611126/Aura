@@ -9,7 +9,7 @@
 class UAbilitySystemComponent;
 class UAttributeSet;
 
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnPlayerStatChangedSignature, int32 /* Stat Value */);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnPlayerStatChanged, int32 /* Stat Value */);
 
 UCLASS()
 class AURA_API AAuraPlayerState : public APlayerState, public IAbilitySystemInterface
@@ -35,8 +35,8 @@ public:
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<ULevelUpInfo> LevelUpInfo;
 
-	FOnPlayerStatChangedSignature OnLevelChangedDelegate;
-	FOnPlayerStatChangedSignature OnXPChangedDelegate;
+	FOnPlayerStatChanged OnXPChangedDelegate;
+	FOnPlayerStatChanged OnLevelChangedDelegate;
 
 protected:
 	// Simulated Proxy와 다르게 Autonomous Proxy의 경우, 리스폰 시 유지되어야 하는 정보가 존재할 수 있습니다.

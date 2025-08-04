@@ -28,7 +28,7 @@ public:
 	// ~Combat Interface
 	virtual void RegisterPawn() override;
 	virtual void UnregisterPawn() override;
-	virtual int32 GetPlayerLevel_Implementation() override;
+	virtual int32 GetCharacterLevel_Implementation() override;
 	virtual void Die(bool bShouldAddImpulse, const FVector& Impulse) override;
 	// ~End of Combat Interface
 

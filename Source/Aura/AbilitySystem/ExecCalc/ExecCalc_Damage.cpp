@@ -111,12 +111,12 @@ void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecuti
 	int32 SourcePlayerLevel = 1;
 	if (SourceAvatar->Implements<UCombatInterface>())
 	{
-		SourcePlayerLevel = ICombatInterface::Execute_GetPlayerLevel(SourceAvatar);
+		SourcePlayerLevel = ICombatInterface::Execute_GetCharacterLevel(SourceAvatar);
 	}
 	int32 TargetPlayerLevel = 1;
 	if (TargetAvatar->Implements<UCombatInterface>())
 	{
-		TargetPlayerLevel = ICombatInterface::Execute_GetPlayerLevel(TargetAvatar);
+		TargetPlayerLevel = ICombatInterface::Execute_GetCharacterLevel(TargetAvatar);
 	}	
 
 	// 지금 적용 중인 GE에 대한 정보

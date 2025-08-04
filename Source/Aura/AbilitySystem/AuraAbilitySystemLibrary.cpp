@@ -87,7 +87,7 @@ void UAuraAbilitySystemLibrary::AddCommonAbilities(const UObject* WorldContextOb
 	{
 		if (ASC->GetAvatarActor()->Implements<UCombatInterface>())
 		{
-			FGameplayAbilitySpec AbilitySpec = FGameplayAbilitySpec(AbilityClass, ICombatInterface::Execute_GetPlayerLevel(ASC->GetAvatarActor()));
+			FGameplayAbilitySpec AbilitySpec = FGameplayAbilitySpec(AbilityClass, ICombatInterface::Execute_GetCharacterLevel(ASC->GetAvatarActor()));
 			ASC->GiveAbility(AbilitySpec);
 		}
 	}

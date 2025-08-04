@@ -84,7 +84,7 @@ void AAuraEnemy::UnregisterPawn()
 	}
 }
 
-int32 AAuraEnemy::GetPlayerLevel_Implementation()
+int32 AAuraEnemy::GetCharacterLevel_Implementation()
 {
 	return Level;
 }

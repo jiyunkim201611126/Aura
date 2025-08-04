@@ -32,7 +32,7 @@ public:
 	virtual void UnregisterPawn();
 
 	UFUNCTION(BlueprintNativeEvent)
-	int32 GetPlayerLevel();
+	int32 GetCharacterLevel();
 	
 	// 무기의 Socket으로부터 위치를 가져오는 함수
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)

@@ -70,11 +70,39 @@ void AAuraCharacter::UnregisterPawn()
 	}
 }
 
-int32 AAuraCharacter::GetPlayerLevel_Implementation()
+int32 AAuraCharacter::GetCharacterLevel_Implementation()
 {
 	const AAuraPlayerState* AuraPlayerState = GetPlayerState<AAuraPlayerState>();
 	check(AuraPlayerState);
 	return AuraPlayerState->GetPlayerLevel();
+}
+
+int32 AAuraCharacter::FindLevelForXP_Implementation(int32 InXP) const
+{
+	AAuraPlayerState* AuraPlayerState = GetPlayerState<AAuraPlayerState>();
+	check(AuraPlayerState);
+	return AuraPlayerState->LevelUpInfo->FindLevelForXP(InXP);
+}
+
+int32 AAuraCharacter::GetXP_Implementation() const
+{
+	AAuraPlayerState* AuraPlayerState = GetPlayerState<AAuraPlayerState>();
+	check(AuraPlayerState);
+	return AuraPlayerState->GetXP();
+}
+
+int32 AAuraCharacter::GetAttributePointsReward_Implementation(int32 Level) const
+{
+	AAuraPlayerState* AuraPlayerState = GetPlayerState<AAuraPlayerState>();
+	check(AuraPlayerState);
+	return AuraPlayerState->LevelUpInfo->LevelUpInformation[Level].AttributePointAward;
+}
+
+int32 AAuraCharacter::GetSpellPointsReward_Implementation(int32 Level) const
+{
+	AAuraPlayerState* AuraPlayerState = GetPlayerState<AAuraPlayerState>();
+	check(AuraPlayerState);
+	return AuraPlayerState->LevelUpInfo->LevelUpInformation[Level].SpellPointAward;
 }
 
 void AAuraCharacter::AddToXP_Implementation(const int32 InXP)
@@ -82,6 +110,23 @@ void AAuraCharacter::AddToXP_Implementation(const int32 InXP)
 	AAuraPlayerState* AuraPlayerState = GetPlayerState<AAuraPlayerState>();
 	check(AuraPlayerState);
 	AuraPlayerState->AddToXP(InXP);
+}
+
+void AAuraCharacter::AddToLevel_Implementation(const int32 InPlayerLevel)
+{
+	AAuraPlayerState* AuraPlayerState = GetPlayerState<AAuraPlayerState>();
+	check(AuraPlayerState);
+	AuraPlayerState->AddToLevel(InPlayerLevel);
+}
+
+void AAuraCharacter::AddToAttributePoints_Implementation(const int32 InAttributePoints)
+{
+	// TODO: PlayerState에 AttributePoints 선언
+}
+
+void AAuraCharacter::AddToSpellPoints_Implementation(const int32 InSpellPoints)
+{
+	// TODO: PlayerState에 SpellPoints 선언
 }
 
 void AAuraCharacter::LevelUp_Implementation()

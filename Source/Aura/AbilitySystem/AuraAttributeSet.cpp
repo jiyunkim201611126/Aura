@@ -7,9 +7,9 @@
 #include "Aura/Interaction/CombatInterface.h"
 #include "AuraAbilitySystemLibrary.h"
 #include "EngineUtils.h"
-#include "Aura/Character/AuraCharacterBase.h"
-#include "Aura/Interaction/PlayerInterface.h"
+#include "Aura/Interaction/LevelableInterface.h"
 #include "Aura/Player/AuraPlayerController.h"
+#include "GameFramework/Character.h"
 
 UAuraAttributeSet::UAuraAttributeSet()
 {
@@ -98,7 +98,7 @@ void UAuraAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallba
 		SetMana(FMath::Clamp(GetMana(), 0.f, GetMaxMana()));
 	}
 
-	// IncomingDamage Attribute에 값 변화가 있는 경우 데미지 로직 시작
+	// IncomingDamage Attribute에 값 변화가 있는 경우 데미지 로직을 시작합니다.
 	if (Data.EvaluatedData.Attribute == GetIncomingDamageAttribute())
 	{
 		const float LocalIncomingDamage = GetIncomingDamage();
@@ -136,7 +136,7 @@ void UAuraAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallba
 			}
 			else
 			{
-				// 사망하지 않은 경우, 적용된 GE가 GrantHitReact 태그를 갖고 있으면 HitReact Ability 작동
+				// 사망하지 않은 경우, 적용된 GE가 GrantHitReact 태그를 갖고 있으면 HitReact Ability를 작동합니다.
 				FGameplayTagContainer EffectTags;
 				Data.EffectSpec.GetAllAssetTags(EffectTags);
 				if (EffectTags.HasTag(FAuraGameplayTags::Get().Effects_GrantHitReact))
@@ -161,7 +161,7 @@ void UAuraAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallba
 		}
 		else if (LocalIncomingDamage < 0.01f)
 		{
-			// 데미지가 0.01보다 작으면 체력 감소나 애니메이션 재생 없이 NoDamage 표시
+			// 데미지가 0.01보다 작으면 체력 감소나 애니메이션 재생 없이 NoDamage 문구를 표시합니다.
 			SetIncomingDamage(0.f);
 			for (TActorIterator<AAuraPlayerController> It(GetWorld()); It; ++It)
 			{
@@ -170,15 +170,41 @@ void UAuraAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallba
 		}
 	}
 
-	// IncomingXP Attribute에 값 변화가 있는 경우 경험치 증가 및 레벨업 로직 시작
+	// IncomingXP Attribute에 값 변화가 있는 경우 경험치 증가 및 레벨업 로직 시작합니다.
+	// 위에서 SendXPEvent를 호출, GA_ListenForEvents Ability가 해당 이벤트를 수신해 GE를 적용한 뒤
+	// 다시 여기로 들어와 아래 로직을 실행하는 방식입니다.
 	if (Data.EvaluatedData.Attribute == GetIncomingXPAttribute())
 	{
 		const float LocalIncomingXP = GetIncomingXP();
 		SetIncomingXP(0.f);
 
-		if (Props.SourceCharacter->Implements<UPlayerInterface>())
+		if (Props.SourceCharacter->Implements<UCombatInterface>() && Props.SourceCharacter->Implements<ULevelableInterface>())
 		{
-			IPlayerInterface::Execute_AddToXP(Props.SourceCharacter, LocalIncomingXP);
+			// 레벨업 여부를 계산합니다.
+			const int32 CurrentLevel = ICombatInterface::Execute_GetCharacterLevel(Props.SourceCharacter);
+			const int32 CurrentXP = ILevelableInterface::Execute_GetXP(Props.SourceCharacter);
+
+			const int32 NewLevel = ILevelableInterface::Execute_FindLevelForXP(Props.SourceCharacter, CurrentXP + LocalIncomingXP);
+			const int32 NumLevelUps = NewLevel - CurrentLevel;
+
+			if (NumLevelUps > 0)
+			{
+				// 레벨이 상승한 경우, 레벨업 보상을 계산 및 부여합니다.
+				const int32 AttributePointsReward = ILevelableInterface::Execute_GetAttributePointsReward(Props.SourceCharacter, CurrentLevel);
+				const int32 SpellPointsReward = ILevelableInterface::Execute_GetSpellPointsReward(Props.SourceCharacter, CurrentLevel);
+
+				ILevelableInterface::Execute_AddToLevel(Props.SourceCharacter, NumLevelUps);
+				ILevelableInterface::Execute_AddToAttributePoints(Props.SourceCharacter, AttributePointsReward);
+				ILevelableInterface::Execute_AddToSpellPoints(Props.SourceCharacter, SpellPointsReward);
+
+				SetHealth(GetMaxHealth());
+				SetMana(GetMaxMana());
+				
+				ILevelableInterface::Execute_LevelUp(Props.SourceCharacter);
+			}
+
+			// XP 보상을 부여합니다.
+			ILevelableInterface::Execute_AddToXP(Props.SourceCharacter, LocalIncomingXP);
 		}
 	}
 }
@@ -186,7 +212,7 @@ void UAuraAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallba
 void UAuraAttributeSet::SetEffectProperties(const FGameplayEffectModCallbackData& Data, FEffectProperties& Props) const
 {
 	// Source = Effect를 발생시킨 것, Target = Effect를 받는 것 (AbilitySystemComponent 소유자)
-	// 아래 로직은 Source와 Target이 플레이어든 아니든 모든 상황에서 AbilitySystemComponent, OwnerActor, AvatarActor를 추적
+	// GE가 적용되는 상황에서 ASC, SourceAvatarActor, TargetAvatarActor등을 편리하게 추적하기 위해 사용하는 함수입니다. 
 	Props.EffectContextHandle = Data.EffectSpec.GetContext();
 	Props.SourceASC = Props.EffectContextHandle.GetOriginalInstigatorAbilitySystemComponent();
 
@@ -228,7 +254,7 @@ void UAuraAttributeSet::SendXPEvent(const FEffectProperties& Props) const
 		}
 		
 		// XP 변화량을 계산해 이벤트를 송신합니다.
-		const int32 TargetLevel = ICombatInterface::Execute_GetPlayerLevel(Props.TargetAvatarActor);
+		const int32 TargetLevel = ICombatInterface::Execute_GetCharacterLevel(Props.TargetAvatarActor);
 		const ECharacterRank TargetRank = ICombatInterface::Execute_GetCharacterRank(Props.TargetAvatarActor);
 		const int32 XPReward = UAuraAbilitySystemLibrary::GetXPRewardForRankAndLevel(Props.TargetAvatarActor, TargetRank, TargetLevel);
 
