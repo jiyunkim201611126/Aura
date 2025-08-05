@@ -8,6 +8,8 @@
 #include "Aura/Player/AuraPlayerController.h"
 #include "Aura/UI/HUD/AuraHUD.h"
 #include "Aura/Manager/PawnManagerSubsystem.h"
+#include "NiagaraComponent.h"
+#include "Aura/Manager/FXManagerSubsystem.h"
 
 AAuraCharacter::AAuraCharacter()
 {
@@ -131,7 +133,7 @@ void AAuraCharacter::AddToSpellPoints_Implementation(const int32 InSpellPoints)
 
 void AAuraCharacter::LevelUp_Implementation()
 {
-	
+	MulticastLevelUpParticles();
 }
 
 void AAuraCharacter::InitAbilityActorInfo()
@@ -156,6 +158,17 @@ void AAuraCharacter::InitAbilityActorInfo()
 
 	// 초기 Attribute 초기화
 	InitializeDefaultAttributes();
+}
+
+void AAuraCharacter::MulticastLevelUpParticles_Implementation() const
+{
+	if (const UGameInstance* GameInstance = GetGameInstance())
+	{
+		if (UFXManagerSubsystem* FXManager = GameInstance->GetSubsystem<UFXManagerSubsystem>())
+		{
+			FXManager->AsyncPlayNiagaraAtLocation(LevelUpNiagaraTag, GetActorLocation());
+		}
+	}
 }
 
 void AAuraCharacter::InitializeDefaultAttributes() const

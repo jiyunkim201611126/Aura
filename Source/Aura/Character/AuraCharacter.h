@@ -5,6 +5,8 @@
 #include "Aura/Interaction/LevelableInterface.h"
 #include "AuraCharacter.generated.h"
 
+class UNiagaraComponent;
+
 UCLASS()
 class AURA_API AAuraCharacter : public AAuraCharacterBase, public ILevelableInterface
 {
@@ -48,7 +50,13 @@ protected:
 private:
 	virtual void InitAbilityActorInfo() override;
 
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastLevelUpParticles() const;
+
 protected:
+	UPROPERTY(EditDefaultsOnly)
+	FGameplayTag LevelUpNiagaraTag;
+	
 	// 게임 시작 시 Attribute 초기화를 위해 사용되는 GameplayEffect
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Attributes")
 	TSubclassOf<UGameplayEffect> DefaultPrimaryAttributes;

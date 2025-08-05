@@ -106,6 +106,8 @@ struct FAuraGameplayTags
 	
 	FGameplayTag Niagara_Projectile_Impact_FireBolt;
 	FGameplayTag Niagara_Projectile_Impact_Rock;
+
+	FGameplayTag Niagara_LevelUp;
 	// ~End of Niagaras
 
 	// ~BehaviorTree

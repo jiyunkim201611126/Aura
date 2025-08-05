@@ -87,12 +87,15 @@ public:
 	UPROPERTY(EditAnywhere, Category = "AI")
 	TObjectPtr<UBehaviorTree> BehaviorTree;
 
+	// 해당 거리 안으로 캐릭터가 접근하면 AgroBehaviorTree가 실행됩니다.
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AI")
 	float AgroRange = 1000.f;
 
+	// 해당 거리 안으로 캐릭터가 접근하면 CombatBehaviorTree가 실행됩니다.
 	// 일반적으로 근접 공격 캐릭터는 150 이상, 원거리 공격 캐릭터는 600을 사용합니다.
 	// 너무 낮게 설정하는 경우, 최대한 가까워져도 사정거리보다 멀어 공격하지 못 하는 현상이 있습니다.
-	// 따라서 캐릭터의 Capsule Collision의 크기를 생각해 설정해줍니다.
+	// 따라서 Melee Attack이라면 캐릭터의 Capsule Collision의 크기와 Melee Attack Radius를 생각해 설정해주고,
+	// Range Attack이라면 Projectile의 LifeSpan을 생각해 설정해줍니다.
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AI")
 	float CombatRange = 150.f;
 	

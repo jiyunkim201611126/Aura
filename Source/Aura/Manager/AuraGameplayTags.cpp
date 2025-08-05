@@ -150,7 +150,10 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 	GameplayTags.Niagara_Projectile_Impact_FireBolt = UGameplayTagsManager::Get().AddNativeGameplayTag(
 		FName("Niagara.Projectile.Impact.FireBolt"),FString("FireBolt Impact"));
 	GameplayTags.Niagara_Projectile_Impact_Rock = UGameplayTagsManager::Get().AddNativeGameplayTag(
-		FName("Niagara.Projectile.Impact.Rock"),FString("Rock Impact"));
+		FName("Niagara.Projectile.Impact.Rock"),FString("Rock Impact"));\
+
+	GameplayTags.Niagara_LevelUp = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("Niagara.LevelUp"), FString("LevelUp Effect"));
 
 	// BehaviorTree
 	
