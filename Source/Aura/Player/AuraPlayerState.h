@@ -24,19 +24,28 @@ public:
 
 	FORCEINLINE int32 GetPlayerLevel() const { return Level; }
 	FORCEINLINE int32 GetXP() const { return XP; }
+	FORCEINLINE int32 GetAttributePoints() const { return AttributePoints; }
+	FORCEINLINE int32 GetSpellPoints() const { return SpellPoints; }
 	
 	void SetPlayerLevel(int32 InLevel);
 	void SetXP(const int32 InXP);
+	void SetAttributePoints(const int32 InAttributePoints);
+	void SetToSpellPoints(const int32 InSpellPoints);
 
 	void AddToLevel(int32 InLevel);
 	void AddToXP(const int32 InXP);
+	void AddToAttributePoints(const int32 InAttributePoints);
+	void AddToSpellPoints(const int32 InSpellPoints);
+
+public:
+	FOnPlayerStatChanged OnXPChangedDelegate;
+	FOnPlayerStatChanged OnLevelChangedDelegate;
+	FOnPlayerStatChanged OnAttributePointsChangedDelegate;
+	FOnPlayerStatChanged OnSpellPointsChangedDelegate;
 
 public:
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<ULevelUpInfo> LevelUpInfo;
-
-	FOnPlayerStatChanged OnXPChangedDelegate;
-	FOnPlayerStatChanged OnLevelChangedDelegate;
 
 protected:
 	// Simulated Proxy와 다르게 Autonomous Proxy의 경우, 리스폰 시 유지되어야 하는 정보가 존재할 수 있습니다.
@@ -66,4 +75,16 @@ private:
 
 	UFUNCTION()
 	void OnRep_XP(int32 OldXP);
+
+	UPROPERTY(VisibleAnywhere, ReplicatedUsing = OnRep_AttributePoints)
+	int32 AttributePoints = 0;
+
+	UFUNCTION()
+	void OnRep_AttributePoints(int32 OldAttributePoints);
+
+	UPROPERTY(VisibleAnywhere, ReplicatedUsing = OnRep_SpellPoints)
+	int32 SpellPoints = 0;
+
+	UFUNCTION()
+	void OnRep_SpellPoints(int32 OldSpellPoints);
 };

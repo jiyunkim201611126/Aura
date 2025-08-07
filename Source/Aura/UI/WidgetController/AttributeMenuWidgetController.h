@@ -23,8 +23,11 @@ private:
 	void BroadcastAttributeInfo(const FGameplayTag& AttributeTag, const FGameplayAttribute& Attribute) const;
 
 public:
-	UPROPERTY(BlueprintAssignable, Category = "GAS|Attributes")
+	UPROPERTY(BlueprintAssignable, Category = "GAS | Attributes")
 	FAttributeInfoSignature AttributeInfoDelegate;
+	
+	UPROPERTY(BlueprintAssignable, Category = "GAS | Attributes")
+	FOnPlayerStatChangedSignature OnAttributePointsChangedDelegate;
 
 protected:
 	UPROPERTY(EditDefaultsOnly)

@@ -123,12 +123,16 @@ void AAuraCharacter::AddToLevel_Implementation(const int32 InPlayerLevel)
 
 void AAuraCharacter::AddToAttributePoints_Implementation(const int32 InAttributePoints)
 {
-	// TODO: PlayerState에 AttributePoints 선언
+	AAuraPlayerState* AuraPlayerState = GetPlayerState<AAuraPlayerState>();
+	check(AuraPlayerState);
+	AuraPlayerState->AddToAttributePoints(InAttributePoints);
 }
 
 void AAuraCharacter::AddToSpellPoints_Implementation(const int32 InSpellPoints)
 {
-	// TODO: PlayerState에 SpellPoints 선언
+	AAuraPlayerState* AuraPlayerState = GetPlayerState<AAuraPlayerState>();
+	check(AuraPlayerState);
+	AuraPlayerState->AddToSpellPoints(InSpellPoints);
 }
 
 void AAuraCharacter::LevelUp_Implementation()

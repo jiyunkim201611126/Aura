@@ -23,7 +23,7 @@ public:
 	virtual int32 GetCharacterLevel_Implementation() override;
 	// ~End of Combat Interface
 	
-	// ~Player Interface
+	// ~Levelable Interface
 	virtual int32 FindLevelForXP_Implementation(int32 InXP) const override;
 	virtual int32 GetXP_Implementation() const override;
 	virtual int32 GetAttributePointsReward_Implementation(int32 Level) const override;
@@ -33,7 +33,7 @@ public:
 	virtual void AddToAttributePoints_Implementation(const int32 InAttributePoints) override;
 	virtual void AddToSpellPoints_Implementation(const int32 InSpellPoints) override;
 	virtual void LevelUp_Implementation() override;
-	// ~End of Player Interface
+	// ~End of Levelable Interface
 
 protected:
 	// ~AActor Interface
