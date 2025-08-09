@@ -8,7 +8,7 @@ class UGameplayEffect;
 class UGameplayAbility;
 
 UENUM(BlueprintType)
-enum class ECharacterClass
+enum class ECharacterClass : uint8
 {
 	None,
 	Elementalist,

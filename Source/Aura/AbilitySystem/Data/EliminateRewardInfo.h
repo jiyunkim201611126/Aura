@@ -6,7 +6,7 @@
 #include "EliminateRewardInfo.generated.h"
 
 UENUM(BlueprintType)
-enum class ECharacterRank
+enum class ECharacterRank : uint8
 {
 	None,
 	Normal,

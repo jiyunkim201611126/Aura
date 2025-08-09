@@ -16,7 +16,7 @@ void UAuraAbilitySystemComponent::AddCharacterAbilities(const TArray<TSubclassOf
 		if (const UAuraGameplayAbility* AuraAbility = Cast<UAuraGameplayAbility>(AbilitySpec.Ability))
 		{
 			// 어떤 Input에 의해 사용될 Ability인지 기록
-			AbilitySpec.DynamicAbilityTags.AddTag(AuraAbility->StartupInputTag);
+			AbilitySpec.GetDynamicSpecSourceTags().AddTag(AuraAbility->StartupInputTag);
 			// Ability 장착
 			GiveAbility(AbilitySpec);
 			// 부여된 Ability를 HUD에 스킬 아이콘으로 표시하기 위해 델리게이트를 Broadcast합니다.
@@ -63,7 +63,7 @@ void UAuraAbilitySystemComponent::AbilityInputTagHeld(const FGameplayTag& InputT
 	for (FGameplayAbilitySpec& AbilitySpec : GetActivatableAbilities())
 	{
 		// 장착 중인 Ability 중 Tag가 일치하는 Ability가 있는지 탐색
-		if (AbilitySpec.DynamicAbilityTags.HasTagExact(InputTag))
+		if (AbilitySpec.GetDynamicSpecSourceTags().HasTagExact(InputTag))
 		{
 			// Pressed 이벤트도 발생시킴
 			AbilitySpecInputPressed(AbilitySpec);
@@ -82,7 +82,7 @@ void UAuraAbilitySystemComponent::AbilityInputTagReleased(const FGameplayTag& In
 
 	for (FGameplayAbilitySpec& AbilitySpec : GetActivatableAbilities())
 	{
-		if (AbilitySpec.DynamicAbilityTags.HasTagExact(InputTag))
+		if (AbilitySpec.GetDynamicSpecSourceTags().HasTagExact(InputTag))
 		{
 			AbilitySpecInputReleased(AbilitySpec);
 		}
@@ -94,7 +94,7 @@ FGameplayTag UAuraAbilitySystemComponent::GetAbilityTagFromSpec(const FGameplayA
 	// 매개변수로 들어온 AbilitySpec의 Abilities 태그를 찾아 반환합니다.
 	if (AbilitySpec.Ability)
 	{
-		for (FGameplayTag Tag : AbilitySpec.Ability.Get()->AbilityTags)
+		for (FGameplayTag Tag : AbilitySpec.Ability.Get()->GetAssetTags())
 		{
 			if (Tag.MatchesTag(FGameplayTag::RequestGameplayTag(FName("Abilities"))))
 			{
@@ -108,7 +108,7 @@ FGameplayTag UAuraAbilitySystemComponent::GetAbilityTagFromSpec(const FGameplayA
 FGameplayTag UAuraAbilitySystemComponent::GetInputTagFromSpec(const FGameplayAbilitySpec& AbilitySpec)
 {
 	// 매개변수로 들어온 AbilitySpec의 InputTag를 찾아 반환합니다.
-	for (FGameplayTag Tag : AbilitySpec.DynamicAbilityTags)
+	for (FGameplayTag Tag : AbilitySpec.GetDynamicSpecSourceTags())
 	{
 		if (Tag.MatchesTag(FGameplayTag::RequestGameplayTag(FName("InputTag"))))
 		{

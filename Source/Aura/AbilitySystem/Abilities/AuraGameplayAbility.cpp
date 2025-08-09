@@ -32,7 +32,7 @@ void UAuraGameplayAbility::OnGiveAbility(const FGameplayAbilityActorInfo* ActorI
 		if (UStackableAbilityComponent* Comp = GetStackableAbilityComponent(ActorInfo))
 		{
 			// 이 Ability의 충전 타이머를 등록합니다.
-			Comp->RegisterAbility(AbilityTags.First(), StackData.MaxStack, StackData.RechargeTime);
+			Comp->RegisterAbility(GetAssetTags().First(), StackData.MaxStack, StackData.RechargeTime);
 		}
 	}
 }
@@ -42,7 +42,7 @@ bool UAuraGameplayAbility::CheckCost(const FGameplayAbilitySpecHandle Handle, co
 	// 충전된 스택이 없다면 false를 반환합니다.
 	if (UStackableAbilityComponent* Comp = GetStackableAbilityComponent(ActorInfo))
 	{
-		if (!Comp->CheckCost(AbilityTags.First()))
+		if (!Comp->CheckCost(GetAssetTags().First()))
 		{
 			return false;
 		}
@@ -56,7 +56,7 @@ void UAuraGameplayAbility::ApplyCost(const FGameplayAbilitySpecHandle Handle, co
 	// 충전된 스택을 소모합니다.
 	if (UStackableAbilityComponent* Comp = GetStackableAbilityComponent(ActorInfo))
 	{
-		Comp->ApplyCost(AbilityTags.First());
+		Comp->ApplyCost(GetAssetTags().First());
 	}
 	
 	Super::ApplyCost(Handle, ActorInfo, ActivationInfo);
@@ -67,7 +67,7 @@ void UAuraGameplayAbility::OnRemoveAbility(const FGameplayAbilityActorInfo* Acto
 	// 이 Ability가 제거될 때, 이 Ability의 충전 타이머를 제거합니다.
 	if (UStackableAbilityComponent* Comp = GetStackableAbilityComponent(ActorInfo))
 	{
-		Comp->UnregisterAbility(AbilityTags.First());
+		Comp->UnregisterAbility(GetAssetTags().First());
 	}
 	
 	Super::OnRemoveAbility(ActorInfo, Spec);

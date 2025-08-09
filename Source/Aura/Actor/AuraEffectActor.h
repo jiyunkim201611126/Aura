@@ -10,7 +10,7 @@ class UAbilitySystemComponent;
 
 // 트리거 작동 시 Effect 적용을 어떻게 처리할 것인지에 대한 enum 
 UENUM(BlueprintType)
-enum class EEffectApplicationPolicy
+enum class EEffectApplicationPolicy : uint8
 {
 	ApplyOnOverlap,
 	ApplyOnEndOverlap,
@@ -19,7 +19,7 @@ enum class EEffectApplicationPolicy
 
 // Infinite 적용 상태인 경우 언제 Effect를 제거할 것인지에 대한 enum
 UENUM(BlueprintType)
-enum class EEffectRemovalPolicy
+enum class EEffectRemovalPolicy : uint8
 {
 	RemoveOnEndOverlap,
 	DoNotRemove
