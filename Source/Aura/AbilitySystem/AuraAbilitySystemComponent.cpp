@@ -2,7 +2,6 @@
 
 #include "Aura/Manager/AuraGameplayTags.h"
 #include "Abilities/AuraGameplayAbility.h"
-#include "Aura/AuraLogChannels.h"
 
 void UAuraAbilitySystemComponent::AbilityActorInfoSet()
 {

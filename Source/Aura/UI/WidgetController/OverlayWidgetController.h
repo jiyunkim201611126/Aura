@@ -30,9 +30,29 @@ struct FUIWidgetRow : public FTableRowBase
 	UTexture2D* Image = nullptr;
 };
 
+USTRUCT(BlueprintType)
+struct FAbilityUsableTypeInfo
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadOnly)
+	bool bIsStackable = false;
+
+	FORCEINLINE bool HasAnyTrue() const
+	{
+		return bIsStackable;
+	}
+
+	// 추후 Ability 사용 타입이 추가됐을 때, UI에도 반영해야 하는 경우 이곳에 변수를 추가해 HUD에 알려줍니다.
+};
+
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAttributeChangedSignature, float, NewValue);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMessageWidgetRowSignature, FUIWidgetRow, Row);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FAbilityInfoSignature, const FAuraAbilityInfo&, Info);
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnAbilityUsableTypeSignature, FGameplayTag, InAbilityTag, const FAbilityUsableTypeInfo&, Info);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnStackCountChangedSignature, FGameplayTag, InAbilityTag, int32, StackCount);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnStackTimerStartedSignature, FGameplayTag, InAbilityTag, float, RechargeTime);
 
 UCLASS(BlueprintType, Blueprintable)
 class AURA_API UOverlayWidgetController : public UAuraWidgetController
@@ -76,6 +96,19 @@ public:
 
 	UPROPERTY(BlueprintAssignable, Category = "GAS | Level")
 	FOnPlayerStatChangedSignature OnPlayerLevelChangedDelegate;
+
+	// ~Ability Usable Type
+	UPROPERTY(BlueprintAssignable, Category = "GAS | AbilityIcon")
+	FOnAbilityUsableTypeSignature OnAbilityUsableTypeDelegate;
+
+	// ~Stackable Ability
+	UPROPERTY(BlueprintAssignable, Category = "GAS | AbilityIcon")
+	FOnStackCountChangedSignature OnStackCountChangedDelegate;
+	
+	UPROPERTY(BlueprintAssignable, Category = "GAS | AbilityIcon")
+	FOnStackTimerStartedSignature OnStackTimerStartedDelegate;
+	// ~End of Stackable Ability
+	// ~End of Ability Usable Type
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Widget Data")

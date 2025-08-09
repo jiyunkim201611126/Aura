@@ -20,17 +20,20 @@ FTaggedMontage UAuraGameplayAbility::GetRandomMontage()
 	return TaggedMontage;
 }
 
-/*
+//*
 
 void UAuraGameplayAbility::OnGiveAbility(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec)
 {
 	Super::OnGiveAbility(ActorInfo, Spec);
 
 	// 이 Ability가 부여될 때, 대상에게 StackableAbilityComponent를 부여합니다.
-	if (UStackableAbilityComponent* Comp = GetStackableAbilityComponent(ActorInfo))
+	if (ActorInfo->IsNetAuthority())
 	{
-		// 이 Ability의 충전 타이머를 등록합니다.
-		Comp->RegisterAbility(AbilityTags.First(), StackData.MaxStack, StackData.RechargeTime);
+		if (UStackableAbilityComponent* Comp = GetStackableAbilityComponent(ActorInfo))
+		{
+			// 이 Ability의 충전 타이머를 등록합니다.
+			Comp->RegisterAbility(AbilityTags.First(), StackData.MaxStack, StackData.RechargeTime);
+		}
 	}
 }
 
@@ -89,4 +92,4 @@ UStackableAbilityComponent* UAuraGameplayAbility::GetStackableAbilityComponent(c
 	return nullptr;
 }
 
-*/
+//*/

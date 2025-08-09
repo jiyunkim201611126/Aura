@@ -3,6 +3,7 @@
 #include "Aura/AbilitySystem/AuraAttributeSet.h"
 #include "Aura/AbilitySystem/AuraAbilitySystemComponent.h"
 #include "Aura/AbilitySystem/Data/AbilityInfo.h"
+#include "Aura/Character/Component/StackableAbilityComponent.h"
 #include "Aura/Player/AuraPlayerState.h"
 
 void UOverlayWidgetController::BroadcastInitialValue()
@@ -90,9 +91,36 @@ void UOverlayWidgetController::OnAbilitiesGiven(const FGameplayAbilitySpec& Abil
 		// 다른 곳에서 GiveAbility 등의 함수를 호출해도, 이 함수가 끝날 때까지 흐름이 보류됩니다.
 		FScopedAbilityListLock ActiveScopeLock(*AuraASC);
 		
-		FAuraAbilityInfo Info = AbilityInfo->FindAbilityInfoForTag(AuraASC->GetAbilityTagFromSpec(AbilitySpec));
-		Info.InputTag = AuraASC->GetInputTagFromSpec(AbilitySpec);
-		AbilityInfoDelegate.Broadcast(Info);
+		FAuraAbilityInfo AbilityUIInfo = AbilityInfo->FindAbilityInfoForTag(AuraASC->GetAbilityTagFromSpec(AbilitySpec));
+		AbilityUIInfo.InputTag = AuraASC->GetInputTagFromSpec(AbilitySpec);
+		AbilityInfoDelegate.Broadcast(AbilityUIInfo);
+
+		FAbilityUsableTypeInfo UsableTypeInfo;
+		if (UStackableAbilityComponent* StackableAbilityComponent = AuraASC->GetAvatarActor()->FindComponentByClass<UStackableAbilityComponent>())
+		{
+			// Stackable Ability로 등록되어있는지 확인, 필요한 함수를 바인드합니다.
+			if (StackableAbilityComponent->CheckHasAbility(AbilityUIInfo.AbilityTag))
+			{
+				UsableTypeInfo.bIsStackable = true;
+			}
+			StackableAbilityComponent->OnStackCountChanged.BindLambda(
+				[this](FGameplayTag InAbilityTag,int32 StackCount)
+				{
+					OnStackCountChangedDelegate.Broadcast(InAbilityTag, StackCount);
+				}
+			);
+			StackableAbilityComponent->OnStackTimerStarted.BindLambda(
+				[this](FGameplayTag InAbilityTag,float RechargeTime)
+				{
+					OnStackTimerStartedDelegate.Broadcast(InAbilityTag, RechargeTime);
+				}
+			);
+
+			if (UsableTypeInfo.HasAnyTrue())
+			{
+				OnAbilityUsableTypeDelegate.Broadcast(AbilityUIInfo.AbilityTag, UsableTypeInfo);
+			}
+		}
 	}
 }
 

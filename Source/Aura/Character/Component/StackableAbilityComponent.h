@@ -27,12 +27,19 @@ struct FAbilityStackData
 	 */
 };
 
+DECLARE_DELEGATE_TwoParams(FOnStackCountChanged, FGameplayTag /*InAbilityTag*/, int32 /*StackCount*/);
+DECLARE_DELEGATE_TwoParams(FOnStackTimerStarted, FGameplayTag /*InAbilityTag*/, float /*RechargeTime*/);
+
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class AURA_API UStackableAbilityComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
 public:
+	UStackableAbilityComponent();
+	
+	virtual void DestroyComponent(bool bPromoteChildren = false) override;
+	
 	void RegisterAbility(FGameplayTag AbilityTag, int32 MaxStack, float RechargeTime);
 	void UnregisterAbility(FGameplayTag AbilityTag);
 
@@ -41,11 +48,19 @@ public:
 
 	int32 GetCurrentStack(FGameplayTag AbilityTag) const;
 
+	bool CheckHasAbility(FGameplayTag AbilityTag) const;
+
+public:
+	// WidgetController가 바인드할 델리게이트
+	FOnStackCountChanged OnStackCountChanged;
+	FOnStackTimerStarted OnStackTimerStarted;
+
 private:
 	void StartRecharge(FGameplayTag AbilityTag);
 	void StopRecharge(FGameplayTag AbilityTag);
 	void Recharge(FGameplayTag AbilityTag);
 
 private:
+	UPROPERTY()
 	TMap<FGameplayTag, FAbilityStackData> AbilityStacks;
 };

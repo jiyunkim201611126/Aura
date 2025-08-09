@@ -109,7 +109,10 @@ void UAuraSummonAbility::ApplyCost(const FGameplayAbilitySpecHandle Handle, cons
 	// 충전된 스택을 소모합니다.
 	if (UStackableAbilityComponent* Comp = GetStackableAbilityComponent(ActorInfo))
 	{
-		Comp->ApplyCost(AbilityTags.First());
+		if (ActorInfo->IsNetAuthority())
+		{
+			Comp->ApplyCost(AbilityTags.First());
+		}
 	}
 	
 	Super::ApplyCost(Handle, ActorInfo, ActivationInfo);
@@ -126,6 +129,7 @@ void UAuraSummonAbility::OnRemoveAbility(const FGameplayAbilityActorInfo* ActorI
 	Super::OnRemoveAbility(ActorInfo, Spec);
 }
 
+/*
 UStackableAbilityComponent* UAuraSummonAbility::GetStackableAbilityComponent(const FGameplayAbilityActorInfo* ActorInfo) const
 {
 	// 이미 StackableAbilityComponent가 있다면 그 컴포넌트에 이 Ability를 등록하고, 없다면 직접 스폰 후 붙여줍니다.
@@ -145,3 +149,4 @@ UStackableAbilityComponent* UAuraSummonAbility::GetStackableAbilityComponent(con
 
 	return nullptr;
 }
+*/
