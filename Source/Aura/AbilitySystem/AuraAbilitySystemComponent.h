@@ -42,4 +42,9 @@ public:
 	// Widget Controller가 바인드할 델리게이트
 	FEffectAssetTags EffectAssetTags;
 	FAbilitiesGiven AbilitiesGivenDelegate;
+
+private:
+	// OnRep_ActivateAbilities가 호출되기 전, 클라이언트에서 캐싱해두고 있는 Ability 부여 정보입니다.
+	// 갖고 있던 것과 비교해서 달라졌을 경우만 위젯에 알려줍니다.
+	TSet<FGameplayAbilitySpecHandle> CachedAbilityHandles;
 };

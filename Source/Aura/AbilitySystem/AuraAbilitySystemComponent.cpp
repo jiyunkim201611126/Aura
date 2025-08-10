@@ -49,10 +49,28 @@ void UAuraAbilitySystemComponent::OnRep_ActivateAbilities()
 {
 	Super::OnRep_ActivateAbilities();
 
+	TSet<FGameplayAbilitySpecHandle> NewHandles;
+	NewHandles.Reserve(GetActivatableAbilities().Num());
+
 	for (const FGameplayAbilitySpec& AbilitySpec : GetActivatableAbilities())
 	{
-		AbilitiesGivenDelegate.Broadcast(AbilitySpec);
+		if (!AbilitySpec.Handle.IsValid())
+		{
+			continue;
+		}
+
+		NewHandles.Add(AbilitySpec.Handle);
+
+		// 이전에 갖고 있지 않던 Ability만 위젯에 알려줍니다.
+		if (!CachedAbilityHandles.Contains(AbilitySpec.Handle))
+		{
+			AbilitiesGivenDelegate.Broadcast(AbilitySpec);
+		}
 	}
+
+	// 추후 Ability가 제거되는 로직이 추가되면 여기에 로직을 작성해 위젯이 알 수 있도록 해줍니다.
+
+	CachedAbilityHandles = MoveTemp(NewHandles);
 }
 
 void UAuraAbilitySystemComponent::AbilityInputTagHeld(const FGameplayTag& InputTag)

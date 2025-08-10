@@ -41,11 +41,5 @@ protected:
 	virtual bool CheckCost(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, FGameplayTagContainer* OptionalRelevantTags = nullptr) const override;
 	virtual void ApplyCost(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo) const override;
 	virtual void OnRemoveAbility(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec) override;
-	
-	UStackableAbilityComponent* GetStackableAbilityComponent(const FGameplayAbilityActorInfo* ActorInfo) const;
-	
-public:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Stackable")
-	FAbilityStackItem StackData;
 	// ~End of Stackable Ability Interface
 };

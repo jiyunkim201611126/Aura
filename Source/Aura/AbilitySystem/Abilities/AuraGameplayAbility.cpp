@@ -1,8 +1,8 @@
 #include "AuraGameplayAbility.h"
 
-#include "Aura/Character/Component/StackableAbilityComponent.h"
 #include "Aura/Interaction/CombatInterface.h"
 #include "Aura/Interaction/EnemyInterface.h"
+#include "UsableTypes/AbilityUsableType.h"
 
 void UAuraGameplayAbility::UpdateFacingToCombatTarget() const
 {
@@ -20,29 +20,21 @@ FTaggedMontage UAuraGameplayAbility::GetRandomMontage()
 	return TaggedMontage;
 }
 
-/*
-
 void UAuraGameplayAbility::OnGiveAbility(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec)
 {
 	Super::OnGiveAbility(ActorInfo, Spec);
 
-	// 이 Ability가 부여될 때, 대상에게 StackableAbilityComponent를 부여합니다.
-	if (ActorInfo->IsNetAuthority())
+	for (auto AbilityUsableType : UsableTypes)
 	{
-		if (UStackableAbilityComponent* Comp = GetStackableAbilityComponent(ActorInfo))
-		{
-			// 이 Ability의 충전 타이머를 등록합니다.
-			Comp->RegisterAbility(GetAssetTags().First(), StackData.CurrentStack, StackData.MaxStack, StackData.RechargeTime);
-		}
+		AbilityUsableType->OnGivenAbility(ActorInfo, Spec);
 	}
 }
 
 bool UAuraGameplayAbility::CheckCost(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, FGameplayTagContainer* OptionalRelevantTags) const
-{
-	// 충전된 스택이 없다면 false를 반환합니다.
-	if (UStackableAbilityComponent* Comp = GetStackableAbilityComponent(ActorInfo))
+{	
+	for (auto AbilityUsableType : UsableTypes)
 	{
-		if (!Comp->CheckCost(GetAssetTags().First()))
+		if (!AbilityUsableType->CheckCost(this))
 		{
 			return false;
 		}
@@ -53,10 +45,9 @@ bool UAuraGameplayAbility::CheckCost(const FGameplayAbilitySpecHandle Handle, co
 
 void UAuraGameplayAbility::ApplyCost(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo) const
 {
-	// 충전된 스택을 소모합니다.
-	if (UStackableAbilityComponent* Comp = GetStackableAbilityComponent(ActorInfo))
+	for (auto AbilityUsableType : UsableTypes)
 	{
-		Comp->ApplyCost(GetAssetTags().First());
+		AbilityUsableType->ApplyCost(this);
 	}
 	
 	Super::ApplyCost(Handle, ActorInfo, ActivationInfo);
@@ -64,32 +55,10 @@ void UAuraGameplayAbility::ApplyCost(const FGameplayAbilitySpecHandle Handle, co
 
 void UAuraGameplayAbility::OnRemoveAbility(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec)
 {
-	// 이 Ability가 제거될 때, 이 Ability의 충전 타이머를 제거합니다.
-	if (UStackableAbilityComponent* Comp = GetStackableAbilityComponent(ActorInfo))
+	for (auto AbilityUsableType : UsableTypes)
 	{
-		Comp->UnregisterAbility(GetAssetTags().First());
+		AbilityUsableType->OnRemoveAbility(this);
 	}
 	
 	Super::OnRemoveAbility(ActorInfo, Spec);
 }
-
-UStackableAbilityComponent* UAuraGameplayAbility::GetStackableAbilityComponent(const FGameplayAbilityActorInfo* ActorInfo) const
-{
-	// 이미 StackableAbilityComponent가 있다면 그 컴포넌트에 이 Ability를 등록하고, 없다면 직접 스폰 후 붙여줍니다.
-	if (AActor* AvatarActor = ActorInfo ? ActorInfo->AvatarActor.Get() : nullptr)
-	{
-		UStackableAbilityComponent* Comp = AvatarActor->FindComponentByClass<UStackableAbilityComponent>();
-		if (Comp)
-		{
-			return Comp;
-		}
-		
-		Comp = Cast<UStackableAbilityComponent>(AvatarActor->AddComponentByClass(UStackableAbilityComponent::StaticClass(), false, FTransform::Identity, true));
-		AvatarActor->FinishAddComponent(Comp, false, FTransform::Identity);
-		return Comp;
-	}
-
-	return nullptr;
-}
-
-*/
