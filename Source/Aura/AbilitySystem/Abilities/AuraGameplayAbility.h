@@ -60,7 +60,7 @@ public:
 	 * 이 아래로는 스택형 스킬을 구현하기 위한 구문 예시입니다.
 	 * 스택형 Ability로 만들고 싶다면 원하는 Ability 클래스에 이 아래의 구문들과 cpp의 구현부를 작성하면 됩니다.
 	 * Ability 객체가 충전 로직을 담당하게 되므로, 꼭 Instanced per Actor로 설정해줍니다.
-	 */
+	 *
 
 protected:
 	virtual void OnGiveAbility(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec) override;
@@ -71,7 +71,7 @@ protected:
 	UStackableAbilityComponent* GetStackableAbilityComponent(const FGameplayAbilityActorInfo* ActorInfo) const;
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Stackable")
-	FAbilityStackData StackData;
+	FAbilityStackItem StackData;
 	
-	//*/
+	*/
 };

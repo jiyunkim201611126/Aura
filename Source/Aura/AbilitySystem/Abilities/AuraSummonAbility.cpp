@@ -69,7 +69,7 @@ void UAuraSummonAbility::OnGiveAbility(const FGameplayAbilityActorInfo* ActorInf
 	if (UStackableAbilityComponent* Comp = GetStackableAbilityComponent(ActorInfo))
 	{
 		// 이 Ability의 충전 타이머를 등록합니다.
-		Comp->RegisterAbility(GetAssetTags().First(), StackData.MaxStack, StackData.RechargeTime);
+		Comp->RegisterAbility(GetAssetTags().First(), StackData.CurrentStack, StackData.MaxStack, StackData.RechargeTime);
 	}
 }
 
@@ -129,7 +129,6 @@ void UAuraSummonAbility::OnRemoveAbility(const FGameplayAbilityActorInfo* ActorI
 	Super::OnRemoveAbility(ActorInfo, Spec);
 }
 
-/*
 UStackableAbilityComponent* UAuraSummonAbility::GetStackableAbilityComponent(const FGameplayAbilityActorInfo* ActorInfo) const
 {
 	// 이미 StackableAbilityComponent가 있다면 그 컴포넌트에 이 Ability를 등록하고, 없다면 직접 스폰 후 붙여줍니다.
@@ -149,4 +148,3 @@ UStackableAbilityComponent* UAuraSummonAbility::GetStackableAbilityComponent(con
 
 	return nullptr;
 }
-*/

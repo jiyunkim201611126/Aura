@@ -116,9 +116,20 @@ void UOverlayWidgetController::OnAbilitiesGiven(const FGameplayAbilitySpec& Abil
 				}
 			);
 
+			// 특별한 사용 타입이 하나라도 있으면 이 분기 안으로 들어갑니다.
+			// 현재는 스택형밖에 없습니다.
 			if (UsableTypeInfo.HasAnyTrue())
 			{
 				OnAbilityUsableTypeDelegate.Broadcast(AbilityUIInfo.AbilityTag, UsableTypeInfo);
+				if (UsableTypeInfo.bIsStackable)
+				{
+					// Component의 충전 로직 첫 시작이 콜백 함수 바인드보다 먼저 이루어지기 때문에, 여기서 정보를 가져와 한 번 Broadcast해줍니다.
+					if (const FAbilityStackItem* Item = StackableAbilityComponent->FindItem(AbilityUIInfo.AbilityTag))
+					{
+						OnStackCountChangedDelegate.Broadcast(AbilityUIInfo.AbilityTag, Item->CurrentStack);
+						OnStackTimerStartedDelegate.Broadcast(AbilityUIInfo.AbilityTag, Item->RechargeTime);
+					}
+				}
 			}
 		}
 	}
