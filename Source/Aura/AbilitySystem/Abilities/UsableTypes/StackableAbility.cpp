@@ -30,18 +30,18 @@ bool UStackableAbility::CheckCost(const UAuraGameplayAbility* OwningAbility)
 void UStackableAbility::ApplyCost(const UAuraGameplayAbility* OwningAbility)
 {
 	// 충전된 스택을 소모합니다.
-	if (UStackableAbilityComponent* Comp = GetStackableAbilityComponent(OwningAbility->GetCurrentActorInfo()))
+	if (UStackableAbilityComponent* Component = GetStackableAbilityComponent(OwningAbility->GetCurrentActorInfo()))
 	{
-		Comp->ApplyCost(OwningAbility->GetAssetTags().First());
+		Component->ApplyCost(OwningAbility->GetAssetTags().First());
 	}
 }
 
 void UStackableAbility::OnRemoveAbility(UAuraGameplayAbility* OwningAbility)
 {
 	// 이 Ability가 제거될 때, Component에서 이 Ability의 등록을 해제합니다.
-	if (UStackableAbilityComponent* Comp = GetStackableAbilityComponent(OwningAbility->GetCurrentActorInfo()))
+	if (UStackableAbilityComponent* Component = GetStackableAbilityComponent(OwningAbility->GetCurrentActorInfo()))
 	{
-		Comp->UnregisterAbility(OwningAbility->GetAssetTags().First());
+		Component->UnregisterAbility(OwningAbility->GetAssetTags().First());
 	}
 }
 
@@ -51,17 +51,17 @@ UStackableAbilityComponent* UStackableAbility::GetStackableAbilityComponent(cons
 	// 클라이언트는 이후에 Component가 자동으로 복제됩니다.
 	if (AActor* AvatarActor = ActorInfo ? ActorInfo->AvatarActor.Get() : nullptr)
 	{
-		UStackableAbilityComponent* Comp = AvatarActor->FindComponentByClass<UStackableAbilityComponent>();
-		if (Comp)
+		UStackableAbilityComponent* Component = AvatarActor->FindComponentByClass<UStackableAbilityComponent>();
+		if (Component)
 		{
-			return Comp;
+			return Component;
 		}
 
 		if (ActorInfo->IsNetAuthority())
 		{
-			Comp = Cast<UStackableAbilityComponent>(AvatarActor->AddComponentByClass(UStackableAbilityComponent::StaticClass(), false, FTransform::Identity, true));
-			AvatarActor->FinishAddComponent(Comp, false, FTransform::Identity);
-			return Comp;
+			Component = Cast<UStackableAbilityComponent>(AvatarActor->AddComponentByClass(UStackableAbilityComponent::StaticClass(), false, FTransform::Identity, true));
+			AvatarActor->FinishAddComponent(Component, false, FTransform::Identity);
+			return Component;
 		}
 	}
 
