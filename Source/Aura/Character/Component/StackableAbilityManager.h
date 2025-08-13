@@ -1,10 +1,10 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "Components/ActorComponent.h"
+#include "GameFramework/Actor.h"
 #include "GameplayTagContainer.h"
 #include "Net/Serialization/FastArraySerializer.h"
-#include "StackableAbilityComponent.generated.h"
+#include "StackableAbilityManager.generated.h"
 
 USTRUCT(BlueprintType)
 struct FAbilityStackItem : public FFastArraySerializerItem
@@ -51,7 +51,7 @@ struct FAbilityStackArray : public FFastArraySerializer
 	TArray<FAbilityStackItem> Items;
 
 	UPROPERTY(NotReplicated)
-	class UStackableAbilityComponent* OwnerComp = nullptr;
+	class AStackableAbilityManager* OwnerActor = nullptr;
 
 	bool NetDeltaSerialize(FNetDeltaSerializeInfo& DeltaParams)
 	{
@@ -67,17 +67,16 @@ struct TStructOpsTypeTraits<FAbilityStackArray> : public TStructOpsTypeTraitsBas
 DECLARE_DELEGATE_TwoParams(FOnStackCountChanged, FGameplayTag /*InAbilityTag*/, int32 /*StackCount*/);
 DECLARE_DELEGATE_TwoParams(FOnStackTimerStarted, FGameplayTag /*InAbilityTag*/, float /*RechargeTime*/);
 
-UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
-class AURA_API UStackableAbilityComponent : public UActorComponent
+UCLASS()
+class AURA_API AStackableAbilityManager : public AActor
 {
 	GENERATED_BODY()
 
 public:
-	UStackableAbilityComponent();
+	AStackableAbilityManager();
 
 	// ~ActorComponent Interface
-	virtual void BeginPlay() override;
-	virtual void DestroyComponent(bool bPromoteChildren = false) override;
+	virtual void Destroyed() override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	// ~End of ActorComponent Interface
 	

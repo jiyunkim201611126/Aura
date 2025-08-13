@@ -1,4 +1,4 @@
-﻿#include "StackableAbilityComponent.h"
+﻿#include "StackableAbilityManager.h"
 #include "Net/UnrealNetwork.h"
 
 ///////////////////////////////////////////////////////////////
@@ -6,7 +6,7 @@
 
 void FAbilityStackItem::PostReplicatedAdd(const FAbilityStackArray& InArraySerializer)
 {
-	if (!InArraySerializer.OwnerComp)
+	if (!InArraySerializer.OwnerActor)
 	{
 		return;
 	}
@@ -21,95 +21,79 @@ void FAbilityStackItem::PostReplicatedAdd(const FAbilityStackArray& InArraySeria
 			break;
 		}
 	}
-	InArraySerializer.OwnerComp->TagToIndex.Add(AbilityTag, Index);
+	InArraySerializer.OwnerActor->TagToIndex.Add(AbilityTag, Index);
 
-	InArraySerializer.OwnerComp->OnStackCountChanged.ExecuteIfBound(AbilityTag, CurrentStack);
+	InArraySerializer.OwnerActor->OnStackCountChanged.ExecuteIfBound(AbilityTag, CurrentStack);
 
 	if (bShouldTimerStart)
 	{
-		InArraySerializer.OwnerComp->OnStackTimerStarted.ExecuteIfBound(AbilityTag, RechargeTime);
+		InArraySerializer.OwnerActor->OnStackTimerStarted.ExecuteIfBound(AbilityTag, RechargeTime);
 	}
 }
 
 void FAbilityStackItem::PostReplicatedChange(const FAbilityStackArray& InArraySerializer)
 {
-	if (!InArraySerializer.OwnerComp)
+	if (!InArraySerializer.OwnerActor)
 	{
 		return;
 	}
 	
-	InArraySerializer.OwnerComp->OnStackCountChanged.ExecuteIfBound(AbilityTag, CurrentStack);
+	InArraySerializer.OwnerActor->OnStackCountChanged.ExecuteIfBound(AbilityTag, CurrentStack);
 
 	if (bShouldTimerStart)
 	{
-		InArraySerializer.OwnerComp->OnStackTimerStarted.ExecuteIfBound(AbilityTag, RechargeTime);
+		InArraySerializer.OwnerActor->OnStackTimerStarted.ExecuteIfBound(AbilityTag, RechargeTime);
 	}
 }
 
 void FAbilityStackItem::PostReplicatedRemove(const FAbilityStackArray& InArraySerializer)
 {
-	if (!InArraySerializer.OwnerComp)
+	if (!InArraySerializer.OwnerActor)
 	{
 		return;
 	}
 
-	InArraySerializer.OwnerComp->TagToIndex.Remove(AbilityTag);
+	InArraySerializer.OwnerActor->TagToIndex.Remove(AbilityTag);
 }
 
 ///////////////////////////////////////////////////////////////
-// Stackable Ability Component
+// Stackable Ability Manager
 
-UStackableAbilityComponent::UStackableAbilityComponent()
+AStackableAbilityManager::AStackableAbilityManager()
 {
-	SetIsReplicatedByDefault(true);
-	PrimaryComponentTick.bCanEverTick = false;
+	SetReplicates(true);
+	PrimaryActorTick.bCanEverTick = false;
+	// Owner 클라이언트에게만 복제합니다.
+	bOnlyRelevantToOwner = true;
+	// 위치/거리 신경 안 쓰고 Owner Relevancy를 따릅니다.
+	bNetUseOwnerRelevancy = true;
+	SetReplicateMovement(false);
+	SetActorEnableCollision(false);
+	// 초기 전송을 보장합니다.
+	SetNetDormancy(DORM_Awake);
 
-	AbilityStacks.OwnerComp = this;
+	AbilityStacks.OwnerActor = this;
 }
 
-void UStackableAbilityComponent::BeginPlay()
-{
-	Super::BeginPlay();
-
-	if (GetOwner()->HasAuthority())
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Server: UStackableAbilityComponent::BeginPlay"));
-	}
-	else
-	{
-		if (APawn* Pawn = Cast<APawn>(GetOwner()))
-		{
-			if (Pawn->IsLocallyControlled())
-			{
-				UE_LOG(LogTemp, Warning, TEXT("Client, NotMine: UStackableAbilityComponent::BeginPlay"));
-			}
-			else
-			{
-				UE_LOG(LogTemp, Warning, TEXT("Client, Mine: UStackableAbilityComponent::BeginPlay"));
-			}
-		}
-	}
-}
-
-void UStackableAbilityComponent::DestroyComponent(bool bPromoteChildren)
+void AStackableAbilityManager::Destroyed()
 {
 	OnStackCountChanged.Unbind();
 	OnStackTimerStarted.Unbind();
-	Super::DestroyComponent(bPromoteChildren);
+	Super::Destroyed();
 }
 
-void UStackableAbilityComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+void AStackableAbilityManager::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	// 현재는 몇 개의 스택이 쌓였는지 자신만 알면 되므로 OwnerOnly.
 	// 추후 다른 사람의 스택이나 충전 시간 등을 알아야 하는 경우 CONDITION을 제거합니다.
-	DOREPLIFETIME_CONDITION(UStackableAbilityComponent, AbilityStacks, COND_OwnerOnly);
+	DOREPLIFETIME_CONDITION(AStackableAbilityManager, AbilityStacks, COND_OwnerOnly);
 }
 
-void UStackableAbilityComponent::RegisterAbility(FGameplayTag AbilityTag, int32 CurrentStack, int32 MaxStack, float RechargeTime)
+void AStackableAbilityManager::RegisterAbility(FGameplayTag AbilityTag, int32 CurrentStack, int32 MaxStack, float RechargeTime)
 {
-	if (!ensure(GetOwner() != nullptr) || !GetOwner()->HasAuthority())
+	if (!HasAuthority())
 	{
 		return;
 	}
@@ -149,9 +133,9 @@ void UStackableAbilityComponent::RegisterAbility(FGameplayTag AbilityTag, int32 
 	StartRecharge(AbilityTag);
 }
 
-void UStackableAbilityComponent::UnregisterAbility(FGameplayTag AbilityTag)
+void AStackableAbilityManager::UnregisterAbility(FGameplayTag AbilityTag)
 {
-	if (!ensure(GetOwner() != nullptr) || !GetOwner()->HasAuthority())
+	if (!HasAuthority())
 	{
 		return;
 	}
@@ -173,15 +157,15 @@ void UStackableAbilityComponent::UnregisterAbility(FGameplayTag AbilityTag)
 	}
 }
 
-bool UStackableAbilityComponent::CheckCost(FGameplayTag AbilityTag) const
+bool AStackableAbilityManager::CheckCost(FGameplayTag AbilityTag) const
 {
 	const FAbilityStackItem* Item = FindItem(AbilityTag);
 	return Item && Item->CurrentStack > 0;
 }
 
-void UStackableAbilityComponent::ApplyCost(FGameplayTag AbilityTag)
+void AStackableAbilityManager::ApplyCost(FGameplayTag AbilityTag)
 {
-	if (!ensure(GetOwner() != nullptr) || !GetOwner()->HasAuthority())
+	if (!HasAuthority())
 	{
 		return;
 	}
@@ -207,20 +191,20 @@ void UStackableAbilityComponent::ApplyCost(FGameplayTag AbilityTag)
 	}
 }
 
-int32 UStackableAbilityComponent::GetCurrentStack(FGameplayTag AbilityTag) const
+int32 AStackableAbilityManager::GetCurrentStack(FGameplayTag AbilityTag) const
 {
 	const FAbilityStackItem* Item = FindItem(AbilityTag);
 	return Item ? Item->CurrentStack : 0;
 }
 
-bool UStackableAbilityComponent::CheckHasAbility(FGameplayTag AbilityTag) const
+bool AStackableAbilityManager::CheckHasAbility(FGameplayTag AbilityTag) const
 {
 	return FindItem(AbilityTag)	!= nullptr;
 }
 
-void UStackableAbilityComponent::StartRecharge(FGameplayTag AbilityTag)
+void AStackableAbilityManager::StartRecharge(FGameplayTag AbilityTag)
 {
-	if (!ensure(GetOwner() != nullptr) || !GetOwner()->HasAuthority())
+	if (!HasAuthority())
 	{
 		return;
 	}
@@ -259,9 +243,9 @@ void UStackableAbilityComponent::StartRecharge(FGameplayTag AbilityTag)
 	}
 }
 
-void UStackableAbilityComponent::Recharge(FGameplayTag AbilityTag)
+void AStackableAbilityManager::Recharge(FGameplayTag AbilityTag)
 {
-	if (!ensure(GetOwner() != nullptr) || !GetOwner()->HasAuthority())
+	if (!HasAuthority())
 	{
 		return;
 	}
@@ -291,9 +275,9 @@ void UStackableAbilityComponent::Recharge(FGameplayTag AbilityTag)
 	}
 }
 
-void UStackableAbilityComponent::StopRecharge(FGameplayTag AbilityTag)
+void AStackableAbilityManager::StopRecharge(FGameplayTag AbilityTag)
 {
-	if (!ensure(GetOwner() != nullptr) || !GetOwner()->HasAuthority())
+	if (!HasAuthority())
 	{
 		return;
 	}
@@ -313,7 +297,7 @@ void UStackableAbilityComponent::StopRecharge(FGameplayTag AbilityTag)
 	}
 }
 
-int32 UStackableAbilityComponent::FindIndexByTag(const FGameplayTag AbilityTag) const
+int32 AStackableAbilityManager::FindIndexByTag(const FGameplayTag AbilityTag) const
 {
 	if (const int32* FoundIndex = TagToIndex.Find(AbilityTag))
 	{
@@ -331,13 +315,13 @@ int32 UStackableAbilityComponent::FindIndexByTag(const FGameplayTag AbilityTag) 
 	return INDEX_NONE;
 }
 
-FAbilityStackItem* UStackableAbilityComponent::FindItemMutable(const FGameplayTag AbilityTag)
+FAbilityStackItem* AStackableAbilityManager::FindItemMutable(const FGameplayTag AbilityTag)
 {
 	const int32 Index = FindIndexByTag(AbilityTag);
 	return AbilityStacks.Items.IsValidIndex(Index) ? &AbilityStacks.Items[Index] : nullptr;
 }
 
-const FAbilityStackItem* UStackableAbilityComponent::FindItem(const FGameplayTag AbilityTag) const
+const FAbilityStackItem* AStackableAbilityManager::FindItem(const FGameplayTag AbilityTag) const
 {
 	const int32 Index = FindIndexByTag(AbilityTag);
 	return AbilityStacks.Items.IsValidIndex(Index) ? &AbilityStacks.Items[Index] : nullptr;

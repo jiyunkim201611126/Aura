@@ -2,7 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "AuraGameplayAbility.h"
-#include "Aura/Character/Component/StackableAbilityComponent.h"
+#include "Aura/Character/Component/StackableAbilityManager.h"
 #include "AuraSummonAbility.generated.h"
 
 UCLASS()

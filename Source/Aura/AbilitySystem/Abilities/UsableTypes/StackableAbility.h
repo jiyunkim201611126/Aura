@@ -2,7 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "AbilityUsableType.h"
-#include "Aura/Character/Component/StackableAbilityComponent.h"
+#include "Aura/Character/Component/StackableAbilityManager.h"
 #include "StackableAbility.generated.h"
 
 struct FGameplayAbilityActorInfo;
@@ -19,7 +19,7 @@ public:
 	virtual void OnRemoveAbility(UAuraGameplayAbility* OwningAbility) override;
 
 private:
-	UStackableAbilityComponent* GetStackableAbilityComponent(const FGameplayAbilityActorInfo* ActorInfo) const;
+	AStackableAbilityManager* GetStackableAbilityManager(const FGameplayAbilityActorInfo* ActorInfo) const;
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)

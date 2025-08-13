@@ -2,10 +2,18 @@
 
 #include "Aura/Manager/AuraGameplayTags.h"
 #include "Abilities/AuraGameplayAbility.h"
+#include "Net/UnrealNetwork.h"
 
 void UAuraAbilitySystemComponent::AbilityActorInfoSet()
 {
 	OnGameplayEffectAppliedDelegateToSelf.AddUObject(this, &ThisClass::ClientEffectApplied);
+}
+
+void UAuraAbilitySystemComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	
+	DOREPLIFETIME_CONDITION(UAuraAbilitySystemComponent, StackableAbilityManager, COND_OwnerOnly);
 }
 
 void UAuraAbilitySystemComponent::AddCharacterAbilities(const TArray<TSubclassOf<UGameplayAbility>>& StartupAbilities)
@@ -134,6 +142,35 @@ FGameplayTag UAuraAbilitySystemComponent::GetInputTagFromSpec(const FGameplayAbi
 		}
 	}
 	return FGameplayTag();
+}
+
+AStackableAbilityManager* UAuraAbilitySystemComponent::GetStackableAbilityManager()
+{
+	if (!StackableAbilityManager && IsOwnerActorAuthoritative())
+	{
+		// 서버에서만 생성하고, 그 후 PlayerController에게 붙여 Owner 클라이언트에게만 Replicate됩니다.
+		// AI인 경우에도 해당 객체가 필요하므로 주의합니다.
+		FActorSpawnParameters Params;
+		Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+		if (APlayerController* PlayerController = AbilityActorInfo->PlayerController.Get())
+		{
+			Params.Owner = PlayerController;
+		}
+
+		AActor* Avatar = GetAvatarActor();
+		
+		StackableAbilityManager = GetWorld()->SpawnActor<AStackableAbilityManager>(AStackableAbilityManager::StaticClass(),
+			Avatar ? Avatar->GetActorLocation() : FVector::ZeroVector,
+			Avatar ? Avatar->GetActorRotation() : FRotator::ZeroRotator,
+			Params);
+
+		if (StackableAbilityManager && Avatar && Avatar->GetRootComponent())
+		{
+			StackableAbilityManager->AttachToComponent(Avatar->GetRootComponent(), FAttachmentTransformRules::KeepRelativeTransform);
+		}
+	}
+	return StackableAbilityManager;
 }
 
 void UAuraAbilitySystemComponent::ClientEffectApplied_Implementation(UAbilitySystemComponent* AbilitySystemComponent, const FGameplayEffectSpec& EffectSpec, FActiveGameplayEffectHandle ActiveEffectHandle)

@@ -3,7 +3,7 @@
 #include "Aura/AbilitySystem/AuraAttributeSet.h"
 #include "Aura/AbilitySystem/AuraAbilitySystemComponent.h"
 #include "Aura/AbilitySystem/Data/AbilityInfo.h"
-#include "Aura/Character/Component/StackableAbilityComponent.h"
+#include "Aura/Character/Component/StackableAbilityManager.h"
 #include "Aura/Player/AuraPlayerState.h"
 
 void UOverlayWidgetController::BroadcastInitialValue()
@@ -96,20 +96,20 @@ void UOverlayWidgetController::OnAbilitiesGiven(const FGameplayAbilitySpec& Abil
 		AbilityInfoDelegate.Broadcast(AbilityUIInfo);
 
 		FAbilityUsableTypeInfo UsableTypeInfo;
-		if (UStackableAbilityComponent* StackableAbilityComponent = AuraASC->GetAvatarActor()->FindComponentByClass<UStackableAbilityComponent>())
+		if (AStackableAbilityManager* StackableAbilityManager = AuraASC->GetStackableAbilityManager())
 		{
 			// Stackable Ability로 등록되어있는지 확인, 필요한 함수를 바인드합니다.
-			if (StackableAbilityComponent->CheckHasAbility(AbilityUIInfo.AbilityTag))
+			if (StackableAbilityManager->CheckHasAbility(AbilityUIInfo.AbilityTag))
 			{
 				UsableTypeInfo.bIsStackable = true;
 			}
-			StackableAbilityComponent->OnStackCountChanged.BindLambda(
+			StackableAbilityManager->OnStackCountChanged.BindLambda(
 				[this](FGameplayTag InAbilityTag,int32 StackCount)
 				{
 					OnStackCountChangedDelegate.Broadcast(InAbilityTag, StackCount);
 				}
 			);
-			StackableAbilityComponent->OnStackTimerStarted.BindLambda(
+			StackableAbilityManager->OnStackTimerStarted.BindLambda(
 				[this](FGameplayTag InAbilityTag,float RechargeTime)
 				{
 					OnStackTimerStartedDelegate.Broadcast(InAbilityTag, RechargeTime);
@@ -124,7 +124,7 @@ void UOverlayWidgetController::OnAbilitiesGiven(const FGameplayAbilitySpec& Abil
 				if (UsableTypeInfo.bIsStackable)
 				{
 					// Component의 충전 로직 첫 시작이 콜백 함수 바인드보다 먼저 이루어지기 때문에, 여기서 정보를 가져와 한 번 Broadcast해줍니다.
-					if (const FAbilityStackItem* Item = StackableAbilityComponent->FindItem(AbilityUIInfo.AbilityTag))
+					if (const FAbilityStackItem* Item = StackableAbilityManager->FindItem(AbilityUIInfo.AbilityTag))
 					{
 						OnStackCountChangedDelegate.Broadcast(AbilityUIInfo.AbilityTag, Item->CurrentStack);
 						OnStackTimerStartedDelegate.Broadcast(AbilityUIInfo.AbilityTag, Item->RechargeTime);

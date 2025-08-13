@@ -7,7 +7,6 @@
 #include "Aura/AbilitySystem/Data/CharacterClassInfo.h"
 #include "AuraCharacterBase.generated.h"
 
-class UStackableAbilityComponent;
 class UAbilitySystemComponent;
 class UAttributeSet;
 class UGameplayEffect;
@@ -25,7 +24,6 @@ public:
 
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 	UAttributeSet* GetAttributeSet() const { return AttributeSet; }
-	void SetStackableAbilityComponent(UStackableAbilityComponent* Component);
 	
 	// ~Combat Interface
 	virtual FVector GetCombatSocketLocation_Implementation(const FGameplayTag& SocketTag) override;
@@ -42,7 +40,6 @@ protected:
 	// ~AActor Interface
 	virtual void BeginPlay() override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
-	virtual bool ReplicateSubobjects(UActorChannel* Channel, FOutBunch* Bunch, FReplicationFlags* RepFlags) override;
 	// ~End of AActor Interface
 	
 	// ~APawn Interface
@@ -79,11 +76,6 @@ protected:
 
 	UPROPERTY()
 	TObjectPtr<UAttributeSet> AttributeSet;
-
-	// 사용 횟수 충전형 Ability의 충전 로직과 이벤트 호출을 담당하는 클래스입니다.
-	// StackableAbility가 처음 부여된 시점에 동적으로 생성해 할당합니다.
-	UPROPERTY(Replicated)
-	TObjectPtr<UStackableAbilityComponent> StackableAbilityComponent;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TObjectPtr<UMaterialInstance> DissolveMaterialInstance;

@@ -4,6 +4,7 @@
 #include "AbilitySystemComponent.h"
 #include "AuraAbilitySystemComponent.generated.h"
 
+class AStackableAbilityManager;
 DECLARE_MULTICAST_DELEGATE_OneParam(FEffectAssetTags, const FGameplayTagContainer&);
 DECLARE_MULTICAST_DELEGATE_OneParam(FAbilitiesGiven, const FGameplayAbilitySpec&);
 
@@ -15,6 +16,8 @@ class AURA_API UAuraAbilitySystemComponent : public UAbilitySystemComponent
 public:
 	// InitAbilityActorInfo(OwnerActor와 AvatarActor를 할당해주는 함수)가 호출된 직후 호출되는 함수
 	void AbilityActorInfoSet();
+
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 	// 키 입력에 따라 발동하는 Ability를 장착하는 플레이어 캐릭터용 함수입니다. UAuraGameplayAbility를 사용합니다.
 	void AddCharacterAbilities(const TArray<TSubclassOf<UGameplayAbility>>& StartupAbilities);
@@ -33,6 +36,8 @@ public:
 	static FGameplayTag GetAbilityTagFromSpec(const FGameplayAbilitySpec& AbilitySpec);
 	FGameplayTag GetInputTagFromSpec(const FGameplayAbilitySpec& AbilitySpec);
 
+	AStackableAbilityManager* GetStackableAbilityManager();
+
 protected:
 	// OnGameplayEffectAppliedDelegateToSelf에 붙이는 함수, 해당 델리게이트는 Server에서만 호출하기 때문에 RPC를 바인드해 클라이언트도 메시지 표시
 	UFUNCTION(Client, Reliable)
@@ -47,4 +52,8 @@ private:
 	// OnRep_ActivateAbilities가 호출되기 전, 클라이언트에서 캐싱해두고 있는 Ability 부여 정보입니다.
 	// 갖고 있던 것과 비교해서 달라졌을 경우만 위젯에 알려줍니다.
 	TSet<FGameplayAbilitySpecHandle> CachedAbilityHandles;
+
+	// StackableAbility가 하나라도 존재하면 해당 객체를 런타임 중에 할당받습니다.
+	UPROPERTY(Replicated)
+	TObjectPtr<AStackableAbilityManager> StackableAbilityManager;
 };
