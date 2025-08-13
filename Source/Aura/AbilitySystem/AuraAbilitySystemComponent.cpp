@@ -1,7 +1,7 @@
 #include "AuraAbilitySystemComponent.h"
-
 #include "Aura/Manager/AuraGameplayTags.h"
 #include "Abilities/AuraGameplayAbility.h"
+#include "Abilities/UsableTypes/StackableAbility/StackableAbilityManager.h"
 #include "Net/UnrealNetwork.h"
 
 void UAuraAbilitySystemComponent::AbilityActorInfoSet()

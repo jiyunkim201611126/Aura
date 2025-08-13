@@ -2,7 +2,6 @@
 
 #include "CoreMinimal.h"
 #include "AuraGameplayAbility.h"
-#include "Aura/Character/Component/StackableAbilityManager.h"
 #include "AuraSummonAbility.generated.h"
 
 UCLASS()
@@ -35,11 +34,11 @@ private:
 	float SpawnSpread = 90.f;
 
 	
-	// ~Stackable Ability Interface
+	// ~Ability Interface
 protected:
 	virtual void OnGiveAbility(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec) override;
 	virtual bool CheckCost(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, FGameplayTagContainer* OptionalRelevantTags = nullptr) const override;
 	virtual void ApplyCost(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo) const override;
 	virtual void OnRemoveAbility(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec) override;
-	// ~End of Stackable Ability Interface
+	// ~End of Ability Interface
 };

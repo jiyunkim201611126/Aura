@@ -1,8 +1,8 @@
 ﻿#include "StackableAbility.h"
 
+#include "StackableAbilityManager.h"
 #include "Aura/AbilitySystem/AuraAbilitySystemComponent.h"
 #include "Aura/AbilitySystem/Abilities/AuraGameplayAbility.h"
-#include "Aura/Character/AuraCharacterBase.h"
 
 void UStackableAbility::OnGivenAbility(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec)
 {

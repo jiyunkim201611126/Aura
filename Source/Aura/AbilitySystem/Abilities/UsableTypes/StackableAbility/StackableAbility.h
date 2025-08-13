@@ -1,8 +1,8 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "AbilityUsableType.h"
-#include "Aura/Character/Component/StackableAbilityManager.h"
+#include "StackableAbilityManager.h"
+#include "Aura/AbilitySystem/Abilities/UsableTypes/AbilityUsableType.h"
 #include "StackableAbility.generated.h"
 
 struct FGameplayAbilityActorInfo;

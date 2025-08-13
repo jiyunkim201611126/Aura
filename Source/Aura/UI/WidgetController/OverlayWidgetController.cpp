@@ -2,8 +2,8 @@
 
 #include "Aura/AbilitySystem/AuraAttributeSet.h"
 #include "Aura/AbilitySystem/AuraAbilitySystemComponent.h"
+#include "Aura/AbilitySystem/Abilities/UsableTypes/StackableAbility/StackableAbilityManager.h"
 #include "Aura/AbilitySystem/Data/AbilityInfo.h"
-#include "Aura/Character/Component/StackableAbilityManager.h"
 #include "Aura/Player/AuraPlayerState.h"
 
 void UOverlayWidgetController::BroadcastInitialValue()

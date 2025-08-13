@@ -2,7 +2,6 @@
 
 #include "CoreMinimal.h"
 #include "Abilities/GameplayAbility.h"
-#include "Aura/Character/Component/StackableAbilityManager.h"
 #include "AuraGameplayAbility.generated.h"
 
 class UAbilityUsableType;
