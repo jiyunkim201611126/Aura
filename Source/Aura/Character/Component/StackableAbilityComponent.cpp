@@ -1,5 +1,4 @@
 ﻿#include "StackableAbilityComponent.h"
-
 #include "Net/UnrealNetwork.h"
 
 ///////////////////////////////////////////////////////////////
@@ -68,6 +67,30 @@ UStackableAbilityComponent::UStackableAbilityComponent()
 	AbilityStacks.OwnerComp = this;
 }
 
+void UStackableAbilityComponent::BeginPlay()
+{
+	Super::BeginPlay();
+
+	if (GetOwner()->HasAuthority())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Server: UStackableAbilityComponent::BeginPlay"));
+	}
+	else
+	{
+		if (APawn* Pawn = Cast<APawn>(GetOwner()))
+		{
+			if (Pawn->IsLocallyControlled())
+			{
+				UE_LOG(LogTemp, Warning, TEXT("Client, NotMine: UStackableAbilityComponent::BeginPlay"));
+			}
+			else
+			{
+				UE_LOG(LogTemp, Warning, TEXT("Client, Mine: UStackableAbilityComponent::BeginPlay"));
+			}
+		}
+	}
+}
+
 void UStackableAbilityComponent::DestroyComponent(bool bPromoteChildren)
 {
 	OnStackCountChanged.Unbind();
@@ -78,7 +101,10 @@ void UStackableAbilityComponent::DestroyComponent(bool bPromoteChildren)
 void UStackableAbilityComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-	DOREPLIFETIME(UStackableAbilityComponent, AbilityStacks);
+
+	// 현재는 몇 개의 스택이 쌓였는지 자신만 알면 되므로 OwnerOnly.
+	// 추후 다른 사람의 스택이나 충전 시간 등을 알아야 하는 경우 CONDITION을 제거합니다.
+	DOREPLIFETIME_CONDITION(UStackableAbilityComponent, AbilityStacks, COND_OwnerOnly);
 }
 
 void UStackableAbilityComponent::RegisterAbility(FGameplayTag AbilityTag, int32 CurrentStack, int32 MaxStack, float RechargeTime)

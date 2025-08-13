@@ -1,6 +1,7 @@
 ﻿#include "StackableAbility.h"
 
 #include "Aura/AbilitySystem/Abilities/AuraGameplayAbility.h"
+#include "Aura/Character/AuraCharacterBase.h"
 
 void UStackableAbility::OnGivenAbility(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec)
 {
@@ -60,6 +61,12 @@ UStackableAbilityComponent* UStackableAbility::GetStackableAbilityComponent(cons
 		if (ActorInfo->IsNetAuthority())
 		{
 			Component = Cast<UStackableAbilityComponent>(AvatarActor->AddComponentByClass(UStackableAbilityComponent::StaticClass(), false, FTransform::Identity, true));
+			
+			if (AAuraCharacterBase* Character = Cast<AAuraCharacterBase>(AvatarActor))
+			{
+				Character->SetStackableAbilityComponent(Component);
+			}
+			
 			AvatarActor->FinishAddComponent(Component, false, FTransform::Identity);
 			return Component;
 		}

@@ -6,6 +6,9 @@
 #include "Components/CapsuleComponent.h"
 #include "Aura/Manager/AuraGameplayTags.h"
 #include "Aura/Manager/FXManagerSubsystem.h"
+#include "Component/StackableAbilityComponent.h"
+#include "Engine/ActorChannel.h"
+#include "Net/UnrealNetwork.h"
 
 // Sets default values
 AAuraCharacterBase::AAuraCharacterBase()
@@ -32,6 +35,29 @@ void AAuraCharacterBase::BeginPlay()
 	RegisterPawn();
 }
 
+void AAuraCharacterBase::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	
+	// 현재는 몇 개의 스택이 쌓였는지 자신만 알면 되므로 OwnerOnly.
+	// 추후 다른 사람의 스택이나 충전 시간 등을 알아야 하는 경우 CONDITION을 제거합니다.
+	DOREPLIFETIME_CONDITION(AAuraCharacterBase, StackableAbilityComponent, COND_OwnerOnly);
+}
+
+bool AAuraCharacterBase::ReplicateSubobjects(UActorChannel* Channel, FOutBunch* Bunch, FReplicationFlags* RepFlags)
+{
+	bool Wrote = Super::ReplicateSubobjects(Channel, Bunch, RepFlags);
+
+	if (RepFlags && RepFlags->bNetOwner)
+	{
+		if (IsValid(StackableAbilityComponent) && StackableAbilityComponent->GetIsReplicated())
+		{
+			Wrote |= Channel->ReplicateSubobject(StackableAbilityComponent, *Bunch, *RepFlags);
+		}
+	}
+	return Wrote;
+}
+
 void AAuraCharacterBase::PossessedBy(AController* NewController)
 {
 	Super::PossessedBy(NewController);
@@ -40,6 +66,11 @@ void AAuraCharacterBase::PossessedBy(AController* NewController)
 UAbilitySystemComponent* AAuraCharacterBase::GetAbilitySystemComponent() const
 {
 	return AbilitySystemComponent;
+}
+
+void AAuraCharacterBase::SetStackableAbilityComponent(UStackableAbilityComponent* Component)
+{
+	StackableAbilityComponent = Component;
 }
 
 FVector AAuraCharacterBase::GetCombatSocketLocation_Implementation(const FGameplayTag& SocketTag)

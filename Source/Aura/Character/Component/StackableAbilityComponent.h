@@ -76,6 +76,7 @@ public:
 	UStackableAbilityComponent();
 
 	// ~ActorComponent Interface
+	virtual void BeginPlay() override;
 	virtual void DestroyComponent(bool bPromoteChildren = false) override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	// ~End of ActorComponent Interface
