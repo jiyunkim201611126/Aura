@@ -1,7 +1,10 @@
 #include "AuraAbilitySystemComponent.h"
+
+#include "AbilitySystemBlueprintLibrary.h"
 #include "Aura/Manager/AuraGameplayTags.h"
 #include "Abilities/AuraGameplayAbility.h"
 #include "Abilities/UsableTypes/StackableAbility/StackableAbilityManager.h"
+#include "Aura/Interaction/LevelableInterface.h"
 #include "Net/UnrealNetwork.h"
 
 void UAuraAbilitySystemComponent::AbilityActorInfoSet()
@@ -13,7 +16,7 @@ void UAuraAbilitySystemComponent::GetLifetimeReplicatedProps(TArray<FLifetimePro
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	
-	DOREPLIFETIME_CONDITION(UAuraAbilitySystemComponent, StackableAbilityManager, COND_OwnerOnly);
+	DOREPLIFETIME_CONDITION(UAuraAbilitySystemComponent, AbilityManagers, COND_OwnerOnly);
 }
 
 void UAuraAbilitySystemComponent::AddCharacterAbilities(const TArray<TSubclassOf<UGameplayAbility>>& StartupAbilities)
@@ -144,33 +147,29 @@ FGameplayTag UAuraAbilitySystemComponent::GetInputTagFromSpec(const FGameplayAbi
 	return FGameplayTag();
 }
 
-AStackableAbilityManager* UAuraAbilitySystemComponent::GetStackableAbilityManager()
+void UAuraAbilitySystemComponent::UpgradeAttribute(const FGameplayTag& AttributeTag)
 {
-	if (!StackableAbilityManager && IsOwnerActorAuthoritative())
+	if (GetAvatarActor()->Implements<ULevelableInterface>())
 	{
-		// 서버에서만 생성하고, 그 후 PlayerController에게 붙여 Owner 클라이언트에게만 Replicate됩니다.
-		// AI인 경우에도 해당 객체가 필요하므로 주의합니다.
-		FActorSpawnParameters Params;
-		Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-
-		if (APlayerController* PlayerController = AbilityActorInfo->PlayerController.Get())
+		if (ILevelableInterface::Execute_GetAttributePoints(GetAvatarActor()) > 0)
 		{
-			Params.Owner = PlayerController;
-		}
-
-		AActor* Avatar = GetAvatarActor();
-		
-		StackableAbilityManager = GetWorld()->SpawnActor<AStackableAbilityManager>(AStackableAbilityManager::StaticClass(),
-			Avatar ? Avatar->GetActorLocation() : FVector::ZeroVector,
-			Avatar ? Avatar->GetActorRotation() : FRotator::ZeroRotator,
-			Params);
-
-		if (StackableAbilityManager && Avatar && Avatar->GetRootComponent())
-		{
-			StackableAbilityManager->AttachToComponent(Avatar->GetRootComponent(), FAttachmentTransformRules::KeepRelativeTransform);
+			ServerUpgradeAttribute(AttributeTag);
 		}
 	}
-	return StackableAbilityManager;
+}
+
+void UAuraAbilitySystemComponent::ServerUpgradeAttribute_Implementation(const FGameplayTag& AttributeTag)
+{
+	FGameplayEventData Payload;
+	Payload.EventTag = AttributeTag;
+	Payload.EventMagnitude = 1.f;
+
+	UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(GetAvatarActor(), AttributeTag, Payload);
+
+	if (GetAvatarActor()->Implements<ULevelableInterface>())
+	{
+		ILevelableInterface::Execute_AddToAttributePoints(GetAvatarActor(), -1);
+	}
 }
 
 void UAuraAbilitySystemComponent::ClientEffectApplied_Implementation(UAbilitySystemComponent* AbilitySystemComponent, const FGameplayEffectSpec& EffectSpec, FActiveGameplayEffectHandle ActiveEffectHandle)

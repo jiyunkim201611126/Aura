@@ -51,5 +51,5 @@ AStackableAbilityManager* UStackableAbility::GetStackableAbilityManager(const FG
 {
 	UAuraAbilitySystemComponent* ASC = Cast<UAuraAbilitySystemComponent>(ActorInfo->AbilitySystemComponent);
 
-	return ASC->GetStackableAbilityManager();
+	return ASC->FindOrAddAbilityManager<AStackableAbilityManager>();
 }

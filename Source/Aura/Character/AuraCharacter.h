@@ -31,7 +31,9 @@ public:
 	virtual void AddToXP_Implementation(const int32 InXP) override;
 	virtual void AddToLevel_Implementation(const int32 InPlayerLevel) override;
 	virtual void AddToAttributePoints_Implementation(const int32 InAttributePoints) override;
+	virtual int32 GetAttributePoints_Implementation() const override;
 	virtual void AddToSpellPoints_Implementation(const int32 InSpellPoints) override;
+	virtual int32 GetSpellPoints_Implementation() const override;
 	virtual void LevelUp_Implementation() override;
 	// ~End of Levelable Interface
 

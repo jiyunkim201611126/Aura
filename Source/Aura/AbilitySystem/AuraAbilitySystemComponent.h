@@ -32,11 +32,19 @@ public:
 
 	void AbilityInputTagHeld(const FGameplayTag& InputTag);
 	void AbilityInputTagReleased(const FGameplayTag& InputTag);
-	
+
 	static FGameplayTag GetAbilityTagFromSpec(const FGameplayAbilitySpec& AbilitySpec);
 	FGameplayTag GetInputTagFromSpec(const FGameplayAbilitySpec& AbilitySpec);
 
-	AStackableAbilityManager* GetStackableAbilityManager();
+	void UpgradeAttribute(const FGameplayTag& AttributeTag);
+
+	UFUNCTION(Server, Reliable)
+	void ServerUpgradeAttribute(const FGameplayTag& AttributeTag);
+	
+	template <class T>
+	T* FindAbilityManager();
+	template <class T>
+	T* FindOrAddAbilityManager();
 
 protected:
 	// OnGameplayEffectAppliedDelegateToSelf에 붙이는 함수, 해당 델리게이트는 Server에서만 호출하기 때문에 RPC를 바인드해 클라이언트도 메시지 표시
@@ -53,7 +61,62 @@ private:
 	// 갖고 있던 것과 비교해서 달라졌을 경우만 위젯에 알려줍니다.
 	TSet<FGameplayAbilitySpecHandle> CachedAbilityHandles;
 
-	// StackableAbility가 하나라도 존재하면 해당 객체를 런타임 중에 할당받습니다.
+	// Ability Manager 배열입니다.
+	// 런타임 중 드물게 변하는 배열이며, Owner 클라이언트에게만 복제되기 때문에 FastArray를 굳이 사용하지 않았습니다.
+	// 현재는 Stackable Ability Manager 클래스뿐이며, 보유 Ability 중 하나라도 Stackable Ability라면 Manager 객체를 런타임 중에 할당받습니다.
 	UPROPERTY(Replicated)
-	TObjectPtr<AStackableAbilityManager> StackableAbilityManager;
+	TArray<TObjectPtr<AActor>> AbilityManagers;
 };
+
+template<typename T>
+T* UAuraAbilitySystemComponent::FindAbilityManager()
+{
+	for (AActor* Manager : AbilityManagers)
+	{
+		if (T* Typed = Cast<T>(Manager))
+		{
+			return Typed;
+		}
+	}
+	return nullptr;
+}
+
+template <class T>
+T* UAuraAbilitySystemComponent::FindOrAddAbilityManager()
+{
+	if (T* Existing = FindAbilityManager<T>())
+	{
+		return Existing;
+	}
+
+	if (!IsOwnerActorAuthoritative())
+	{
+		// 클라이언트인 경우 생성할 권한이 없으므로 반환합니다.
+		return nullptr;
+	}
+	
+	// Manager 액터 생성 후 PlayerController에게 붙여 Owner 클라이언트에게만 Replicate됩니다.
+	// AI인 경우에도 해당 객체가 필요하므로 주의합니다.
+	FActorSpawnParameters Params;
+	Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+	if (APlayerController* PlayerController = AbilityActorInfo->PlayerController.Get())
+	{
+		Params.Owner = PlayerController;
+	}
+
+	AActor* Avatar = GetAvatarActor();
+		
+	T* NewManager = GetWorld()->SpawnActor<T>(T::StaticClass(),
+		Avatar ? Avatar->GetActorLocation() : FVector::ZeroVector,
+		Avatar ? Avatar->GetActorRotation() : FRotator::ZeroRotator,
+		Params);
+
+	if (NewManager && Avatar && Avatar->GetRootComponent())
+	{
+		NewManager->AttachToComponent(Avatar->GetRootComponent(), FAttachmentTransformRules::KeepRelativeTransform);
+		AbilityManagers.Add(NewManager);
+	}
+	
+	return NewManager;
+}

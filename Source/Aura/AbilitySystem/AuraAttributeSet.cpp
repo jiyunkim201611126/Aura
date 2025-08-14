@@ -262,6 +262,10 @@ void UAuraAttributeSet::SendXPEvent(const FEffectProperties& Props) const
 		FGameplayEventData Payload;
 		Payload.EventTag = GameplayTags.Attributes_Meta_IncomingXP;
 		Payload.EventMagnitude = XPReward;
+		// 이벤트를 송신하는 함수입니다.
+		// 아래 구문을 기준으로 하면, SourceCharacter의 ASC에게 IncomingXP Tag를 식별자로 하여 이벤트를 발생시킵니다.
+		// Payload에 원하는 데이터를 담아 송신할 수 있습니다.
+		// 해당 이벤트는 이 Tag를 기준으로 WaitGameplayEvent를 호출한 Ability(GA_ListenForEvent)가 수신합니다.
 		UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(Props.SourceCharacter, GameplayTags.Attributes_Meta_IncomingXP, Payload);
 	}
 }

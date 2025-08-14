@@ -6,6 +6,7 @@
 #include "GameplayTagContainer.h"
 #include "OverlayWidgetController.generated.h"
 
+class UAuraAbilitySystemComponent;
 struct FGameplayAbilitySpec;
 struct FAuraAbilityInfo;
 class UAbilityInfo;
@@ -68,6 +69,7 @@ protected:
 	T* GetDataTableRowByTag(UDataTable* DataTable, const FGameplayTag& Tag);
 
 	void OnAbilitiesGiven(const FGameplayAbilitySpec& AbilitySpec);
+	void BindForUsableTypes(UAuraAbilitySystemComponent* AuraASC, FGameplayTag AbilityTag);
 	
 	void OnXPChanged(int32 InXP) const;
 
