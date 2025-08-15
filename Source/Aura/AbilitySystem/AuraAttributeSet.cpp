@@ -197,8 +197,9 @@ void UAuraAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallba
 				ILevelableInterface::Execute_AddToAttributePoints(Props.SourceCharacter, AttributePointsReward);
 				ILevelableInterface::Execute_AddToSpellPoints(Props.SourceCharacter, SpellPointsReward);
 
-				SetHealth(GetMaxHealth());
-				SetMana(GetMaxMana());
+				// 레벨에 따른 MaxHealth와 MaxMana 반영 이후 Health, Mana를 최대치로 회복하기 위해 기록해둡니다. 
+				bTopOffHealth = true;
+				bTopOffMana = true;
 				
 				ILevelableInterface::Execute_LevelUp(Props.SourceCharacter);
 			}
@@ -206,6 +207,22 @@ void UAuraAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallba
 			// XP 보상을 부여합니다.
 			ILevelableInterface::Execute_AddToXP(Props.SourceCharacter, LocalIncomingXP);
 		}
+	}
+}
+
+void UAuraAttributeSet::PostAttributeChange(const FGameplayAttribute& Attribute, float OldValue, float NewValue)
+{
+	Super::PostAttributeChange(Attribute, OldValue, NewValue);
+
+	if (Attribute == GetMaxHealthAttribute() && bTopOffHealth)
+	{
+		SetHealth(GetMaxHealth());
+		bTopOffHealth = false;
+	}
+	if (Attribute == GetHealthAttribute() && bTopOffMana)
+	{
+		SetMana(GetMaxMana());
+		bTopOffMana = false;
 	}
 }
 
@@ -246,16 +263,15 @@ void UAuraAttributeSet::SendXPEvent(const FEffectProperties& Props) const
 {
 	if (Props.TargetAvatarActor->Implements<UCombatInterface>())
 	{
-		ECharacterRank Rank = ICombatInterface::Execute_GetCharacterRank(Props.TargetAvatarActor);
+		const ECharacterRank TargetRank = ICombatInterface::Execute_GetCharacterRank(Props.TargetAvatarActor);
 		// Rank가 None인 경우(소환된 하수인이거나, 경험치를 얻을 수 없는 적), 이벤트를 발생시키지 않습니다.
-		if (Rank == ECharacterRank::None)
+		if (TargetRank == ECharacterRank::None)
 		{
 			return;
 		}
 		
 		// XP 변화량을 계산해 이벤트를 송신합니다.
 		const int32 TargetLevel = ICombatInterface::Execute_GetCharacterLevel(Props.TargetAvatarActor);
-		const ECharacterRank TargetRank = ICombatInterface::Execute_GetCharacterRank(Props.TargetAvatarActor);
 		const int32 XPReward = UAuraAbilitySystemLibrary::GetXPRewardForRankAndLevel(Props.TargetAvatarActor, TargetRank, TargetLevel);
 
 		const FAuraGameplayTags& GameplayTags = FAuraGameplayTags::Get();

@@ -3,7 +3,7 @@
 #include "GameplayAbilitySpec.h"
 #include "GameplayAbilitySpecHandle.h"
 
-void UAbilityUsableType::OnGivenAbility(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec)
+void UAbilityUsableType::OnGivenAbility(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec, const FGameplayTag& InAbilityTag)
 {
 }
 

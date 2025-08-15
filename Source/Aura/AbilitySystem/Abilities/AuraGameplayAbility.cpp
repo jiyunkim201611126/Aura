@@ -26,7 +26,7 @@ void UAuraGameplayAbility::OnGiveAbility(const FGameplayAbilityActorInfo* ActorI
 
 	for (auto AbilityUsableType : UsableTypes)
 	{
-		AbilityUsableType->OnGivenAbility(ActorInfo, Spec);
+		AbilityUsableType->OnGivenAbility(ActorInfo, Spec, AbilityTag);
 	}
 }
 
@@ -61,4 +61,32 @@ void UAuraGameplayAbility::OnRemoveAbility(const FGameplayAbilityActorInfo* Acto
 	}
 	
 	Super::OnRemoveAbility(ActorInfo, Spec);
+}
+
+void UAuraGameplayAbility::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
+{
+	Super::PostEditChangeProperty(PropertyChangedEvent);
+
+	if (PropertyChangedEvent.Property && PropertyChangedEvent.Property->GetFName() == GET_MEMBER_NAME_CHECKED(UAuraGameplayAbility, AbilityTag))
+	{
+		SyncAbilityTagToAssetTags();
+	}
+}
+
+void UAuraGameplayAbility::SyncAbilityTagToAssetTags()
+{
+	// GetAssetTags를 통해 반환받는 변수인 AbilityTags는 GameplayAbility의 멤버 변수입니다.
+	// 추후 AssetTags라는 이름으로 변경될 예정이며, 메타데이터 역할을 수행하기 때문에 런타임 중 변경되는 것을 금지하고 있습니다.
+	// 따라서 해당 함수는 에디터에서만 호출됩니다.
+	if (AbilityTag.IsValid() && !GetAssetTags().HasTag(AbilityTag))
+	{
+		FGameplayTagContainer NewAbilityTags;
+		NewAbilityTags.AddTag(AbilityTag);
+		for (auto AssetTag : GetAssetTags())
+		{
+			NewAbilityTags.AddTag(AssetTag);
+		}
+		
+		SetAssetTags(NewAbilityTags);
+	}
 }

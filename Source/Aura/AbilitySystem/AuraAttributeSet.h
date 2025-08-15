@@ -60,12 +60,22 @@ class AURA_API UAuraAttributeSet : public UAttributeSet
 
 public:
 	UAuraAttributeSet();
-	
+
+	// ~AttributeSet Interface
 	// 어떤 변수들이 Replicate될지, 어떻게 Replicate될지 지정하는 함수입니다.
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	// GameplayEffect의 적용으로 인해 Attribute에 변동사항이 있으면 호출되는 함수입니다.
 	virtual void PostGameplayEffectExecute(const FGameplayEffectModCallbackData& Data) override;
+	// Attribute의 값이 변화할 때 호출되는 함수입니다.
+	virtual void PostAttributeChange(const FGameplayAttribute& Attribute, float OldValue, float NewValue) override;
+	// ~End of AttributeSet Interface
 
+private:
+	// GE 적용 시점에 Source와 Target을 편리하게 추적하기 위해 구조체에 그 정보를 채워주는 함수
+	void SetEffectProperties(const FGameplayEffectModCallbackData& Data, FEffectProperties& Props) const;
+	void SendXPEvent(const FEffectProperties& Props) const;
+
+public:
 	/**
 	 * 델리게이트가 아닌 함수 포인터를 직접 Value로 선언한 TMap.
 	 * 저수준 방식으로 최적화를 위해서 사용하기도 하지만, Bind 과정을 거칠 필요가 없기 때문에 보일러 플레이트를 줄이는 데에도 사용 가능합니다.
@@ -232,7 +242,6 @@ public:
 	ATTRIBUTE_ACCESSORS(UAuraAttributeSet, IncomingXP);
 
 private:
-	// GE 적용 시점에 Source와 Target을 편리하게 추적하기 위해 구조체에 그 정보를 채워주는 함수
-	void SetEffectProperties(const FGameplayEffectModCallbackData& Data, FEffectProperties& Props) const;
-	void SendXPEvent(const FEffectProperties& Props) const;
+	bool bTopOffHealth = false;
+	bool bTopOffMana = false;
 };

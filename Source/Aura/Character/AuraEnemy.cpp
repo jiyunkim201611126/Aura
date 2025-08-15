@@ -183,7 +183,7 @@ void AAuraEnemy::PossessedBy(AController* NewController)
 
 void AAuraEnemy::InitAbilityActorInfo()
 {
-	// Simulated Proxy의 AbilitySystemComponent는 Owner Actor == Avatar Actor로, 둘 모두 캐릭터다
+	// Simulated Proxy의 AbilitySystemComponent는 Owner Actor == Avatar Actor로, 둘 모두 캐릭터입니다.
 	AbilitySystemComponent->InitAbilityActorInfo(this, this);
 	Cast<UAuraAbilitySystemComponent>(AbilitySystemComponent)->AbilityActorInfoSet();
 

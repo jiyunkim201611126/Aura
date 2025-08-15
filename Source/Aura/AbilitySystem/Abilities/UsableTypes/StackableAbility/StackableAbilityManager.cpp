@@ -61,18 +61,23 @@ void FAbilityStackItem::PostReplicatedRemove(const FAbilityStackArray& InArraySe
 
 AStackableAbilityManager::AStackableAbilityManager()
 {
-	SetReplicates(true);
+	bReplicates = true;
 	PrimaryActorTick.bCanEverTick = false;
 	// Owner 클라이언트에게만 복제합니다.
 	bOnlyRelevantToOwner = true;
 	// 위치/거리 신경 안 쓰고 Owner Relevancy를 따릅니다.
 	bNetUseOwnerRelevancy = true;
-	SetReplicateMovement(false);
-	SetActorEnableCollision(false);
 	// 초기 전송을 보장합니다.
 	SetNetDormancy(DORM_Awake);
 
 	AbilityStacks.OwnerActor = this;
+}
+
+void AStackableAbilityManager::BeginPlay()
+{
+	Super::BeginPlay();
+	SetReplicateMovement(false);
+	SetActorEnableCollision(false);
 }
 
 void AStackableAbilityManager::Destroyed()

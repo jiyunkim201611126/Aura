@@ -42,6 +42,11 @@ private:
 	FTaggedMontage GetRandomMontage();
 
 public:
+	// Ability의 전용 태그입니다.
+	// 플레이어 캐릭터가 사용하는 Ability는 반드시 Tag 하나와 1:1 대응하며, 해당 Tag는 Ability의 식별자 역할을 수행합니다.
+	UPROPERTY(EditDefaultsOnly, Category = "Tags")
+	FGameplayTag AbilityTag;
+	
 	// 플레이어의 캐릭터만 사용하는 태그입니다.
 	// Input과 관련된 태그들은 AuraInputConfig를 통해 InputAction과 이어져있습니다.
 	// AuraInputComponent를 통해 InputAction에 바인드된 함수는 호출 시 자동으로 연결된 태그가 매개변수로 들어갑니다.
@@ -65,4 +70,12 @@ protected:
 	virtual bool CheckCost(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, FGameplayTagContainer* OptionalRelevantTags = nullptr) const override;
 	virtual void ApplyCost(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo) const override;
 	virtual void OnRemoveAbility(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec) override;
+
+	// AbilityTag로 할당한 Ability 전용 태그가 AssetTag(AbilityTags)에도 자동으로 추가되도록 해주는 함수들입니다.
+#if WITH_EDITOR
+	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
+
+private:
+	void SyncAbilityTagToAssetTags();
+#endif
 };

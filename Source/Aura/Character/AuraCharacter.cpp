@@ -159,13 +159,15 @@ void AAuraCharacter::InitAbilityActorInfo()
 	AAuraPlayerState* AuraPlayerState = GetPlayerState<AAuraPlayerState>();
 	check(AuraPlayerState);
 	// Autonomous Proxy의 AbilitySystemComponent은 Owner Actor가 PlayerState, Avatar Actor가 캐릭터
-	// 이유는 리스폰 시 정보가 유지되어야 하는 상황이 존재하기 때문
+	// 이유는 리스폰 시 정보가 유지되어야 하는 상황이 존재하기 때문입니다.
 	AuraPlayerState->GetAbilitySystemComponent()->InitAbilityActorInfo(AuraPlayerState, this);
 	Cast<UAuraAbilitySystemComponent>(AuraPlayerState->GetAbilitySystemComponent())->AbilityActorInfoSet();
 	AbilitySystemComponent = AuraPlayerState->GetAbilitySystemComponent();
 	AttributeSet = AuraPlayerState->GetAttributeSet();
 
-	// PlayerController, PlayerState, AbilitySystemComponent, AttributeSet이 모두 초기화된 게 확실한 장소이므로 HUD의 Init함수 호출
+	// PlayerController, PlayerState, AbilitySystemComponent, AttributeSet이 모두 초기화된 게 확실한 장소이므로 HUD의 Init함수를 호출합니다.
+	// Widget들의 생성 자체는 이미 끝난 상태이며, 콜백 함수 바인드 로직의 호출을 기다리고 있는 상태입니다.
+	// Widget Controller는 Widget과 관련 있는 객체들을 직접 찾아가 자신의 콜백 함수를 바인드하고, 그 과정이 끝나면 모든 Widget들에게 Widget Controller가 뿌려집니다.
 	if (AAuraPlayerController* AuraPlayerController = Cast<AAuraPlayerController>(GetController()))
 	{
 		if (AAuraHUD* AuraHUD = Cast<AAuraHUD>(AuraPlayerController->GetHUD()))
