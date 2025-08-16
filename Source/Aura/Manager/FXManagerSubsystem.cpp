@@ -1,5 +1,4 @@
 ﻿#include "FXManagerSubsystem.h"
-
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraSystem.h"
 #include "Engine/AssetManager.h"

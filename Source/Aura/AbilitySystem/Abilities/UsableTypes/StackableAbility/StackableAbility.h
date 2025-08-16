@@ -13,7 +13,7 @@ class AURA_API UStackableAbility : public UAbilityUsableType
 	GENERATED_BODY()
 
 public:
-	virtual void OnGivenAbility(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec, const FGameplayTag& InAbilityTag) override;
+	virtual void OnGivenAbility(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec, const UAuraGameplayAbility* OwningAbility) override;
 	virtual bool CheckCost(const UAuraGameplayAbility* OwningAbility) override;
 	virtual void ApplyCost(const UAuraGameplayAbility* OwningAbility) override;
 	virtual void OnRemoveAbility(UAuraGameplayAbility* OwningAbility) override;
@@ -24,8 +24,4 @@ private:
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	FAbilityStackItem StackData;
-
-private:
-	// 이 객체를 소유한 Ability의 태그입니다.
-	FGameplayTag AbilityTag;
 };

@@ -1,5 +1,4 @@
 ﻿#include "AuraProgressBar.h"
-
 #include "Kismet/KismetMathLibrary.h"
 #include "Components/ProgressBar.h"
 

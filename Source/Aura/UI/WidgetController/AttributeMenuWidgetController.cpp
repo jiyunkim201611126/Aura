@@ -8,24 +8,21 @@
 void UAttributeMenuWidgetController::BroadcastInitialValue()
 {
 	// 반드시 모든 바인드가 끝난 뒤에 호출할 것
-	UAuraAttributeSet* AS = CastChecked<UAuraAttributeSet>(AttributeSet);
 	check(AttributeInfo);
 
-	for (auto& Pair : AS->TagsToAttributes)
+	for (auto& Pair : GetAuraAS()->TagsToAttributes)
 	{
 		BroadcastAttributeInfo(Pair.Key, Pair.Value());
 	}
 
-	AAuraPlayerState* AuraPlayerState = CastChecked<AAuraPlayerState>(PlayerState);
-	OnAttributePointsChangedDelegate.Broadcast(AuraPlayerState->GetAttributePoints());
+	OnAttributePointsChangedDelegate.Broadcast(GetAuraPS()->GetAttributePoints());
 }
 
 void UAttributeMenuWidgetController::BindCallbacksToDependencies()
 {
 	// 하나의 Attribute만 변경되어도 다른 Attribute에게 영향을 주므로 모두 새로고침해야 함
-	UAuraAttributeSet* AS = CastChecked<UAuraAttributeSet>(AttributeSet);
 	check(AttributeInfo);
-	for (auto& Pair : AS->TagsToAttributes)
+	for (auto& Pair : GetAuraAS()->TagsToAttributes)
 	{
 		AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(Pair.Value()).AddLambda(
 			[this, Pair](const FOnAttributeChangeData& Data)
@@ -35,8 +32,7 @@ void UAttributeMenuWidgetController::BindCallbacksToDependencies()
 		);
 	}
 
-	AAuraPlayerState* AuraPlayerState = CastChecked<AAuraPlayerState>(PlayerState);
-	AuraPlayerState->OnAttributePointsChangedDelegate.AddLambda(
+	GetAuraPS()->OnAttributePointsChangedDelegate.AddLambda(
 		[this](int32 NewAttributePoints)
 		{
 			OnAttributePointsChangedDelegate.Broadcast(NewAttributePoints);
@@ -46,8 +42,7 @@ void UAttributeMenuWidgetController::BindCallbacksToDependencies()
 
 void UAttributeMenuWidgetController::UpgradeAttribute(const FGameplayTag& AttributeTag)
 {
-	UAuraAbilitySystemComponent* AuraASC = CastChecked<UAuraAbilitySystemComponent>(AbilitySystemComponent);
-	AuraASC->UpgradeAttribute(AttributeTag);
+	GetAuraASC()->UpgradeAttribute(AttributeTag);
 }
 
 void UAttributeMenuWidgetController::BroadcastAttributeInfo(const FGameplayTag& AttributeTag, const FGameplayAttribute& Attribute) const

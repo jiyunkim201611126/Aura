@@ -6,7 +6,10 @@
 /**
  * AuraGameplayTags
  *
- * 싱글톤 패턴, Gameplay Tags를 보관
+ * 싱글톤 패턴으로 선언된 구조체입니다.
+ * AssetManager가 자신의 Init 타이밍에 맞춰 함께 이 구조체의 Init 함수를 호출합니다.
+ * 런타임 중 Tag에 접근 가능하도록 선언 및 초기화하는 역할이며, 일부 디자이너와 깊게 관련된 태그를 제외하면 대부분 여기에서 선언됩니다.
+ * 여기에 존재하지 않는 태그는 Project Settings에서 선언합니다.
  */
 
 struct FAuraGameplayTags
@@ -43,12 +46,14 @@ struct FAuraGameplayTags
 	// ~End of Attributes
 
 	// ~Input Tags
+	FGameplayTag InputTag_LMB;
+	FGameplayTag InputTag_RMB;
 	FGameplayTag InputTag_1;
 	FGameplayTag InputTag_2;
 	FGameplayTag InputTag_3;
 	FGameplayTag InputTag_4;
-	FGameplayTag InputTag_LMB;
-	FGameplayTag InputTag_RMB;
+	FGameplayTag InputTag_Passive_1;
+	FGameplayTag InputTag_Passive_2;
 	// ~End of Input Tags
 
 	// ~Damage Type

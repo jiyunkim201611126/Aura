@@ -26,7 +26,7 @@ void UAuraGameplayAbility::OnGiveAbility(const FGameplayAbilityActorInfo* ActorI
 
 	for (auto AbilityUsableType : UsableTypes)
 	{
-		AbilityUsableType->OnGivenAbility(ActorInfo, Spec, AbilityTag);
+		AbilityUsableType->OnGivenAbility(ActorInfo, Spec, this);
 	}
 }
 

@@ -1,5 +1,4 @@
 #include "AuraPlayerState.h"
-
 #include "Aura/AbilitySystem/AuraAbilitySystemComponent.h"
 #include "Aura/AbilitySystem/AuraAttributeSet.h"
 #include "Net/UnrealNetwork.h"

@@ -1,5 +1,4 @@
 ﻿#include "OverlayWidgetController.h"
-
 #include "Aura/AbilitySystem/AuraAttributeSet.h"
 #include "Aura/AbilitySystem/AuraAbilitySystemComponent.h"
 #include "Aura/AbilitySystem/Abilities/UsableTypes/StackableAbility/StackableAbilityManager.h"
@@ -8,64 +7,54 @@
 
 void UOverlayWidgetController::BroadcastInitialValue()
 {
-	const UAuraAttributeSet* AuraAttributeSet = CastChecked<UAuraAttributeSet>(AttributeSet);
-	
-	OnHealthChanged.Broadcast(AuraAttributeSet->GetHealth());
-	OnMaxHealthChanged.Broadcast(AuraAttributeSet->GetMaxHealth());
-	OnManaChanged.Broadcast(AuraAttributeSet->GetMana());
-	OnMaxManaChanged.Broadcast(AuraAttributeSet->GetMaxMana());
+	OnHealthChanged.Broadcast(GetAuraAS()->GetHealth());
+	OnMaxHealthChanged.Broadcast(GetAuraAS()->GetMaxHealth());
+	OnManaChanged.Broadcast(GetAuraAS()->GetMana());
+	OnMaxManaChanged.Broadcast(GetAuraAS()->GetMaxMana());
 }
 
 void UOverlayWidgetController::BindCallbacksToDependencies()
 {
-	AAuraPlayerState* AuraPlayerState = Cast<AAuraPlayerState>(PlayerState);
-	AuraPlayerState->OnXPChangedDelegate.AddUObject(this, &ThisClass::OnXPChanged);
-	AuraPlayerState->OnLevelChangedDelegate.AddLambda(
-		[this](int32 NewLevel)
+	GetAuraPS()->OnXPChangedDelegate.AddUObject(this, &ThisClass::OnXPChanged);
+	GetAuraPS()->OnLevelChangedDelegate.AddLambda([this](int32 NewLevel)
 		{
 			OnPlayerLevelChangedDelegate.Broadcast(NewLevel);
 		}
 	);
-	
-	const UAuraAttributeSet* AuraAttributeSet = CastChecked<UAuraAttributeSet>(AttributeSet);
 
 	// 선언된 Attribute들에게 변동사항이 있는 경우 Widget Controller가 알 수 있도록 각 Attribute에게 함수를 바인드
-	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(AuraAttributeSet->GetHealthAttribute()).AddLambda(
-		[this](const FOnAttributeChangeData& Data)
+	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(GetAuraAS()->GetHealthAttribute()).AddLambda([this](const FOnAttributeChangeData& Data)
 		{
 			OnHealthChanged.Broadcast(Data.NewValue);
 		}
 	);
 	
-	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(AuraAttributeSet->GetMaxHealthAttribute()).AddLambda(
-	[this](const FOnAttributeChangeData& Data)
+	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(GetAuraAS()->GetMaxHealthAttribute()).AddLambda([this](const FOnAttributeChangeData& Data)
 		{
 			OnMaxHealthChanged.Broadcast(Data.NewValue);
 		}
 	);
 	
-	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(AuraAttributeSet->GetManaAttribute()).AddLambda(
-	[this](const FOnAttributeChangeData& Data)
+	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(GetAuraAS()->GetManaAttribute()).AddLambda([this](const FOnAttributeChangeData& Data)
 		{
 			OnManaChanged.Broadcast(Data.NewValue);
 		}
 	);
 	
-	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(AuraAttributeSet->GetMaxManaAttribute()).AddLambda(
-	[this](const FOnAttributeChangeData& Data)
+	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(GetAuraAS()->GetMaxManaAttribute()).AddLambda([this](const FOnAttributeChangeData& Data)
 		{
 			OnMaxManaChanged.Broadcast(Data.NewValue);
 		}
 	);
 
-	if (UAuraAbilitySystemComponent* AuraASC = Cast<UAuraAbilitySystemComponent>(AbilitySystemComponent))
+	if (GetAuraASC())
 	{
 		// Ability가 부여될 때, OverlayWidget이 이를 알 수 있도록 함수를 바인드합니다.
 		// HUD에 대한 초기화가 모두 이루어지고 나서 GameAbility를 부여하기 때문에, 여기서 바인드하면 정상 작동합니다.
-		AuraASC->AbilitiesGivenDelegate.AddUObject(this, &ThisClass::OnAbilitiesGiven);
+		GetAuraASC()->AbilitiesGivenDelegate.AddUObject(this, &ThisClass::OnAbilitiesGiven);
 
 		// GameplayEffect가 적용될 때 화면에 메시지를 띄울 수 있도록 함수를 바인드합니다.
-		AuraASC->EffectAssetTags.AddLambda([this](const FGameplayTagContainer& AssetTags)
+		GetAuraASC()->EffectAssetTags.AddLambda([this](const FGameplayTagContainer& AssetTags)
 		{
 			for (const FGameplayTag& Tag : AssetTags)
 			{
@@ -85,17 +74,17 @@ void UOverlayWidgetController::BindCallbacksToDependencies()
 
 void UOverlayWidgetController::OnAbilitiesGiven(const FGameplayAbilitySpec& AbilitySpec)
 {
-	if (UAuraAbilitySystemComponent* AuraASC = Cast<UAuraAbilitySystemComponent>(AbilitySystemComponent))
+	if (GetAuraASC())
 	{
-		// 이 함수가 끝날 때까지 부여된 Ability의 목록을 변경하지 않도록 잠가주는 역할의 구문입니다.
-		// 다른 곳에서 GiveAbility 등의 함수를 호출해도, 이 함수가 끝날 때까지 흐름이 보류됩니다.
-		FScopedAbilityListLock ActiveScopeLock(*AuraASC);
+		// 부모 함수와 코드가 중복되는 부분이 많으나, 함수로 따로 또 빼면 가독성 면에서 이 방식이 더 우월하고
+		// 락 스코프가 여러 번 걸리지 않기 때문에 흐름도 명확합니다.
+		FScopedAbilityListLock ActiveScopeLock(*GetAuraASC());
 		
-		FAuraAbilityInfo AbilityUIInfo = AbilityInfo->FindAbilityInfoForTag(AuraASC->GetAbilityTagFromSpec(AbilitySpec));
-		AbilityUIInfo.InputTag = AuraASC->GetInputTagFromSpec(AbilitySpec);
+		FAuraAbilityInfo AbilityUIInfo = AbilityInfo->FindAbilityInfoForTag(GetAuraASC()->GetAbilityTagFromSpec(AbilitySpec));
+		AbilityUIInfo.InputTag = GetAuraASC()->GetInputTagFromSpec(AbilitySpec);
 		AbilityInfoDelegate.Broadcast(AbilityUIInfo);
 
-		BindForUsableTypes(AuraASC, AbilityUIInfo.AbilityTag);
+		BindForUsableTypes(GetAuraASC(), AbilityUIInfo.AbilityTag);
 	}
 }
 
@@ -140,10 +129,9 @@ void UOverlayWidgetController::BindForUsableTypes(UAuraAbilitySystemComponent* A
 	}
 }
 
-void UOverlayWidgetController::OnXPChanged(const int32 InXP) const
+void UOverlayWidgetController::OnXPChanged(const int32 InXP)
 {
-	AAuraPlayerState* AuraPlayerState = CastChecked<AAuraPlayerState>(PlayerState);
-	const ULevelUpInfo* LevelUpInfo = AuraPlayerState->LevelUpInfo;
+	const ULevelUpInfo* LevelUpInfo = GetAuraPS()->LevelUpInfo;
 	checkf(LevelUpInfo, TEXT("LevelUpInfo를 찾을 수 없습니다. 블루프린트 에디터에서 할당해주세요."))
 
 	const int32 Level = LevelUpInfo->FindLevelForXP(InXP);

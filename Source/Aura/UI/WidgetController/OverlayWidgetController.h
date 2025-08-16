@@ -7,10 +7,10 @@
 #include "OverlayWidgetController.generated.h"
 
 class UAuraAbilitySystemComponent;
-struct FGameplayAbilitySpec;
 struct FAuraAbilityInfo;
 class UAbilityInfo;
 class UAuraUserWidget;
+struct FGameplayAbilitySpec;
 struct FOnAttributeChangeData;
 
 USTRUCT(BlueprintType)
@@ -49,7 +49,6 @@ struct FAbilityUsableTypeInfo
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAttributeChangedSignature, float, NewValue);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMessageWidgetRowSignature, FUIWidgetRow, Row);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FAbilityInfoSignature, const FAuraAbilityInfo&, Info);
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnAbilityUsableTypeSignature, FGameplayTag, InAbilityTag, const FAbilityUsableTypeInfo&, Info);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnStackCountChangedSignature, FGameplayTag, InAbilityTag, int32, StackCount);
@@ -68,10 +67,10 @@ protected:
 	template<typename T>
 	T* GetDataTableRowByTag(UDataTable* DataTable, const FGameplayTag& Tag);
 
-	void OnAbilitiesGiven(const FGameplayAbilitySpec& AbilitySpec);
+	virtual void OnAbilitiesGiven(const FGameplayAbilitySpec& AbilitySpec) override;
 	void BindForUsableTypes(UAuraAbilitySystemComponent* AuraASC, FGameplayTag AbilityTag);
 	
-	void OnXPChanged(int32 InXP) const;
+	void OnXPChanged(int32 InXP);
 
 public:
 	// 아래 델리게이트들에 위젯 블루프린트들이 각자 필요한 함수를 바인드
@@ -89,9 +88,6 @@ public:
 
 	UPROPERTY(BlueprintAssignable, Category = "GAS | Messages")
 	FMessageWidgetRowSignature MessageWidgetRowDelegate;
-
-	UPROPERTY(BlueprintAssignable, Category = "GAS | Messages")
-	FAbilityInfoSignature AbilityInfoDelegate;
 	
 	UPROPERTY(BlueprintAssignable, Category = "GAS | XP")
 	FOnAttributeChangedSignature OnXPBarPercentChangedDelegate;
@@ -115,9 +111,6 @@ public:
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Widget Data")
 	TObjectPtr<UDataTable> MessageWidgetDataTable;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Widget Data")
-	TObjectPtr<UAbilityInfo> AbilityInfo;
 };
 
 template <typename T>

@@ -16,12 +16,8 @@ class AURA_API UAbilityUsableType : public UObject
 	GENERATED_BODY()
 
 public:
-	virtual void OnGivenAbility(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec, const FGameplayTag& InAbilityTag);
+	virtual void OnGivenAbility(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec, const UAuraGameplayAbility* OwningAbility);
 	virtual bool CheckCost(const UAuraGameplayAbility* OwningAbility);
 	virtual void ApplyCost(const UAuraGameplayAbility* OwningAbility);
 	virtual void OnRemoveAbility(UAuraGameplayAbility* OwningAbility);
-
-public:
-	UPROPERTY()
-	FGameplayTag AbilityTag;
 };

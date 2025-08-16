@@ -1,8 +1,8 @@
 ﻿#include "AuraHUD.h"
-
 #include "Aura/UI/Widget/AuraUserWidget.h"
-#include "Aura/UI/WidgetController/AttributeMenuWidgetController.h"
 #include "Aura/UI/WidgetController/OverlayWidgetController.h"
+#include "Aura/UI/WidgetController/AttributeMenuWidgetController.h"
+#include "Aura/UI/WidgetController/SpellMenuWidgetController.h"
 
 UOverlayWidgetController* AAuraHUD::GetOverlayWidgetController(const FWidgetControllerParams& WidgetControllerParams)
 {
@@ -26,18 +26,28 @@ UAttributeMenuWidgetController* AAuraHUD::GetAttributeMenuWidgetController(const
 	return AttributeMenuWidgetController;
 }
 
+USpellMenuWidgetController* AAuraHUD::GetSpellMenuWidgetController(const FWidgetControllerParams& WidgetControllerParams)
+{
+	if (SpellMenuWidgetController == nullptr)
+	{
+		SpellMenuWidgetController = NewObject<USpellMenuWidgetController>(this, SpellMenuWidgetControllerClass);
+		SpellMenuWidgetController->SetWidgetControllerParams(WidgetControllerParams);
+		SpellMenuWidgetController->BindCallbacksToDependencies();
+	}
+	return SpellMenuWidgetController;
+}
+
 void AAuraHUD::InitHUD(APlayerController* PC, APlayerState* PS, UAbilitySystemComponent* ASC, UAttributeSet* AS)
 {
 	checkf(OverlayWidgetClass, TEXT("Overlay Widget Class uninitialized, pleas fill out BP_AuraHUD"));
 	checkf(OverlayWidgetControllerClass, TEXT("Overlay Widget Controller Class uninitialized, please fill out BP_AuraHUD"));
-	checkf(AttributeMenuWidgetControllerClass, TEXT("Attribute Menu Widget Controller Class uninitialized, please fill out BP_AuraHUD"));
+	checkf(AttributeMenuWidgetControllerClass, TEXT("Attribute Menu Widget Controller Class uninitialized, please fill out BP_AuraHUD"));;
+	checkf(SpellMenuWidgetControllerClass, TEXT("Spell Menu Widget Controller Class uninitialized, please fill out BP_AuraHUD"));
 
 	OverlayWidget = CreateWidget<UAuraUserWidget>(GetWorld(), OverlayWidgetClass);
 
-	// 겸사겸사 AttributeMenuWidgetController도 함께 생성합니다.
 	const FWidgetControllerParams WidgetControllerParams(PC, PS, ASC, AS);
 	GetOverlayWidgetController(WidgetControllerParams);
-	GetAttributeMenuWidgetController(WidgetControllerParams);
 
 	// OverlayWidget 및 그 하위 Widget들에게 Controller를 할당합니다.
 	// 이 함수는 WidgetControllerSet을 호출하며, 그곳에서 자신의 하위 위젯에게 또 다시 SetWidgetController로 이 할당을 전파합니다.
