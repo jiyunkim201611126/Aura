@@ -111,14 +111,12 @@ void UOverlayWidgetController::BindForUsableTypes(UAuraAbilitySystemComponent* A
 		{
 			UsableTypeInfo.bIsStackable = true;
 		}
-		StackableAbilityManager->OnStackCountChanged.BindLambda(
-			[this](FGameplayTag InAbilityTag, int32 StackCount)
+		StackableAbilityManager->OnStackCountChanged.BindLambda([this](FGameplayTag InAbilityTag, int32 StackCount)
 			{
 				OnStackCountChangedDelegate.Broadcast(InAbilityTag, StackCount);
 			}
 		);
-		StackableAbilityManager->OnStackTimerStarted.BindLambda(
-			[this](FGameplayTag InAbilityTag, float RechargeTime)
+		StackableAbilityManager->OnStackTimerStarted.BindLambda([this](FGameplayTag InAbilityTag, float RechargeTime)
 			{
 				OnStackTimerStartedDelegate.Broadcast(InAbilityTag, RechargeTime);
 			}
