@@ -87,7 +87,6 @@ public:
 	bool CheckCost(FGameplayTag AbilityTag) const;
 	void ApplyCost(FGameplayTag AbilityTag);
 
-	int32 GetCurrentStack(FGameplayTag AbilityTag) const;
 	bool CheckHasAbility(FGameplayTag AbilityTag) const;
 
 	const FAbilityStackItem* FindItem(const FGameplayTag AbilityTag) const;

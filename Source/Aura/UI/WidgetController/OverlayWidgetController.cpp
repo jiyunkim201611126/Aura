@@ -104,28 +104,26 @@ void UOverlayWidgetController::BindForUsableTypes(UAuraAbilitySystemComponent* A
 	FAbilityUsableTypeInfo UsableTypeInfo;
 
 	AStackableAbilityManager* StackableAbilityManager = AuraASC->FindAbilityManager<AStackableAbilityManager>();
-	if (!StackableAbilityManager)
+	if (StackableAbilityManager)
 	{
-		return;
-	}
-	
-	// Stackable Ability로 등록되어있는지 확인, 필요한 함수를 바인드합니다.
-	if (StackableAbilityManager->CheckHasAbility(AbilityTag))
-	{
-		UsableTypeInfo.bIsStackable = true;
-	}
-	StackableAbilityManager->OnStackCountChanged.BindLambda(
-		[this](FGameplayTag InAbilityTag,int32 StackCount)
+		// Stackable Ability로 등록되어있는지 확인, 필요한 함수를 바인드합니다.
+		if (StackableAbilityManager->CheckHasAbility(AbilityTag))
 		{
-			OnStackCountChangedDelegate.Broadcast(InAbilityTag, StackCount);
+			UsableTypeInfo.bIsStackable = true;
 		}
-	);
-	StackableAbilityManager->OnStackTimerStarted.BindLambda(
-		[this](FGameplayTag InAbilityTag,float RechargeTime)
-		{
-			OnStackTimerStartedDelegate.Broadcast(InAbilityTag, RechargeTime);
-		}
-	);
+		StackableAbilityManager->OnStackCountChanged.BindLambda(
+			[this](FGameplayTag InAbilityTag, int32 StackCount)
+			{
+				OnStackCountChangedDelegate.Broadcast(InAbilityTag, StackCount);
+			}
+		);
+		StackableAbilityManager->OnStackTimerStarted.BindLambda(
+			[this](FGameplayTag InAbilityTag, float RechargeTime)
+			{
+				OnStackTimerStartedDelegate.Broadcast(InAbilityTag, RechargeTime);
+			}
+		);
+	}
 
 	// 특별한 사용 타입이 하나라도 있으면 이 분기 안으로 들어갑니다.
 	// 현재는 스택형밖에 없습니다.

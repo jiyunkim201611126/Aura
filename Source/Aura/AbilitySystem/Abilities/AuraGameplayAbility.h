@@ -42,8 +42,8 @@ private:
 	FTaggedMontage GetRandomMontage();
 
 public:
-	// Ability의 전용 태그입니다.
-	// 플레이어 캐릭터가 사용하는 Ability는 반드시 Tag 하나와 1:1 대응하며, 해당 Tag는 Ability의 식별자 역할을 수행합니다.
+	// 식별자 역할의 Ability의 전용 태그입니다.
+	// 플레이어 캐릭터가 사용하는 Ability는 반드시 Tag 하나와 1:1 대응합니다.
 	UPROPERTY(EditDefaultsOnly, Category = "Tags")
 	FGameplayTag AbilityTag;
 	

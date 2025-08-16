@@ -196,12 +196,6 @@ void AStackableAbilityManager::ApplyCost(FGameplayTag AbilityTag)
 	}
 }
 
-int32 AStackableAbilityManager::GetCurrentStack(FGameplayTag AbilityTag) const
-{
-	const FAbilityStackItem* Item = FindItem(AbilityTag);
-	return Item ? Item->CurrentStack : 0;
-}
-
 bool AStackableAbilityManager::CheckHasAbility(FGameplayTag AbilityTag) const
 {
 	return FindItem(AbilityTag)	!= nullptr;
