@@ -17,8 +17,8 @@ class AURA_API UAttributeMenuWidgetController : public UAuraWidgetController
 	GENERATED_BODY()
 
 public:
-	virtual void BroadcastInitialValue() override;
 	virtual void BindCallbacksToDependencies() override;
+	virtual void BroadcastInitialValue() override;
 
 	UFUNCTION(BlueprintCallable)
 	void UpgradeAttribute(const FGameplayTag& AttributeTag);

@@ -54,7 +54,7 @@ void AAuraHUD::InitHUD(APlayerController* PC, APlayerState* PS, UAbilitySystemCo
 	// 그와 함게 필요한 함수를 Controller에 바인드합니다.
 	OverlayWidget->SetWidgetController(OverlayWidgetController);
 
-	// Overlay가 Init되는 순간 모든 Attribute값을 한 번 Broadcast해줍니다.
+	// 모든 바인드가 완료되었으나, 아직 값이 반영된 것은 아니므로 필요한 Attribute값을 한 번 Broadcast해줍니다.
 	OverlayWidgetController->BroadcastInitialValue();
 	
 	OverlayWidget->AddToViewport();

@@ -5,19 +5,6 @@
 #include "Aura/AbilitySystem/Data/AttributeInfo.h"
 #include "Aura/Player/AuraPlayerState.h"
 
-void UAttributeMenuWidgetController::BroadcastInitialValue()
-{
-	// 반드시 모든 바인드가 끝난 뒤에 호출할 것
-	check(AttributeInfo);
-
-	for (auto& Pair : GetAuraAS()->TagsToAttributes)
-	{
-		BroadcastAttributeInfo(Pair.Key, Pair.Value());
-	}
-
-	OnAttributePointsChangedDelegate.Broadcast(GetAuraPS()->GetAttributePoints());
-}
-
 void UAttributeMenuWidgetController::BindCallbacksToDependencies()
 {
 	// 하나의 Attribute만 변경되어도 다른 Attribute에게 영향을 주므로 모두 새로고침해야 함
@@ -38,6 +25,19 @@ void UAttributeMenuWidgetController::BindCallbacksToDependencies()
 			OnAttributePointsChangedDelegate.Broadcast(NewAttributePoints);
 		}
 	);
+}
+
+void UAttributeMenuWidgetController::BroadcastInitialValue()
+{
+	// 반드시 모든 바인드가 끝난 뒤에 호출할 것
+	check(AttributeInfo);
+
+	for (auto& Pair : GetAuraAS()->TagsToAttributes)
+	{
+		BroadcastAttributeInfo(Pair.Key, Pair.Value());
+	}
+
+	OnAttributePointsChangedDelegate.Broadcast(GetAuraPS()->GetAttributePoints());
 }
 
 void UAttributeMenuWidgetController::UpgradeAttribute(const FGameplayTag& AttributeTag)

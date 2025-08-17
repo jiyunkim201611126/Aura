@@ -13,11 +13,11 @@ void UAuraWidgetController::SetWidgetControllerParams(const FWidgetControllerPar
 	AttributeSet = WidgetControllerParams.AttributeSet;
 }
 
-void UAuraWidgetController::BroadcastInitialValue()
+void UAuraWidgetController::BindCallbacksToDependencies()
 {
 }
 
-void UAuraWidgetController::BindCallbacksToDependencies()
+void UAuraWidgetController::BroadcastInitialValue()
 {
 }
 
@@ -29,11 +29,17 @@ void UAuraWidgetController::OnAbilitiesGiven(const FGameplayAbilitySpec& Ability
 		// 다른 곳에서 GiveAbility 등의 함수를 호출해도, 이 함수가 끝날 때까지 흐름이 보류됩니다.
 		FScopedAbilityListLock ActiveScopeLock(*GetAuraASC());
 		
-		FAuraAbilityInfo AbilityUIInfo = AbilityInfo->FindAbilityInfoForTag(GetAuraASC()->GetAbilityTagFromSpec(AbilitySpec));
-		AbilityUIInfo.InputTag = AuraAbilitySystemComponent->GetInputTagFromSpec(AbilitySpec);
-		AbilityUIInfo.StatusTag = AuraAbilitySystemComponent->GetStatusFromSpec(AbilitySpec);
+		FAuraAbilityInfo AbilityUIInfo;
+		MakeAbilityUIInfo(AbilitySpec, AbilityUIInfo);
 		AbilityInfoDelegate.Broadcast(AbilityUIInfo);
 	}
+}
+
+void UAuraWidgetController::MakeAbilityUIInfo(const FGameplayAbilitySpec& AbilitySpec, FAuraAbilityInfo& AbilityUIInfo)
+{
+	AbilityUIInfo = AbilityInfo->FindAbilityInfoForTag(GetAuraASC()->GetAbilityTagFromSpec(AbilitySpec));
+	AbilityUIInfo.InputTag = AuraAbilitySystemComponent->GetInputTagFromSpec(AbilitySpec);
+	AbilityUIInfo.StatusTag = AuraAbilitySystemComponent->GetStatusFromSpec(AbilitySpec);
 }
 
 AAuraPlayerController* UAuraWidgetController::GetAuraPC()

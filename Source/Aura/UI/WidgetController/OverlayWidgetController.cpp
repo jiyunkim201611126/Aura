@@ -5,14 +5,6 @@
 #include "Aura/AbilitySystem/Data/AbilityInfo.h"
 #include "Aura/Player/AuraPlayerState.h"
 
-void UOverlayWidgetController::BroadcastInitialValue()
-{
-	OnHealthChanged.Broadcast(GetAuraAS()->GetHealth());
-	OnMaxHealthChanged.Broadcast(GetAuraAS()->GetMaxHealth());
-	OnManaChanged.Broadcast(GetAuraAS()->GetMana());
-	OnMaxManaChanged.Broadcast(GetAuraAS()->GetMaxMana());
-}
-
 void UOverlayWidgetController::BindCallbacksToDependencies()
 {
 	GetAuraPS()->OnXPChangedDelegate.AddUObject(this, &ThisClass::OnXPChanged);
@@ -72,17 +64,24 @@ void UOverlayWidgetController::BindCallbacksToDependencies()
 	}
 }
 
+void UOverlayWidgetController::BroadcastInitialValue()
+{
+	OnHealthChanged.Broadcast(GetAuraAS()->GetHealth());
+	OnMaxHealthChanged.Broadcast(GetAuraAS()->GetMaxHealth());
+	OnManaChanged.Broadcast(GetAuraAS()->GetMana());
+	OnMaxManaChanged.Broadcast(GetAuraAS()->GetMaxMana());
+}
+
 void UOverlayWidgetController::OnAbilitiesGiven(const FGameplayAbilitySpec& AbilitySpec)
 {
 	if (GetAuraASC())
 	{
-		// 부모 함수와 코드가 중복되는 부분이 많으나, 함수로 따로 또 빼면 가독성 면에서 이 방식이 더 우월하고
+		// 부모 함수와 코드가 중복되는 부분이 많으나, 가독성 면에서 이 방식이 더 우월하고
 		// 락 스코프가 여러 번 걸리지 않기 때문에 흐름도 명확합니다.
 		FScopedAbilityListLock ActiveScopeLock(*GetAuraASC());
 		
-		FAuraAbilityInfo AbilityUIInfo = AbilityInfo->FindAbilityInfoForTag(GetAuraASC()->GetAbilityTagFromSpec(AbilitySpec));
-		AbilityUIInfo.InputTag = AuraAbilitySystemComponent->GetInputTagFromSpec(AbilitySpec);
-		AbilityUIInfo.StatusTag = AuraAbilitySystemComponent->GetStatusFromSpec(AbilitySpec);
+		FAuraAbilityInfo AbilityUIInfo;
+		MakeAbilityUIInfo(AbilitySpec, AbilityUIInfo);
 		AbilityInfoDelegate.Broadcast(AbilityUIInfo);
 
 		BindForUsableTypes(GetAuraASC(), AbilityUIInfo.AbilityTag);

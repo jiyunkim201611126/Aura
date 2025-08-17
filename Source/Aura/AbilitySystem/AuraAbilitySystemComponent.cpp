@@ -3,8 +3,9 @@
 #include "AbilitySystemBlueprintLibrary.h"
 #include "Aura/Manager/AuraGameplayTags.h"
 #include "Abilities/AuraGameplayAbility.h"
-#include "Abilities/UsableTypes/StackableAbility/StackableAbilityManager.h"
 #include "Aura/Interaction/LevelableInterface.h"
+#include "AuraAbilitySystemLibrary.h"
+#include "Data/AbilityInfo.h"
 #include "Net/UnrealNetwork.h"
 
 void UAuraAbilitySystemComponent::AbilityActorInfoSet()
@@ -160,6 +161,25 @@ FGameplayTag UAuraAbilitySystemComponent::GetStatusFromSpec(const FGameplayAbili
 	return FGameplayTag();
 }
 
+FGameplayAbilitySpec* UAuraAbilitySystemComponent::GetGivenAbilitySpecFromAbilityTag(const FGameplayTag& AbilityTag)
+{
+	// 보유한 Ability 중 매개변수로 들어온 태그와 일치하는 태그를 가진 AbilitySpec을 반환합니다.
+	FScopedAbilityListLock ActiveScopeLock(*this);
+	for (FGameplayAbilitySpec& AbilitySpec : GetActivatableAbilities())
+	{
+		for (FGameplayTag Tag : AbilitySpec.Ability.Get()->GetAssetTags())
+		{
+			if (Tag.MatchesTag(AbilityTag))
+			{
+				return &AbilitySpec;
+			}
+		}
+	}
+
+	// nullptr이 반환되면 보유하지 않은 Ability라는 걸 알 수 있습니다.
+	return nullptr;
+}
+
 void UAuraAbilitySystemComponent::UpgradeAttribute(const FGameplayTag& AttributeTag)
 {
 	if (GetAvatarActor()->Implements<ULevelableInterface>())
@@ -169,6 +189,50 @@ void UAuraAbilitySystemComponent::UpgradeAttribute(const FGameplayTag& Attribute
 			ServerUpgradeAttribute(AttributeTag);
 		}
 	}
+}
+
+void UAuraAbilitySystemComponent::UpdateAbilityStatuses(int32 Level)
+{
+	// 특정 레벨을 만족하면 Ability를 부여하는 함수입니다.
+	// 습득과 부여는 다릅니다.
+	// 부여란 GiveAbility에 의해 ASC에 등록되는 걸 말합니다.
+	// 습득은 부여받은 Ability를 실제 사용 가능한 상태로 바꾸는 것을 말합니다.
+	
+	UAbilityInfo* AbilityInfo = UAuraAbilitySystemLibrary::GetAbilityInfo(GetAvatarActor());
+	
+	for (const FAuraAbilityInfo& Info : AbilityInfo->AbilityInformation)
+	{
+		if (!Info.AbilityTag.IsValid())
+		{
+			continue;
+		}
+		
+		if (Level < Info.LevelRequirement)
+		{
+			// 습득 가능 레벨 미만인 경우 못 한 경우 다음 Ability를 확인합니다.
+			continue;
+		}
+		
+		if (GetGivenAbilitySpecFromAbilityTag(Info.AbilityTag) == nullptr)
+		{
+			// 습득 조건을 만족했으나 아직 부여되지 않은 경우 들어오는 분기입니다.
+			FGameplayAbilitySpec AbilitySpec = FGameplayAbilitySpec(Info.Ability, 1);
+
+			// Status 태그를 Eligible로 설정한 상태로 일단 GiveAbility를 통해 부여합니다.
+			// 레벨을 만족하면 일단 '부여'하고, 추후 플레이어가 SpellPoint를 소모해 '습득', Status 태그가 Equipped로 변경됩니다.
+			// 추후 디버깅 시 습득하지 않은 Ability를 보고 '왜 부여됐지?'하며 헷갈릴 수 있으나, 능력 해금 시스템이 복잡해지거나 UI 상시 노출이 필요한 시스템의 경우 실용적인 로직입니다.
+			// 특히 ASC에 접근해 GetActivatableAbilities로 '배운 Ability와 습득 가능한 Ability'를 빠르게 가져올 수 있다는 장점이 있습니다.
+			AbilitySpec.GetDynamicSpecSourceTags().AddTag(FAuraGameplayTags::Get().Abilities_Status_Eligible);
+			GiveAbility(AbilitySpec);
+			MarkAbilitySpecDirty(AbilitySpec);
+			ClientUpdateAbilityStatus(Info.AbilityTag, FAuraGameplayTags::Get().Abilities_Status_Eligible);
+		}
+	}
+}
+
+void UAuraAbilitySystemComponent::ClientUpdateAbilityStatus_Implementation(const FGameplayTag& AbilityTag, const FGameplayTag& StatusTag)
+{
+	AbilityStatusChangedDelegate.Broadcast(AbilityTag, StatusTag);
 }
 
 void UAuraAbilitySystemComponent::ServerUpgradeAttribute_Implementation(const FGameplayTag& AttributeTag)

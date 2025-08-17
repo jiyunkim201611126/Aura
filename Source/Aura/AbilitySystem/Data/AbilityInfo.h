@@ -5,6 +5,8 @@
 #include "Engine/DataAsset.h"
 #include "AbilityInfo.generated.h"
 
+class UGameplayAbility;
+
 /**
  * GameplayAbility의 스킬 아이콘 표시를 위해 Tag와 에셋을 매핑하는 구조체입니다.
  * DataAsset에서 초기화하며, 스킬 아이콘이 필요한 모든 Ability가 여기에 추가됩니다.
@@ -37,6 +39,12 @@ struct FAuraAbilityInfo
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TObjectPtr<UMaterialInterface> BackgroundMaterial = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	int32 LevelRequirement = 1;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	TSubclassOf<UGameplayAbility> Ability;
 };
 
 UCLASS()
