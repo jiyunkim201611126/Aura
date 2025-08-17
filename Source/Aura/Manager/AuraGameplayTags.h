@@ -66,20 +66,39 @@ struct FAuraGameplayTags
 	// 데미지 타입과 Resistance 타입을 묶는 TMap
 	TMap<FGameplayTag, FGameplayTag> DamageTypesToResistances;
 	// ~End of Damage Type
-	
-	// ~Common Abilities
-	// GameplayEffect가 이 태그를 갖고 있어야 HitReact가 발동됩니다.
-	FGameplayTag Effects_GrantHitReact;
-	FGameplayTag Effects_HitReact;
-	// ~End of Common Abilities
 
-	// ~Abilities and Cooldown
-	FGameplayTag Abilities_Attack;
-	FGameplayTag Abilities_Summon;
 	
+	
+	// ~Abilities
+	FGameplayTag Abilities_Attack;
+	FGameplayTag Abilities_HitReact;
+	FGameplayTag Abilities_Summon;
 	FGameplayTag Abilities_Fire_FireBolt;
+	// ~End of Abilities
+
+	// ~Cooldown
 	FGameplayTag Cooldown_Fire_FireBolt;
-	// ~End of Abilities and Cooldown
+	// ~End of Cooldown
+
+	// ~Ability Status
+	FGameplayTag Abilities_Status_Locked;
+	FGameplayTag Abilities_Status_Eligible;
+	FGameplayTag Abilities_Status_Unlocked;
+	FGameplayTag Abilities_Status_Equipped;
+	// ~End of AbilityStatus
+
+	// ~Ability Types
+	FGameplayTag Abilities_Types_Active;
+	FGameplayTag Abilities_Types_Passive;
+	FGameplayTag Abilities_Types_None;
+	// ~End of Ability Types
+
+	// ~Effects
+	FGameplayTag Effects_HitReact;
+	FGameplayTag Effects_GrantHitReact;
+	// ~End of Effects
+	
+	
 
 	// ~Combat Sockets
 	FGameplayTag CombatSocket_Weapon;
@@ -94,7 +113,6 @@ struct FAuraGameplayTags
 
 	// ~Projectile Sounds
 	FGameplayTag Sound_Projectile_Looping_FireBolt;
-	
 	FGameplayTag Sound_Projectile_Impact_FireBolt;
 	FGameplayTag Sound_Projectile_Impact_Rock;
 	// ~End of Projectile Sounds

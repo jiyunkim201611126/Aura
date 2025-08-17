@@ -34,7 +34,8 @@ public:
 	void AbilityInputTagReleased(const FGameplayTag& InputTag);
 
 	static FGameplayTag GetAbilityTagFromSpec(const FGameplayAbilitySpec& AbilitySpec);
-	FGameplayTag GetInputTagFromSpec(const FGameplayAbilitySpec& AbilitySpec);
+	static FGameplayTag GetInputTagFromSpec(const FGameplayAbilitySpec& AbilitySpec);
+	static FGameplayTag GetStatusFromSpec(const FGameplayAbilitySpec& AbilitySpec);
 
 	void UpgradeAttribute(const FGameplayTag& AttributeTag);
 

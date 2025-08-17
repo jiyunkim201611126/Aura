@@ -30,7 +30,8 @@ void UAuraWidgetController::OnAbilitiesGiven(const FGameplayAbilitySpec& Ability
 		FScopedAbilityListLock ActiveScopeLock(*GetAuraASC());
 		
 		FAuraAbilityInfo AbilityUIInfo = AbilityInfo->FindAbilityInfoForTag(GetAuraASC()->GetAbilityTagFromSpec(AbilitySpec));
-		AbilityUIInfo.InputTag = GetAuraASC()->GetInputTagFromSpec(AbilitySpec);
+		AbilityUIInfo.InputTag = AuraAbilitySystemComponent->GetInputTagFromSpec(AbilitySpec);
+		AbilityUIInfo.StatusTag = AuraAbilitySystemComponent->GetStatusFromSpec(AbilitySpec);
 		AbilityInfoDelegate.Broadcast(AbilityUIInfo);
 	}
 }

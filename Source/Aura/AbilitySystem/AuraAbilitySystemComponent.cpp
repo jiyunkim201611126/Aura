@@ -28,6 +28,7 @@ void UAuraAbilitySystemComponent::AddCharacterAbilities(const TArray<TSubclassOf
 		{
 			// 어떤 Input에 의해 사용될 Ability인지 기록
 			AbilitySpec.GetDynamicSpecSourceTags().AddTag(AuraAbility->StartupInputTag);
+			AbilitySpec.GetDynamicSpecSourceTags().AddTag(FAuraGameplayTags::Get().Abilities_Status_Equipped);
 			// Ability 장착
 			GiveAbility(AbilitySpec);
 			// 부여된 Ability를 HUD에 스킬 아이콘으로 표시하기 위해 델리게이트를 Broadcast합니다.
@@ -142,6 +143,18 @@ FGameplayTag UAuraAbilitySystemComponent::GetInputTagFromSpec(const FGameplayAbi
 		if (Tag.MatchesTag(FGameplayTag::RequestGameplayTag(FName("InputTag"))))
 		{
 			return Tag;
+		}
+	}
+	return FGameplayTag();
+}
+
+FGameplayTag UAuraAbilitySystemComponent::GetStatusFromSpec(const FGameplayAbilitySpec& AbilitySpec)
+{
+	for (FGameplayTag StatusTag : AbilitySpec.GetDynamicSpecSourceTags())
+	{
+		if (StatusTag.MatchesTag(FGameplayTag::RequestGameplayTag(FName("Abilities.Status"))))
+		{
+			return StatusTag;
 		}
 	}
 	return FGameplayTag();

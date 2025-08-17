@@ -93,23 +93,49 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 	GameplayTags.DamageTypesToResistances.Add(GameplayTags.Damage_Physical, GameplayTags.Attributes_Resistance_Physical);
 
 	
-	GameplayTags.Effects_GrantHitReact = UGameplayTagsManager::Get().AddNativeGameplayTag(
-		FName("Effects.GrantHitReact"),FString("Grant 'HitReact' tag if GameplayEffect has this tag"));
-	GameplayTags.Effects_HitReact = UGameplayTagsManager::Get().AddNativeGameplayTag(
-		FName("Effects.HitReact"),FString("Tag granted when Hit Reacting"));
-
 	// Abilities
 	
 	GameplayTags.Abilities_Attack = UGameplayTagsManager::Get().AddNativeGameplayTag(
 		FName("Abilities.Attack"),FString("Attack Ability Tag"));
+	GameplayTags.Abilities_HitReact = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("Abilities.HitReact"),FString("Tag granted when Hit Reacting"));
 	GameplayTags.Abilities_Summon = UGameplayTagsManager::Get().AddNativeGameplayTag(
 		FName("Abilities.Summon"),FString("Summon Ability Tag"));
-
 	GameplayTags.Abilities_Fire_FireBolt = UGameplayTagsManager::Get().AddNativeGameplayTag(
 		FName("Abilities.Fire.FireBolt"), FString("FireBolt Ability Tag"));
+
+	// Cooldown
+	
 	GameplayTags.Cooldown_Fire_FireBolt = UGameplayTagsManager::Get().AddNativeGameplayTag(
 		FName("Cooldown.Fire.FireBolt"), FString("FireBolt Cooldown Tag"));
 
+	// Status
+	
+	GameplayTags.Abilities_Status_Locked = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("Abilities.Status.Locked"), FString("Locked Status"));
+	GameplayTags.Abilities_Status_Eligible = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("Abilities.Status.Eligible"), FString("Eligible Status"));
+	GameplayTags.Abilities_Status_Unlocked = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("Abilities.Status.Unlocked"), FString("Unlocked Status"));
+	GameplayTags.Abilities_Status_Equipped = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("Abilities.Status.Equipped"), FString("Equipped Status"));
+
+	// Types
+	
+	GameplayTags.Abilities_Types_Active = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("Abilities.Types.Active"), FString("Active Type"));
+	GameplayTags.Abilities_Types_Passive = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("Abilities.Types.Passive"), FString("Passive Type"));
+	GameplayTags.Abilities_Types_None = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("Abilities.Types.None"), FString("None Type"));
+
+	// Effects
+
+	GameplayTags.Effects_HitReact = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("Effects.HitReact"), FString("HitReact Effect"));
+	GameplayTags.Effects_GrantHitReact = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("Effects.GrantHitReact"),FString("Grant 'HitReact' tag if GameplayEffect has this tag"));
+	
 	// Sockets
 	
 	GameplayTags.CombatSocket_Weapon = UGameplayTagsManager::Get().AddNativeGameplayTag(

@@ -142,7 +142,7 @@ void UAuraAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallba
 				if (EffectTags.HasTag(FAuraGameplayTags::Get().Effects_GrantHitReact))
 				{
 					FGameplayTagContainer HitReactTag;
-					HitReactTag.AddTag(FAuraGameplayTags::Get().Effects_HitReact);
+					HitReactTag.AddTag(FAuraGameplayTags::Get().Abilities_HitReact);
 					Props.TargetASC->TryActivateAbilitiesByTag(HitReactTag);
 				}
 			}
