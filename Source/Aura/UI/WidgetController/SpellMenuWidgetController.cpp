@@ -16,11 +16,7 @@ void USpellMenuWidgetController::BindCallbacksToDependencies()
 			if (SelectedAbility.Ability.MatchesTagExact(AbilityTag))
 			{
 				SelectedAbility.Status = StatusTag;
-
-				bool bEnableSpendPoints = false;
-				bool bEnableEquip = false;
-				ShouldEnableButtons(StatusTag, CurrentSpellPoints, bEnableSpendPoints, bEnableEquip);
-				OnSpellGlobeSelectedDelegate.Broadcast(bEnableSpendPoints, bEnableEquip);
+				ShouldEnableButtons();
 			}
 			if (AbilityInfo)
 			{
@@ -37,11 +33,7 @@ void USpellMenuWidgetController::BindCallbacksToDependencies()
 		{
 			OnSpellPointsChanged.Broadcast(InSpellPoints);
 			CurrentSpellPoints = InSpellPoints;
-
-			bool bEnableSpendPoints = false;
-			bool bEnableEquip = false;
-			ShouldEnableButtons(SelectedAbility.Status, CurrentSpellPoints, bEnableSpendPoints, bEnableEquip);
-			OnSpellGlobeSelectedDelegate.Broadcast(bEnableSpendPoints, bEnableEquip);
+			ShouldEnableButtons();
 		});
 	}
 }
@@ -76,45 +68,49 @@ void USpellMenuWidgetController::SpellGlobeSelected(const FGameplayTag& AbilityT
 			AbilityStatus = AuraAbilitySystemComponent->GetStatusFromSpec(*AbilitySpec);
 		}
 
+		// 선택된 SpellGlobe의 Ability와 그 상태를 멤버변수로 캐싱합니다.
 		SelectedAbility.Ability = AbilityTag;
 		SelectedAbility.Status = AbilityStatus;
 
-		bool bEnableSpendPoints = false;
-		bool bEnableEquip = false;
-		ShouldEnableButtons(AbilityStatus, CurrentSpellPoints, bEnableSpendPoints, bEnableEquip);
-		OnSpellGlobeSelectedDelegate.Broadcast(bEnableSpendPoints, bEnableEquip);
+		// 버튼들 상태 조작을 시작합니다.
+		ShouldEnableButtons();
 	}
 }
 
-void USpellMenuWidgetController::ShouldEnableButtons(const FGameplayTag& AbilityStatus, int32 SpellPoints, bool& bShouldEnableSpellPointsButton, bool& bShouldEnableEquipButton)
+void USpellMenuWidgetController::ShouldEnableButtons()
 {
 	const FAuraGameplayTags GameplayTags = FAuraGameplayTags::Get();
 
-	bShouldEnableSpellPointsButton = false;
-	bShouldEnableEquipButton = false;
-	if (AbilityStatus.MatchesTagExact(GameplayTags.Abilities_Status_Equipped))
+	bool bShouldEnableSpellPointsButton = false;
+	bool bShouldEnableEquipButton = false;
+	if (SelectedAbility.Status.MatchesTagExact(GameplayTags.Abilities_Status_Equipped))
 	{
 		bShouldEnableEquipButton = true;
-		if (SpellPoints > 0)
+		if (CurrentSpellPoints > 0)
 		{
 			bShouldEnableSpellPointsButton = true;
 		}
 	}
-	else if (AbilityStatus.MatchesTagExact(GameplayTags.Abilities_Status_Eligible))
+	else if (SelectedAbility.Status.MatchesTagExact(GameplayTags.Abilities_Status_Eligible))
 	{
-		if (SpellPoints > 0)
+		if (CurrentSpellPoints > 0)
 		{
 			bShouldEnableSpellPointsButton = true;
 		}
 	}
-	else if (AbilityStatus.MatchesTagExact(GameplayTags.Abilities_Status_Unlocked))
+	else if (SelectedAbility.Status.MatchesTagExact(GameplayTags.Abilities_Status_Unlocked))
 	{
 		bShouldEnableEquipButton = true;
-		if (SpellPoints > 0)
+		if (CurrentSpellPoints > 0)
 		{
 			bShouldEnableSpellPointsButton = true;
 		}
 	}
+	FString Description;
+	FString NextLevelDescription;
+	AuraAbilitySystemComponent->GetDescriptionsByAbilityTag(SelectedAbility.Ability, Description, NextLevelDescription);
+
+	OnSpellMenuStatusChangedDelegate.Broadcast(bShouldEnableSpellPointsButton, bShouldEnableEquipButton, Description, NextLevelDescription);
 }
 
 void USpellMenuWidgetController::SpendPointButtonPressed(const FGameplayTag& AbilityTag)

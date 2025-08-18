@@ -4,7 +4,16 @@
 #include "Aura/Interaction/CombatInterface.h"
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystemComponent.h"
-#include "Aura/Manager/AuraGameplayTags.h"
+
+FString UAuraProjectileSpell::GetDescription(int32 Level)
+{
+	
+}
+
+FString UAuraProjectileSpell::GetNextLevelDescription(int32 Level)
+{
+	
+}
 
 void UAuraProjectileSpell::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)
 {
