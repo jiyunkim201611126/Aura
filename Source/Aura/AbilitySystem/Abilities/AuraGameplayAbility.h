@@ -37,6 +37,10 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void UpdateFacingToCombatTarget() const;
 
+	virtual FString GetDescription(int32 Level);
+	virtual FString GetNextLevelDescription(int32 Level);
+	static FString GetLockedDescription(int32 Level);
+
 private:
 	UFUNCTION(BlueprintCallable, Category = "Montage")
 	FTaggedMontage GetRandomMontage();

@@ -70,6 +70,7 @@ struct FAuraGameplayTags
 	
 	
 	// ~Abilities
+	FGameplayTag Abilities_None;
 	FGameplayTag Abilities_Attack;
 	FGameplayTag Abilities_HitReact;
 	FGameplayTag Abilities_Summon;
