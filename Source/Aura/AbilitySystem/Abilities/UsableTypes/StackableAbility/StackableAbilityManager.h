@@ -81,23 +81,23 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	// ~End of Actor Interface
 	
-	void RegisterAbility(FGameplayTag AbilityTag, int32 CurrentStack, int32 MaxStack, float RechargeTime);
-	void UnregisterAbility(FGameplayTag AbilityTag);
+	void RegisterAbility(const FGameplayTag& AbilityTag, int32 CurrentStack, int32 MaxStack, float RechargeTime);
+	void UnregisterAbility(const FGameplayTag& AbilityTag);
 
-	bool CheckCost(FGameplayTag AbilityTag) const;
-	void ApplyCost(FGameplayTag AbilityTag);
+	bool CheckCost(const FGameplayTag& AbilityTag) const;
+	void ApplyCost(const FGameplayTag& AbilityTag);
 
-	bool CheckHasAbility(FGameplayTag AbilityTag) const;
+	bool CheckHasAbility(const FGameplayTag& AbilityTag) const;
 
-	const FAbilityStackItem* FindItem(const FGameplayTag AbilityTag) const;
+	const FAbilityStackItem* FindItem(const FGameplayTag& AbilityTag) const;
 
 private:
-	void StartRecharge(FGameplayTag AbilityTag);
+	void StartRecharge(const FGameplayTag& AbilityTag);
 	void Recharge(FGameplayTag AbilityTag);
-	void StopRecharge(FGameplayTag AbilityTag);
+	void StopRecharge(const FGameplayTag& AbilityTag);
 
-	int32 FindIndexByTag(const FGameplayTag AbilityTag) const;
-	FAbilityStackItem* FindItemMutable(const FGameplayTag AbilityTag);
+	int32 FindIndexByTag(const FGameplayTag& AbilityTag) const;
+	FAbilityStackItem* FindItemMutable(const FGameplayTag& AbilityTag);
 
 public:
 	// WidgetController가 바인드할 델리게이트

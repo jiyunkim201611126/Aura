@@ -106,8 +106,8 @@ void USpellMenuWidgetController::ShouldEnableButtons()
 			bShouldEnableSpellPointsButton = true;
 		}
 	}
-	FString Description;
-	FString NextLevelDescription;
+	FText Description;
+	FText NextLevelDescription;
 	AuraAbilitySystemComponent->GetDescriptionsByAbilityTag(SelectedAbility.Ability, Description, NextLevelDescription);
 
 	OnSpellMenuStatusChangedDelegate.Broadcast(bShouldEnableSpellPointsButton, bShouldEnableEquipButton, Description, NextLevelDescription);

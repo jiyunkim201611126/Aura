@@ -4,15 +4,14 @@
 #include "Aura/Interaction/CombatInterface.h"
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystemComponent.h"
+#include "Aura/Manager/AuraGameplayTags.h"
+#include "Aura/Manager/AuraTextManager.h"
 
-FString UAuraProjectileSpell::GetDescription(int32 Level)
+FText UAuraProjectileSpell::GetDescription(int32 Level)
 {
+	const int32 Damage = DamageTypes[FAuraGameplayTags::Get().Damage_Fire].GetValueAtLevel(Level);
 	
-}
-
-FString UAuraProjectileSpell::GetNextLevelDescription(int32 Level)
-{
-	
+	return FText::Format(FAuraTextManager::GetText(EStringTableTextType::UI, TEXT("Abilities_Description_Firebolt")), NumOfProjectiles, Damage, Level);
 }
 
 void UAuraProjectileSpell::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)

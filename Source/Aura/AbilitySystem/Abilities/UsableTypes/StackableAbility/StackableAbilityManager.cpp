@@ -96,7 +96,7 @@ void AStackableAbilityManager::GetLifetimeReplicatedProps(TArray<FLifetimeProper
 	DOREPLIFETIME_CONDITION(AStackableAbilityManager, AbilityStacks, COND_OwnerOnly);
 }
 
-void AStackableAbilityManager::RegisterAbility(FGameplayTag AbilityTag, int32 CurrentStack, int32 MaxStack, float RechargeTime)
+void AStackableAbilityManager::RegisterAbility(const FGameplayTag& AbilityTag, int32 CurrentStack, int32 MaxStack, float RechargeTime)
 {
 	if (!HasAuthority())
 	{
@@ -138,7 +138,7 @@ void AStackableAbilityManager::RegisterAbility(FGameplayTag AbilityTag, int32 Cu
 	StartRecharge(AbilityTag);
 }
 
-void AStackableAbilityManager::UnregisterAbility(FGameplayTag AbilityTag)
+void AStackableAbilityManager::UnregisterAbility(const FGameplayTag& AbilityTag)
 {
 	if (!HasAuthority())
 	{
@@ -162,13 +162,13 @@ void AStackableAbilityManager::UnregisterAbility(FGameplayTag AbilityTag)
 	}
 }
 
-bool AStackableAbilityManager::CheckCost(FGameplayTag AbilityTag) const
+bool AStackableAbilityManager::CheckCost(const FGameplayTag& AbilityTag) const
 {
 	const FAbilityStackItem* Item = FindItem(AbilityTag);
 	return Item && Item->CurrentStack > 0;
 }
 
-void AStackableAbilityManager::ApplyCost(FGameplayTag AbilityTag)
+void AStackableAbilityManager::ApplyCost(const FGameplayTag& AbilityTag)
 {
 	if (!HasAuthority())
 	{
@@ -196,12 +196,12 @@ void AStackableAbilityManager::ApplyCost(FGameplayTag AbilityTag)
 	}
 }
 
-bool AStackableAbilityManager::CheckHasAbility(FGameplayTag AbilityTag) const
+bool AStackableAbilityManager::CheckHasAbility(const FGameplayTag& AbilityTag) const
 {
 	return FindItem(AbilityTag)	!= nullptr;
 }
 
-void AStackableAbilityManager::StartRecharge(FGameplayTag AbilityTag)
+void AStackableAbilityManager::StartRecharge(const FGameplayTag& AbilityTag)
 {
 	if (!HasAuthority())
 	{
@@ -242,7 +242,7 @@ void AStackableAbilityManager::StartRecharge(FGameplayTag AbilityTag)
 	}
 }
 
-void AStackableAbilityManager::Recharge(FGameplayTag AbilityTag)
+void AStackableAbilityManager::Recharge(const FGameplayTag AbilityTag)
 {
 	if (!HasAuthority())
 	{
@@ -274,7 +274,7 @@ void AStackableAbilityManager::Recharge(FGameplayTag AbilityTag)
 	}
 }
 
-void AStackableAbilityManager::StopRecharge(FGameplayTag AbilityTag)
+void AStackableAbilityManager::StopRecharge(const FGameplayTag& AbilityTag)
 {
 	if (!HasAuthority())
 	{
@@ -296,7 +296,7 @@ void AStackableAbilityManager::StopRecharge(FGameplayTag AbilityTag)
 	}
 }
 
-int32 AStackableAbilityManager::FindIndexByTag(const FGameplayTag AbilityTag) const
+int32 AStackableAbilityManager::FindIndexByTag(const FGameplayTag& AbilityTag) const
 {
 	if (const int32* FoundIndex = TagToIndex.Find(AbilityTag))
 	{
@@ -314,13 +314,13 @@ int32 AStackableAbilityManager::FindIndexByTag(const FGameplayTag AbilityTag) co
 	return INDEX_NONE;
 }
 
-FAbilityStackItem* AStackableAbilityManager::FindItemMutable(const FGameplayTag AbilityTag)
+FAbilityStackItem* AStackableAbilityManager::FindItemMutable(const FGameplayTag& AbilityTag)
 {
 	const int32 Index = FindIndexByTag(AbilityTag);
 	return AbilityStacks.Items.IsValidIndex(Index) ? &AbilityStacks.Items[Index] : nullptr;
 }
 
-const FAbilityStackItem* AStackableAbilityManager::FindItem(const FGameplayTag AbilityTag) const
+const FAbilityStackItem* AStackableAbilityManager::FindItem(const FGameplayTag& AbilityTag) const
 {
 	const int32 Index = FindIndexByTag(AbilityTag);
 	return AbilityStacks.Items.IsValidIndex(Index) ? &AbilityStacks.Items[Index] : nullptr;

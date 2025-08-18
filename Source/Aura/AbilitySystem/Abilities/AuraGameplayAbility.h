@@ -37,11 +37,11 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void UpdateFacingToCombatTarget() const;
 
-	virtual FString GetDescription(int32 Level);
-	virtual FString GetNextLevelDescription(int32 Level);
-	static FString GetLockedDescription(int32 Level);
+	virtual FText GetDescription(int32 Level);
+	static FText GetLockedDescription(int32 Level);
 
 private:
+	// TaggedMontages 중 랜덤하게 하나 가져오는 함수입니다.
 	UFUNCTION(BlueprintCallable, Category = "Montage")
 	FTaggedMontage GetRandomMontage();
 
@@ -59,10 +59,14 @@ public:
 	FGameplayTag StartupInputTag;
 
 protected:
-	// 애니메이션 몽타주 배열
+	// 애니메이션 몽타주 및 각종 필요 변수를 한 번 래핑한 구조체의 배열입니다.
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Montage")
 	TArray<FTaggedMontage> TaggedMontages;
-	
+
+	UPROPERTY(EditDefaultsOnly, Category = "Description")
+	FText DescriptionFormat;
+
+protected:
 	// 이 아래로는 스택형 스킬을 구현하기 위한 구문입니다.
 	// Ability 객체가 충전 로직을 담당하게 되므로, 꼭 Instanced per Actor로 설정해줍니다. 
 

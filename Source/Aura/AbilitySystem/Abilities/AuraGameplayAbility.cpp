@@ -2,6 +2,7 @@
 
 #include "Aura/Interaction/CombatInterface.h"
 #include "Aura/Interaction/EnemyInterface.h"
+#include "Aura/Manager/AuraTextManager.h"
 #include "UsableTypes/AbilityUsableType.h"
 
 void UAuraGameplayAbility::UpdateFacingToCombatTarget() const
@@ -12,19 +13,14 @@ void UAuraGameplayAbility::UpdateFacingToCombatTarget() const
 	ICombatInterface::Execute_UpdateFacingTarget(SourceActor, TargetLocation);
 }
 
-FString UAuraGameplayAbility::GetDescription(int32 Level)
+FText UAuraGameplayAbility::GetDescription(int32 Level)
 {
-	return FString::Printf(TEXT("<Default>%s, </><Level>%d, </>"), L"Default Ability Name - LoremIpsum LoremIpsum LoremIpsum LoremIpsum LoremIpsum LoremIpsum LoremIpsum", Level);
+	return FText();
 }
 
-FString UAuraGameplayAbility::GetNextLevelDescription(int32 Level)
+FText UAuraGameplayAbility::GetLockedDescription(int32 Level)
 {
-	return FString::Printf(TEXT("<Default>Next Level: </><Level>%d</>\n<Default>Causes much more damage. </>"), Level);
-}
-
-FString UAuraGameplayAbility::GetLockedDescription(int32 Level)
-{
-	return FString::Printf(TEXT("<Default>Spell Locked Until Level: %d</>"), Level);
+	return FText::Format(FAuraTextManager::GetText(EStringTableTextType::UI, TEXT("Abilities_Description_Locked")), Level);
 }
 
 FTaggedMontage UAuraGameplayAbility::GetRandomMontage()
