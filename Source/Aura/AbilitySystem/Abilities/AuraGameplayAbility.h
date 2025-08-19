@@ -40,6 +40,11 @@ public:
 	virtual FText GetDescription(int32 Level);
 	static FText GetLockedDescription(int32 Level);
 
+protected:
+	
+	float GetManaCost(float InLevel = 1.f) const;
+	float GetCooldown(float InLevel = 1.f) const;
+
 private:
 	// TaggedMontages 중 랜덤하게 하나 가져오는 함수입니다.
 	UFUNCTION(BlueprintCallable, Category = "Montage")
@@ -62,9 +67,9 @@ protected:
 	// 애니메이션 몽타주 및 각종 필요 변수를 한 번 래핑한 구조체의 배열입니다.
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Montage")
 	TArray<FTaggedMontage> TaggedMontages;
-
+	
 	UPROPERTY(EditDefaultsOnly, Category = "Description")
-	FText DescriptionFormat;
+	FString DescriptionKey;
 
 protected:
 	// 이 아래로는 스택형 스킬을 구현하기 위한 구문입니다.

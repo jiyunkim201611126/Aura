@@ -232,8 +232,17 @@ void UAuraAbilitySystemComponent::UpdateAbilityStatuses(int32 Level)
 
 bool UAuraAbilitySystemComponent::GetDescriptionsByAbilityTag(const FGameplayTag& AbilityTag, FText& OutDescription, FText& OutNextLevelDescription)
 {
+	if (!AbilityTag.IsValid() || AbilityTag.MatchesTagExact(FAuraGameplayTags::Get().Abilities_None))
+	{
+		// Ability Tag가 유효하지 않거나 None인 경우, 즉 아직 개발되지 않은 Ability인 경우 들어오는 분기입니다.
+		OutDescription = FText();
+		OutNextLevelDescription = FText();
+		return false;
+	}
+	
 	if (const FGameplayAbilitySpec* AbilitySpec = GetGivenAbilitySpecFromAbilityTag(AbilityTag))
 	{
+		// Ability가 부여되어있는 경우 들어오는 분기입니다.
 		if (UAuraGameplayAbility* AuraAbility = Cast<UAuraGameplayAbility>(AbilitySpec->Ability))
 		{
 			OutDescription = AuraAbility->GetDescription(AbilitySpec->Level);
@@ -242,7 +251,7 @@ bool UAuraAbilitySystemComponent::GetDescriptionsByAbilityTag(const FGameplayTag
 		}
 	}
 
-	// Ability가 부여되지 않은 상태라면 여기로 내려옵니다.
+	// Ability Tag가 None이 아니며, Ability가 부여되지 않은 상태라면 여기로 내려옵니다.
 	UAbilityInfo* AbilityInfo = UAuraAbilitySystemLibrary::GetAbilityInfo(GetAvatarActor());
 	OutDescription = UAuraGameplayAbility::GetLockedDescription(AbilityInfo->FindAbilityInfoForTag(AbilityTag).LevelRequirement);
 	OutNextLevelDescription = FText();

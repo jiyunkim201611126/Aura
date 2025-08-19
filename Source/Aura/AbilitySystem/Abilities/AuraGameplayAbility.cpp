@@ -1,5 +1,6 @@
 #include "AuraGameplayAbility.h"
 
+#include "Aura/AbilitySystem/AuraAttributeSet.h"
 #include "Aura/Interaction/CombatInterface.h"
 #include "Aura/Interaction/EnemyInterface.h"
 #include "Aura/Manager/AuraTextManager.h"
@@ -21,6 +22,33 @@ FText UAuraGameplayAbility::GetDescription(int32 Level)
 FText UAuraGameplayAbility::GetLockedDescription(int32 Level)
 {
 	return FText::Format(FAuraTextManager::GetText(EStringTableTextType::UI, TEXT("Abilities_Description_Locked")), Level);
+}
+
+float UAuraGameplayAbility::GetManaCost(float InLevel) const
+{
+	float ManaCost = 0.f;
+	if (const UGameplayEffect* CostEffect = GetCostGameplayEffect())
+	{
+		for (FGameplayModifierInfo Mod : CostEffect->Modifiers)
+		{
+			if (Mod.Attribute == UAuraAttributeSet::GetManaAttribute())
+			{
+				Mod.ModifierMagnitude.GetStaticMagnitudeIfPossible(InLevel, ManaCost);
+				break;
+			}
+		}
+	}
+	return ManaCost;
+}
+
+float UAuraGameplayAbility::GetCooldown(float InLevel) const
+{
+	float Cooldown = 0.f;
+	if (const UGameplayEffect* CooldownEffect = GetCooldownGameplayEffect())
+	{
+		CooldownEffect->DurationMagnitude.GetStaticMagnitudeIfPossible(InLevel, Cooldown);
+	}
+	return Cooldown;
 }
 
 FTaggedMontage UAuraGameplayAbility::GetRandomMontage()
