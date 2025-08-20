@@ -31,6 +31,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SpendPointButtonPressed(const FGameplayTag& AbilityTag);
 
+	UFUNCTION(BlueprintCallable)
+	void GlobeDeselect();
+
 private:
 	// SpendPoints 버튼과 Equip 버튼 활성화 여부를 결정 및 델리게이트를 호출하는 함수입니다.
 	void ShouldEnableButtons();

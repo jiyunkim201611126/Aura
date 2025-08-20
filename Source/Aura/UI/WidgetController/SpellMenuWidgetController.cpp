@@ -108,7 +108,7 @@ void USpellMenuWidgetController::ShouldEnableButtons()
 	}
 	FText Description;
 	FText NextLevelDescription;
-	AuraAbilitySystemComponent->GetDescriptionsByAbilityTag(SelectedAbility.Ability, Description, NextLevelDescription);
+	AuraAbilitySystemComponent->GetDescriptionsByAbilityTag(SelectedAbility.Ability, Description, NextLevelDescription, AbilityInfo);
 
 	OnSpellMenuStatusChangedDelegate.Broadcast(bShouldEnableSpellPointsButton, bShouldEnableEquipButton, Description, NextLevelDescription);
 }
@@ -119,4 +119,12 @@ void USpellMenuWidgetController::SpendPointButtonPressed(const FGameplayTag& Abi
 	{
 		AuraAbilitySystemComponent->ServerSpendSpellPoint(AbilityTag);
 	}
+}
+
+void USpellMenuWidgetController::GlobeDeselect()
+{
+	SelectedAbility.Ability = FAuraGameplayTags::Get().Abilities_None;
+	SelectedAbility.Status = FAuraGameplayTags::Get().Abilities_Status_Locked;
+
+	OnSpellMenuStatusChangedDelegate.Broadcast(false, false, FText(), FText());
 }

@@ -16,7 +16,7 @@ void UAuraGameplayAbility::UpdateFacingToCombatTarget() const
 
 FText UAuraGameplayAbility::GetDescription(int32 Level)
 {
-	return FText();
+	return FAuraTextManager::GetText(EStringTableTextType::UI, DescriptionKey);
 }
 
 FText UAuraGameplayAbility::GetLockedDescription(int32 Level)
