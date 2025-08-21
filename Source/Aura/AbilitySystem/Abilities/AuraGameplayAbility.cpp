@@ -14,7 +14,7 @@ void UAuraGameplayAbility::UpdateFacingToCombatTarget() const
 	ICombatInterface::Execute_UpdateFacingTarget(SourceActor, TargetLocation);
 }
 
-FText UAuraGameplayAbility::GetDescription(int32 Level)
+FText UAuraGameplayAbility::GetDescription_Implementation(int32 Level)
 {
 	return FAuraTextManager::GetText(EStringTableTextType::UI, DescriptionKey);
 }
@@ -24,7 +24,7 @@ FText UAuraGameplayAbility::GetLockedDescription(int32 Level)
 	return FText::Format(FAuraTextManager::GetText(EStringTableTextType::UI, TEXT("Abilities_Description_Locked")), Level);
 }
 
-float UAuraGameplayAbility::GetManaCost(float InLevel) const
+float UAuraGameplayAbility::GetManaCost(int32 InLevel) const
 {
 	float ManaCost = 0.f;
 	if (const UGameplayEffect* CostEffect = GetCostGameplayEffect())
@@ -41,7 +41,7 @@ float UAuraGameplayAbility::GetManaCost(float InLevel) const
 	return ManaCost;
 }
 
-float UAuraGameplayAbility::GetCooldown(float InLevel) const
+float UAuraGameplayAbility::GetCooldown(int32 InLevel) const
 {
 	float Cooldown = 0.f;
 	if (const UGameplayEffect* CooldownEffect = GetCooldownGameplayEffect())

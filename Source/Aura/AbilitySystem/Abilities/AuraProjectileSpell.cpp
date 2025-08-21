@@ -6,7 +6,7 @@
 #include "AbilitySystemComponent.h"
 #include "Aura/Manager/AuraTextManager.h"
 
-FText UAuraProjectileSpell::GetDescription(int32 Level)
+FText UAuraProjectileSpell::GetDescription_Implementation(int32 Level)
 {
 	return FText::Format(FAuraTextManager::GetText(EStringTableTextType::UI, DescriptionKey), Level, -GetManaCost(Level), GetCooldown(Level), GetDamageTexts(Level), NumOfProjectiles);
 }

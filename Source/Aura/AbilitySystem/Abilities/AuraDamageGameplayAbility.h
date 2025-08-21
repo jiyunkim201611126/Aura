@@ -27,7 +27,8 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	void SetTargetActorsToContext();
 
-	FText GetDamageTexts(float InLevel);
+	UFUNCTION(BlueprintCallable)
+	FText GetDamageTexts(int32 InLevel);
 
 public:
 	FGameplayEffectContextHandle EffectContextHandle;

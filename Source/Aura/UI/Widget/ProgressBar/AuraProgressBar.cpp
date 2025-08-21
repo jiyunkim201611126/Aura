@@ -26,7 +26,7 @@ void UAuraProgressBar::BarPercentSet_Implementation()
 		this,
 		&UAuraProgressBar::InterpGhostBar,
 		GhostInterpDelay,
-		false);
+		true);
 }
 
 void UAuraProgressBar::InterpGhostBar_Implementation()
@@ -35,14 +35,8 @@ void UAuraProgressBar::InterpGhostBar_Implementation()
 	const float NextGhostBarPercent = UKismetMathLibrary::FInterpTo(CurrentGhostBarPercent, GhostPercentTarget, GetWorld()->GetDeltaSeconds(), GhostInterpSpeed);
 	GhostProgressBar->SetPercent(NextGhostBarPercent);
 
-	if (!UKismetMathLibrary::NearlyEqual_FloatFloat(NextGhostBarPercent, GhostPercentTarget))
+	if (UKismetMathLibrary::NearlyEqual_FloatFloat(NextGhostBarPercent, GhostPercentTarget))
 	{
 		GetWorld()->GetTimerManager().ClearTimer(GhostPercentSetTimerHandle);
-		GetWorld()->GetTimerManager().SetTimer(
-			GhostPercentSetTimerHandle,
-			this,
-			&UAuraProgressBar::InterpGhostBar,
-			GhostInterpDelay,
-			false);
 	}
 }

@@ -37,13 +37,16 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void UpdateFacingToCombatTarget() const;
 
-	virtual FText GetDescription(int32 Level);
+	UFUNCTION(BlueprintNativeEvent)
+	FText GetDescription(int32 Level);
 	static FText GetLockedDescription(int32 Level);
 
 protected:
-	
-	float GetManaCost(float InLevel = 1.f) const;
-	float GetCooldown(float InLevel = 1.f) const;
+
+	UFUNCTION(BlueprintCallable)
+	float GetManaCost(int32 InLevel = 1) const;
+	UFUNCTION(BlueprintCallable)
+	float GetCooldown(int32 InLevel = 1) const;
 
 private:
 	// TaggedMontages 중 랜덤하게 하나 가져오는 함수입니다.
@@ -76,7 +79,7 @@ protected:
 	// Ability 객체가 충전 로직을 담당하게 되므로, 꼭 Instanced per Actor로 설정해줍니다. 
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UsableType")
-	TArray<UAbilityUsableType*> UsableTypes;
+	TArray<TObjectPtr<UAbilityUsableType>> UsableTypes;
 
 protected:
 	virtual void OnGiveAbility(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec) override;
