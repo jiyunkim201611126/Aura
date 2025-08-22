@@ -15,6 +15,7 @@ struct FSelectedAbility
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FOnSpellMenuStatusChangedSignature, bool, bSpendPointsButtonEnabled, bool, bEquipButtonEnabled, FText, DescriptionText, FText, NextLevelDescriptionText);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FWaitForEquipSelectionSignature, const FGameplayTag&, AbilityType);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSuccessRequestEquipSignature);
 
 UCLASS(BlueprintType, Blueprintable)
 class AURA_API USpellMenuWidgetController : public UAuraWidgetController
@@ -30,17 +31,23 @@ public:
 	void SpellGlobeSelected(const FGameplayTag& AbilityTag);
 
 	UFUNCTION(BlueprintCallable)
-	void SpendPointButtonPressed(const FGameplayTag& AbilityTag);
+	void SpellGlobeDeselected();
 
 	UFUNCTION(BlueprintCallable)
-	void GlobeDeselect();
+	void SpendPointButtonPressed(const FGameplayTag& AbilityTag);
 
 	UFUNCTION(BlueprintCallable)
 	void EquipButtonPressed();
 
+	// Equip 버튼 클릭 후 그 아래 장착 슬롯을 클릭했을 때 호출되는 함수
+	UFUNCTION(BlueprintCallable)
+	void SpellRowGlobePressed(const FGameplayTag& InputTag, const FGameplayTag& AbilityType);
+
 private:
 	// SpendPoints 버튼과 Equip 버튼 활성화 여부를 결정 및 델리게이트를 호출하는 함수입니다.
 	void ShouldEnableButtons();
+
+	void OnAbilityEquipped(const FGameplayTag& AbilityTag, const FGameplayTag& StatusTag, const FGameplayTag& InputTag, const FGameplayTag& PreviousInputTag);
 
 public:
 	UPROPERTY(BlueprintAssignable, Category = "GAS | SpellMenu")
@@ -55,8 +62,12 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "GAS | SpellMenu")
 	FWaitForEquipSelectionSignature StopWaitingForEquipSelectionDelegate;
 
+	UPROPERTY(BlueprintAssignable, Category = "GAS | SpellMenu")
+	FOnSuccessRequestEquipSignature OnSuccessRequestEquipDelegate;
+
 private:
 	FSelectedAbility SelectedAbility = { FAuraGameplayTags::Get().Abilities_None, FAuraGameplayTags::Get().Abilities_Status_Locked };
 	int32 CurrentSpellPoints = 0;
 	bool bWaitingForEquipSelection = false;
+	FGameplayTag SelectedInputTag;
 };

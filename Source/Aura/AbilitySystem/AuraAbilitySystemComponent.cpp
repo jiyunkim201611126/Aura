@@ -27,14 +27,18 @@ void UAuraAbilitySystemComponent::AddCharacterAbilities(const TArray<TSubclassOf
 		FGameplayAbilitySpec AbilitySpec = FGameplayAbilitySpec(AbilityClass, 1);
 		if (const UAuraGameplayAbility* AuraAbility = Cast<UAuraGameplayAbility>(AbilitySpec.Ability))
 		{
-			// 어떤 Input에 의해 사용될 Ability인지 기록
+			// 어떤 Input에 의해 작동할 Ability인지 DynamicTag로 추가합니다.
+			// DynamicTag는 AssetTag와 달리 런타임 중 자유롭게 Tag를 추가 및 제거할 수 있습니다.
 			AbilitySpec.GetDynamicSpecSourceTags().AddTag(AuraAbility->StartupInputTag);
+			// Ability를 장착 상태로 변경합니다.
 			AbilitySpec.GetDynamicSpecSourceTags().AddTag(FAuraGameplayTags::Get().Abilities_Status_Equipped);
-			// Ability 장착
+			// Ability를 부여합니다.
+			// 부여란 Ability를 ASC에 등록하는 행위이며, 사용은 못 하는 상태일 수 있습니다.
+			// 장착이랑 Ability를 사용 가능한 상태로 바꾸는 행위입니다.
 			GiveAbility(AbilitySpec);
 			// 부여된 Ability를 HUD에 스킬 아이콘으로 표시하기 위해 델리게이트를 Broadcast합니다.
 			// 해당 함수는 서버에서만 호출되기 때문에, 클라이언트에서 OnRep 함수로 따로 Broadcast해줍니다.
-			AbilitiesGivenDelegate.Broadcast(AbilitySpec);
+			OnAbilitiesGivenDelegate.Broadcast(AbilitySpec);
 		}
 	}
 }
@@ -77,7 +81,7 @@ void UAuraAbilitySystemComponent::OnRep_ActivateAbilities()
 		// 이전에 갖고 있지 않던 Ability만 위젯에 알려줍니다.
 		if (!CachedAbilityHandles.Contains(AbilitySpec.Handle))
 		{
-			AbilitiesGivenDelegate.Broadcast(AbilitySpec);
+			OnAbilitiesGivenDelegate.Broadcast(AbilitySpec);
 		}
 	}
 
@@ -161,6 +165,15 @@ FGameplayTag UAuraAbilitySystemComponent::GetStatusFromSpec(const FGameplayAbili
 	return FGameplayTag();
 }
 
+FGameplayTag UAuraAbilitySystemComponent::GetInputTagFromAbilityTag(const FGameplayTag& AbilityTag)
+{
+	if (const FGameplayAbilitySpec* Spec = GetGivenAbilitySpecFromAbilityTag(AbilityTag))
+	{
+		return GetInputTagFromSpec(*Spec);
+	}
+	return FGameplayTag();
+}
+
 FGameplayAbilitySpec* UAuraAbilitySystemComponent::GetGivenAbilitySpecFromAbilityTag(const FGameplayTag& AbilityTag)
 {
 	// 보유한 Ability 중 매개변수로 들어온 태그와 일치하는 태그를 가진 AbilitySpec을 반환합니다.
@@ -178,56 +191,6 @@ FGameplayAbilitySpec* UAuraAbilitySystemComponent::GetGivenAbilitySpecFromAbilit
 
 	// nullptr이 반환되면 보유하지 않은 Ability라는 걸 알 수 있습니다.
 	return nullptr;
-}
-
-void UAuraAbilitySystemComponent::UpgradeAttribute(const FGameplayTag& AttributeTag)
-{
-	if (GetAvatarActor()->Implements<ULevelableInterface>())
-	{
-		if (ILevelableInterface::Execute_GetAttributePoints(GetAvatarActor()) > 0)
-		{
-			ServerUpgradeAttribute(AttributeTag);
-		}
-	}
-}
-
-void UAuraAbilitySystemComponent::UpdateAbilityStatuses(int32 Level)
-{
-	// 특정 레벨을 만족하면 Ability를 부여하는 함수입니다.
-	// 습득과 부여는 다릅니다.
-	// 부여란 GiveAbility에 의해 ASC에 등록되는 걸 말합니다.
-	// 습득은 부여받은 Ability를 실제 사용 가능한 상태로 바꾸는 것을 말합니다.
-	
-	UAbilityInfo* AbilityInfo = UAuraAbilitySystemLibrary::GetAbilityInfo(GetAvatarActor());
-	
-	for (const FAuraAbilityInfo& Info : AbilityInfo->AbilityInformation)
-	{
-		if (!Info.AbilityTag.IsValid())
-		{
-			continue;
-		}
-		
-		if (Level < Info.LevelRequirement)
-		{
-			// 습득 가능 레벨 미만인 경우 못 한 경우 다음 Ability를 확인합니다.
-			continue;
-		}
-		
-		if (GetGivenAbilitySpecFromAbilityTag(Info.AbilityTag) == nullptr)
-		{
-			// 습득 조건을 만족했으나 아직 부여되지 않은 경우 들어오는 분기입니다.
-			FGameplayAbilitySpec AbilitySpec = FGameplayAbilitySpec(Info.Ability, 1);
-
-			// Status 태그를 Eligible로 설정한 상태로 일단 GiveAbility를 통해 부여합니다.
-			// 레벨을 만족하면 일단 '부여'하고, 추후 플레이어가 SpellPoint를 소모해 '습득', Status 태그가 Equipped로 변경됩니다.
-			// 추후 디버깅 시 습득하지 않은 Ability를 보고 '왜 부여됐지?'하며 헷갈릴 수 있으나, 능력 해금 시스템이 복잡해지거나 UI 상시 노출이 필요한 시스템의 경우 실용적인 로직입니다.
-			// 특히 ASC에 접근해 GetActivatableAbilities로 '배운 Ability와 습득 가능한 Ability'를 빠르게 가져올 수 있다는 장점이 있습니다.
-			AbilitySpec.GetDynamicSpecSourceTags().AddTag(FAuraGameplayTags::Get().Abilities_Status_Eligible);
-			GiveAbility(AbilitySpec);
-			MarkAbilitySpecDirty(AbilitySpec);
-			ClientUpdateAbilityStatus(Info.AbilityTag, FAuraGameplayTags::Get().Abilities_Status_Eligible, 1);
-		}
-	}
 }
 
 bool UAuraAbilitySystemComponent::GetDescriptionsByAbilityTag(const FGameplayTag& AbilityTag, FText& OutDescription, FText& OutNextLevelDescription, UAbilityInfo* AbilityInfo)
@@ -254,6 +217,155 @@ bool UAuraAbilitySystemComponent::GetDescriptionsByAbilityTag(const FGameplayTag
 		OutDescription = UAuraGameplayAbility::GetLockedDescription(AbilityInfo->FindAbilityInfoForTag(AbilityTag).LevelRequirement);
 	}
 	OutNextLevelDescription = FText();
+	return false;
+}
+
+void UAuraAbilitySystemComponent::UpgradeAttribute(const FGameplayTag& AttributeTag)
+{
+	if (GetAvatarActor()->Implements<ULevelableInterface>())
+	{
+		if (ILevelableInterface::Execute_GetAttributePoints(GetAvatarActor()) > 0)
+		{
+			ServerUpgradeAttribute(AttributeTag);
+		}
+	}
+}
+
+void UAuraAbilitySystemComponent::ServerUpgradeAttribute_Implementation(const FGameplayTag& AttributeTag)
+{
+	FGameplayEventData Payload;
+	Payload.EventTag = AttributeTag;
+	Payload.EventMagnitude = 1.f;
+
+	UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(GetAvatarActor(), AttributeTag, Payload);
+
+	if (GetAvatarActor()->Implements<ULevelableInterface>())
+	{
+		ILevelableInterface::Execute_AddToAttributePoints(GetAvatarActor(), -1);
+	}
+}
+
+void UAuraAbilitySystemComponent::UpdateAbilityStatuses(int32 Level)
+{
+	// 특정 레벨을 만족하면 Ability를 부여하는 함수입니다.
+	// 장착과 부여는 다릅니다.
+	// 부여란 GiveAbility에 의해 ASC에 등록되는 걸 말합니다.
+	// 장착은 부여받은 Ability를 실제 사용 가능한 상태로 바꾸는 것을 말합니다.
+	
+	UAbilityInfo* AbilityInfo = UAuraAbilitySystemLibrary::GetAbilityInfo(GetAvatarActor());
+	
+	for (const FAuraAbilityInfo& Info : AbilityInfo->AbilityInformation)
+	{
+		if (!Info.AbilityTag.IsValid())
+		{
+			continue;
+		}
+		
+		if (Level < Info.LevelRequirement)
+		{
+			// 장착 가능 레벨 미만인 경우 못 한 경우 다음 Ability를 확인합니다.
+			continue;
+		}
+		
+		if (GetGivenAbilitySpecFromAbilityTag(Info.AbilityTag) == nullptr)
+		{
+			// 장착 조건을 만족했으나 아직 부여되지 않은 경우 들어오는 분기입니다.
+			FGameplayAbilitySpec AbilitySpec = FGameplayAbilitySpec(Info.Ability, 1);
+
+			// Status 태그를 Eligible로 설정한 상태로 일단 GiveAbility를 통해 부여합니다.
+			// 레벨을 만족하면 일단 '부여'하고, 추후 플레이어가 SpellPoint를 소모해 '장착', Status 태그가 Equipped로 변경됩니다.
+			// 추후 디버깅 시 장착하지 않은 Ability를 보고 '왜 부여됐지?'하며 헷갈릴 수 있으나, 능력 해금 시스템이 복잡해지거나 UI 상시 노출이 필요한 시스템의 경우 실용적인 로직입니다.
+			// 특히 ASC에 접근해 GetActivatableAbilities로 '배운 Ability와 장착 가능한 Ability'를 빠르게 가져올 수 있다는 장점이 있습니다.
+			AbilitySpec.GetDynamicSpecSourceTags().AddTag(FAuraGameplayTags::Get().Abilities_Status_Eligible);
+			GiveAbility(AbilitySpec);
+			MarkAbilitySpecDirty(AbilitySpec);
+			ClientUpdateAbilityStatus(Info.AbilityTag, FAuraGameplayTags::Get().Abilities_Status_Eligible, 1);
+		}
+	}
+}
+
+void UAuraAbilitySystemComponent::ServerEquipAbility_Implementation(const FGameplayTag& AbilityTag, const FGameplayTag& InputTag)
+{
+	if (FGameplayAbilitySpec* AbilitySpec = GetGivenAbilitySpecFromAbilityTag(AbilityTag))
+	{
+		const FAuraGameplayTags& GameplayTags = FAuraGameplayTags::Get();
+		const FGameplayTag& PrevInputTag = GetInputTagFromSpec(*AbilitySpec);
+		const FGameplayTag& StatusTag = GetStatusFromSpec(*AbilitySpec);
+
+		// 장착 가능한 Ability인지 판별합니다.
+		const bool bStatusValid = StatusTag == GameplayTags.Abilities_Status_Equipped || StatusTag == GameplayTags.Abilities_Status_Unlocked;
+		if (bStatusValid)
+		{
+			// 우선 장착하려는 InputTag에 있는 Ability의 InputTag를 제거합니다. 즉, 장착을 해제합니다.
+			ClearAbilitiesOfInputTag(InputTag);
+			// 장착하려는 Ability 또한 InputTag를 제거합니다. 마찬가지로 장착을 해제한다는 뜻입니다.
+			ClearInputTag(AbilitySpec);
+			// Ability를 InputTag에 장착합니다.
+			AbilitySpec->GetDynamicSpecSourceTags().AddTag(InputTag);
+
+			// Ability가 부여 상태였다면 장착 상태로 변경합니다.
+			if (StatusTag.MatchesTagExact(GameplayTags.Abilities_Status_Unlocked))
+			{
+				AbilitySpec->GetDynamicSpecSourceTags().RemoveTag(GameplayTags.Abilities_Status_Unlocked);
+				AbilitySpec->GetDynamicSpecSourceTags().AddTag(GameplayTags.Abilities_Status_Equipped);
+			}
+
+			// 클라이언트에게 Ability의 변경사항을 알려줍니다.
+			MarkAbilitySpecDirty(*AbilitySpec);
+		}
+		
+		// MarkDirty만으로는 UI에 변경 사항을 반영할 수 없습니다. 따라서 RPC로 이 변경 사항을 다시 한 번 알려줍니다.
+		ClientEquipAbility(AbilityTag, StatusTag, InputTag, PrevInputTag);
+	}
+}
+
+void UAuraAbilitySystemComponent::ClientEffectApplied_Implementation(UAbilitySystemComponent* AbilitySystemComponent, const FGameplayEffectSpec& EffectSpec, FActiveGameplayEffectHandle ActiveEffectHandle)
+{
+	FGameplayTagContainer TagContainer;
+	EffectSpec.GetAllAssetTags(TagContainer);
+
+	// Widget Controller에게 Tag를 가진 Effect가 Apply되었음을 알림
+	EffectAssetTags.Broadcast(TagContainer);
+}
+
+void UAuraAbilitySystemComponent::ClientUpdateAbilityStatus_Implementation(const FGameplayTag& AbilityTag, const FGameplayTag& StatusTag, const int32 AbilityLevel)
+{
+	OnAbilityStatusChangedDelegate.Broadcast(AbilityTag, StatusTag, AbilityLevel);
+}
+
+void UAuraAbilitySystemComponent::ClientEquipAbility_Implementation(const FGameplayTag& AbilityTag, const FGameplayTag& StatusTag, const FGameplayTag& InputTag, const FGameplayTag& PreviousInputTag)
+{
+	OnAbilityEquipped.Broadcast(AbilityTag, StatusTag, InputTag, PreviousInputTag);
+}
+
+void UAuraAbilitySystemComponent::ClearInputTag(FGameplayAbilitySpec* Spec)
+{
+	const FGameplayTag InputTag = GetInputTagFromSpec(*Spec);
+	Spec->GetDynamicSpecSourceTags().RemoveTag(InputTag);
+	MarkAbilitySpecDirty(*Spec);
+}
+
+void UAuraAbilitySystemComponent::ClearAbilitiesOfInputTag(const FGameplayTag& InputTag)
+{
+	FScopedAbilityListLock ActiveScopeLock(*this);
+	for (FGameplayAbilitySpec& Spec : GetActivatableAbilities())
+	{
+		if (AbilityHasInputTag(&Spec, InputTag))
+		{
+			ClearInputTag(&Spec);
+		}
+	}
+}
+
+bool UAuraAbilitySystemComponent::AbilityHasInputTag(FGameplayAbilitySpec* Spec, const FGameplayTag& InputTag) const
+{
+	for (FGameplayTag Tag : Spec->GetDynamicSpecSourceTags())
+	{
+		if (Tag.MatchesTagExact(InputTag))
+		{
+			return true;
+		}
+	}
 	return false;
 }
 
@@ -286,32 +398,4 @@ void UAuraAbilitySystemComponent::ServerSpendSpellPoint_Implementation(const FGa
 		ClientUpdateAbilityStatus(AbilityTag, Status, AbilitySpec->Level);
 		MarkAbilitySpecDirty(*AbilitySpec);
 	}
-}
-
-void UAuraAbilitySystemComponent::ClientUpdateAbilityStatus_Implementation(const FGameplayTag& AbilityTag, const FGameplayTag& StatusTag, const int32 AbilityLevel)
-{
-	AbilityStatusChangedDelegate.Broadcast(AbilityTag, StatusTag, AbilityLevel);
-}
-
-void UAuraAbilitySystemComponent::ServerUpgradeAttribute_Implementation(const FGameplayTag& AttributeTag)
-{
-	FGameplayEventData Payload;
-	Payload.EventTag = AttributeTag;
-	Payload.EventMagnitude = 1.f;
-
-	UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(GetAvatarActor(), AttributeTag, Payload);
-
-	if (GetAvatarActor()->Implements<ULevelableInterface>())
-	{
-		ILevelableInterface::Execute_AddToAttributePoints(GetAvatarActor(), -1);
-	}
-}
-
-void UAuraAbilitySystemComponent::ClientEffectApplied_Implementation(UAbilitySystemComponent* AbilitySystemComponent, const FGameplayEffectSpec& EffectSpec, FActiveGameplayEffectHandle ActiveEffectHandle)
-{
-	FGameplayTagContainer TagContainer;
-	EffectSpec.GetAllAssetTags(TagContainer);
-
-	// Widget Controller에게 Tag를 가진 Effect가 Apply되었음을 알림
-	EffectAssetTags.Broadcast(TagContainer);
 }
