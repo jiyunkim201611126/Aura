@@ -3,6 +3,7 @@
 #include "StackableAbilityManager.h"
 #include "Aura/AbilitySystem/AuraAbilitySystemComponent.h"
 #include "Aura/AbilitySystem/Abilities/AuraGameplayAbility.h"
+#include "Aura/Manager/AuraTextManager.h"
 
 void UStackableAbility::OnGivenAbility(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec, const UAuraGameplayAbility* OwningAbility)
 {
@@ -45,6 +46,11 @@ void UStackableAbility::OnRemoveAbility(UAuraGameplayAbility* OwningAbility)
 	{
 		Component->UnregisterAbility(OwningAbility->AbilityTag);
 	}
+}
+
+FText UStackableAbility::GetDescription()
+{
+	return FText::Format(FAuraTextManager::GetText(EStringTableTextType::UI, FString("Abilities_Description_Stackable")), StackData.CurrentStack, StackData.MaxStack, StackData.RechargeTime);
 }
 
 AStackableAbilityManager* UStackableAbility::GetStackableAbilityManager(const FGameplayAbilityActorInfo* ActorInfo) const

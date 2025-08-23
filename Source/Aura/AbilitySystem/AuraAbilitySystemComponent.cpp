@@ -34,7 +34,7 @@ void UAuraAbilitySystemComponent::AddCharacterAbilities(const TArray<TSubclassOf
 			AbilitySpec.GetDynamicSpecSourceTags().AddTag(FAuraGameplayTags::Get().Abilities_Status_Equipped);
 			// Ability를 부여합니다.
 			// 부여란 Ability를 ASC에 등록하는 행위이며, 사용은 못 하는 상태일 수 있습니다.
-			// 장착이랑 Ability를 사용 가능한 상태로 바꾸는 행위입니다.
+			// 장착이란 Ability를 사용 가능한 상태로 바꾸는 행위입니다.
 			GiveAbility(AbilitySpec);
 			// 부여된 Ability를 HUD에 스킬 아이콘으로 표시하기 위해 델리게이트를 Broadcast합니다.
 			// 해당 함수는 서버에서만 호출되기 때문에, 클라이언트에서 OnRep 함수로 따로 Broadcast해줍니다.

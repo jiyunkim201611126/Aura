@@ -18,6 +18,8 @@ public:
 	virtual void ApplyCost(const UAuraGameplayAbility* OwningAbility) override;
 	virtual void OnRemoveAbility(UAuraGameplayAbility* OwningAbility) override;
 
+	virtual FText GetDescription() override;
+
 private:
 	AStackableAbilityManager* GetStackableAbilityManager(const FGameplayAbilityActorInfo* ActorInfo) const;
 

@@ -27,7 +27,7 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	void SetTargetActorsToContext();
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintPure)
 	FText GetDamageTexts(int32 InLevel);
 
 public:

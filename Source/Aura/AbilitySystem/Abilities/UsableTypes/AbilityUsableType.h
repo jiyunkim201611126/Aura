@@ -20,4 +20,7 @@ public:
 	virtual bool CheckCost(const UAuraGameplayAbility* OwningAbility);
 	virtual void ApplyCost(const UAuraGameplayAbility* OwningAbility);
 	virtual void OnRemoveAbility(UAuraGameplayAbility* OwningAbility);
+
+	UFUNCTION(BlueprintPure, Category = "UsableType")
+	virtual FText GetDescription();
 };
