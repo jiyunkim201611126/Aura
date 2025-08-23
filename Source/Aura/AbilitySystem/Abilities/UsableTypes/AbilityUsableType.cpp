@@ -1,9 +1,6 @@
 ﻿#include "AbilityUsableType.h"
 
-#include "GameplayAbilitySpec.h"
-#include "GameplayAbilitySpecHandle.h"
-
-void UAbilityUsableType::OnGivenAbility(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec, const UAuraGameplayAbility* OwningAbility)
+void UAbilityUsableType::OnEquipAbility(const UAuraGameplayAbility* OwningAbility, UAuraAbilitySystemComponent* ASC)
 {
 }
 

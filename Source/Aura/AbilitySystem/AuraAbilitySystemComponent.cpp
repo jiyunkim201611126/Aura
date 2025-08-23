@@ -29,15 +29,18 @@ void UAuraAbilitySystemComponent::AddCharacterAbilities(const TArray<TSubclassOf
 		{
 			// 어떤 Input에 의해 작동할 Ability인지 DynamicTag로 추가합니다.
 			// DynamicTag는 AssetTag와 달리 런타임 중 자유롭게 Tag를 추가 및 제거할 수 있습니다.
-			AbilitySpec.GetDynamicSpecSourceTags().AddTag(AuraAbility->StartupInputTag);
+			//AbilitySpec.GetDynamicSpecSourceTags().AddTag(AuraAbility->StartupInputTag);
 			
-			// Ability를 장착 상태로 변경합니다.
-			AbilitySpec.GetDynamicSpecSourceTags().AddTag(FAuraGameplayTags::Get().Abilities_Status_Equipped);
+			// Ability를 미장착 상태로 변경합니다.
+			AbilitySpec.GetDynamicSpecSourceTags().AddTag(FAuraGameplayTags::Get().Abilities_Status_Unlocked);
 			
 			// Ability를 부여합니다.
 			// 부여란 Ability를 ASC에 등록하는 행위이며, 사용은 못 하는 상태일 수 있습니다.
 			// 장착이란 Ability를 사용 가능한 상태로 바꾸는 행위입니다.
 			GiveAbility(AbilitySpec);
+
+			// Ability를 장착합니다.
+			ServerEquipAbility(GetAbilityTagFromSpec(AbilitySpec), AuraAbility->StartupInputTag);
 			
 			// 부여된 Ability를 HUD에 스킬 아이콘으로 표시하기 위해 델리게이트를 Broadcast합니다.
 			// 해당 함수는 서버에서만 호출되기 때문에, 클라이언트에서 OnRep 함수로 따로 Broadcast해줍니다.
@@ -106,7 +109,7 @@ void UAuraAbilitySystemComponent::OnRep_ActivateAbilities()
 			const int32 NowLevel = AbilitySpec.Level;
 			
 			// InputTag의 변경 사항을 체크합니다.
-			if (PreviousInputTag != NowInputTag)
+			if (PreviousInputTag != NowInputTag && NowInputTag.IsValid())
 			{
 				// 현재 할당된 InputTag와 이전 InputTag가 다를 경우 UI에 알립니다.
 				OnAbilityEquipped.Broadcast(AbilityTag, NowInputTag, NowStatusTag, PreviousInputTag);
@@ -373,6 +376,11 @@ void UAuraAbilitySystemComponent::ServerEquipAbility_Implementation(const FGamep
 			{
 				AbilitySpec->GetDynamicSpecSourceTags().RemoveTag(GameplayTags.Abilities_Status_Unlocked);
 				AbilitySpec->GetDynamicSpecSourceTags().AddTag(GameplayTags.Abilities_Status_Equipped);
+			
+				if (UAuraGameplayAbility* Ability = Cast<UAuraGameplayAbility>(AbilitySpec->Ability))
+				{
+					Ability->RegisterAbilityToUsableTypeManagers(this);
+				}
 			}
 
 			// 클라이언트에게 Ability의 변경사항을 알려줍니다.

@@ -4,6 +4,7 @@
 #include "Abilities/GameplayAbility.h"
 #include "AuraGameplayAbility.generated.h"
 
+class UAuraAbilitySystemComponent;
 class UAbilityUsableType;
 
 USTRUCT(BlueprintType)
@@ -42,7 +43,7 @@ public:
 	static FText GetLockedDescription(int32 Level);
 
 protected:
-
+	
 	UFUNCTION(BlueprintCallable)
 	float GetManaCost(int32 InLevel = 1) const;
 	UFUNCTION(BlueprintCallable)
@@ -81,11 +82,12 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UsableType")
 	TArray<TObjectPtr<UAbilityUsableType>> UsableTypes;
 
+public:
+	void RegisterAbilityToUsableTypeManagers(UAuraAbilitySystemComponent* ASC);
+	void UnregisterAbilityFromUsableTypeManagers();
 protected:
-	virtual void OnGiveAbility(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec) override;
 	virtual bool CheckCost(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, FGameplayTagContainer* OptionalRelevantTags = nullptr) const override;
 	virtual void ApplyCost(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo) const override;
-	virtual void OnRemoveAbility(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec) override;
 
 	// AbilityTag로 할당한 Ability 전용 태그가 AssetTag(AbilityTags)에도 자동으로 추가되도록 해주는 함수들입니다.
 #if WITH_EDITOR

@@ -59,19 +59,25 @@ FTaggedMontage UAuraGameplayAbility::GetRandomMontage()
 	return TaggedMontage;
 }
 
-void UAuraGameplayAbility::OnGiveAbility(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec)
+void UAuraGameplayAbility::RegisterAbilityToUsableTypeManagers(UAuraAbilitySystemComponent* ASC)
 {
-	Super::OnGiveAbility(ActorInfo, Spec);
-
-	for (auto AbilityUsableType : UsableTypes)
+	for (const auto AbilityUsableType : UsableTypes)
 	{
-		AbilityUsableType->OnGivenAbility(ActorInfo, Spec, this);
+		AbilityUsableType->OnEquipAbility(this, ASC);
+	}
+}
+
+void UAuraGameplayAbility::UnregisterAbilityFromUsableTypeManagers()
+{
+	for (const auto AbilityUsableType : UsableTypes)
+	{
+		AbilityUsableType->OnRemoveAbility(this);
 	}
 }
 
 bool UAuraGameplayAbility::CheckCost(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, FGameplayTagContainer* OptionalRelevantTags) const
 {	
-	for (auto AbilityUsableType : UsableTypes)
+	for (const auto AbilityUsableType : UsableTypes)
 	{
 		if (!AbilityUsableType->CheckCost(this))
 		{
@@ -84,22 +90,12 @@ bool UAuraGameplayAbility::CheckCost(const FGameplayAbilitySpecHandle Handle, co
 
 void UAuraGameplayAbility::ApplyCost(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo) const
 {
-	for (auto AbilityUsableType : UsableTypes)
+	for (const auto AbilityUsableType : UsableTypes)
 	{
 		AbilityUsableType->ApplyCost(this);
 	}
 	
 	Super::ApplyCost(Handle, ActorInfo, ActivationInfo);
-}
-
-void UAuraGameplayAbility::OnRemoveAbility(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec)
-{
-	for (auto AbilityUsableType : UsableTypes)
-	{
-		AbilityUsableType->OnRemoveAbility(this);
-	}
-	
-	Super::OnRemoveAbility(ActorInfo, Spec);
 }
 
 void UAuraGameplayAbility::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
