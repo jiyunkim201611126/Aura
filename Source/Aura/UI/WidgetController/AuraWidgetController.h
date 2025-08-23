@@ -13,6 +13,7 @@ class UAuraAbilitySystemComponent;
 class UAuraAttributeSet;
 struct FGameplayAbilitySpec;
 struct FAuraAbilityInfo;
+struct FGameplayTag;
 
 // 위젯 컨트롤러의 멤버 변수 초기화를 간편화하는 구조체
 USTRUCT(BlueprintType)
@@ -63,13 +64,15 @@ public:
 	UFUNCTION(BlueprintCallable)
 	virtual void BroadcastInitialValue();
 
-	virtual void OnAbilitiesGiven(const FGameplayAbilitySpec& AbilitySpec);
-	void MakeAbilityUIInfo(const FGameplayAbilitySpec& AbilitySpec, FAuraAbilityInfo& AbilityUIInfo);
-
 	AAuraPlayerController* GetAuraPC();
 	AAuraPlayerState* GetAuraPS();
 	UAuraAbilitySystemComponent* GetAuraASC();
 	UAuraAttributeSet* GetAuraAS();
+
+protected:
+	virtual void OnAbilityEquipped(const FGameplayTag& AbilityTag, const FGameplayTag& InputTag, const FGameplayTag& StatusTag, const FGameplayTag& PreviousInputTag);
+	void ClearSpellGlobe(const FGameplayTag& PreviousInputTag) const;
+	void UpdateSpellGlobe(const FGameplayTag& AbilityTag, const FGameplayTag& StatusTag, const FGameplayTag& InputTag) const;
 
 public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Widget Data")

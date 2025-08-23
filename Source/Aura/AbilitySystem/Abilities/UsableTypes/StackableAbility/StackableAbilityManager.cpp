@@ -27,7 +27,7 @@ void FAbilityStackItem::PostReplicatedAdd(const FAbilityStackArray& InArraySeria
 
 	if (bShouldTimerStart)
 	{
-		InArraySerializer.OwnerActor->OnStackTimerStarted.ExecuteIfBound(AbilityTag, RechargeTime);
+		InArraySerializer.OwnerActor->OnStackTimerStarted.ExecuteIfBound(AbilityTag, RechargeTime, RechargeTime);
 	}
 }
 
@@ -42,7 +42,7 @@ void FAbilityStackItem::PostReplicatedChange(const FAbilityStackArray& InArraySe
 
 	if (bShouldTimerStart)
 	{
-		InArraySerializer.OwnerActor->OnStackTimerStarted.ExecuteIfBound(AbilityTag, RechargeTime);
+		InArraySerializer.OwnerActor->OnStackTimerStarted.ExecuteIfBound(AbilityTag, RechargeTime, RechargeTime);
 	}
 }
 
@@ -211,7 +211,7 @@ void AStackableAbilityManager::StartRecharge(const FGameplayTag& AbilityTag)
 	if (FAbilityStackItem* Item = FindItemMutable(AbilityTag))
 	{
 		// 최대 충전치인 경우 충전을 중단합니다.
-		if (Item->CurrentStack >= Item->MaxStack)
+		if (!CanRecharge(Item))
 		{
 			StopRecharge(AbilityTag);
 			return;
@@ -229,8 +229,8 @@ void AStackableAbilityManager::StartRecharge(const FGameplayTag& AbilityTag)
 					true
 				);
 
-				// 충전이 시작됐음을 서버의 로컬 HUD에 알립니다.
-				OnStackTimerStarted.ExecuteIfBound(AbilityTag, Item->RechargeTime);
+				// 충전이 시작됐음을 리슨 서버의 로컬 HUD에 알립니다.
+				OnStackTimerStarted.ExecuteIfBound(AbilityTag, Item->RechargeTime, Item->RechargeTime);
 
 				// 클라이언트가 알 수 있도록 충전이 시작됐음을 기록합니다.
 				Item->bShouldTimerStart = true;
@@ -257,14 +257,14 @@ void AStackableAbilityManager::Recharge(const FGameplayTag AbilityTag)
 		OnStackCountChanged.ExecuteIfBound(AbilityTag, Item->CurrentStack);
 
 		// 최대 충전치에 도달한 경우 충전을 중단합니다.
-		if (Item->CurrentStack >= Item->MaxStack)
+		if (!CanRecharge(Item))
 		{
 			StopRecharge(AbilityTag);
 			return;
 		}
 
-		// 충전이 시작됐음을 서버의 로컬 HUD에 알립니다.
-		OnStackTimerStarted.ExecuteIfBound(AbilityTag, Item->RechargeTime);
+		// 충전이 시작됐음을 리슨 서버의 로컬 HUD에 알립니다.
+		OnStackTimerStarted.ExecuteIfBound(AbilityTag, Item->RechargeTime, Item->RechargeTime);
 
 		// 클라이언트가 알 수 있도록 충전이 시작됐음을 기록합니다.
 		Item->bShouldTimerStart = true;
@@ -294,6 +294,36 @@ void AStackableAbilityManager::StopRecharge(const FGameplayTag& AbilityTag)
 			AbilityStacks.MarkItemDirty(*Item);
 		}
 	}
+}
+
+bool AStackableAbilityManager::CanRecharge(const FAbilityStackItem* Item) const
+{
+	return Item->CurrentStack < Item->MaxStack;
+}
+
+void AStackableAbilityManager::ServerGetRemainingRechargeTime_Implementation(const FGameplayTag& AbilityTag)
+{
+	const FAbilityStackItem* Item = FindItem(AbilityTag);
+
+	// 더이상 충전할 수 없다면 충전 로직이 돌지 않는 게 정상이므로 아무 동작도 하지 않습니다.
+	if (!CanRecharge(Item))
+	{
+		return;
+	}
+
+	// 타이머가 동작 중일 때만 클라이언트(리슨 서버인 경우 자신에게) 알려줍니다.
+	const FTimerManager& TimerManager = GetWorld()->GetTimerManager();
+	if (TimerManager.IsTimerActive(Item->RechargeTimerHandle))
+	{
+		ClientGetRemainingRechargeTime(AbilityTag, TimerManager.GetTimerRemaining(Item->RechargeTimerHandle));
+	}
+}
+
+void AStackableAbilityManager::ClientGetRemainingRechargeTime_Implementation(const FGameplayTag& AbilityTag, const float RemainingTime)
+{
+	const FAbilityStackItem* Item = FindItem(AbilityTag);
+	
+	OnStackTimerStarted.ExecuteIfBound(AbilityTag, RemainingTime, Item->RechargeTime);
 }
 
 int32 AStackableAbilityManager::FindIndexByTag(const FGameplayTag& AbilityTag) const

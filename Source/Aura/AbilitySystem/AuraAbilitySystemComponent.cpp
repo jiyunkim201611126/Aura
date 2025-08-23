@@ -30,15 +30,18 @@ void UAuraAbilitySystemComponent::AddCharacterAbilities(const TArray<TSubclassOf
 			// 어떤 Input에 의해 작동할 Ability인지 DynamicTag로 추가합니다.
 			// DynamicTag는 AssetTag와 달리 런타임 중 자유롭게 Tag를 추가 및 제거할 수 있습니다.
 			AbilitySpec.GetDynamicSpecSourceTags().AddTag(AuraAbility->StartupInputTag);
+			
 			// Ability를 장착 상태로 변경합니다.
 			AbilitySpec.GetDynamicSpecSourceTags().AddTag(FAuraGameplayTags::Get().Abilities_Status_Equipped);
+			
 			// Ability를 부여합니다.
 			// 부여란 Ability를 ASC에 등록하는 행위이며, 사용은 못 하는 상태일 수 있습니다.
 			// 장착이란 Ability를 사용 가능한 상태로 바꾸는 행위입니다.
 			GiveAbility(AbilitySpec);
+			
 			// 부여된 Ability를 HUD에 스킬 아이콘으로 표시하기 위해 델리게이트를 Broadcast합니다.
 			// 해당 함수는 서버에서만 호출되기 때문에, 클라이언트에서 OnRep 함수로 따로 Broadcast해줍니다.
-			OnAbilitiesGivenDelegate.Broadcast(AbilitySpec);
+			OnAbilityEquipped.Broadcast(GetAbilityTagFromSpec(AbilitySpec), AuraAbility->StartupInputTag, FAuraGameplayTags::Get().Abilities_Status_Equipped, FGameplayTag());
 		}
 	}
 }
@@ -81,7 +84,10 @@ void UAuraAbilitySystemComponent::OnRep_ActivateAbilities()
 		// 이전에 갖고 있지 않던 Ability의 부여 상황을 UI에 알립니다.
 		if (!CachedAbilities.Contains(AbilitySpec.Handle))
 		{
-			OnAbilitiesGivenDelegate.Broadcast(AbilitySpec);
+			FGameplayTag InputTag;
+			FGameplayTag StatusTag;
+			ExtractTagsFromSpec(AbilitySpec, InputTag, StatusTag);
+			OnAbilityEquipped.Broadcast(GetAbilityTagFromSpec(AbilitySpec), InputTag, StatusTag, FGameplayTag());
 		}
 		else
 		{
@@ -103,7 +109,7 @@ void UAuraAbilitySystemComponent::OnRep_ActivateAbilities()
 			if (PreviousInputTag != NowInputTag)
 			{
 				// 현재 할당된 InputTag와 이전 InputTag가 다를 경우 UI에 알립니다.
-				OnAbilityEquipped.Broadcast(AbilityTag, NowStatusTag, NowInputTag, PreviousInputTag);
+				OnAbilityEquipped.Broadcast(AbilityTag, NowInputTag, NowStatusTag, PreviousInputTag);
 			}
 
 			// StatusTag와 Level의 변경 사항을 체크합니다.
@@ -375,7 +381,7 @@ void UAuraAbilitySystemComponent::ServerEquipAbility_Implementation(const FGamep
 		
 		// 리슨 서버가 UI에 변경 사항을 표시할 수 있도록 델리게이트를 호출합니다.
 		// 클라이언트는 OnRep_ActivateAbilities 함수에서 각종 Tag를 비교 및 변경 사항을 독자적으로 추적해 UI에 반영합니다.
-		OnAbilityEquipped.Broadcast(AbilityTag, StatusTag, InputTag, PreviousInputTag);
+		OnAbilityEquipped.Broadcast(AbilityTag, InputTag, StatusTag, PreviousInputTag);
 	}
 }
 

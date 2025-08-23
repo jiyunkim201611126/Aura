@@ -8,7 +8,6 @@ class AStackableAbilityManager;
 class UAbilityInfo;
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FEffectAssetTags, const FGameplayTagContainer&);
-DECLARE_MULTICAST_DELEGATE_OneParam(FAbilitiesGiven, const FGameplayAbilitySpec&);
 DECLARE_MULTICAST_DELEGATE_ThreeParams(FAbilityStatusChanged, const FGameplayTag& /*AbilityTag*/, const FGameplayTag& /*StatusTag*/, const int32 /*AbilityLevel*/);
 DECLARE_MULTICAST_DELEGATE_FourParams(FAbilityEquipped, const FGameplayTag& /*AbilityTag*/, const FGameplayTag& /*StatusTag*/, const FGameplayTag& /*InputTag*/, const FGameplayTag& /*PreviousInputTag*/)
 
@@ -78,7 +77,6 @@ private:
 public:
 	// Widget Controller가 바인드할 델리게이트
 	FEffectAssetTags EffectAssetTags;
-	FAbilitiesGiven OnAbilitiesGivenDelegate;
 	FAbilityStatusChanged OnAbilityStatusOrLevelChangedDelegate;
 	FAbilityEquipped OnAbilityEquipped;
 

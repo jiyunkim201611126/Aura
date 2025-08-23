@@ -10,7 +10,7 @@ void USpellMenuWidgetController::BindCallbacksToDependencies()
 	// HUD에 대한 초기화가 모두 이루어지고 나서 GameAbility를 부여하기 때문에, 여기서 바인드하면 정상 작동합니다.
 	if (GetAuraASC())
 	{
-		AuraAbilitySystemComponent->OnAbilitiesGivenDelegate.AddUObject(this, &ThisClass::OnAbilitiesGiven);
+		AuraAbilitySystemComponent->OnAbilityEquipped.AddUObject(this, &ThisClass::OnAbilityEquipped);
 		AuraAbilitySystemComponent->OnAbilityStatusOrLevelChangedDelegate.AddLambda([this](const FGameplayTag& AbilityTag, const FGameplayTag& StatusTag, const int32 AbilityLevel)
 		{
 			if (SelectedAbility.Ability.MatchesTagExact(AbilityTag))
@@ -25,7 +25,6 @@ void USpellMenuWidgetController::BindCallbacksToDependencies()
 				AbilityInfoDelegate.Broadcast(Info);
 			}
 		});
-		AuraAbilitySystemComponent->OnAbilityEquipped.AddUObject(this, &ThisClass::OnAbilityEquipped);
 	}
 
 	if (GetAuraPS())
@@ -144,6 +143,14 @@ void USpellMenuWidgetController::SpellRowGlobePressed(const FGameplayTag& InputT
 	OnSuccessRequestEquipDelegate.Broadcast();
 }
 
+void USpellMenuWidgetController::OnAbilityEquipped(const FGameplayTag& AbilityTag, const FGameplayTag& InputTag, const FGameplayTag& StatusTag, const FGameplayTag& PreviousInputTag)
+{
+	Super::OnAbilityEquipped(AbilityTag, InputTag, StatusTag, PreviousInputTag);
+
+	bWaitingForEquipSelection = false;
+	StopWaitingForEquipSelectionDelegate.Broadcast(AbilityInfo->FindAbilityInfoForTag(AbilityTag).AbilityType);
+}
+
 void USpellMenuWidgetController::ShouldEnableButtons()
 {
 	const FAuraGameplayTags GameplayTags = FAuraGameplayTags::Get();
@@ -178,26 +185,4 @@ void USpellMenuWidgetController::ShouldEnableButtons()
 	AuraAbilitySystemComponent->GetDescriptionsByAbilityTag(SelectedAbility.Ability, Description, NextLevelDescription, AbilityInfo);
 
 	OnSpellMenuStatusChangedDelegate.Broadcast(bShouldEnableSpellPointsButton, bShouldEnableEquipButton, Description, NextLevelDescription);
-}
-
-void USpellMenuWidgetController::OnAbilityEquipped(const FGameplayTag& AbilityTag, const FGameplayTag& StatusTag, const FGameplayTag& InputTag, const FGameplayTag& PreviousInputTag)
-{
-	bWaitingForEquipSelection = false;
-
-	const FAuraGameplayTags& GameplayTags = FAuraGameplayTags::Get();
-
-	// 변경 전 InputTag에 해당하는 슬롯이 비워지도록 비주얼을 업데이트합니다.
-	FAuraAbilityInfo LastSlotInfo;
-	LastSlotInfo.StatusTag = GameplayTags.Abilities_Status_Unlocked;
-	LastSlotInfo.InputTag = PreviousInputTag;
-	LastSlotInfo.AbilityTag = GameplayTags.Abilities_None;
-	AbilityInfoDelegate.Broadcast(LastSlotInfo);
-
-	// 이번에 장착한 InputTag에 해당하는 Slot의 비주얼을 업데이트합니다.
-	FAuraAbilityInfo Info = AbilityInfo->FindAbilityInfoForTag(AbilityTag);
-	Info.StatusTag = StatusTag;
-	Info.InputTag = InputTag;
-	AbilityInfoDelegate.Broadcast(Info);
-
-	StopWaitingForEquipSelectionDelegate.Broadcast(AbilityInfo->FindAbilityInfoForTag(AbilityTag).AbilityType);
 }

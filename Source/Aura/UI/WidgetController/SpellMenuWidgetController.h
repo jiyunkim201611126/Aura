@@ -43,11 +43,11 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SpellRowGlobePressed(const FGameplayTag& InputTag, const FGameplayTag& AbilityType);
 
+	void OnAbilityEquipped(const FGameplayTag& AbilityTag, const FGameplayTag& InputTag, const FGameplayTag& StatusTag, const FGameplayTag& PreviousInputTag);
+
 private:
 	// SpendPoints 버튼과 Equip 버튼 활성화 여부를 결정 및 델리게이트를 호출하는 함수입니다.
 	void ShouldEnableButtons();
-
-	void OnAbilityEquipped(const FGameplayTag& AbilityTag, const FGameplayTag& StatusTag, const FGameplayTag& InputTag, const FGameplayTag& PreviousInputTag);
 
 public:
 	UPROPERTY(BlueprintAssignable, Category = "GAS | SpellMenu")

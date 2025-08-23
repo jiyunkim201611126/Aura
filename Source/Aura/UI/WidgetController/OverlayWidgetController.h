@@ -52,7 +52,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMessageWidgetRowSignature, FUIWidge
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnAbilityUsableTypeSignature, FGameplayTag, InAbilityTag, const FAbilityUsableTypeInfo&, Info);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnStackCountChangedSignature, FGameplayTag, InAbilityTag, int32, StackCount);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnStackTimerStartedSignature, FGameplayTag, InAbilityTag, float, RechargeTime);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnStackTimerStartedSignature, FGameplayTag, InAbilityTag, float, RemainingTime, float, RechargeTime);
 
 UCLASS(BlueprintType, Blueprintable)
 class AURA_API UOverlayWidgetController : public UAuraWidgetController
@@ -67,10 +67,11 @@ protected:
 	template<typename T>
 	T* GetDataTableRowByTag(UDataTable* DataTable, const FGameplayTag& Tag);
 
-	virtual void OnAbilitiesGiven(const FGameplayAbilitySpec& AbilitySpec) override;
-	void BindForUsableTypes(UAuraAbilitySystemComponent* AuraASC, FGameplayTag AbilityTag);
+	void BindForUsableTypes(UAuraAbilitySystemComponent* AuraASC, FGameplayTag AbilityTag, bool bShouldRequestStackTime);
 	
 	void OnXPChanged(int32 InXP);
+	
+	virtual void OnAbilityEquipped(const FGameplayTag& AbilityTag, const FGameplayTag& InputTag, const FGameplayTag& StatusTag, const FGameplayTag& PreviousInputTag) override;
 
 public:
 	// 아래 델리게이트들에 위젯 블루프린트들이 각자 필요한 함수를 바인드

@@ -2,17 +2,19 @@
 #include "Aura/AbilitySystem/AuraAttributeSet.h"
 #include "Aura/AbilitySystem/AuraAbilitySystemComponent.h"
 #include "Aura/AbilitySystem/Abilities/UsableTypes/StackableAbility/StackableAbilityManager.h"
-#include "Aura/AbilitySystem/Data/AbilityInfo.h"
 #include "Aura/Player/AuraPlayerState.h"
 
 void UOverlayWidgetController::BindCallbacksToDependencies()
 {
-	GetAuraPS()->OnXPChangedDelegate.AddUObject(this, &ThisClass::OnXPChanged);
-	GetAuraPS()->OnLevelChangedDelegate.AddLambda([this](int32 NewLevel)
-		{
-			OnPlayerLevelChangedDelegate.Broadcast(NewLevel);
-		}
-	);
+	if (GetAuraPS())
+	{
+		AuraPlayerState->OnXPChangedDelegate.AddUObject(this, &ThisClass::OnXPChanged);
+		AuraPlayerState->OnLevelChangedDelegate.AddLambda([this](int32 NewLevel)
+			{
+				OnPlayerLevelChangedDelegate.Broadcast(NewLevel);
+			}
+		);
+	}
 
 	// 선언된 Attribute들에게 변동사항이 있는 경우 Widget Controller가 알 수 있도록 각 Attribute에게 함수를 바인드
 	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(GetAuraAS()->GetHealthAttribute()).AddLambda([this](const FOnAttributeChangeData& Data)
@@ -43,7 +45,7 @@ void UOverlayWidgetController::BindCallbacksToDependencies()
 	{
 		// Ability가 부여될 때, OverlayWidget이 이를 알 수 있도록 함수를 바인드합니다.
 		// HUD에 대한 초기화가 모두 이루어지고 나서 GameAbility를 부여하기 때문에, 여기서 바인드하면 정상 작동합니다.
-		AuraAbilitySystemComponent->OnAbilitiesGivenDelegate.AddUObject(this, &ThisClass::OnAbilitiesGiven);
+		AuraAbilitySystemComponent->OnAbilityEquipped.AddUObject(this, &ThisClass::OnAbilityEquipped);
 
 		// GameplayEffect가 적용될 때 화면에 메시지를 띄울 수 있도록 함수를 바인드합니다.
 		AuraAbilitySystemComponent->EffectAssetTags.AddLambda([this](const FGameplayTagContainer& AssetTags)
@@ -72,23 +74,18 @@ void UOverlayWidgetController::BroadcastInitialValue()
 	OnMaxManaChanged.Broadcast(GetAuraAS()->GetMaxMana());
 }
 
-void UOverlayWidgetController::OnAbilitiesGiven(const FGameplayAbilitySpec& AbilitySpec)
+void UOverlayWidgetController::OnAbilityEquipped(const FGameplayTag& AbilityTag, const FGameplayTag& InputTag, const FGameplayTag& StatusTag, const FGameplayTag& PreviousInputTag)
 {
-	if (GetAuraASC())
-	{
-		// 부모 함수와 코드가 중복되는 부분이 많으나, 가독성 면에서 이 방식이 더 우월하고
-		// 락 스코프가 여러 번 걸리지 않기 때문에 흐름도 명확합니다.
-		FScopedAbilityListLock ActiveScopeLock(*GetAuraASC());
-		
-		FAuraAbilityInfo AbilityUIInfo;
-		MakeAbilityUIInfo(AbilitySpec, AbilityUIInfo);
-		AbilityInfoDelegate.Broadcast(AbilityUIInfo);
+	Super::OnAbilityEquipped(AbilityTag, InputTag, StatusTag, PreviousInputTag);
 
-		BindForUsableTypes(GetAuraASC(), AbilityUIInfo.AbilityTag);
-	}
+	// 사용 규칙(Stackable 등)에 대한 위젯 생성 및 바인드 로직을 수행합니다.
+	// PreviousInputTag가 유효하면 다른 InputTag에 장착된 상태였으므로, 충전 로직이 수행중이었을 가능성이 높습니다.
+	// 따라서 이 점을 이용해 서버에 남은 시간을 요청할지 말지 결정합니다.
+	// 추후 다른 UsableType이 추가되어 매개변수가 많아진다면 구조체로 묶어야 할 수 있습니다.
+	BindForUsableTypes(GetAuraASC(), AbilityTag, PreviousInputTag.IsValid());
 }
 
-void UOverlayWidgetController::BindForUsableTypes(UAuraAbilitySystemComponent* AuraASC, FGameplayTag AbilityTag)
+void UOverlayWidgetController::BindForUsableTypes(UAuraAbilitySystemComponent* AuraASC, FGameplayTag AbilityTag, bool bShouldRequestStackTime)
 {
 	FAbilityUsableTypeInfo UsableTypeInfo;
 
@@ -105,9 +102,9 @@ void UOverlayWidgetController::BindForUsableTypes(UAuraAbilitySystemComponent* A
 				OnStackCountChangedDelegate.Broadcast(InAbilityTag, StackCount);
 			}
 		);
-		StackableAbilityManager->OnStackTimerStarted.BindLambda([this](FGameplayTag InAbilityTag, float RechargeTime)
+		StackableAbilityManager->OnStackTimerStarted.BindLambda([this](FGameplayTag InAbilityTag, float RemainingTime, float RechargeTime)
 			{
-				OnStackTimerStartedDelegate.Broadcast(InAbilityTag, RechargeTime);
+				OnStackTimerStartedDelegate.Broadcast(InAbilityTag, RemainingTime, RechargeTime);
 			}
 		);
 	}
@@ -123,7 +120,8 @@ void UOverlayWidgetController::BindForUsableTypes(UAuraAbilitySystemComponent* A
 			if (const FAbilityStackItem* Item = StackableAbilityManager->FindItem(AbilityTag))
 			{
 				OnStackCountChangedDelegate.Broadcast(AbilityTag, Item->CurrentStack);
-				OnStackTimerStartedDelegate.Broadcast(AbilityTag, Item->RechargeTime);
+				// 서버에 요청할 필요가 없는 경우 Item의 정보를 그대로 UI에게 전송합니다.
+				bShouldRequestStackTime ? StackableAbilityManager->ServerGetRemainingRechargeTime(AbilityTag) : OnStackTimerStartedDelegate.Broadcast(AbilityTag, Item->RechargeTime, Item->RechargeTime);
 			}
 		}
 	}

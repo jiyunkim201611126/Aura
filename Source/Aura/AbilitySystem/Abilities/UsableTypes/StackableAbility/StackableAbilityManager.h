@@ -65,7 +65,7 @@ struct TStructOpsTypeTraits<FAbilityStackArray> : public TStructOpsTypeTraitsBas
 };
 
 DECLARE_DELEGATE_TwoParams(FOnStackCountChanged, FGameplayTag /*InAbilityTag*/, int32 /*StackCount*/);
-DECLARE_DELEGATE_TwoParams(FOnStackTimerStarted, FGameplayTag /*InAbilityTag*/, float /*RechargeTime*/);
+DECLARE_DELEGATE_ThreeParams(FOnStackTimerStarted, FGameplayTag /*InAbilityTag*/, float /*RemainingTime*/, float /*RechargeTime*/);
 
 UCLASS()
 class AURA_API AStackableAbilityManager : public AActor
@@ -91,13 +91,20 @@ public:
 
 	const FAbilityStackItem* FindItem(const FGameplayTag& AbilityTag) const;
 
+	UFUNCTION(Server, Reliable)
+	void ServerGetRemainingRechargeTime(const FGameplayTag& AbilityTag);
+
 private:
 	void StartRecharge(const FGameplayTag& AbilityTag);
 	void Recharge(FGameplayTag AbilityTag);
 	void StopRecharge(const FGameplayTag& AbilityTag);
+	bool CanRecharge(const FAbilityStackItem* Item) const;
 
 	int32 FindIndexByTag(const FGameplayTag& AbilityTag) const;
 	FAbilityStackItem* FindItemMutable(const FGameplayTag& AbilityTag);
+
+	UFUNCTION(Client, Reliable)
+	void ClientGetRemainingRechargeTime(const FGameplayTag& AbilityTag, const float RemainingTime);
 
 public:
 	// WidgetController가 바인드할 델리게이트
