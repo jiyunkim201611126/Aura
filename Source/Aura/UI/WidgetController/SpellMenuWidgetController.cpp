@@ -11,7 +11,7 @@ void USpellMenuWidgetController::BindCallbacksToDependencies()
 	if (GetAuraASC())
 	{
 		AuraAbilitySystemComponent->OnAbilitiesGivenDelegate.AddUObject(this, &ThisClass::OnAbilitiesGiven);
-		AuraAbilitySystemComponent->OnAbilityStatusChangedDelegate.AddLambda([this](const FGameplayTag& AbilityTag, const FGameplayTag& StatusTag, const int32 AbilityLevel)
+		AuraAbilitySystemComponent->OnAbilityStatusOrLevelChangedDelegate.AddLambda([this](const FGameplayTag& AbilityTag, const FGameplayTag& StatusTag, const int32 AbilityLevel)
 		{
 			if (SelectedAbility.Ability.MatchesTagExact(AbilityTag))
 			{

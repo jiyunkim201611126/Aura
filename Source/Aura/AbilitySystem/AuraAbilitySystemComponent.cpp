@@ -66,8 +66,8 @@ void UAuraAbilitySystemComponent::OnRep_ActivateAbilities()
 {
 	Super::OnRep_ActivateAbilities();
 
-	TSet<FGameplayAbilitySpecHandle> NewHandles;
-	NewHandles.Reserve(GetActivatableAbilities().Num());
+	TMap<FGameplayAbilitySpecHandle, FGameplayAbilitySpec> NewAbilities;
+	NewAbilities.Reserve(GetActivatableAbilities().Num());
 
 	for (const FGameplayAbilitySpec& AbilitySpec : GetActivatableAbilities())
 	{
@@ -76,18 +76,48 @@ void UAuraAbilitySystemComponent::OnRep_ActivateAbilities()
 			continue;
 		}
 
-		NewHandles.Add(AbilitySpec.Handle);
+		NewAbilities.Add({AbilitySpec.Handle, AbilitySpec});
 
-		// 이전에 갖고 있지 않던 Ability만 위젯에 알려줍니다.
-		if (!CachedAbilityHandles.Contains(AbilitySpec.Handle))
+		// 이전에 갖고 있지 않던 Ability의 부여 상황을 UI에 알립니다.
+		if (!CachedAbilities.Contains(AbilitySpec.Handle))
 		{
 			OnAbilitiesGivenDelegate.Broadcast(AbilitySpec);
 		}
+		else
+		{
+			// 이미 캐싱된 Ability일 때 들어오는 분기입니다.
+			const FGameplayAbilitySpec& CachedAbility = *CachedAbilities.Find(AbilitySpec.Handle);
+			
+			const FGameplayTag& AbilityTag = GetAbilityTagFromSpec(AbilitySpec);
+			FGameplayTag PreviousInputTag;
+			FGameplayTag PreviousStatusTag;
+			FGameplayTag NowInputTag;
+			FGameplayTag NowStatusTag;
+			ExtractTagsFromSpec(CachedAbility, PreviousInputTag, PreviousStatusTag);
+			ExtractTagsFromSpec(AbilitySpec, NowInputTag, NowStatusTag);
+			
+			const int32 PreviousLevel = CachedAbility.Level;
+			const int32 NowLevel = AbilitySpec.Level;
+			
+			// InputTag의 변경 사항을 체크합니다.
+			if (PreviousInputTag != NowInputTag)
+			{
+				// 현재 할당된 InputTag와 이전 InputTag가 다를 경우 UI에 알립니다.
+				OnAbilityEquipped.Broadcast(AbilityTag, NowStatusTag, NowInputTag, PreviousInputTag);
+			}
+
+			// StatusTag와 Level의 변경 사항을 체크합니다.
+			if (PreviousStatusTag != NowStatusTag || PreviousLevel != NowLevel)
+			{
+				OnAbilityStatusOrLevelChangedDelegate.Broadcast(AbilityTag, NowStatusTag, NowLevel);
+			}
+		}
+		
+		// 프로젝트 특성상 Ability 부여가 해제되는 상황은 존재하지 않습니다.
 	}
 
-	// 추후 Ability가 제거되는 로직이 추가되면 여기에 로직을 작성해 위젯이 알 수 있도록 해줍니다.
-
-	CachedAbilityHandles = MoveTemp(NewHandles);
+	// 현재 Abilities 정보를 캐싱합니다.
+	CachedAbilities = MoveTemp(NewAbilities);
 }
 
 void UAuraAbilitySystemComponent::AbilityInputTagHeld(const FGameplayTag& InputTag)
@@ -172,6 +202,32 @@ FGameplayTag UAuraAbilitySystemComponent::GetInputTagFromAbilityTag(const FGamep
 		return GetInputTagFromSpec(*Spec);
 	}
 	return FGameplayTag();
+}
+
+void UAuraAbilitySystemComponent::ExtractTagsFromSpec(const FGameplayAbilitySpec& AbilitySpec, FGameplayTag& OutInputTag, FGameplayTag& OutStatusTag) const
+{
+	// 여러 태그가 필요할 때 위 헬퍼 함수들을 사용하는 경우 불필요한 반복문이 호출됩니다.
+	// 한 번의 반복 안에서 필요한 모든 태그를 가져오는 헬퍼함수입니다.
+
+	const FGameplayTag& InputRootTag = FGameplayTag::RequestGameplayTag(FName("InputTag"));
+	const FGameplayTag& StatusRootTag = FGameplayTag::RequestGameplayTag(FName("Abilities.Status"));
+
+	for (const FGameplayTag& Tag : AbilitySpec.GetDynamicSpecSourceTags())
+	{
+		if (Tag.MatchesTag(InputRootTag))
+		{
+			OutInputTag = Tag;
+		}
+		else if (Tag.MatchesTag(StatusRootTag))
+		{
+			OutStatusTag = Tag;
+		}
+
+		if (OutInputTag.IsValid() && OutStatusTag.IsValid())
+		{
+			return;
+		}
+	}
 }
 
 FGameplayAbilitySpec* UAuraAbilitySystemComponent::GetGivenAbilitySpecFromAbilityTag(const FGameplayTag& AbilityTag)
@@ -273,13 +329,16 @@ void UAuraAbilitySystemComponent::UpdateAbilityStatuses(int32 Level)
 			FGameplayAbilitySpec AbilitySpec = FGameplayAbilitySpec(Info.Ability, 1);
 
 			// Status 태그를 Eligible로 설정한 상태로 일단 GiveAbility를 통해 부여합니다.
-			// 레벨을 만족하면 일단 '부여'하고, 추후 플레이어가 SpellPoint를 소모해 '장착', Status 태그가 Equipped로 변경됩니다.
-			// 추후 디버깅 시 장착하지 않은 Ability를 보고 '왜 부여됐지?'하며 헷갈릴 수 있으나, 능력 해금 시스템이 복잡해지거나 UI 상시 노출이 필요한 시스템의 경우 실용적인 로직입니다.
+			// 레벨을 만족하면 일단 '부여'하고, 추후 플레이어가 SpellPoint를 소모해 '장착'하면 Status 태그가 Equipped로 변경됩니다.
+			// 추후 디버깅 시 장착하지 않은 Ability를 보고 '왜 부여됐지?'하며 헷갈릴 수 있으나, 능력 해금 시스템이 복잡해지거나 UI 상시 노출이 필요한 프로젝트의 경우 실용적인 로직입니다.
 			// 특히 ASC에 접근해 GetActivatableAbilities로 '배운 Ability와 장착 가능한 Ability'를 빠르게 가져올 수 있다는 장점이 있습니다.
 			AbilitySpec.GetDynamicSpecSourceTags().AddTag(FAuraGameplayTags::Get().Abilities_Status_Eligible);
 			GiveAbility(AbilitySpec);
+			// 해당 변경 사항을 클라이언트에게 알려줍니다.
 			MarkAbilitySpecDirty(AbilitySpec);
-			ClientUpdateAbilityStatus(Info.AbilityTag, FAuraGameplayTags::Get().Abilities_Status_Eligible, 1);
+			// 리슨 서버도 UI에 반영할 수 있도록 델리게이트를 호출합니다.
+			// 클라이언트는 OnRep_ActivateAbilities에서 변경 사항을 독자적으로 추적해 UI에 반영합니다.
+			OnAbilityStatusOrLevelChangedDelegate.Broadcast(Info.AbilityTag, FAuraGameplayTags::Get().Abilities_Status_Eligible, 1);
 		}
 	}
 }
@@ -289,7 +348,7 @@ void UAuraAbilitySystemComponent::ServerEquipAbility_Implementation(const FGamep
 	if (FGameplayAbilitySpec* AbilitySpec = GetGivenAbilitySpecFromAbilityTag(AbilityTag))
 	{
 		const FAuraGameplayTags& GameplayTags = FAuraGameplayTags::Get();
-		const FGameplayTag& PrevInputTag = GetInputTagFromSpec(*AbilitySpec);
+		const FGameplayTag& PreviousInputTag = GetInputTagFromSpec(*AbilitySpec);
 		const FGameplayTag& StatusTag = GetStatusFromSpec(*AbilitySpec);
 
 		// 장착 가능한 Ability인지 판별합니다.
@@ -314,8 +373,9 @@ void UAuraAbilitySystemComponent::ServerEquipAbility_Implementation(const FGamep
 			MarkAbilitySpecDirty(*AbilitySpec);
 		}
 		
-		// MarkDirty만으로는 UI에 변경 사항을 반영할 수 없습니다. 따라서 RPC로 이 변경 사항을 다시 한 번 알려줍니다.
-		ClientEquipAbility(AbilityTag, StatusTag, InputTag, PrevInputTag);
+		// 리슨 서버가 UI에 변경 사항을 표시할 수 있도록 델리게이트를 호출합니다.
+		// 클라이언트는 OnRep_ActivateAbilities 함수에서 각종 Tag를 비교 및 변경 사항을 독자적으로 추적해 UI에 반영합니다.
+		OnAbilityEquipped.Broadcast(AbilityTag, StatusTag, InputTag, PreviousInputTag);
 	}
 }
 
@@ -326,16 +386,6 @@ void UAuraAbilitySystemComponent::ClientEffectApplied_Implementation(UAbilitySys
 
 	// Widget Controller에게 Tag를 가진 Effect가 Apply되었음을 알림
 	EffectAssetTags.Broadcast(TagContainer);
-}
-
-void UAuraAbilitySystemComponent::ClientUpdateAbilityStatus_Implementation(const FGameplayTag& AbilityTag, const FGameplayTag& StatusTag, const int32 AbilityLevel)
-{
-	OnAbilityStatusChangedDelegate.Broadcast(AbilityTag, StatusTag, AbilityLevel);
-}
-
-void UAuraAbilitySystemComponent::ClientEquipAbility_Implementation(const FGameplayTag& AbilityTag, const FGameplayTag& StatusTag, const FGameplayTag& InputTag, const FGameplayTag& PreviousInputTag)
-{
-	OnAbilityEquipped.Broadcast(AbilityTag, StatusTag, InputTag, PreviousInputTag);
 }
 
 void UAuraAbilitySystemComponent::ClearInputTag(FGameplayAbilitySpec* Spec)
@@ -381,21 +431,24 @@ void UAuraAbilitySystemComponent::ServerSpendSpellPoint_Implementation(const FGa
 		}
 		
 		const FAuraGameplayTags GameplayTags = FAuraGameplayTags::Get();
-		FGameplayTag Status = GetStatusFromSpec(*AbilitySpec);
+		FGameplayTag StatusTag = GetStatusFromSpec(*AbilitySpec);
 
-		if (Status.MatchesTagExact(GameplayTags.Abilities_Status_Eligible))
+		if (StatusTag.MatchesTagExact(GameplayTags.Abilities_Status_Eligible))
 		{
 			// Status가 Eligible이라면 Unlocked로 교체합니다.
 			AbilitySpec->GetDynamicSpecSourceTags().RemoveTag(GameplayTags.Abilities_Status_Eligible);
 			AbilitySpec->GetDynamicSpecSourceTags().AddTag(GameplayTags.Abilities_Status_Unlocked);
-			Status = GameplayTags.Abilities_Status_Unlocked;
+			StatusTag = GameplayTags.Abilities_Status_Unlocked;
 		}
-		else if (Status.MatchesTagExact(GameplayTags.Abilities_Status_Equipped) || Status.MatchesTagExact(GameplayTags.Abilities_Status_Unlocked))
+		else if (StatusTag.MatchesTagExact(GameplayTags.Abilities_Status_Equipped) || StatusTag.MatchesTagExact(GameplayTags.Abilities_Status_Unlocked))
 		{
 			// Status가 이미 Equipped거나 Unlocked라면 레벨에 1 더합니다.
 			AbilitySpec->Level++;
 		}
-		ClientUpdateAbilityStatus(AbilityTag, Status, AbilitySpec->Level);
+		// 해당 변경 사항을 클라이언트에게도 알려줍니다.
 		MarkAbilitySpecDirty(*AbilitySpec);
+		// 리슨 서버도 UI에 반영할 수 있도록 델리게이트를 호출합니다.
+		// 클라이언트는 OnRep_ActivateAbilities에서 변경 사항을 독자적으로 추적해 UI에 반영합니다.
+		OnAbilityStatusOrLevelChangedDelegate.Broadcast(AbilityTag, StatusTag, AbilitySpec->Level);
 	}
 }

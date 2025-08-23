@@ -122,7 +122,7 @@ void AAuraCharacter::AddToLevel_Implementation(const int32 InPlayerLevel)
 
 	if (UAuraAbilitySystemComponent* AuraASC = Cast<UAuraAbilitySystemComponent>(GetAbilitySystemComponent()))
 	{
-		// 레벨이 상승했으므로, 그에 따라 습득 가능한 Ability들의 상태를 업데이트합니다.
+		// 레벨이 상승했으므로, 그에 따라 장착 가능한 Ability들의 상태를 업데이트합니다.
 		AuraASC->UpdateAbilityStatuses(AuraPlayerState->GetPlayerLevel());
 	}
 }

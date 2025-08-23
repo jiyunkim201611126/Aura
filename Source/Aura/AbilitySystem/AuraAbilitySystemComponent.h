@@ -41,6 +41,7 @@ public:
 	static FGameplayTag GetInputTagFromSpec(const FGameplayAbilitySpec& AbilitySpec);
 	static FGameplayTag GetStatusFromSpec(const FGameplayAbilitySpec& AbilitySpec);
 	FGameplayTag GetInputTagFromAbilityTag(const FGameplayTag& AbilityTag);
+	void ExtractTagsFromSpec(const FGameplayAbilitySpec& AbilitySpec, FGameplayTag& OutInputTag, FGameplayTag& OutStatusTag) const;
 
 	FGameplayAbilitySpec* GetGivenAbilitySpecFromAbilityTag(const FGameplayTag& AbilityTag);
 
@@ -69,29 +70,22 @@ private:
 	UFUNCTION(Client, Reliable)
 	void ClientEffectApplied(UAbilitySystemComponent* AbilitySystemComponent, const FGameplayEffectSpec& EffectSpec, FActiveGameplayEffectHandle ActiveEffectHandle);
 
-	UFUNCTION(Client, Reliable)
-	void ClientUpdateAbilityStatus(const FGameplayTag& AbilityTag, const FGameplayTag& StatusTag, const int32 AbilityLevel = 1);
-
-	UFUNCTION(Client, Reliable)
-	void ClientEquipAbility(const FGameplayTag& AbilityTag, const FGameplayTag& StatusTag, const FGameplayTag& InputTag, const FGameplayTag& PreviousInputTag);
-
 	// 장착이 해제되면 해당 Ability의 InputTag를 제거하는 함수
 	void ClearInputTag(FGameplayAbilitySpec* Spec);
 	void ClearAbilitiesOfInputTag(const FGameplayTag& InputTag);
 	bool AbilityHasInputTag(FGameplayAbilitySpec* Spec, const FGameplayTag& InputTag) const;
 	
-	
 public:
 	// Widget Controller가 바인드할 델리게이트
 	FEffectAssetTags EffectAssetTags;
 	FAbilitiesGiven OnAbilitiesGivenDelegate;
-	FAbilityStatusChanged OnAbilityStatusChangedDelegate;
+	FAbilityStatusChanged OnAbilityStatusOrLevelChangedDelegate;
 	FAbilityEquipped OnAbilityEquipped;
 
 private:
 	// OnRep_ActivateAbilities가 호출되기 전, 클라이언트에서 캐싱해두고 있는 Ability 부여 정보입니다.
 	// 갖고 있던 것과 비교해서 달라졌을 경우만 위젯에 알려줍니다.
-	TSet<FGameplayAbilitySpecHandle> CachedAbilityHandles;
+	TMap<FGameplayAbilitySpecHandle, FGameplayAbilitySpec> CachedAbilities;
 
 	// Ability Manager 배열입니다.
 	// 런타임 중 드물게 변하는 배열이며, Owner 클라이언트에게만 복제되기 때문에 FastArray를 굳이 사용하지 않았습니다.
