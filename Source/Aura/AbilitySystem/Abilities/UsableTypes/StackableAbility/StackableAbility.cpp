@@ -8,12 +8,24 @@
 void UStackableAbility::OnEquipAbility(const UAuraGameplayAbility* OwningAbility, UAuraAbilitySystemComponent* ASC)
 {
 	// Equip 시점에선 아직 Ability가 제대로 초기화되지 않아 Ability를 통해 ASC를 추적하는 데에 실패할 가능성이 있습니다.
+	// 또, UCLASS 매크로에서 DefaultToInstanced를 사용하지 않았기 때문에 런타임 중 값에 변화를 줄 수 없습니다.
+	// 따라서 매개변수로 들어오는 OwningAbility로 Manager에게 접근합니다.
+	// DefaultToInstanced를 사용할 경우 Manager가 이 객체를 제대로 캐싱하지 못 하는 문제가 발생합니다. (이유는 찾지 못 함)
 	if (AStackableAbilityManager* Manager = ASC->FindOrAddAbilityManager<AStackableAbilityManager>())
 	{
 		if (Manager)
 		{
 			Manager->RegisterAbility(OwningAbility->AbilityTag, StackData.CurrentStack, StackData.MaxStack, StackData.RechargeTime);
 		}
+	}
+}
+
+void UStackableAbility::OnUnequipAbility(const UAuraGameplayAbility* OwningAbility, UAuraAbilitySystemComponent* ASC)
+{
+	// 이 Ability가 제거될 때, Component에서 이 Ability의 등록을 해제합니다.
+	if (AStackableAbilityManager* Manager = ASC->FindOrAddAbilityManager<AStackableAbilityManager>())
+	{
+		Manager->UnregisterAbility(OwningAbility->AbilityTag);
 	}
 }
 
@@ -37,15 +49,6 @@ void UStackableAbility::ApplyCost(const UAuraGameplayAbility* OwningAbility)
 	if (AStackableAbilityManager* Manager = GetStackableAbilityManager(OwningAbility))
 	{
 		Manager->ApplyCost(OwningAbility->AbilityTag);
-	}
-}
-
-void UStackableAbility::OnRemoveAbility(UAuraGameplayAbility* OwningAbility)
-{
-	// 이 Ability가 제거될 때, Component에서 이 Ability의 등록을 해제합니다.
-	if (AStackableAbilityManager* Manager = GetStackableAbilityManager(OwningAbility))
-	{
-		Manager->UnregisterAbility(OwningAbility->AbilityTag);
 	}
 }
 

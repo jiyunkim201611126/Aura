@@ -4,16 +4,16 @@ void UAbilityUsableType::OnEquipAbility(const UAuraGameplayAbility* OwningAbilit
 {
 }
 
+void UAbilityUsableType::OnUnequipAbility(const UAuraGameplayAbility* OwningAbility, UAuraAbilitySystemComponent* ASC)
+{
+}
+
 bool UAbilityUsableType::CheckCost(const UAuraGameplayAbility* OwningAbility)
 {
 	return false;
 }
 
 void UAbilityUsableType::ApplyCost(const UAuraGameplayAbility* OwningAbility)
-{
-}
-
-void UAbilityUsableType::OnRemoveAbility(UAuraGameplayAbility* OwningAbility)
 {
 }
 

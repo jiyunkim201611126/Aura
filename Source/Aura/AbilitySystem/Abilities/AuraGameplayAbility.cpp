@@ -67,11 +67,11 @@ void UAuraGameplayAbility::RegisterAbilityToUsableTypeManagers(UAuraAbilitySyste
 	}
 }
 
-void UAuraGameplayAbility::UnregisterAbilityFromUsableTypeManagers()
+void UAuraGameplayAbility::UnregisterAbilityFromUsableTypeManagers(UAuraAbilitySystemComponent* ASC)
 {
 	for (const auto AbilityUsableType : UsableTypes)
 	{
-		AbilityUsableType->OnRemoveAbility(this);
+		AbilityUsableType->OnUnequipAbility(this, ASC);
 	}
 }
 

@@ -84,7 +84,7 @@ protected:
 
 public:
 	void RegisterAbilityToUsableTypeManagers(UAuraAbilitySystemComponent* ASC);
-	void UnregisterAbilityFromUsableTypeManagers();
+	void UnregisterAbilityFromUsableTypeManagers(UAuraAbilitySystemComponent* ASC);
 protected:
 	virtual bool CheckCost(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, FGameplayTagContainer* OptionalRelevantTags = nullptr) const override;
 	virtual void ApplyCost(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo) const override;

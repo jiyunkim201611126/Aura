@@ -343,8 +343,10 @@ void UAuraAbilitySystemComponent::UpdateAbilityStatuses(int32 Level)
 			// 특히 ASC에 접근해 GetActivatableAbilities로 '배운 Ability와 장착 가능한 Ability'를 빠르게 가져올 수 있다는 장점이 있습니다.
 			AbilitySpec.GetDynamicSpecSourceTags().AddTag(FAuraGameplayTags::Get().Abilities_Status_Eligible);
 			GiveAbility(AbilitySpec);
+			
 			// 해당 변경 사항을 클라이언트에게 알려줍니다.
 			MarkAbilitySpecDirty(AbilitySpec);
+			
 			// 리슨 서버도 UI에 반영할 수 있도록 델리게이트를 호출합니다.
 			// 클라이언트는 OnRep_ActivateAbilities에서 변경 사항을 독자적으로 추적해 UI에 반영합니다.
 			OnAbilityStatusOrLevelChangedDelegate.Broadcast(Info.AbilityTag, FAuraGameplayTags::Get().Abilities_Status_Eligible, 1);
@@ -389,7 +391,7 @@ void UAuraAbilitySystemComponent::ServerEquipAbility_Implementation(const FGamep
 		
 		// 리슨 서버가 UI에 변경 사항을 표시할 수 있도록 델리게이트를 호출합니다.
 		// 클라이언트는 OnRep_ActivateAbilities 함수에서 각종 Tag를 비교 및 변경 사항을 독자적으로 추적해 UI에 반영합니다.
-		OnAbilityEquipped.Broadcast(AbilityTag, InputTag, StatusTag, PreviousInputTag);
+		OnAbilityEquipped.Broadcast(AbilityTag, InputTag, GameplayTags.Abilities_Status_Equipped, PreviousInputTag);
 	}
 }
 
@@ -404,6 +406,8 @@ void UAuraAbilitySystemComponent::ClientEffectApplied_Implementation(UAbilitySys
 
 void UAuraAbilitySystemComponent::ClearInputTag(FGameplayAbilitySpec* Spec)
 {
+	// 이 함수로 들어오는 관련 Ability는 장착 위치를 변경하는 중일 수 있습니다.
+	// 따라서 Status 태그 변경은 하지 않으며, UsableTypeManager에게도 접근하지 않습니다.
 	const FGameplayTag InputTag = GetInputTagFromSpec(*Spec);
 	Spec->GetDynamicSpecSourceTags().RemoveTag(InputTag);
 	MarkAbilitySpecDirty(*Spec);
@@ -411,11 +415,22 @@ void UAuraAbilitySystemComponent::ClearInputTag(FGameplayAbilitySpec* Spec)
 
 void UAuraAbilitySystemComponent::ClearAbilitiesOfInputTag(const FGameplayTag& InputTag)
 {
+	// 이 함수로 들어오는 관련 Ability들은 무조건 장착 해제하는 상황입니다.
 	FScopedAbilityListLock ActiveScopeLock(*this);
 	for (FGameplayAbilitySpec& Spec : GetActivatableAbilities())
 	{
 		if (AbilityHasInputTag(&Spec, InputTag))
 		{
+			if (UAuraGameplayAbility* Ability = Cast<UAuraGameplayAbility>(Spec.Ability))
+			{
+				// 장착 해제하는 중이므로, Manager 객체들에게서 이 Ability 관련 로직을 중단시킵니다.
+				Ability->UnregisterAbilityFromUsableTypeManagers(this);
+			}
+			
+			const FAuraGameplayTags& GameplayTags = FAuraGameplayTags::Get();
+			Spec.GetDynamicSpecSourceTags().RemoveTag(GameplayTags.Abilities_Status_Equipped);
+			Spec.GetDynamicSpecSourceTags().AddTag(GameplayTags.Abilities_Status_Unlocked);
+			
 			ClearInputTag(&Spec);
 		}
 	}

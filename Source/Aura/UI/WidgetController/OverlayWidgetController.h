@@ -67,7 +67,7 @@ protected:
 	template<typename T>
 	T* GetDataTableRowByTag(UDataTable* DataTable, const FGameplayTag& Tag);
 
-	void BindForUsableTypes(UAuraAbilitySystemComponent* AuraASC, FGameplayTag AbilityTag, bool bShouldRequestStackTime);
+	void BindForUsableTypes(UAuraAbilitySystemComponent* AuraASC, FGameplayTag AbilityTag, bool bShouldRequestStackTime) const;
 	
 	void OnXPChanged(int32 InXP);
 	

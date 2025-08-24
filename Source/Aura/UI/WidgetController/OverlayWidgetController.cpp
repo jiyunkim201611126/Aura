@@ -2,6 +2,7 @@
 #include "Aura/AbilitySystem/AuraAttributeSet.h"
 #include "Aura/AbilitySystem/AuraAbilitySystemComponent.h"
 #include "Aura/AbilitySystem/Abilities/UsableTypes/StackableAbility/StackableAbilityManager.h"
+#include "Aura/Manager/AuraGameplayTags.h"
 #include "Aura/Player/AuraPlayerState.h"
 
 void UOverlayWidgetController::BindCallbacksToDependencies()
@@ -82,10 +83,13 @@ void UOverlayWidgetController::OnAbilityEquipped(const FGameplayTag& AbilityTag,
 	// PreviousInputTag가 유효하면 다른 InputTag에 장착된 상태였으므로, 충전 로직이 수행중이었을 가능성이 높습니다.
 	// 따라서 이 점을 이용해 서버에 남은 시간을 요청할지 말지 결정합니다.
 	// 추후 다른 UsableType이 추가되어 매개변수가 많아진다면 구조체로 묶어야 할 수 있습니다.
-	BindForUsableTypes(GetAuraASC(), AbilityTag, PreviousInputTag.IsValid());
+	if (StatusTag == FAuraGameplayTags::Get().Abilities_Status_Equipped)
+	{
+		BindForUsableTypes(GetAuraASC(), AbilityTag, PreviousInputTag.IsValid());
+	}
 }
 
-void UOverlayWidgetController::BindForUsableTypes(UAuraAbilitySystemComponent* AuraASC, FGameplayTag AbilityTag, bool bShouldRequestStackTime)
+void UOverlayWidgetController::BindForUsableTypes(UAuraAbilitySystemComponent* AuraASC, const FGameplayTag AbilityTag, const bool bShouldRequestStackTime) const
 {
 	FAbilityUsableTypeInfo UsableTypeInfo;
 

@@ -112,6 +112,9 @@ void AStackableAbilityManager::RegisterAbility(const FGameplayTag& AbilityTag, i
 
 		// 값이 변경되었으므로 클라이언트에게 알려줍니다.
 		AbilityStacks.MarkItemDirty(*ExistingItem);
+
+		// 서버의 로컬 HUD에 현재 충전 횟수를 알립니다.
+		OnStackCountChanged.ExecuteIfBound(AbilityTag, ExistingItem->CurrentStack);
 	}
 	else
 	{
@@ -151,13 +154,13 @@ void AStackableAbilityManager::UnregisterAbility(const FGameplayTag& AbilityTag)
 	{
 		StopRecharge(AbilityTag);
 
-		AbilityStacks.Items.RemoveAtSwap(Index);
-		AbilityStacks.MarkArrayDirty();
+		//AbilityStacks.Items.RemoveAtSwap(Index);
+		//AbilityStacks.MarkArrayDirty();
 
-		TagToIndex.Empty(AbilityStacks.Items.Num());
+		//TagToIndex.Empty(AbilityStacks.Items.Num());
 		for (int32 i = 0; i < AbilityStacks.Items.Num(); i++)
 		{
-			TagToIndex.Add(AbilityStacks.Items[i].AbilityTag, i);
+			//TagToIndex.Add(AbilityStacks.Items[i].AbilityTag, i);
 		}
 	}
 }

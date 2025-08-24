@@ -15,9 +15,9 @@ class AURA_API UStackableAbility : public UAbilityUsableType
 
 public:
 	virtual void OnEquipAbility(const UAuraGameplayAbility* OwningAbility, UAuraAbilitySystemComponent* ASC) override;
+	virtual void OnUnequipAbility(const UAuraGameplayAbility* OwningAbility, UAuraAbilitySystemComponent* ASC) override;
 	virtual bool CheckCost(const UAuraGameplayAbility* OwningAbility) override;
 	virtual void ApplyCost(const UAuraGameplayAbility* OwningAbility) override;
-	virtual void OnRemoveAbility(UAuraGameplayAbility* OwningAbility) override;
 
 	virtual FText GetDescription() override;
 	
