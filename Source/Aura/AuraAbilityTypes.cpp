@@ -1,5 +1,27 @@
 ﻿#include "AuraAbilityTypes.h"
 
+#include "Manager/AuraGameplayTags.h"
+
+void FAuraGameplayEffectContext::SetDamageType(const FGameplayTag& InDamageType)
+{
+	if (InDamageType == FAuraGameplayTags::Get().Damage_Fire)
+	{
+		DamageType = EDamageTypeData::Fire;
+	}
+	else if (InDamageType == FAuraGameplayTags::Get().Damage_Lightning)
+	{
+		DamageType = EDamageTypeData::Lightning;
+	}
+	else if (InDamageType == FAuraGameplayTags::Get().Damage_Arcane)
+	{
+		DamageType = EDamageTypeData::Arcane;
+	}
+	else if (InDamageType == FAuraGameplayTags::Get().Damage_Physical)
+	{
+		DamageType = EDamageTypeData::Physical;
+	}
+}
+
 bool FAuraGameplayEffectContext::NetSerialize(FArchive& Ar, class UPackageMap* Map, bool& bOutSuccess)
 {
 	// 동기화해야 하는 정보가 늘어났기 때문에 기존 uint8 대신 uint32로 선언  
@@ -42,10 +64,14 @@ bool FAuraGameplayEffectContext::NetSerialize(FArchive& Ar, class UPackageMap* M
 		{
 			RepBits |= 1 << 8;
 		}
+		if (DamageType != EDamageTypeData::None)
+		{
+			RepBits |= 1 << 9;
+		}
 	}
 
 	// uint32를 몽땅 쓰지 않고 필요한 만큼의 길이로 잘라내 패킷 최적화
-	Ar.SerializeBits(&RepBits, 9);
+	Ar.SerializeBits(&RepBits, 10);
 
 	if (RepBits & (1 << 0))
 	{
@@ -96,6 +122,10 @@ bool FAuraGameplayEffectContext::NetSerialize(FArchive& Ar, class UPackageMap* M
 	{
 		Ar << bIsCriticalHit;
 		bIsCriticalHit = true;
+	}
+	if (RepBits & (1 << 9))
+	{
+		Ar << DamageType;
 	}
 
 	if (Ar.IsLoading())

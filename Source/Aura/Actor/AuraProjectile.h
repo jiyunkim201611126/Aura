@@ -31,7 +31,7 @@ public:
 	TObjectPtr<UProjectileMovementComponent> ProjectileMovement;
 
 	UPROPERTY(BlueprintReadWrite, meta = (ExposeOnSpawn = true))
-	FGameplayEffectSpecHandle DamageEffectSpecHandle;
+	TArray<FGameplayEffectSpecHandle> DamageEffectSpecHandle;
 
 private:
 	UPROPERTY(EditAnywhere)

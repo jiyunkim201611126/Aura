@@ -19,7 +19,7 @@ AAuraPlayerController::AAuraPlayerController()
 	Spline = CreateDefaultSubobject<USplineComponent>("Spline");
 }
 
-void AAuraPlayerController::SpawnDamageText_Implementation(float DamageAmount, AActor* TargetActor, bool bBlockedHit, bool bCriticalHit) const
+void AAuraPlayerController::SpawnDamageText_Implementation(float DamageAmount, AActor* TargetActor, bool bBlockedHit, bool bCriticalHit, const EDamageTypeData DamageType) const
 {
 	if (IsValid(TargetActor) && DamageTextComponentClass && IsLocalController())
 	{
@@ -27,7 +27,7 @@ void AAuraPlayerController::SpawnDamageText_Implementation(float DamageAmount, A
 		// Component 생성 후 등록하는 과정, 위젯의 AddToViewport 같은 개념
 		DamageText->RegisterComponent();
 		DamageText->SetWorldTransform(TargetActor->GetTransform());
-		DamageText->SetDamageText(DamageAmount, bBlockedHit, bCriticalHit);
+		DamageText->SetDamageText(DamageAmount, bBlockedHit, bCriticalHit, DamageType);
 	}
 }
 

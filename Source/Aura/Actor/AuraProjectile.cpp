@@ -89,10 +89,13 @@ void AAuraProjectile::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, 
 		return;
 	}
 	
-	// GameplayEffectSpec이 아직 유효하지 않을 때 Overlap되거나, Projectile을 발사한 캐릭터 자신이 부딪히면 이 이벤트를 무시함 
-	if (!DamageEffectSpecHandle.Data.IsValid() || DamageEffectSpecHandle.Data.Get()->GetContext().GetEffectCauser() == OtherActor)
+	// GameplayEffectSpec이 아직 유효하지 않을 때 Overlap되거나, Projectile을 발사한 캐릭터 자신이 부딪히면 이 이벤트를 무시함
+	for (auto& FGameplayEffectSpecHandle : DamageEffectSpecHandle)
 	{
-		return;
+		if (!FGameplayEffectSpecHandle.Data.IsValid() || FGameplayEffectSpecHandle.Data.Get()->GetContext().GetEffectCauser() == OtherActor)
+		{
+			return;
+		}
 	}
 	
 	if (UAuraAbilitySystemLibrary::IsFriend(GetOwner(), OtherActor))
@@ -129,7 +132,10 @@ void AAuraProjectile::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, 
 		// Overlap 대상에게 데미지 부여
 		if (UAbilitySystemComponent* TargetASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(OtherActor))
 		{
-			TargetASC->ApplyGameplayEffectSpecToSelf(*DamageEffectSpecHandle.Data.Get());
+			for (auto& FGameplayEffectSpecHandle : DamageEffectSpecHandle)
+			{
+				TargetASC->ApplyGameplayEffectSpecToSelf(*FGameplayEffectSpecHandle.Data.Get());
+			}
 		}
 
 		// 스폰과 동시에 Overlap 이벤트가 일어난 경우 바로 Destroy되면서 액터가 클라이언트로 복제되지 않는 현상이 있음

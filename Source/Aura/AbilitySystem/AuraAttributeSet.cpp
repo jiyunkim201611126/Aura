@@ -7,6 +7,7 @@
 #include "Aura/Interaction/CombatInterface.h"
 #include "AuraAbilitySystemLibrary.h"
 #include "EngineUtils.h"
+#include "Aura/AuraAbilityTypes.h"
 #include "Aura/Interaction/LevelableInterface.h"
 #include "Aura/Player/AuraPlayerController.h"
 #include "GameFramework/Character.h"
@@ -149,6 +150,7 @@ void UAuraAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallba
 			
 			const bool bBlockedHit = UAuraAbilitySystemLibrary::IsBlockedHit(Props.EffectContextHandle);
 			const bool bCriticalHit = UAuraAbilitySystemLibrary::IsCriticalHit(Props.EffectContextHandle);
+			const EDamageTypeData DamageType = UAuraAbilitySystemLibrary::GetDamageType(Props.EffectContextHandle);
 
 			// 데미지를 Text로 표시하는 위젯 컴포넌트를 AttributeSet이 직접 스폰하려면 그 클래스를 참조하고 있어야 합니다.
 			// 즉, 클라이언트당 하나만 있어도 되는 포인터가 AttributeSet마다 하나씩 있게 되기 때문에 메모리가 낭비됩니다.
@@ -156,7 +158,7 @@ void UAuraAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallba
 			// 다만 NetMulticast 함수는 '그 액터가 클라이언트에 존재할 때'만 호출되므로, PlayerController를 순회하며 Client함수를 호출합니다.
 			for (TActorIterator<AAuraPlayerController> It(GetWorld()); It; ++It)
 			{
-				It->SpawnDamageText(LocalIncomingDamage, Props.TargetAvatarActor, bBlockedHit, bCriticalHit);
+				It->SpawnDamageText(LocalIncomingDamage, Props.TargetAvatarActor, bBlockedHit, bCriticalHit, DamageType);
 			}
 		}
 		else if (LocalIncomingDamage < 0.01f)
@@ -165,7 +167,7 @@ void UAuraAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallba
 			SetIncomingDamage(0.f);
 			for (TActorIterator<AAuraPlayerController> It(GetWorld()); It; ++It)
 			{
-				It->SpawnDamageText(LocalIncomingDamage, Props.TargetAvatarActor, false, false);
+				It->SpawnDamageText(LocalIncomingDamage, Props.TargetAvatarActor, false, false, EDamageTypeData::None);
 			}
 		}
 	}

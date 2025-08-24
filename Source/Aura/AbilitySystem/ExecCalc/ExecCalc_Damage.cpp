@@ -6,7 +6,6 @@
 #include "Aura/AbilitySystem/Data/CharacterClassInfo.h"
 #include "Aura/AbilitySystem/AuraAbilitySystemLibrary.h"
 #include "Aura/Interaction/CombatInterface.h"
-#include "Aura/AuraAbilityTypes.h"
 
 /**
  * 아래 구문은 언리얼에서 제공하는 Capture 선언, 초기화 매크로입니다.
@@ -128,27 +127,35 @@ void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecuti
 	FAggregatorEvaluateParameters EvaluationParameters;
 	EvaluationParameters.SourceTags = SourceTags;
 	EvaluationParameters.TargetTags = TargetTags;
+	
+	FGameplayEffectContextHandle EffectContextHandle = Spec.GetContext();
 
-	// 모든 데미지 타입을 순회하며 부여된 데미지에 따라 계산 진행
+	// 일치하는 데미지 타입 탐색 후 부여된 데미지에 따른 계산 진행
 	float Damage = 0.f;
 	for (auto& Pair : FAuraGameplayTags::Get().DamageTypesToResistances)
 	{
-		// 각 데미지 타입 모두 순회하며 태그 가져오기
+		// 각 데미지 타입 모두 순회하며 현재 데미지 타입과 일치하는 경우 데미지로 할당합니다.
 		const FGameplayTag DamageTypeTag = Pair.Key;
 		const FGameplayTag ResistanceTypeTag = Pair.Value;
 		checkf(AuraDamageStatics().TagsToCaptureResistanceDefs.Contains(ResistanceTypeTag), TEXT("TagsToCaptureResistanceDefs doesn't contain Tag: [%s] in ExecCalc_Damage."), *ResistanceTypeTag.ToString());
 
 		float DamageTypeValue = Spec.GetSetByCallerMagnitude(DamageTypeTag, false);
 
-		// Resistance Value 가져오기
-		const FGameplayEffectAttributeCaptureDefinition Resistance = AuraDamageStatics().TagsToCaptureResistanceDefs[ResistanceTypeTag];
-		float ResistanceTypeValue = 0.f;
-		ExecutionParams.AttemptCalculateCapturedAttributeMagnitude(Resistance, EvaluationParameters, ResistanceTypeValue);
-		// Resistance는 음수일 가능성도 있으므로 Clamp하지 않음
+		if (DamageTypeValue > 0.f)
+		{
+			// Resistance Value 가져오기
+			const FGameplayEffectAttributeCaptureDefinition Resistance = AuraDamageStatics().TagsToCaptureResistanceDefs[ResistanceTypeTag];
+			float ResistanceTypeValue = 0.f;
+			ExecutionParams.AttemptCalculateCapturedAttributeMagnitude(Resistance, EvaluationParameters, ResistanceTypeValue);
+			// Resistance는 음수일 가능성도 있으므로 Clamp하지 않음
 
-		// 속성별 데미지 계산 결과 반영
-		DamageTypeValue *= ( 100.f - ResistanceTypeValue ) / 100.f;
-		Damage += DamageTypeValue;
+			UAuraAbilitySystemLibrary::SetDamageType(EffectContextHandle, Pair.Key);
+
+			// 속성 데미지 계산 결과 반영
+			DamageTypeValue *= ( 100.f - ResistanceTypeValue ) / 100.f;
+			Damage = DamageTypeValue;
+			break;
+		}
 	}
 
 	// DamageStatics 구조체에 정의된 FGameplayEffectAttributeCaptureDefinition들을 통해 Source와 Target의 현재 Attribute 값을 캡쳐
@@ -217,7 +224,6 @@ void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecuti
 	
 
 	// Block 및 Critical 계산 결과를 Context에 기록
-	FGameplayEffectContextHandle EffectContextHandle = Spec.GetContext();
 	UAuraAbilitySystemLibrary::SetIsBlockedHit(EffectContextHandle, bBlocked);
 	UAuraAbilitySystemLibrary::SetIsCriticalHit(EffectContextHandle, bCritical);
 	

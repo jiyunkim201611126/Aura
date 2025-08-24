@@ -3,6 +3,17 @@
 #include "GameplayEffectTypes.h"
 #include "AuraAbilityTypes.Generated.h"
 
+UENUM(BlueprintType)
+enum class EDamageTypeData : uint8
+{
+	None,
+	Fire,
+	Lightning,
+	Arcane,
+	Physical,
+	Max
+};
+
 /**
  * GE가 어떻게 적용되었는지에 대해 추적하는 데에 사용할 수 있으며, 서버와 클라 간 데이터가 공유되는 클래스
  * GE가 적용될 때 Ability로 적용한 건지, 그렇다면 어떤 Ability인지, GE를 적용시킨 건 누구인지 등등을 확인할 수 있음
@@ -19,9 +30,11 @@ struct FAuraGameplayEffectContext : public FGameplayEffectContext
 public:
 	bool IsBlockedHit() const { return bIsBlockedHit; }
 	bool IsCriticalHit() const { return bIsCriticalHit; }
+	EDamageTypeData GetDamageType() const { return  DamageType; }
 
 	void SetIsBlockedHit(bool bInIsBlockedHit) { bIsBlockedHit = bInIsBlockedHit; }
 	void SetIsCriticalHit(bool bInIsCriticalHit) { bIsCriticalHit = bInIsCriticalHit; }
+	void SetDamageType(const FGameplayTag& InDamageType);
 	
 	virtual UScriptStruct* GetScriptStruct() const override
 	{
@@ -49,6 +62,9 @@ protected:
 
 	UPROPERTY()
 	bool bIsCriticalHit = false;
+
+	UPROPERTY()
+	EDamageTypeData DamageType = EDamageTypeData::None;
 };
 
 /**

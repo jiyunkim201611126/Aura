@@ -47,21 +47,20 @@ void UAuraProjectileSpell::SpawnProjectile(FVector& ProjectileSpawnLocation, FVe
 		HitResult.Location = ProjectileTargetLocation;
 		EffectContextHandle.AddHitResult(HitResult);
 
-		// 할당받은 DamageEffectClass를 기반으로 Projectile이 가질 GameplayEffectSpecHandle을 생성
-		const FGameplayEffectSpecHandle SpecHandle = SourceASC->MakeOutgoingSpec(DamageEffectClass, GetAbilityLevel(), EffectContextHandle);
-
 		// 바로 위에서 만든 GE에 Damage 값을 할당해주기 위한 구문, Damage 타입별 태그와 함께 Damage 값을 부여
 		for (auto& Pair : DamageTypes)
 		{
-			// Value는 FScalableFloat으로, 에디터에서 할당한 커브 테이블을 이용해 값을 가져옴
+			// Value는 FScalableFloat으로, 에디터에서 할당한 커브 테이블을 이용해 값을 가져옵니다.
 			const float AbilityLevel = GetAbilityLevel();
 			const float ScaledDamage = Pair.Value.GetValueAtLevel(AbilityLevel);
-			// Spec 안에 SetByCallerMagnitudes라는 이름의 TMap이 있으며, 거기에 Tag를 키, Damage를 밸류로 값을 추가하는 함수
-			// 이 값은 GetSetByCallerMagnitude로 꺼내올 수 있음
+			// 할당받은 DamageEffectClass를 기반으로 Projectile이 가질 GameplayEffectSpecHandle을 생성
+			const FGameplayEffectSpecHandle SpecHandle = SourceASC->MakeOutgoingSpec(DamageEffectClass, GetAbilityLevel(), EffectContextHandle);
+			// Spec 안에 SetByCallerMagnitudes라는 이름의 TMap이 있으며, 거기에 Tag를 키, Damage를 밸류로 값을 추가하는 함수입니다.
+			// 이 값은 GetSetByCallerMagnitude로 꺼내올 수 있습니다.
 			UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle, Pair.Key, ScaledDamage);
-		}
 		
-		Projectile->DamageEffectSpecHandle = SpecHandle;
+			Projectile->DamageEffectSpecHandle.Add(SpecHandle);
+		}
 
 		// 액터 스폰
 		Projectile->FinishSpawning(SpawnTransform);
