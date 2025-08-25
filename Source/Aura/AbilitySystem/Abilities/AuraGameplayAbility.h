@@ -28,6 +28,27 @@ struct FTaggedMontage
 	FGameplayTag NiagaraTag;
 };
 
+USTRUCT(BlueprintType)
+struct FDebuffData
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	FGameplayTag DebuffType;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	float DebuffChance = 0.f;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	float DebuffDamage = 0.f;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	float DebuffDuration = 0.f;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	float DebuffFrequency = 0.f;
+};
+
 UCLASS()
 class AURA_API UAuraGameplayAbility : public UGameplayAbility
 {
@@ -41,6 +62,12 @@ public:
 	UFUNCTION(BlueprintNativeEvent)
 	FText GetDescription(int32 Level);
 	static FText GetLockedDescription(int32 Level);
+
+	UFUNCTION(BlueprintCallable)
+	TArray<FGameplayEffectSpecHandle> MakeDebuffSpecHandle();
+
+	UFUNCTION(BlueprintCallable)
+	void CauseDebuff(AActor* TargetActor, const TArray<FGameplayEffectSpecHandle>& DebuffSpecs) const;
 
 protected:
 	
@@ -67,6 +94,10 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	FGameplayTag StartupInputTag;
 
+	// 디버프 부여 용도로 사용되는 변수입니다.
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Debuff")
+	TArray<FDebuffData> DebuffData;
+
 protected:
 	// 애니메이션 몽타주 및 각종 필요 변수를 한 번 래핑한 구조체의 배열입니다.
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Montage")
@@ -74,6 +105,12 @@ protected:
 	
 	UPROPERTY(EditDefaultsOnly, Category = "Description")
 	FString DescriptionKey;
+	
+	FGameplayEffectContextHandle DebuffEffectContextHandle;
+
+protected:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Debuff")
+	TSubclassOf<UGameplayEffect> DebuffEffectClass;
 
 protected:
 	// 이 아래로는 스택형 스킬을 구현하기 위한 구문입니다.

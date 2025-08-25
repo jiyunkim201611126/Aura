@@ -21,11 +21,11 @@ void UAuraProjectileSpell::SpawnProjectile(FVector& ProjectileSpawnLocation, FVe
 	const bool bIsServer = GetAvatarActorFromActorInfo()->HasAuthority();
 	if (!bIsServer) return;
 	
-	// Character가 가진 Weapon의 Socket 위치를 가져와야 하므로, OwningActor(PlayerState)가 아닌 AvatarActor(Character)를 필요로 함
+	// Character가 가진 Weapon의 Socket 위치를 가져와야 하므로, OwningActor(PlayerState)가 아닌 AvatarActor(Character)를 필요로 합니다.
 	ICombatInterface* CombatInterface = Cast<ICombatInterface>(GetAvatarActorFromActorInfo());
 	if (CombatInterface)
 	{
-		// Projectile이 스폰될 위치와 날아갈 방향 결정
+		// Projectile이 스폰될 위치와 날아갈 방향을 결정합니다.
 		ProjectileSpawnLocation.Z = GetAvatarActorFromActorInfo()->GetActorLocation().Z;
 		FRotator Rotation = (ProjectileTargetLocation - ProjectileSpawnLocation).Rotation();
 		
@@ -33,34 +33,30 @@ void UAuraProjectileSpell::SpawnProjectile(FVector& ProjectileSpawnLocation, FVe
 		SpawnTransform.SetLocation(ProjectileSpawnLocation);
 		SpawnTransform.SetRotation(Rotation.Quaternion());
 
-		// SpawnActor는 생성 직후 BeginPlay까지 호출하지만 SpawnActorDeferred는 구성만 하고 생성은 대기함
+		// SpawnActor는 생성 직후 BeginPlay까지 호출하지만 SpawnActorDeferred는 구성만 하고 생성은 대기합니다.
 		AAuraProjectile* Projectile = GetWorld()->SpawnActorDeferred<AAuraProjectile>(ProjectileClass, SpawnTransform, GetAvatarActorFromActorInfo(), Cast<APawn>(GetOwningActorFromActorInfo()), ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
 
-		// Ability를 소유한 AvatarActor의 AbilitySystemComponent 가져오기
+		// Ability를 소유한 AvatarActor의 AbilitySystemComponent 가져옵니다.
 		const UAbilitySystemComponent* SourceASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(GetAvatarActorFromActorInfo());
 
-		// Context 생성 및 초기화
-		EffectContextHandle = SourceASC->MakeEffectContext();
-		EffectContextHandle.SetAbility(this);
-		EffectContextHandle.Get()->SetEffectCauser(Projectile);
+		// Damage Context를 생성 및 초기화합니다.
+		DamageEffectContextHandle = SourceASC->MakeEffectContext();
+		DamageEffectContextHandle.SetAbility(this);
+		DamageEffectContextHandle.Get()->SetEffectCauser(Projectile);
 		FHitResult HitResult;
 		HitResult.Location = ProjectileTargetLocation;
-		EffectContextHandle.AddHitResult(HitResult);
+		DamageEffectContextHandle.AddHitResult(HitResult);
 
-		// 바로 위에서 만든 GE에 Damage 값을 할당해주기 위한 구문, Damage 타입별 태그와 함께 Damage 값을 부여
-		for (auto& Pair : DamageTypes)
-		{
-			// Value는 FScalableFloat으로, 에디터에서 할당한 커브 테이블을 이용해 값을 가져옵니다.
-			const float AbilityLevel = GetAbilityLevel();
-			const float ScaledDamage = Pair.Value.GetValueAtLevel(AbilityLevel);
-			// 할당받은 DamageEffectClass를 기반으로 Projectile이 가질 GameplayEffectSpecHandle을 생성
-			const FGameplayEffectSpecHandle SpecHandle = SourceASC->MakeOutgoingSpec(DamageEffectClass, GetAbilityLevel(), EffectContextHandle);
-			// Spec 안에 SetByCallerMagnitudes라는 이름의 TMap이 있으며, 거기에 Tag를 키, Damage를 밸류로 값을 추가하는 함수입니다.
-			// 이 값은 GetSetByCallerMagnitude로 꺼내올 수 있습니다.
-			UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle, Pair.Key, ScaledDamage);
-		
-			Projectile->DamageEffectSpecHandle.Add(SpecHandle);
-		}
+		// 적중 시 데미지를 줄 수 있도록 Projectile에 Spec을 할당합니다.
+		Projectile->DamageEffectSpecHandle = MakeDamageSpecContexts();
+
+		// Debuff Context를 생성 및 초기화합니다.
+		DebuffEffectContextHandle = SourceASC->MakeEffectContext();
+		DebuffEffectContextHandle.SetAbility(this);
+		DebuffEffectContextHandle.Get()->SetEffectCauser(Projectile);
+
+		// 적중 시 디버프를 줄 수 있도록 Projectile에 Spec을 할당합니다.
+		Projectile->DebuffEffectSpecHandle = MakeDebuffSpecContexts();
 
 		// 액터 스폰
 		Projectile->FinishSpawning(SpawnTransform);

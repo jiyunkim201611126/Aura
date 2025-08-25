@@ -33,6 +33,9 @@ public:
 	UPROPERTY(BlueprintReadWrite, meta = (ExposeOnSpawn = true))
 	TArray<FGameplayEffectSpecHandle> DamageEffectSpecHandle;
 
+	UPROPERTY(BlueprintReadWrite, meta = (ExposeOnSpawn = true))
+	TArray<FGameplayEffectSpecHandle> DebuffEffectSpecHandle;
+
 private:
 	UPROPERTY(EditAnywhere)
 	float LifeSpan = 1.f;

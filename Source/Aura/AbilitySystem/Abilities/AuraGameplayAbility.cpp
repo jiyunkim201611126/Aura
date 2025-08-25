@@ -1,8 +1,10 @@
 #include "AuraGameplayAbility.h"
 
+#include "AbilitySystemBlueprintLibrary.h"
 #include "Aura/AbilitySystem/AuraAttributeSet.h"
 #include "Aura/Interaction/CombatInterface.h"
 #include "Aura/Interaction/EnemyInterface.h"
+#include "Aura/Manager/AuraGameplayTags.h"
 #include "Aura/Manager/AuraTextManager.h"
 #include "UsableTypes/AbilityUsableType.h"
 
@@ -22,6 +24,37 @@ FText UAuraGameplayAbility::GetDescription_Implementation(int32 Level)
 FText UAuraGameplayAbility::GetLockedDescription(int32 Level)
 {
 	return FText::Format(FAuraTextManager::GetText(EStringTableTextType::UI, TEXT("Abilities_Description_Locked")), Level);
+}
+
+TArray<FGameplayEffectSpecHandle> UAuraGameplayAbility::MakeDebuffSpecHandle()
+{
+	if (!DebuffEffectContextHandle.Get())
+	{
+		DebuffEffectContextHandle = GetAbilitySystemComponentFromActorInfo()->MakeEffectContext();
+	}
+	
+	const FAuraGameplayTags& GameplayTags = FAuraGameplayTags::Get();
+	TArray<FGameplayEffectSpecHandle> DebuffSpecs;
+	for (auto& Data : DebuffData)
+	{
+		FGameplayEffectSpecHandle DebuffSpecHandle = GetAbilitySystemComponentFromActorInfo()->MakeOutgoingSpec(DebuffEffectClass, 1.f, DebuffEffectContextHandle);
+		UAbilitySystemBlueprintLibrary::AddGrantedTag(DebuffSpecHandle, Data.DebuffType);
+		UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(DebuffSpecHandle, GameplayTags.Debuff_Chance, Data.DebuffChance);
+		UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(DebuffSpecHandle, GameplayTags.Debuff_Damage, Data.DebuffDamage);
+		UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(DebuffSpecHandle, GameplayTags.Debuff_Duration, Data.DebuffDuration);
+		UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(DebuffSpecHandle, GameplayTags.Debuff_Frequency, Data.DebuffFrequency);
+		DebuffSpecs.Add(DebuffSpecHandle);
+	}
+
+	return DebuffSpecs;
+}
+
+void UAuraGameplayAbility::CauseDebuff(AActor* TargetActor, const TArray<FGameplayEffectSpecHandle>& DebuffSpecs) const
+{
+	for (auto& DebuffSpecHandle : DebuffSpecs)
+	{
+		GetAbilitySystemComponentFromActorInfo()->ApplyGameplayEffectSpecToTarget(*DebuffSpecHandle.Data.Get(), UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(TargetActor));
+	}
 }
 
 float UAuraGameplayAbility::GetManaCost(int32 InLevel) const

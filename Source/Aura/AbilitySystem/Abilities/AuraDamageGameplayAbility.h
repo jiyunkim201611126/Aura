@@ -14,24 +14,23 @@ public:
 	// ~Ability Interface
 	virtual void EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled) override;
 	// ~End of Ability Function
+
+	UFUNCTION(BlueprintCallable)
+	TArray<FGameplayEffectSpecHandle> MakeDamageSpecHandle();
 	
 	// Target Actor의 ASC에 GameplayEffect를 적용하는 함수
 	UFUNCTION(BlueprintCallable)
-	void CauseDamage(AActor* TargetActor);
+	void CauseDamage(AActor* TargetActor, TArray<FGameplayEffectSpecHandle> DamageSpecs);
 
 	UFUNCTION(BlueprintCallable)
 	FGameplayEffectContextHandle GetContext();
 
 protected:
-	// 피격당한 Actor를 Context에 담는 함수입니다. 반복문이 끝난 시점에서 호출합니다.
-	UFUNCTION(BlueprintCallable)
-	void SetTargetActorsToContext();
-
 	UFUNCTION(BlueprintPure)
 	FText GetDamageTexts(int32 InLevel);
 
 public:
-	FGameplayEffectContextHandle EffectContextHandle;
+	FGameplayEffectContextHandle DamageEffectContextHandle;
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Damage")
@@ -40,9 +39,4 @@ protected:
 	// 데미지 타입과 그 속성 데미지
 	UPROPERTY(EditDefaultsOnly, Category = "Damage")
 	TMap<FGameplayTag, FScalableFloat> DamageTypes;
-
-private:
-	// 이 Ability에 의해 피격당한 Actor를 모아두는 배열입니다.
-	UPROPERTY()
-	TArray<TWeakObjectPtr<AActor>> TargetActors;
 };

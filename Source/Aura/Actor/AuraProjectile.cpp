@@ -97,6 +97,14 @@ void AAuraProjectile::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, 
 			return;
 		}
 	}
+
+	for (auto& FGameplayEffectSpecHandle : DebuffEffectSpecHandle)
+	{
+		if (!FGameplayEffectSpecHandle.Data.IsValid())
+		{
+			return;
+		}
+	}
 	
 	if (UAuraAbilitySystemLibrary::IsFriend(GetOwner(), OtherActor))
 	{
@@ -133,6 +141,11 @@ void AAuraProjectile::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, 
 		if (UAbilitySystemComponent* TargetASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(OtherActor))
 		{
 			for (auto& FGameplayEffectSpecHandle : DamageEffectSpecHandle)
+			{
+				TargetASC->ApplyGameplayEffectSpecToSelf(*FGameplayEffectSpecHandle.Data.Get());
+			}
+
+			for (auto& FGameplayEffectSpecHandle : DebuffEffectSpecHandle)
 			{
 				TargetASC->ApplyGameplayEffectSpecToSelf(*FGameplayEffectSpecHandle.Data.Get());
 			}

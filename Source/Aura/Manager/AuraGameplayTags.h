@@ -67,7 +67,16 @@ struct FAuraGameplayTags
 	TMap<FGameplayTag, FGameplayTag> DamageTypesToResistances;
 	// ~End of Damage Type
 
-	
+	// ~Debuff Type
+	FGameplayTag Debuff_Burn;
+	FGameplayTag Debuff_Stun;
+	FGameplayTag Debuff_Confuse;
+
+	FGameplayTag Debuff_Chance;
+	FGameplayTag Debuff_Damage;
+	FGameplayTag Debuff_Duration;
+	FGameplayTag Debuff_Frequency;
+	// ~End of Debuff Type
 	
 	// ~Abilities
 	FGameplayTag Abilities_None;
