@@ -1,5 +1,6 @@
 ﻿#include "ExecCal_Debuff.h"
 
+#include "Aura/AbilitySystem/AuraAbilitySystemLibrary.h"
 #include "Aura/AbilitySystem/AuraAttributeSet.h"
 #include "Aura/Manager/AuraGameplayTags.h"
 
@@ -42,7 +43,15 @@ void UExecCal_Debuff::Execute_Implementation(const FGameplayEffectCustomExecutio
 	
 	const FGameplayEffectSpec& Spec = ExecutionParams.GetOwningSpec();
 
+	// 디버프 부여 확률을 계산합니다.
 	const float Chance = Spec.GetSetByCallerMagnitude(GameplayTags.Debuff_Chance, false);
+	const bool bDebuff = FMath::FRandRange(0.f, 100.f) < Chance;
+	if (!bDebuff)
+	{
+		return;
+	}
+
+	// 부여 성공 시 디버프 관련 계산을 시작합니다.
 	const float Damage = Spec.GetSetByCallerMagnitude(GameplayTags.Debuff_Damage, false);
 	const float Duration = Spec.GetSetByCallerMagnitude(GameplayTags.Debuff_Duration, false);
 	const float Frequency = Spec.GetSetByCallerMagnitude(GameplayTags.Debuff_Frequency, false);
@@ -60,20 +69,28 @@ void UExecCal_Debuff::Execute_Implementation(const FGameplayEffectCustomExecutio
 	const bool bIsStun = GrantedTags.HasTagExact(GameplayTags.Debuff_Stun);
 	const bool bIsConfuse = GrantedTags.HasTagExact(GameplayTags.Debuff_Confuse);
 
+	// 타입에 해당하는 태그(Context용)와 함께 관련 저항력 Attribute를 가져옵니다.
+	FGameplayTag TypeTagForContext;
 	float ResistanceTypeValue = 0.f;
 	if (bIsBurn)
 	{
+		TypeTagForContext = GameplayTags.Debuff_Burn;
 		const FGameplayEffectAttributeCaptureDefinition Resistance = AuraDebuffStatics().TagsToCaptureResistanceDefs[GameplayTags.Attributes_Resistance_Fire];
 		ExecutionParams.AttemptCalculateCapturedAttributeMagnitude(Resistance, EvaluationParameters, ResistanceTypeValue);
 	}
 	else if (bIsStun)
 	{
+		TypeTagForContext = GameplayTags.Debuff_Stun;
 		const FGameplayEffectAttributeCaptureDefinition Resistance = AuraDebuffStatics().TagsToCaptureResistanceDefs[GameplayTags.Attributes_Resistance_Lightning];
 		ExecutionParams.AttemptCalculateCapturedAttributeMagnitude(Resistance, EvaluationParameters, ResistanceTypeValue);
 	}
 	else if (bIsConfuse)
 	{
+		TypeTagForContext = GameplayTags.Debuff_Confuse;
 		const FGameplayEffectAttributeCaptureDefinition Resistance = AuraDebuffStatics().TagsToCaptureResistanceDefs[GameplayTags.Attributes_Resistance_Arcane];
 		ExecutionParams.AttemptCalculateCapturedAttributeMagnitude(Resistance, EvaluationParameters, ResistanceTypeValue);
 	}
+	
+	FGameplayEffectContextHandle EffectContextHandle = Spec.GetContext();
+	UAuraAbilitySystemLibrary::SetDebuffDataContext(EffectContextHandle, TypeTagForContext, Damage, Duration, Frequency);
 }

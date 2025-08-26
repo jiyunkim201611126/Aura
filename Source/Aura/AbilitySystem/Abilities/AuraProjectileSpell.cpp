@@ -48,7 +48,7 @@ void UAuraProjectileSpell::SpawnProjectile(FVector& ProjectileSpawnLocation, FVe
 		DamageEffectContextHandle.AddHitResult(HitResult);
 
 		// 적중 시 데미지를 줄 수 있도록 Projectile에 Spec을 할당합니다.
-		Projectile->DamageEffectSpecHandle = MakeDamageSpecContexts();
+		Projectile->DamageEffectSpecHandle = MakeDamageSpecHandle();
 
 		// Debuff Context를 생성 및 초기화합니다.
 		DebuffEffectContextHandle = SourceASC->MakeEffectContext();
@@ -56,7 +56,7 @@ void UAuraProjectileSpell::SpawnProjectile(FVector& ProjectileSpawnLocation, FVe
 		DebuffEffectContextHandle.Get()->SetEffectCauser(Projectile);
 
 		// 적중 시 디버프를 줄 수 있도록 Projectile에 Spec을 할당합니다.
-		Projectile->DebuffEffectSpecHandle = MakeDebuffSpecContexts();
+		Projectile->DebuffEffectSpecHandle = MakeDebuffSpecHandle();
 
 		// 액터 스폰
 		Projectile->FinishSpawning(SpawnTransform);

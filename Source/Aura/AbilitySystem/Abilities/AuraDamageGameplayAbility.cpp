@@ -52,7 +52,7 @@ void UAuraDamageGameplayAbility::CauseDamage(AActor* TargetActor, TArray<FGamepl
 		GetAbilitySystemComponentFromActorInfo()->ApplyGameplayEffectSpecToTarget(*Spec.Data.Get(), UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(TargetActor));
 	}
 	
-	CauseDebuff(TargetActor, MakeDebuffSpecContexts());
+	CauseDebuff(TargetActor, MakeDebuffSpecHandle());
 }
 
 FText UAuraDamageGameplayAbility::GetDamageTexts(int32 InLevel)

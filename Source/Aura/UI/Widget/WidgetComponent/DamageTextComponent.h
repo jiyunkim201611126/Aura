@@ -4,7 +4,7 @@
 #include "Components/WidgetComponent.h"
 #include "DamageTextComponent.generated.h"
 
-enum class EDamageTypeData : uint8;
+enum class EDamageTypeContext : uint8;
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class AURA_API UDamageTextComponent : public UWidgetComponent
@@ -13,7 +13,7 @@ class AURA_API UDamageTextComponent : public UWidgetComponent
 
 public:	
 	UFUNCTION(BlueprintImplementableEvent)
-	void SetDamageText(float Damage, bool bBlockedHit, bool bCriticalHit, const EDamageTypeData DamageType);
+	void SetDamageText(float Damage, bool bBlockedHit, bool bCriticalHit, const EDamageTypeContext DamageType);
 	
 	// ~UActorComponent Interface
 	virtual void BeginPlay() override;

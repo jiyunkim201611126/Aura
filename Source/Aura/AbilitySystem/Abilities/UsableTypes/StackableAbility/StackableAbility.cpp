@@ -22,7 +22,9 @@ void UStackableAbility::OnEquipAbility(const UAuraGameplayAbility* OwningAbility
 
 void UStackableAbility::OnUnequipAbility(const UAuraGameplayAbility* OwningAbility, UAuraAbilitySystemComponent* ASC)
 {
-	// 이 Ability가 제거될 때, Component에서 이 Ability의 등록을 해제합니다.
+	// 이 객체를 소유한 Ability를 장착 해제할 때, Component에서 이 Ability의 등록을 해제합니다.
+	// Ability를 해제하는 게 아니라 Status 태그만 바꾸고 호출하는 타이밍인데도 ActorInfo가 정리되어있습니다.
+	// 이유를 정확히 알 수는 없으나, GAS가 내부적으로 ActorInfo를 상당히 적극적으로 정리한다고 추측됩니다.
 	if (AStackableAbilityManager* Manager = ASC->FindOrAddAbilityManager<AStackableAbilityManager>())
 	{
 		Manager->UnregisterAbility(OwningAbility->AbilityTag);

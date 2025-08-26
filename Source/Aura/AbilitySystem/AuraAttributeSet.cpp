@@ -102,113 +102,14 @@ void UAuraAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallba
 	// IncomingDamage Attribute에 값 변화가 있는 경우 데미지 로직을 시작합니다.
 	if (Data.EvaluatedData.Attribute == GetIncomingDamageAttribute())
 	{
-		const float LocalIncomingDamage = GetIncomingDamage();
-		SetIncomingDamage(0.f);
-		if (LocalIncomingDamage > 0.f)
-		{
-			const float NewHealth = GetHealth() - LocalIncomingDamage;
-			SetHealth(FMath::Clamp(NewHealth, 0.f, GetMaxHealth()));
-
-			const bool bFatal = NewHealth <= 0.f;
-
-			if (bFatal)
-			{
-				ICombatInterface* CombatInterface = Cast<ICombatInterface>(Props.TargetAvatarActor);
-				if (CombatInterface)
-				{
-					bool bShouldAddImpulse = false;
-					FVector Impulse = FVector::ZeroVector;
-					const AActor* SourceObject = Cast<AActor>(Props.EffectContextHandle.Get()->GetSourceObject());
-					if (SourceObject)
-					{
-						bShouldAddImpulse = true;
-						FVector TargetLocation = Props.TargetAvatarActor->GetActorLocation();
-						TargetLocation.Z = 0.f;
-						FVector SourceLocation = SourceObject->GetActorLocation();
-						SourceLocation.Z = 0.f;
-						Impulse = (TargetLocation - SourceLocation).GetSafeNormal();
-						Impulse.Z = 0.3f;
-					}
-					CombatInterface->Die(bShouldAddImpulse, Impulse);
-				}
-
-				// 적을 처치했으므로, XP 이벤트를 송신합니다.
-				SendXPEvent(Props);
-			}
-			else
-			{
-				// 사망하지 않은 경우, 적용된 GE가 GrantHitReact 태그를 갖고 있으면 HitReact Ability를 작동합니다.
-				FGameplayTagContainer EffectTags;
-				Data.EffectSpec.GetAllAssetTags(EffectTags);
-				if (EffectTags.HasTag(FAuraGameplayTags::Get().Effects_GrantHitReact))
-				{
-					FGameplayTagContainer HitReactTag;
-					HitReactTag.AddTag(FAuraGameplayTags::Get().Abilities_HitReact);
-					Props.TargetASC->TryActivateAbilitiesByTag(HitReactTag);
-				}
-			}
-			
-			const bool bBlockedHit = UAuraAbilitySystemLibrary::IsBlockedHit(Props.EffectContextHandle);
-			const bool bCriticalHit = UAuraAbilitySystemLibrary::IsCriticalHit(Props.EffectContextHandle);
-			const EDamageTypeData DamageType = UAuraAbilitySystemLibrary::GetDamageType(Props.EffectContextHandle);
-
-			// 데미지를 Text로 표시하는 위젯 컴포넌트를 AttributeSet이 직접 스폰하려면 그 클래스를 참조하고 있어야 합니다.
-			// 즉, 클라이언트당 하나만 있어도 되는 포인터가 AttributeSet마다 하나씩 있게 되기 때문에 메모리가 낭비됩니다.
-			// 따라서 클라이언트당 하나만 있는 PlayerController를 통해 스폰시켜주는 편이 메모리면에서 이득입니다.
-			// 다만 NetMulticast 함수는 '그 액터가 클라이언트에 존재할 때'만 호출되므로, PlayerController를 순회하며 Client함수를 호출합니다.
-			for (TActorIterator<AAuraPlayerController> It(GetWorld()); It; ++It)
-			{
-				It->SpawnDamageText(LocalIncomingDamage, Props.TargetAvatarActor, bBlockedHit, bCriticalHit, DamageType);
-			}
-		}
-		else if (LocalIncomingDamage < 0.01f)
-		{
-			// 데미지가 0.01보다 작으면 체력 감소나 애니메이션 재생 없이 NoDamage 문구를 표시합니다.
-			SetIncomingDamage(0.f);
-			for (TActorIterator<AAuraPlayerController> It(GetWorld()); It; ++It)
-			{
-				It->SpawnDamageText(LocalIncomingDamage, Props.TargetAvatarActor, false, false, EDamageTypeData::None);
-			}
-		}
+		ApplyIncomingDamage(Props, Data);
 	}
 
 	// IncomingXP Attribute에 값 변화가 있는 경우 경험치 증가 및 레벨업 로직 시작합니다.
-	// 위에서 SendXPEvent를 호출, GA_ListenForEvents Ability가 해당 이벤트를 수신해 GE를 적용한 뒤
-	// 다시 여기로 들어와 아래 로직을 실행하는 방식입니다.
+	// 위에서 SendXPEvent를 호출, GA_ListenForEvents가 해당 이벤트를 수신해 GE를 적용한 뒤 다시 여기로 들어와 아래 로직을 실행하는 방식입니다.
 	if (Data.EvaluatedData.Attribute == GetIncomingXPAttribute())
 	{
-		const float LocalIncomingXP = GetIncomingXP();
-		SetIncomingXP(0.f);
-
-		if (Props.SourceCharacter->Implements<UCombatInterface>() && Props.SourceCharacter->Implements<ULevelableInterface>())
-		{
-			// 레벨업 여부를 계산합니다.
-			const int32 CurrentLevel = ICombatInterface::Execute_GetCharacterLevel(Props.SourceCharacter);
-			const int32 CurrentXP = ILevelableInterface::Execute_GetXP(Props.SourceCharacter);
-
-			const int32 NewLevel = ILevelableInterface::Execute_FindLevelForXP(Props.SourceCharacter, CurrentXP + LocalIncomingXP);
-			const int32 NumLevelUps = NewLevel - CurrentLevel;
-
-			if (NumLevelUps > 0)
-			{
-				// 레벨이 상승한 경우, 레벨업 보상을 계산 및 부여합니다.
-				const int32 AttributePointsReward = ILevelableInterface::Execute_GetAttributePointsReward(Props.SourceCharacter, CurrentLevel);
-				const int32 SpellPointsReward = ILevelableInterface::Execute_GetSpellPointsReward(Props.SourceCharacter, CurrentLevel);
-
-				ILevelableInterface::Execute_AddToLevel(Props.SourceCharacter, NumLevelUps);
-				ILevelableInterface::Execute_AddToAttributePoints(Props.SourceCharacter, AttributePointsReward);
-				ILevelableInterface::Execute_AddToSpellPoints(Props.SourceCharacter, SpellPointsReward);
-
-				// 레벨에 따른 MaxHealth와 MaxMana 반영 이후 Health, Mana를 최대치로 회복하기 위해 기록해둡니다. 
-				bTopOffHealth = true;
-				bTopOffMana = true;
-				
-				ILevelableInterface::Execute_LevelUp(Props.SourceCharacter);
-			}
-
-			// XP 보상을 부여합니다.
-			ILevelableInterface::Execute_AddToXP(Props.SourceCharacter, LocalIncomingXP);
-		}
+		ApplyIncomingXP(Props);
 	}
 }
 
@@ -285,6 +186,114 @@ void UAuraAttributeSet::SendXPEvent(const FEffectProperties& Props) const
 		// Payload에 원하는 데이터를 담아 송신할 수 있습니다.
 		// 해당 이벤트는 이 Tag를 기준으로 WaitGameplayEvent를 호출한 Ability(GA_ListenForEvent)가 수신합니다.
 		UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(Props.SourceCharacter, GameplayTags.Attributes_Meta_IncomingXP, Payload);
+	}
+}
+
+void UAuraAttributeSet::ApplyIncomingDamage(const FEffectProperties& Props, const FGameplayEffectModCallbackData& Data)
+{
+	const float LocalIncomingDamage = GetIncomingDamage();
+	SetIncomingDamage(0.f);
+	if (LocalIncomingDamage > 0.f)
+	{
+		const float NewHealth = GetHealth() - LocalIncomingDamage;
+		SetHealth(FMath::Clamp(NewHealth, 0.f, GetMaxHealth()));
+
+		const bool bFatal = NewHealth <= 0.f;
+
+		if (bFatal)
+		{
+			ICombatInterface* CombatInterface = Cast<ICombatInterface>(Props.TargetAvatarActor);
+			if (CombatInterface)
+			{
+				bool bShouldAddImpulse = false;
+				FVector Impulse = FVector::ZeroVector;
+				const AActor* SourceObject = Cast<AActor>(Props.EffectContextHandle.Get()->GetSourceObject());
+				if (SourceObject)
+				{
+					bShouldAddImpulse = true;
+					FVector TargetLocation = Props.TargetAvatarActor->GetActorLocation();
+					TargetLocation.Z = 0.f;
+					FVector SourceLocation = SourceObject->GetActorLocation();
+					SourceLocation.Z = 0.f;
+					Impulse = (TargetLocation - SourceLocation).GetSafeNormal();
+					Impulse.Z = 0.3f;
+				}
+				CombatInterface->Die(bShouldAddImpulse, Impulse);
+			}
+
+			// 적을 처치했으므로, XP 이벤트를 송신합니다.
+			SendXPEvent(Props);
+		}
+		else
+		{
+			// 사망하지 않은 경우, 적용된 GE가 GrantHitReact 태그를 갖고 있으면 HitReact Ability를 작동합니다.
+			FGameplayTagContainer EffectTags;
+			Data.EffectSpec.GetAllAssetTags(EffectTags);
+			if (EffectTags.HasTag(FAuraGameplayTags::Get().Effects_GrantHitReact))
+			{
+				FGameplayTagContainer HitReactTag;
+				HitReactTag.AddTag(FAuraGameplayTags::Get().Abilities_HitReact);
+				Props.TargetASC->TryActivateAbilitiesByTag(HitReactTag);
+			}
+		}
+		
+		const bool bBlockedHit = UAuraAbilitySystemLibrary::IsBlockedHit(Props.EffectContextHandle);
+		const bool bCriticalHit = UAuraAbilitySystemLibrary::IsCriticalHit(Props.EffectContextHandle);
+		const EDamageTypeContext DamageType = UAuraAbilitySystemLibrary::GetDamageType(Props.EffectContextHandle);
+
+		// 데미지를 Text로 표시하는 위젯 컴포넌트를 AttributeSet이 직접 스폰하려면 그 클래스를 참조하고 있어야 합니다.
+		// 즉, 클라이언트당 하나만 있어도 되는 포인터가 AttributeSet마다 하나씩 있게 되기 때문에 메모리가 낭비됩니다.
+		// 따라서 클라이언트당 하나만 있는 PlayerController를 통해 스폰시켜주는 편이 메모리면에서 이득입니다.
+		// 다만 NetMulticast 함수는 '그 액터가 클라이언트에 존재할 때'만 호출되므로, PlayerController를 순회하며 Client함수를 호출합니다.
+		for (TActorIterator<AAuraPlayerController> It(GetWorld()); It; ++It)
+		{
+			It->SpawnDamageText(LocalIncomingDamage, Props.TargetAvatarActor, bBlockedHit, bCriticalHit, DamageType);
+		}
+	}
+	else if (LocalIncomingDamage < 0.01f)
+	{
+		// 데미지가 0.01보다 작으면 체력 감소나 애니메이션 재생 없이 NoDamage 문구를 표시합니다.
+		SetIncomingDamage(0.f);
+		for (TActorIterator<AAuraPlayerController> It(GetWorld()); It; ++It)
+		{
+			It->SpawnDamageText(LocalIncomingDamage, Props.TargetAvatarActor, false, false, EDamageTypeContext::None);
+		}
+	}
+}
+
+void UAuraAttributeSet::ApplyIncomingXP(const FEffectProperties& Props)
+{
+	const float LocalIncomingXP = GetIncomingXP();
+	SetIncomingXP(0.f);
+
+	if (Props.SourceCharacter->Implements<UCombatInterface>() && Props.SourceCharacter->Implements<ULevelableInterface>())
+	{
+		// 레벨업 여부를 계산합니다.
+		const int32 CurrentLevel = ICombatInterface::Execute_GetCharacterLevel(Props.SourceCharacter);
+		const int32 CurrentXP = ILevelableInterface::Execute_GetXP(Props.SourceCharacter);
+
+		const int32 NewLevel = ILevelableInterface::Execute_FindLevelForXP(Props.SourceCharacter, CurrentXP + LocalIncomingXP);
+		const int32 NumLevelUps = NewLevel - CurrentLevel;
+
+		if (NumLevelUps > 0)
+		{
+			// 레벨이 상승한 경우, 레벨업 보상을 계산 및 부여합니다.
+			const int32 AttributePointsReward = ILevelableInterface::Execute_GetAttributePointsReward(Props.SourceCharacter, CurrentLevel);
+			const int32 SpellPointsReward = ILevelableInterface::Execute_GetSpellPointsReward(Props.SourceCharacter, CurrentLevel);
+
+			ILevelableInterface::Execute_AddToLevel(Props.SourceCharacter, NumLevelUps);
+			ILevelableInterface::Execute_AddToAttributePoints(Props.SourceCharacter, AttributePointsReward);
+			ILevelableInterface::Execute_AddToSpellPoints(Props.SourceCharacter, SpellPointsReward);
+
+			// 레벨에 따른 MaxHealth와 MaxMana 반영 이후 Health, Mana를 최대치로 회복하기 위해 기록해둡니다. 
+			bTopOffHealth = true;
+			bTopOffMana = true;
+				
+			ILevelableInterface::Execute_LevelUp(Props.SourceCharacter);
+		}
+
+		// XP 보상을 부여합니다.
+		ILevelableInterface::Execute_AddToXP(Props.SourceCharacter, LocalIncomingXP);
 	}
 }
 

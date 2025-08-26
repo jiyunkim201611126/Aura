@@ -58,24 +58,7 @@ void AAuraProjectile::Destroyed()
 	// 그 상태로 Destroyed 함수가 호출됐다면 사운드와 나이아가라를 재생해줌
 	if (!bHit)
 	{
-		if (const UFXManagerSubsystem* FXManagerSubsystem = GetWorld()->GetGameInstance()->GetSubsystem<UFXManagerSubsystem>())
-		{
-			USoundBase* ImpactSound = FXManagerSubsystem->GetSound(ImpactSoundTag);
-			if (ImpactSound)
-			{
-				UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation(), FRotator::ZeroRotator);
-			}
-			UNiagaraSystem* ImpactEffect = FXManagerSubsystem->GetNiagara(ImpactEffectTag);
-			if (ImpactEffect)
-			{
-				UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, ImpactEffect, GetActorLocation());
-			}
-		}
-		
-		if (LoopingSoundComponent)
-		{
-			LoopingSoundComponent->Stop();
-		}
+		PlayHitFXs();
 		bHit = true;
 	}
 	
@@ -114,24 +97,7 @@ void AAuraProjectile::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, 
 	// 서버, 클라이언트 모두 사운드와 나이아가라 재생
 	if (!bHit)
 	{
-		if (const UFXManagerSubsystem* FXManagerSubsystem = GetWorld()->GetGameInstance()->GetSubsystem<UFXManagerSubsystem>())
-		{
-			USoundBase* ImpactSound = FXManagerSubsystem->GetSound(ImpactSoundTag);
-			if (ImpactSound)
-			{
-				UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation(), FRotator::ZeroRotator);
-			}
-			UNiagaraSystem* ImpactEffect = FXManagerSubsystem->GetNiagara(ImpactEffectTag);
-			if (ImpactEffect)
-			{
-				UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, ImpactEffect, GetActorLocation());
-			}
-		}
-		
-		if (LoopingSoundComponent)
-		{
-			LoopingSoundComponent->Stop();
-		}
+		PlayHitFXs();
 	}
 
 	// 서버인 경우 데미지를 주며 Destroy 이벤트 바인드
@@ -171,4 +137,18 @@ void AAuraProjectile::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, 
 	bHit = true;
 	// 더이상 Overlap 이벤트가 필요하지 않으므로 바인드 해제
 	Sphere->OnComponentBeginOverlap.Clear();
+}
+
+void AAuraProjectile::PlayHitFXs() const
+{
+	if (UFXManagerSubsystem* FXManagerSubsystem = GetWorld()->GetGameInstance()->GetSubsystem<UFXManagerSubsystem>())
+	{
+		FXManagerSubsystem->AsyncPlaySoundAtLocation(ImpactSoundTag, GetActorLocation());
+		FXManagerSubsystem->AsyncPlayNiagaraAtLocation(ImpactEffectTag, GetActorLocation());
+	}
+		
+	if (LoopingSoundComponent)
+	{
+		LoopingSoundComponent->Stop();
+	}
 }

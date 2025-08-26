@@ -4,7 +4,7 @@
 #include "GameFramework/PlayerController.h"
 #include "AuraPlayerController.generated.h"
 
-enum class EDamageTypeData : uint8;
+enum class EDamageTypeContext : uint8;
 class UInputMappingContext;
 class UInputAction;
 class IEnemyInterface;
@@ -25,7 +25,7 @@ public:
 
 	// Damage를 보여주는 위젯 컴포넌트를 스폰하는 함수
 	UFUNCTION(Reliable, Client)
-	void SpawnDamageText(float DamageAmount, AActor* TargetActor, bool bBlockedHit, bool bCriticalHit, const EDamageTypeData DamageType) const;
+	void SpawnDamageText(float DamageAmount, AActor* TargetActor, bool bBlockedHit, bool bCriticalHit, const EDamageTypeContext DamageType) const;
 
 protected:
 	// ~AActor Interface

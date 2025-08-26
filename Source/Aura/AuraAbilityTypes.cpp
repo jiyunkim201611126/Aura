@@ -2,24 +2,28 @@
 
 #include "Manager/AuraGameplayTags.h"
 
-void FAuraGameplayEffectContext::SetDamageType(const FGameplayTag& InDamageType)
+bool FDebuffDataContext::NetSerialize(FArchive& Ar, UPackageMap* Map, bool& bOutSuccess)
 {
-	if (InDamageType == FAuraGameplayTags::Get().Damage_Fire)
-	{
-		DamageType = EDamageTypeData::Fire;
-	}
-	else if (InDamageType == FAuraGameplayTags::Get().Damage_Lightning)
-	{
-		DamageType = EDamageTypeData::Lightning;
-	}
-	else if (InDamageType == FAuraGameplayTags::Get().Damage_Arcane)
-	{
-		DamageType = EDamageTypeData::Arcane;
-	}
-	else if (InDamageType == FAuraGameplayTags::Get().Damage_Physical)
-	{
-		DamageType = EDamageTypeData::Physical;
-	}
+	uint8 DebuffTypeByte = static_cast<uint8>(DebuffType);
+	Ar.SerializeBits(&DebuffTypeByte, 8);
+	DebuffType = static_cast<EDebuffTypeContext>(DebuffTypeByte);
+
+	Ar << DebuffDamage;
+	Ar << DebuffDuration;
+	Ar << DebuffFrequency;
+
+	bOutSuccess = true;
+	return true;
+}
+
+void FAuraGameplayEffectContext::SetDamageTypeContext(const EDamageTypeContext InDamageType)
+{
+	DamageType = InDamageType;
+}
+
+void FAuraGameplayEffectContext::SetDebuffDataContext(const FDebuffDataContext& DebuffDataContext)
+{
+	DebuffData = DebuffDataContext;
 }
 
 bool FAuraGameplayEffectContext::NetSerialize(FArchive& Ar, class UPackageMap* Map, bool& bOutSuccess)
@@ -64,14 +68,18 @@ bool FAuraGameplayEffectContext::NetSerialize(FArchive& Ar, class UPackageMap* M
 		{
 			RepBits |= 1 << 8;
 		}
-		if (DamageType != EDamageTypeData::None)
+		if (DamageType != EDamageTypeContext::None)
 		{
 			RepBits |= 1 << 9;
+		}
+		if (DebuffData.DebuffType != EDebuffTypeContext::None)
+		{
+			RepBits |= 1 << 10;
 		}
 	}
 
 	// uint32를 몽땅 쓰지 않고 필요한 만큼의 길이로 잘라내 패킷 최적화
-	Ar.SerializeBits(&RepBits, 10);
+	Ar.SerializeBits(&RepBits, 11);
 
 	if (RepBits & (1 << 0))
 	{
@@ -126,6 +134,12 @@ bool FAuraGameplayEffectContext::NetSerialize(FArchive& Ar, class UPackageMap* M
 	if (RepBits & (1 << 9))
 	{
 		Ar << DamageType;
+	}
+	if (RepBits & (1 << 10))
+	{
+		bool bSuccess = false;
+		DebuffData.NetSerialize(Ar, Map, bOutSuccess);
+		bOutSuccess &= bSuccess;
 	}
 
 	if (Ar.IsLoading())

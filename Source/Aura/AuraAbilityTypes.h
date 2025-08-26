@@ -3,8 +3,12 @@
 #include "GameplayEffectTypes.h"
 #include "AuraAbilityTypes.Generated.h"
 
+/**
+ * Tag와 똑같은 역할을 하는 enum을 굳이 선언한 이유는, FName보다 uint8이 패킷면에서 더 저렴하기 때문입니다.
+ * 편의성은 당연히 감소하나, 디자이너에 의해 관리되는 Tag가 아니기 때문에 조금 번거롭더라도 패킷 최적화를 거치는 편이 좋다고 생각합니다.
+ */
 UENUM(BlueprintType)
-enum class EDamageTypeData : uint8
+enum class EDamageTypeContext : uint8
 {
 	None,
 	Fire,
@@ -12,6 +16,45 @@ enum class EDamageTypeData : uint8
 	Arcane,
 	Physical,
 	Max
+};
+
+UENUM(BlueprintType)
+enum class EDebuffTypeContext : uint8
+{
+	None,
+	Burn,
+	Stun,
+	Confuse,
+	Max
+};
+
+USTRUCT(BlueprintType)
+struct FDebuffDataContext
+{
+	GENERATED_BODY()
+	
+	UPROPERTY()
+	EDebuffTypeContext DebuffType = EDebuffTypeContext::None;
+
+	UPROPERTY()
+	float DebuffDamage = 0.f;
+
+	UPROPERTY()
+	float DebuffDuration = 0.f;
+
+	UPROPERTY()
+	float DebuffFrequency = 0.f;
+
+	bool NetSerialize(FArchive& Ar, UPackageMap* Map, bool& bOutSuccess);
+};
+
+template<>
+struct TStructOpsTypeTraits<FDebuffDataContext> : public TStructOpsTypeTraitsBase2<FDebuffDataContext>
+{
+	enum
+	{
+		WithNetSerialize = true
+	};
 };
 
 /**
@@ -30,11 +73,13 @@ struct FAuraGameplayEffectContext : public FGameplayEffectContext
 public:
 	bool IsBlockedHit() const { return bIsBlockedHit; }
 	bool IsCriticalHit() const { return bIsCriticalHit; }
-	EDamageTypeData GetDamageType() const { return  DamageType; }
+	EDamageTypeContext GetDamageType() const { return  DamageType; }
+	FDebuffDataContext GetDebuffData() const { return DebuffData; }
 
 	void SetIsBlockedHit(bool bInIsBlockedHit) { bIsBlockedHit = bInIsBlockedHit; }
 	void SetIsCriticalHit(bool bInIsCriticalHit) { bIsCriticalHit = bInIsCriticalHit; }
-	void SetDamageType(const FGameplayTag& InDamageType);
+	void SetDamageTypeContext(const EDamageTypeContext InDamageType);
+	void SetDebuffDataContext(const FDebuffDataContext& DebuffDataContext);
 	
 	virtual UScriptStruct* GetScriptStruct() const override
 	{
@@ -64,7 +109,10 @@ protected:
 	bool bIsCriticalHit = false;
 
 	UPROPERTY()
-	EDamageTypeData DamageType = EDamageTypeData::None;
+	EDamageTypeContext DamageType = EDamageTypeContext::None;
+
+	UPROPERTY()
+	FDebuffDataContext DebuffData;
 };
 
 /**

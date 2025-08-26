@@ -149,7 +149,7 @@ void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecuti
 			ExecutionParams.AttemptCalculateCapturedAttributeMagnitude(Resistance, EvaluationParameters, ResistanceTypeValue);
 			// Resistance는 음수일 가능성도 있으므로 Clamp하지 않음
 
-			UAuraAbilitySystemLibrary::SetDamageType(EffectContextHandle, Pair.Key);
+			UAuraAbilitySystemLibrary::SetDamageTypeContext(EffectContextHandle, Pair.Key);
 
 			// 속성 데미지 계산 결과 반영
 			DamageTypeValue *= ( 100.f - ResistanceTypeValue ) / 100.f;
