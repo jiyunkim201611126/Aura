@@ -74,23 +74,18 @@ USpellMenuWidgetController* UAuraAbilitySystemLibrary::GetSpellMenuWidgetControl
 
 void UAuraAbilitySystemLibrary::InitializeDefaultAttributes(const UObject* WorldContextObject, ECharacterClass CharacterClass, float Level, UAbilitySystemComponent* ASC)
 {
-	AActor* AvatarActor = ASC->GetAvatarActor();
-
 	UCharacterClassInfo* CharacterClassInfo = GetCharacterClassInfo(WorldContextObject);
 	const FCharacterClassDefaultInfo ClassDefaultInfo = CharacterClassInfo->GetClassDefaultInfo(CharacterClass);
 	
 	FGameplayEffectContextHandle PrimaryAttributesContextHandle = ASC->MakeEffectContext();
-	PrimaryAttributesContextHandle.AddSourceObject(AvatarActor);
 	const FGameplayEffectSpecHandle PrimaryAttributesSpecHandle = ASC->MakeOutgoingSpec(ClassDefaultInfo.PrimaryAttribute, Level, PrimaryAttributesContextHandle);
 	ASC->ApplyGameplayEffectSpecToSelf(*PrimaryAttributesSpecHandle.Data.Get());
 	
 	FGameplayEffectContextHandle SecondaryAttributesContextHandle = ASC->MakeEffectContext();
-	SecondaryAttributesContextHandle.AddSourceObject(AvatarActor);
 	const FGameplayEffectSpecHandle SecondaryAttributesSpecHandle = ASC->MakeOutgoingSpec(CharacterClassInfo->SecondaryAttribute, Level, SecondaryAttributesContextHandle);
 	ASC->ApplyGameplayEffectSpecToSelf(*SecondaryAttributesSpecHandle.Data.Get());
 	
 	FGameplayEffectContextHandle VitalAttributesContextHandle = ASC->MakeEffectContext();
-	VitalAttributesContextHandle.AddSourceObject(AvatarActor);
 	const FGameplayEffectSpecHandle VitalAttributesSpecHandle = ASC->MakeOutgoingSpec(CharacterClassInfo->VitalAttribute, Level, VitalAttributesContextHandle);
 	ASC->ApplyGameplayEffectSpecToSelf(*VitalAttributesSpecHandle.Data.Get());
 }
@@ -185,26 +180,7 @@ void UAuraAbilitySystemLibrary::SetDamageTypeContext(FGameplayEffectContextHandl
 {
 	if (FAuraGameplayEffectContext* AuraEffectContext = static_cast<FAuraGameplayEffectContext*>(EffectContextHandle.Get()))
 	{
-		const FAuraGameplayTags& GameplayTags = FAuraGameplayTags::Get();
-		
-		EDamageTypeContext DamageType = EDamageTypeContext::None;
-		if (InDamageType == GameplayTags.Damage_Fire)
-		{
-			DamageType = EDamageTypeContext::Fire;
-		}
-		else if (InDamageType == GameplayTags.Damage_Lightning)
-		{
-			DamageType = EDamageTypeContext::Lightning;
-		}
-		else if (InDamageType == GameplayTags.Damage_Arcane)
-		{
-			DamageType = EDamageTypeContext::Arcane;
-		}
-		else if (InDamageType == GameplayTags.Damage_Physical)
-		{
-			DamageType = EDamageTypeContext::Physical;
-		}
-		AuraEffectContext->SetDamageTypeContext(DamageType);
+		AuraEffectContext->SetDamageTypeContext(ReplaceDamageTypeToEnum(InDamageType));
 	}
 }
 
@@ -212,26 +188,101 @@ void UAuraAbilitySystemLibrary::SetDebuffDataContext(FGameplayEffectContextHandl
 {
 	if (FAuraGameplayEffectContext* AuraEffectContext = static_cast<FAuraGameplayEffectContext*>(EffectContextHandle.Get()))
 	{
-		const FAuraGameplayTags& GameplayTags = FAuraGameplayTags::Get();
-		
 		FDebuffDataContext Data;
-		if (InDebuffType == GameplayTags.Debuff_Burn)
-		{
-			Data.DebuffType = EDebuffTypeContext::Burn;
-		}
-		else if (InDebuffType == GameplayTags.Debuff_Stun)
-		{
-			Data.DebuffType = EDebuffTypeContext::Stun;
-		}
-		else if (InDebuffType == GameplayTags.Debuff_Confuse)
-		{
-			Data.DebuffType = EDebuffTypeContext::Confuse;
-		}
+		Data.DebuffType = ReplaceDebuffTypeToEnum(InDebuffType);
 		Data.DebuffDamage = InDamage;
 		Data.DebuffDuration = InDuration;
 		Data.DebuffFrequency = InFrequency;
 		AuraEffectContext->SetDebuffDataContext(Data);
 	}
+}
+
+EDamageTypeContext UAuraAbilitySystemLibrary::ReplaceDamageTypeToEnum(const FGameplayTag& DamageTypeTag)
+{
+	const FAuraGameplayTags& GameplayTags = FAuraGameplayTags::Get();
+
+	if (DamageTypeTag == GameplayTags.Damage_Fire)
+	{
+		return EDamageTypeContext::Fire;
+	}
+	if (DamageTypeTag == GameplayTags.Damage_Lightning)
+	{
+		return EDamageTypeContext::Lightning;
+	}
+	if (DamageTypeTag == GameplayTags.Damage_Arcane)
+	{
+		return EDamageTypeContext::Arcane;
+	}
+	if (DamageTypeTag == GameplayTags.Damage_Physical)
+	{
+		return EDamageTypeContext::Physical;
+	}
+	
+	return EDamageTypeContext::None;
+}
+
+FGameplayTag UAuraAbilitySystemLibrary::ReplaceDamageTypeToTag(const EDamageTypeContext DamageTypeEnum)
+{
+	const FAuraGameplayTags& GameplayTags = FAuraGameplayTags::Get();
+
+	if (DamageTypeEnum == EDamageTypeContext::Fire)
+	{
+		return GameplayTags.Damage_Fire;
+	}
+	if (DamageTypeEnum == EDamageTypeContext::Lightning)
+	{
+		return GameplayTags.Damage_Lightning;
+	}
+	if (DamageTypeEnum == EDamageTypeContext::Arcane)
+	{
+		return GameplayTags.Damage_Arcane;
+	}
+	if (DamageTypeEnum == EDamageTypeContext::Physical)
+	{
+		return GameplayTags.Damage_Physical;
+	}
+
+	return FGameplayTag();
+}
+
+EDebuffTypeContext UAuraAbilitySystemLibrary::ReplaceDebuffTypeToEnum(const FGameplayTag& DebuffTypeTag)
+{
+	const FAuraGameplayTags& GameplayTags = FAuraGameplayTags::Get();
+	
+	if (DebuffTypeTag == GameplayTags.Debuff_Burn)
+	{
+		return EDebuffTypeContext::Burn;
+	}
+	if (DebuffTypeTag == GameplayTags.Debuff_Stun)
+	{
+		return EDebuffTypeContext::Stun;
+	}
+	if (DebuffTypeTag == GameplayTags.Debuff_Confuse)
+	{
+		return EDebuffTypeContext::Confuse;
+	}
+	
+	return EDebuffTypeContext::None;
+}
+
+FGameplayTag UAuraAbilitySystemLibrary::ReplaceDebuffTypeToTag(const EDebuffTypeContext DebuffTypeEnum)
+{
+	const FAuraGameplayTags& GameplayTags = FAuraGameplayTags::Get();
+
+	if (DebuffTypeEnum == EDebuffTypeContext::Burn)
+	{
+		return GameplayTags.Debuff_Burn;
+	}
+	if (DebuffTypeEnum == EDebuffTypeContext::Stun)
+	{
+		return GameplayTags.Debuff_Stun;
+	}
+	if (DebuffTypeEnum == EDebuffTypeContext::Confuse)
+	{
+		return GameplayTags.Debuff_Confuse;
+	}
+	
+	return FGameplayTag();
 }
 
 void UAuraAbilitySystemLibrary::SetIsBlockedHit(FGameplayEffectContextHandle& EffectContextHandle, bool bInIsBlockedHit)

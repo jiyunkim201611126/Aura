@@ -90,6 +90,13 @@ void UAuraAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallba
 	FEffectProperties Props;
 	SetEffectProperties(Data, Props);
 
+	// Effect 적용 전에 사망 여부를 체크해서 적용 자체를 안 하는 게 네트워크 면에서 더 좋습니다.
+	// 하지만 지속 데미지 디버프 같은 상황에선 이미 Effect가 적용되어있기도 하고, 또 혹시 모를 경우를 대비해 걸러줍니다.
+	if (Props.TargetCharacter->Implements<UCombatInterface>() && ICombatInterface::Execute_IsDead(Props.TargetCharacter))
+	{
+		return;
+	}
+
 	if (Data.EvaluatedData.Attribute == GetHealthAttribute())
 	{
 		SetHealth(FMath::Clamp(GetHealth(), 0.f, GetMaxHealth()));
@@ -110,6 +117,11 @@ void UAuraAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallba
 	if (Data.EvaluatedData.Attribute == GetIncomingXPAttribute())
 	{
 		ApplyIncomingXP(Props);
+	}
+	
+	if (Data.EvaluatedData.Attribute == GetIncomingDebuffAttribute())
+	{
+		ApplyDebuff(Props);
 	}
 }
 
@@ -164,29 +176,26 @@ void UAuraAttributeSet::SetEffectProperties(const FGameplayEffectModCallbackData
 
 void UAuraAttributeSet::SendXPEvent(const FEffectProperties& Props) const
 {
-	if (Props.TargetAvatarActor->Implements<UCombatInterface>())
+	const ECharacterRank TargetRank = ICombatInterface::Execute_GetCharacterRank(Props.TargetAvatarActor);
+	// Rank가 None인 경우(소환된 하수인이거나, 경험치를 얻을 수 없는 적), 이벤트를 발생시키지 않습니다.
+	if (TargetRank == ECharacterRank::None)
 	{
-		const ECharacterRank TargetRank = ICombatInterface::Execute_GetCharacterRank(Props.TargetAvatarActor);
-		// Rank가 None인 경우(소환된 하수인이거나, 경험치를 얻을 수 없는 적), 이벤트를 발생시키지 않습니다.
-		if (TargetRank == ECharacterRank::None)
-		{
-			return;
-		}
-		
-		// XP 변화량을 계산해 이벤트를 송신합니다.
-		const int32 TargetLevel = ICombatInterface::Execute_GetCharacterLevel(Props.TargetAvatarActor);
-		const int32 XPReward = UAuraAbilitySystemLibrary::GetXPRewardForRankAndLevel(Props.TargetAvatarActor, TargetRank, TargetLevel);
-
-		const FAuraGameplayTags& GameplayTags = FAuraGameplayTags::Get();
-		FGameplayEventData Payload;
-		Payload.EventTag = GameplayTags.Attributes_Meta_IncomingXP;
-		Payload.EventMagnitude = XPReward;
-		// 이벤트를 송신하는 함수입니다.
-		// 아래 구문을 기준으로 하면, SourceCharacter의 ASC에게 IncomingXP Tag를 식별자로 하여 이벤트를 발생시킵니다.
-		// Payload에 원하는 데이터를 담아 송신할 수 있습니다.
-		// 해당 이벤트는 이 Tag를 기준으로 WaitGameplayEvent를 호출한 Ability(GA_ListenForEvent)가 수신합니다.
-		UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(Props.SourceCharacter, GameplayTags.Attributes_Meta_IncomingXP, Payload);
+		return;
 	}
+	
+	// XP 변화량을 계산해 이벤트를 송신합니다.
+	const int32 TargetLevel = ICombatInterface::Execute_GetCharacterLevel(Props.TargetAvatarActor);
+	const int32 XPReward = UAuraAbilitySystemLibrary::GetXPRewardForRankAndLevel(Props.TargetAvatarActor, TargetRank, TargetLevel);
+
+	const FAuraGameplayTags& GameplayTags = FAuraGameplayTags::Get();
+	FGameplayEventData Payload;
+	Payload.EventTag = GameplayTags.Attributes_Meta_IncomingXP;
+	Payload.EventMagnitude = XPReward;
+	// 이벤트를 송신하는 함수입니다.
+	// 아래 구문을 기준으로 하면, SourceCharacter의 ASC에게 IncomingXP Tag를 식별자로 하여 이벤트를 발생시킵니다.
+	// Payload에 원하는 데이터를 담아 송신할 수 있습니다.
+	// 해당 이벤트는 이 Tag를 기준으로 WaitGameplayEvent를 호출한 Ability(GA_ListenForEvent)가 수신합니다.
+	UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(Props.SourceCharacter, GameplayTags.Attributes_Meta_IncomingXP, Payload);
 }
 
 void UAuraAttributeSet::ApplyIncomingDamage(const FEffectProperties& Props, const FGameplayEffectModCallbackData& Data)
@@ -227,6 +236,7 @@ void UAuraAttributeSet::ApplyIncomingDamage(const FEffectProperties& Props, cons
 		else
 		{
 			// 사망하지 않은 경우, 적용된 GE가 GrantHitReact 태그를 갖고 있으면 HitReact Ability를 작동합니다.
+			// GrantedTag로 사용하는 게 적절하지만, GE_Damage의 Duration Policy는 Instant기 때문에 GrantedTag를 가질 수 없어 AssetTag를 사용합니다.
 			FGameplayTagContainer EffectTags;
 			Data.EffectSpec.GetAllAssetTags(EffectTags);
 			if (EffectTags.HasTag(FAuraGameplayTags::Get().Effects_GrantHitReact))
@@ -294,6 +304,54 @@ void UAuraAttributeSet::ApplyIncomingXP(const FEffectProperties& Props)
 
 		// XP 보상을 부여합니다.
 		ILevelableInterface::Execute_AddToXP(Props.SourceCharacter, LocalIncomingXP);
+	}
+}
+
+void UAuraAttributeSet::ApplyDebuff(const FEffectProperties& Props) const
+{
+	const FGameplayEffectContextHandle EffectContextHandle = Props.EffectContextHandle;
+	
+	const FDebuffDataContext DebuffData = UAuraAbilitySystemLibrary::GetDebuffData(EffectContextHandle);
+	if (DebuffData.DebuffType == EDebuffTypeContext::Burn)
+	{
+		ApplyBurnDebuff(Props, EffectContextHandle, DebuffData);
+	}
+}
+
+void UAuraAttributeSet::ApplyBurnDebuff(const FEffectProperties& Props, FGameplayEffectContextHandle EffectContextHandle, const FDebuffDataContext& DebuffData) const
+{
+	const FAuraGameplayTags& GameplayTags = FAuraGameplayTags::Get();
+	const FGameplayTag DamageType = GameplayTags.Damage_Fire;
+     
+	// 동적으로 새로운 GE를 생성합니다.
+	const FString DebuffName = FString::Printf(TEXT("DynamicDebuff_%s"), *UAuraAbilitySystemLibrary::ReplaceDebuffTypeToTag(DebuffData.DebuffType).ToString());
+	UGameplayEffect* Effect = NewObject<UGameplayEffect>(GetTransientPackage(), FName(DebuffName));
+     
+	Effect->DurationPolicy = EGameplayEffectDurationType::HasDuration;
+	Effect->Period = DebuffData.DebuffFrequency;
+	Effect->bExecutePeriodicEffectOnApplication = false;
+	Effect->DurationMagnitude = FScalableFloat(DebuffData.DebuffDuration);
+     
+	Effect->StackingType = EGameplayEffectStackingType::AggregateBySource;
+	Effect->StackLimitCount = 1;
+     
+	const int32 Index = Effect->Modifiers.Num();
+	Effect->Modifiers.Add(FGameplayModifierInfo());
+	FGameplayModifierInfo& ModifierInfo = Effect->Modifiers[Index];
+     
+	ModifierInfo.ModifierMagnitude = FScalableFloat(DebuffData.DebuffDamage);
+	ModifierInfo.ModifierOp = EGameplayModOp::Additive;
+	ModifierInfo.Attribute = GetIncomingDamageAttribute();
+     
+	// Context를 그대로 재사용해 EffectSpec을 생성합니다.
+	FGameplayEffectSpec* MutableSpec = new FGameplayEffectSpec(Effect, EffectContextHandle, 1.f);
+	if (MutableSpec)
+	{
+		MutableSpec->DynamicGrantedTags.AddTag(DamageType);
+		FAuraGameplayEffectContext* AuraContext = static_cast<FAuraGameplayEffectContext*>(EffectContextHandle.Get());
+		AuraContext->SetDamageTypeContext(UAuraAbilitySystemLibrary::ReplaceDamageTypeToEnum(DamageType));
+     
+		Props.TargetASC->ApplyGameplayEffectSpecToSelf(*MutableSpec);
 	}
 }
 

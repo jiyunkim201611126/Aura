@@ -67,7 +67,7 @@ public:
 	TArray<FGameplayEffectSpecHandle> MakeDebuffSpecHandle();
 
 	UFUNCTION(BlueprintCallable)
-	void CauseDebuff(AActor* TargetActor, const TArray<FGameplayEffectSpecHandle>& DebuffSpecs) const;
+	void CauseDebuff(AActor* TargetActor, const TArray<FGameplayEffectSpecHandle>& DebuffSpecs);
 
 protected:
 	

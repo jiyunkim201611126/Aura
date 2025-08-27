@@ -35,7 +35,7 @@ TArray<FGameplayEffectSpecHandle> UAuraGameplayAbility::MakeDebuffSpecHandle()
 	
 	const FAuraGameplayTags& GameplayTags = FAuraGameplayTags::Get();
 	TArray<FGameplayEffectSpecHandle> DebuffSpecs;
-	for (auto& Data : DebuffData)
+	for (const auto& Data : DebuffData)
 	{
 		FGameplayEffectSpecHandle DebuffSpecHandle = GetAbilitySystemComponentFromActorInfo()->MakeOutgoingSpec(DebuffEffectClass, 1.f, DebuffEffectContextHandle);
 		UAbilitySystemBlueprintLibrary::AddGrantedTag(DebuffSpecHandle, Data.DebuffType);
@@ -49,10 +49,23 @@ TArray<FGameplayEffectSpecHandle> UAuraGameplayAbility::MakeDebuffSpecHandle()
 	return DebuffSpecs;
 }
 
-void UAuraGameplayAbility::CauseDebuff(AActor* TargetActor, const TArray<FGameplayEffectSpecHandle>& DebuffSpecs) const
+void UAuraGameplayAbility::CauseDebuff(AActor* TargetActor, const TArray<FGameplayEffectSpecHandle>& DebuffSpecs)
 {
+	// 관련 Actor에 추가
+	if (DebuffEffectContextHandle.IsValid())
+	{
+		TArray<TWeakObjectPtr<AActor>> TargetActors;
+		TargetActors.Add(TargetActor);
+		DebuffEffectContextHandle.AddActors(TargetActors);
+	}
+	
 	for (auto& DebuffSpecHandle : DebuffSpecs)
 	{
+		if (TargetActor->Implements<UCombatInterface>() && ICombatInterface::Execute_IsDead(TargetActor))
+		{
+			return;
+		}
+		
 		GetAbilitySystemComponentFromActorInfo()->ApplyGameplayEffectSpecToTarget(*DebuffSpecHandle.Data.Get(), UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(TargetActor));
 	}
 }

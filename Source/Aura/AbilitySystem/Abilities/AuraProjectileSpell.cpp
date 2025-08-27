@@ -39,24 +39,30 @@ void UAuraProjectileSpell::SpawnProjectile(FVector& ProjectileSpawnLocation, FVe
 		// Ability를 소유한 AvatarActor의 AbilitySystemComponent 가져옵니다.
 		const UAbilitySystemComponent* SourceASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(GetAvatarActorFromActorInfo());
 
-		// Damage Context를 생성 및 초기화합니다.
-		DamageEffectContextHandle = SourceASC->MakeEffectContext();
-		DamageEffectContextHandle.SetAbility(this);
-		DamageEffectContextHandle.Get()->SetEffectCauser(Projectile);
-		FHitResult HitResult;
-		HitResult.Location = ProjectileTargetLocation;
-		DamageEffectContextHandle.AddHitResult(HitResult);
+		if (DamageTypes.Num() > 0)
+		{
+			// Damage Context를 생성 및 초기화합니다.
+			DamageEffectContextHandle = SourceASC->MakeEffectContext();
+			DamageEffectContextHandle.SetAbility(this);
+			DamageEffectContextHandle.Get()->AddSourceObject(Projectile);
+			FHitResult HitResult;
+			HitResult.Location = ProjectileTargetLocation;
+			DamageEffectContextHandle.AddHitResult(HitResult);
 
-		// 적중 시 데미지를 줄 수 있도록 Projectile에 Spec을 할당합니다.
-		Projectile->DamageEffectSpecHandle = MakeDamageSpecHandle();
+			// 적중 시 데미지를 줄 수 있도록 Projectile에 Spec을 할당합니다.
+			Projectile->DamageEffectSpecHandle = MakeDamageSpecHandle();
+		}
 
-		// Debuff Context를 생성 및 초기화합니다.
-		DebuffEffectContextHandle = SourceASC->MakeEffectContext();
-		DebuffEffectContextHandle.SetAbility(this);
-		DebuffEffectContextHandle.Get()->SetEffectCauser(Projectile);
+		if (DebuffData.Num() > 0)
+		{
+			// Debuff Context를 생성 및 초기화합니다.
+			DebuffEffectContextHandle = SourceASC->MakeEffectContext();
+			DebuffEffectContextHandle.SetAbility(this);
+			DebuffEffectContextHandle.Get()->AddSourceObject(Projectile);
 
-		// 적중 시 디버프를 줄 수 있도록 Projectile에 Spec을 할당합니다.
-		Projectile->DebuffEffectSpecHandle = MakeDebuffSpecHandle();
+			// 적중 시 디버프를 줄 수 있도록 Projectile에 Spec을 할당합니다.
+			Projectile->DebuffEffectSpecHandle = MakeDebuffSpecHandle();
+		}
 
 		// 액터 스폰
 		Projectile->FinishSpawning(SpawnTransform);

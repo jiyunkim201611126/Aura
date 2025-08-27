@@ -74,7 +74,7 @@ public:
 	bool IsBlockedHit() const { return bIsBlockedHit; }
 	bool IsCriticalHit() const { return bIsCriticalHit; }
 	EDamageTypeContext GetDamageType() const { return  DamageType; }
-	FDebuffDataContext GetDebuffData() const { return DebuffData; }
+	const FDebuffDataContext& GetDebuffData() const { return DebuffData; }
 
 	void SetIsBlockedHit(bool bInIsBlockedHit) { bIsBlockedHit = bInIsBlockedHit; }
 	void SetIsCriticalHit(bool bInIsCriticalHit) { bIsCriticalHit = bInIsCriticalHit; }

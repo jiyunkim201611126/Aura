@@ -4,11 +4,11 @@
 #include "Aura/Aura.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
-#include "NiagaraFunctionLibrary.h"
 #include "Components/AudioComponent.h"
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystemComponent.h"
 #include "Aura/AbilitySystem/AuraAbilitySystemLibrary.h"
+#include "Aura/Interaction/CombatInterface.h"
 #include "Aura/Manager/FXManagerSubsystem.h"
 
 AAuraProjectile::AAuraProjectile()
@@ -67,11 +67,6 @@ void AAuraProjectile::Destroyed()
 
 void AAuraProjectile::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (!GetWorld() || !GetWorld()->GetGameInstance())
-	{
-		return;
-	}
-	
 	// GameplayEffectSpec이 아직 유효하지 않을 때 Overlap되거나, Projectile을 발사한 캐릭터 자신이 부딪히면 이 이벤트를 무시함
 	for (auto& FGameplayEffectSpecHandle : DamageEffectSpecHandle)
 	{
@@ -81,12 +76,9 @@ void AAuraProjectile::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, 
 		}
 	}
 
-	for (auto& FGameplayEffectSpecHandle : DebuffEffectSpecHandle)
+	if (OtherActor->Implements<UCombatInterface>() && ICombatInterface::Execute_IsDead(OtherActor))
 	{
-		if (!FGameplayEffectSpecHandle.Data.IsValid())
-		{
-			return;
-		}
+		return;
 	}
 	
 	if (UAuraAbilitySystemLibrary::IsFriend(GetOwner(), OtherActor))

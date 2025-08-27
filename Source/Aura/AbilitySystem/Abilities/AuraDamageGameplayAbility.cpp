@@ -15,7 +15,10 @@ TArray<FGameplayEffectSpecHandle> UAuraDamageGameplayAbility::MakeDamageSpecHand
 {
 	if (!DamageEffectContextHandle.Get())
 	{
+		// EffectContext를 생성 및 할당합니다.
+		// MakeEffectContext 함수는 자동으로 OwnerActor를 Instigator로, AvatarActor를 EffectCauser로 할당합니다.
 		DamageEffectContextHandle = GetAbilitySystemComponentFromActorInfo()->MakeEffectContext();
+		DamageEffectContextHandle.AddSourceObject(GetAvatarActorFromActorInfo());
 	}
 	
 	TArray<FGameplayEffectSpecHandle> DamageSpecs;
@@ -38,7 +41,7 @@ TArray<FGameplayEffectSpecHandle> UAuraDamageGameplayAbility::MakeDamageSpecHand
 }
 
 void UAuraDamageGameplayAbility::CauseDamage(AActor* TargetActor, TArray<FGameplayEffectSpecHandle> DamageSpecs)
-{
+{	
 	// 관련 Actor에 추가
 	if (DamageEffectContextHandle.IsValid())
 	{
@@ -49,6 +52,11 @@ void UAuraDamageGameplayAbility::CauseDamage(AActor* TargetActor, TArray<FGamepl
 
 	for (auto& Spec : DamageSpecs)
 	{
+		if (TargetActor->Implements<UCombatInterface>() && ICombatInterface::Execute_IsDead(TargetActor))
+		{
+			return;
+		}
+		
 		GetAbilitySystemComponentFromActorInfo()->ApplyGameplayEffectSpecToTarget(*Spec.Data.Get(), UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(TargetActor));
 	}
 	
@@ -59,10 +67,10 @@ FText UAuraDamageGameplayAbility::GetDamageTexts(int32 InLevel)
 {
 	TArray<FText> FormattedTexts;
 
-	for (const auto& Pair : DamageTypes)
+	for (const auto& Damage : DamageTypes)
 	{
-		const FGameplayTag& DamageTag = Pair.Key;
-		const float DamageValue = Pair.Value.GetValueAtLevel(InLevel);
+		const FGameplayTag& DamageTag = Damage.Key;
+		const float DamageValue = Damage.Value.GetValueAtLevel(InLevel);
 
 		// 태그 네임을 String으로 바꿔 그대로 String Table의 Key로 사용합니다.
 		// ToString으로 변환될 때 언더바(_)가 아닌 마침표(.)으로 변환되므로, String Table에서도 마침표로 Key를 작성합니다.. (예시: Damage.Fire)

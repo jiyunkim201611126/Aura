@@ -93,4 +93,11 @@ void UExecCal_Debuff::Execute_Implementation(const FGameplayEffectCustomExecutio
 	
 	FGameplayEffectContextHandle EffectContextHandle = Spec.GetContext();
 	UAuraAbilitySystemLibrary::SetDebuffDataContext(EffectContextHandle, TypeTagForContext, Damage, Duration, Frequency);
+
+	// 이벤트 전달용 Attribute Modifier를 생성 및 할당합니다.
+	// Magnitude가 0이기 때문에 Attribute에 값 변화가 일어나지 않고 일어난다 해도 게임 플레이에 영향을 주지 않습니다.
+	// 하지만 AttributeSet에게 '이 Attribute에 값 변화가 발생했다.'고 이벤트가 전달됩니다.
+	// 사실상 GAS의 시스템을 이용한 트릭성 로직입니다.
+	const FGameplayModifierEvaluatedData EvaluatedData(UAuraAttributeSet::GetIncomingDebuffAttribute(), EGameplayModOp::Additive, 0.f);
+	OutExecutionOutput.AddOutputModifier(EvaluatedData);
 }

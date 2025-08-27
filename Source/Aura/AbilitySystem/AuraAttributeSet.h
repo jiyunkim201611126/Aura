@@ -14,6 +14,7 @@
 	GAMEPLAYATTRIBUTE_VALUE_SETTER(PropertyName) \
 	GAMEPLAYATTRIBUTE_VALUE_INITTER(PropertyName)
 
+struct FDebuffDataContext;
 // Attribute에게 변화가 적용되는 모든 상황에 대해서 Source와 Target을 추적하기 위해 선언, 초기화하는 구조체
 USTRUCT(BlueprintType)
 struct FEffectProperties
@@ -76,6 +77,9 @@ private:
 	void SendXPEvent(const FEffectProperties& Props) const;
 	void ApplyIncomingDamage(const FEffectProperties& Props, const FGameplayEffectModCallbackData& Data);
 	void ApplyIncomingXP(const FEffectProperties& Props);
+	
+	void ApplyDebuff(const FEffectProperties& Props) const;
+	void ApplyBurnDebuff(const FEffectProperties& Props, FGameplayEffectContextHandle EffectContextHandle, const FDebuffDataContext& DebuffData) const;
 
 public:
 	/**
@@ -242,6 +246,10 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = "Meta Attributes")
 	FGameplayAttributeData IncomingXP;
 	ATTRIBUTE_ACCESSORS(UAuraAttributeSet, IncomingXP);
+	
+	UPROPERTY(BlueprintReadOnly, Category = "Meta Attributes")
+	FGameplayAttributeData IncomingDebuff;
+	ATTRIBUTE_ACCESSORS(UAuraAttributeSet, IncomingDebuff);
 
 private:
 	bool bTopOffHealth = false;

@@ -1,7 +1,5 @@
 ﻿#include "AuraAbilityTypes.h"
 
-#include "Manager/AuraGameplayTags.h"
-
 bool FDebuffDataContext::NetSerialize(FArchive& Ar, UPackageMap* Map, bool& bOutSuccess)
 {
 	uint8 DebuffTypeByte = static_cast<uint8>(DebuffType);

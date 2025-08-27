@@ -77,6 +77,11 @@ public:
 	UFUNCTION(Category = "AuraAbilitySystemLibrary | GameplayEffects | Debuff")
 	static void SetDebuffDataContext(UPARAM(ref) FGameplayEffectContextHandle& EffectContextHandle, const FGameplayTag& InDebuffType, const float InDamage, const float InDuration, const float InFrequency);
 
+	static EDamageTypeContext ReplaceDamageTypeToEnum(const FGameplayTag& DamageTypeTag);
+	static FGameplayTag ReplaceDamageTypeToTag(const EDamageTypeContext DamageTypeEnum);
+	static EDebuffTypeContext ReplaceDebuffTypeToEnum(const FGameplayTag& DebuffTypeTag);
+	static FGameplayTag ReplaceDebuffTypeToTag(const EDebuffTypeContext DebuffTypeEnum);
+
 	// 구체 Collision과 겹쳐있는 모든 UCombatInterface 객체를 TArray<AActor*>로 뱉어주는 함수
 	UFUNCTION(BlueprintCallable, Category = "AuraAbilitySystemLibrary | GameplayMechanics", meta = (WorldContext = "WorldContextObject"))
 	static void GetOverlappedLivePawns(const UObject* WorldContextObject, TArray<AActor*>& OutOverlappingActors, const TArray<AActor*>& ActorsToIgnore, float Radius, const FVector& SphereOrigin);
