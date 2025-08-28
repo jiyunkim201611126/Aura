@@ -31,6 +31,8 @@ public:
 	virtual bool IsDead_Implementation() override;
 	virtual AActor* GetAvatar_Implementation() override;
 	virtual ECharacterRank GetCharacterRank_Implementation() override;
+	virtual FOnASCRegistered& GetOnASCRegisteredDelegate() override;
+	virtual FOnDeath& GetOnDeathDelegate() override;
 	// ~End of Combat Interface
 
 	UFUNCTION(NetMulticast, Reliable)
@@ -92,6 +94,9 @@ protected:
 	
 	UPROPERTY(EditAnywhere, Category = "Abilities")
 	TArray<TSubclassOf<UGameplayAbility>> StartupPassiveAbilities;
+	
+	FOnASCRegistered OnASCRegistered;
+	FOnDeath OnDeath;
 	
 private:
 	bool bDead = false;

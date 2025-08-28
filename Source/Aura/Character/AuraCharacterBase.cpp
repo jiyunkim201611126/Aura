@@ -93,6 +93,16 @@ ECharacterRank AAuraCharacterBase::GetCharacterRank_Implementation()
 	return CharacterRank;
 }
 
+FOnASCRegistered& AAuraCharacterBase::GetOnASCRegisteredDelegate()
+{
+	return OnASCRegistered;
+}
+
+FOnDeath& AAuraCharacterBase::GetOnDeathDelegate()
+{
+	return OnDeath;
+}
+
 void AAuraCharacterBase::MulticastHandleDeath_Implementation(bool bShouldAddImpulse, const FVector& Impulse)
 {
 	UWorld* World = GetWorld();
@@ -135,6 +145,7 @@ void AAuraCharacterBase::MulticastHandleDeath_Implementation(bool bShouldAddImpu
 	Dissolve();
 
 	bDead = true;
+	OnDeath.Broadcast(this);
 }
 
 void AAuraCharacterBase::InitAbilityActorInfo()

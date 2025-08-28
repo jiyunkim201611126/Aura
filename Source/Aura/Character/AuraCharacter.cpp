@@ -170,6 +170,7 @@ void AAuraCharacter::InitAbilityActorInfo()
 	Cast<UAuraAbilitySystemComponent>(AuraPlayerState->GetAbilitySystemComponent())->AbilityActorInfoSet();
 	AbilitySystemComponent = AuraPlayerState->GetAbilitySystemComponent();
 	AttributeSet = AuraPlayerState->GetAttributeSet();
+	OnASCRegistered.Broadcast(AbilitySystemComponent);
 
 	// PlayerController, PlayerState, AbilitySystemComponent, AttributeSet이 모두 초기화된 게 확실한 장소이므로 HUD의 Init함수를 호출합니다.
 	// Widget들의 생성 자체는 이미 끝난 상태이며, 콜백 함수 바인드 로직의 호출을 기다리고 있는 상태입니다.

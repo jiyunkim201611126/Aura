@@ -1,4 +1,4 @@
-﻿#include "ExecCal_Debuff.h"
+﻿#include "ExecCalc_Debuff.h"
 
 #include "Aura/AbilitySystem/AuraAbilitySystemLibrary.h"
 #include "Aura/AbilitySystem/AuraAttributeSet.h"
@@ -30,14 +30,14 @@ static const AuraDebuffStatics& DebuffStatics()
 	return DStatics;
 }
 
-UExecCal_Debuff::UExecCal_Debuff()
+UExecCalc_Debuff::UExecCalc_Debuff()
 {
 	RelevantAttributesToCapture.Add(DebuffStatics().TargetFireResistance);
 	RelevantAttributesToCapture.Add(DebuffStatics().TargetLightningResistance);
 	RelevantAttributesToCapture.Add(DebuffStatics().TargetArcaneResistance);
 }
 
-void UExecCal_Debuff::Execute_Implementation(const FGameplayEffectCustomExecutionParameters& ExecutionParams, FGameplayEffectCustomExecutionOutput& OutExecutionOutput) const
+void UExecCalc_Debuff::Execute_Implementation(const FGameplayEffectCustomExecutionParameters& ExecutionParams, FGameplayEffectCustomExecutionOutput& OutExecutionOutput) const
 {
 	const FAuraGameplayTags& GameplayTags = FAuraGameplayTags::Get();
 	

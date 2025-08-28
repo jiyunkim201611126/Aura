@@ -12,8 +12,13 @@
  * 이는 나중의 확장성을 위해 BlueprintNativeEvent로 미리 선언해놓은 상태입니다.
  */
 
+class UAbilitySystemComponent;
 class UNiagaraSystem;
 class UAnimMontage;
+
+// ASC가 등록된 순간 Broadcast되는 델리게이트입니다.
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnASCRegistered, UAbilitySystemComponent*);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnDeath, AActor*, DeadActor);
 
 UINTERFACE(MinimalAPI, BlueprintType)
 class UCombatInterface : public UInterface
@@ -52,4 +57,7 @@ public:
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	ECharacterRank GetCharacterRank();
+
+	virtual FOnASCRegistered& GetOnASCRegisteredDelegate() = 0;
+	virtual FOnDeath& GetOnDeathDelegate() = 0;
 };

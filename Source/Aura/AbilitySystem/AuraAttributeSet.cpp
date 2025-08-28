@@ -10,6 +10,7 @@
 #include "Aura/AuraAbilityTypes.h"
 #include "Aura/Interaction/LevelableInterface.h"
 #include "Aura/Player/AuraPlayerController.h"
+#include "Debuff/DebuffNiagaraComponent.h"
 #include "GameFramework/Character.h"
 
 UAuraAttributeSet::UAuraAttributeSet()
@@ -314,6 +315,22 @@ void UAuraAttributeSet::ApplyDebuff(const FEffectProperties& Props) const
 	const FDebuffDataContext DebuffData = UAuraAbilitySystemLibrary::GetDebuffData(EffectContextHandle);
 	if (DebuffData.DebuffType == EDebuffTypeContext::Burn)
 	{
+		// 이펙트 적용 시 GrantedTag가 자동으로 부여되므로, 그 전에 이미 해당 디버프가 부여되어있는지 확인해 나이아가라가 중복으로 생기지 않도록 방지합니다.
+		const FGameplayTag DebuffTypeTag = UAuraAbilitySystemLibrary::ReplaceDebuffTypeToTag(DebuffData.DebuffType);
+		if (!Props.TargetASC->HasMatchingGameplayTag(DebuffTypeTag))
+		{
+			if (Props.TargetCharacter)
+			{
+				UDebuffNiagaraComponent* NiagaraComponent = NewObject<UDebuffNiagaraComponent>(Props.TargetCharacter);
+				if (NiagaraComponent)
+				{
+					NiagaraComponent->DebuffTag = DebuffTypeTag;
+					NiagaraComponent->SetupAttachment(Props.TargetCharacter->GetMesh());
+					NiagaraComponent->RegisterComponent();
+				}
+			}
+		}
+		
 		ApplyBurnDebuff(Props, EffectContextHandle, DebuffData);
 	}
 }
@@ -347,7 +364,7 @@ void UAuraAttributeSet::ApplyBurnDebuff(const FEffectProperties& Props, FGamepla
 	FGameplayEffectSpec* MutableSpec = new FGameplayEffectSpec(Effect, EffectContextHandle, 1.f);
 	if (MutableSpec)
 	{
-		MutableSpec->DynamicGrantedTags.AddTag(DamageType);
+		MutableSpec->DynamicGrantedTags.AddTag(UAuraAbilitySystemLibrary::ReplaceDebuffTypeToTag(DebuffData.DebuffType));
 		FAuraGameplayEffectContext* AuraContext = static_cast<FAuraGameplayEffectContext*>(EffectContextHandle.Get());
 		AuraContext->SetDamageTypeContext(UAuraAbilitySystemLibrary::ReplaceDamageTypeToEnum(DamageType));
      
