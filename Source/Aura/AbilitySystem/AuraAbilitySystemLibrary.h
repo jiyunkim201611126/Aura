@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Aura/AuraAbilityTypes.h"
+#include "Aura/Actor/AuraProjectile.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "Data/CharacterClassInfo.h"
 #include "AuraAbilitySystemLibrary.generated.h"
@@ -48,34 +49,20 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "AuraAbilitySystemLibrary | CahracterClassDefaults", meta = (WorldContext = "WorldContextObject"))
 	static UAbilityInfo* GetAbilityInfo(const UObject* WorldContextObject);
 
-	// 데미지 계산 중 Block 되었는지 Context를 통해 확인하는 함수
 	UFUNCTION(BlueprintPure, Category = "AuraAbilitySystemLibrary | GameplayEffects")
-	static bool IsBlockedHit(const FGameplayEffectContextHandle& EffectContextHandle);
-	
-	// 데미지 계산 중 Critical 되었는지 Context를 통해 확인하는 함수
-	UFUNCTION(BlueprintPure, Category = "AuraAbilitySystemLibrary | GameplayEffects")
-	static bool IsCriticalHit(const FGameplayEffectContextHandle& EffectContextHandle);
-
-	UFUNCTION(BlueprintPure, Category = "AuraAbilitySystemLibrary | GameplayEffects")
-	static EDamageTypeContext GetDamageType(const FGameplayEffectContextHandle& EffectContextHandle);
+	static FDamageDataContext GetDamageData(const FGameplayEffectContextHandle& EffectContextHandle);
 
 	UFUNCTION(BlueprintPure, Category = "AuraAbilitySystemLibrary | GameplayEffects")
 	static FDebuffDataContext GetDebuffData(const FGameplayEffectContextHandle& EffectContextHandle);
-
-	// 데미지 계산 중 Block 되었는지 Context에 기록하는 함수
-	// UPARAM(ref)는 &가 붙은 매개변수가 output이 아니라는 걸 알려주는 매크로
-	UFUNCTION(Category = "AuraAbilitySystemLibrary | GameplayEffects | Damage")
-	static void SetIsBlockedHit(UPARAM(ref) FGameplayEffectContextHandle& EffectContextHandle, bool bInIsBlockedHit);
-	
-	// 데미지 계산 중 Critical 되었는지 Context에 기록하는 함수
-	UFUNCTION(Category = "AuraAbilitySystemLibrary | GameplayEffects | Damage")
-	static void SetIsCriticalHit(UPARAM(ref) FGameplayEffectContextHandle& EffectContextHandle, bool bInIsCriticalHit);
 	
 	UFUNCTION(Category = "AuraAbilitySystemLibrary | GameplayEffects | Damage")
-	static void SetDamageTypeContext(UPARAM(ref) FGameplayEffectContextHandle& EffectContextHandle, const FGameplayTag& InDamageType);
+	static void SetDamageDataContext(UPARAM(ref) FGameplayEffectContextHandle& EffectContextHandle, const EDamageTypeContext DamageType, bool bIsBlocked, bool bIsCritical);
+	
+	UFUNCTION(Category = "AuraAbilitySystemLibrary | GameplayEffects | Damage")
+	static void SetDeathImpulse(FGameplayEffectContextHandle& EffectContextHandle, const FVector& Impulse);
 
 	UFUNCTION(Category = "AuraAbilitySystemLibrary | GameplayEffects | Debuff")
-	static void SetDebuffDataContext(UPARAM(ref) FGameplayEffectContextHandle& EffectContextHandle, const FGameplayTag& InDebuffType, const float InDamage, const float InDuration, const float InFrequency);
+	static void SetDebuffDataContext(UPARAM(ref) FGameplayEffectContextHandle& EffectContextHandle, const FDebuffDataContext& Data);
 
 	static EDamageTypeContext ReplaceDamageTypeToEnum(const FGameplayTag& DamageTypeTag);
 	static FGameplayTag ReplaceDamageTypeToTag(const EDamageTypeContext DamageTypeEnum);

@@ -139,32 +139,13 @@ UAbilityInfo* UAuraAbilitySystemLibrary::GetAbilityInfo(const UObject* WorldCont
 	return AuraGameMode->AbilityInfo;
 }
 
-bool UAuraAbilitySystemLibrary::IsBlockedHit(const FGameplayEffectContextHandle& EffectContextHandle)
+FDamageDataContext UAuraAbilitySystemLibrary::GetDamageData(const FGameplayEffectContextHandle& EffectContextHandle)
 {
 	if (const FAuraGameplayEffectContext* AuraEffectContext = static_cast<const FAuraGameplayEffectContext*>(EffectContextHandle.Get()))
 	{
-		return AuraEffectContext->IsBlockedHit();
+		return AuraEffectContext->GetDamageData();
 	}
-	
-	return false;
-}
-
-bool UAuraAbilitySystemLibrary::IsCriticalHit(const FGameplayEffectContextHandle& EffectContextHandle)
-{
-	if (const FAuraGameplayEffectContext* AuraEffectContext = static_cast<const FAuraGameplayEffectContext*>(EffectContextHandle.Get()))
-	{
-		return AuraEffectContext->IsCriticalHit();
-	}
-	return false;
-}
-
-EDamageTypeContext UAuraAbilitySystemLibrary::GetDamageType(const FGameplayEffectContextHandle& EffectContextHandle)
-{
-	if (const FAuraGameplayEffectContext* AuraEffectContext = static_cast<const FAuraGameplayEffectContext*>(EffectContextHandle.Get()))
-	{
-		return AuraEffectContext->GetDamageType();
-	}
-	return EDamageTypeContext::None;
+	return FDamageDataContext();
 }
 
 FDebuffDataContext UAuraAbilitySystemLibrary::GetDebuffData(const FGameplayEffectContextHandle& EffectContextHandle)
@@ -176,23 +157,32 @@ FDebuffDataContext UAuraAbilitySystemLibrary::GetDebuffData(const FGameplayEffec
 	return FDebuffDataContext();
 }
 
-void UAuraAbilitySystemLibrary::SetDamageTypeContext(FGameplayEffectContextHandle& EffectContextHandle, const FGameplayTag& InDamageType)
+void UAuraAbilitySystemLibrary::SetDamageDataContext(FGameplayEffectContextHandle& EffectContextHandle, const EDamageTypeContext DamageType, bool bIsBlocked, bool bIsCritical)
 {
 	if (FAuraGameplayEffectContext* AuraEffectContext = static_cast<FAuraGameplayEffectContext*>(EffectContextHandle.Get()))
 	{
-		AuraEffectContext->SetDamageTypeContext(ReplaceDamageTypeToEnum(InDamageType));
+		FDamageDataContext DamageData = GetDamageData(EffectContextHandle);
+		DamageData.DamageType = DamageType;
+		DamageData.bIsBlockedHit = bIsBlocked;
+		DamageData.bIsCriticalHit = bIsCritical;
+		AuraEffectContext->SetDamageDataContext(DamageData);
 	}
 }
 
-void UAuraAbilitySystemLibrary::SetDebuffDataContext(FGameplayEffectContextHandle& EffectContextHandle, const FGameplayTag& InDebuffType, const float InDamage, const float InDuration, const float InFrequency)
+void UAuraAbilitySystemLibrary::SetDeathImpulse(FGameplayEffectContextHandle& EffectContextHandle, const FVector& Impulse)
 {
 	if (FAuraGameplayEffectContext* AuraEffectContext = static_cast<FAuraGameplayEffectContext*>(EffectContextHandle.Get()))
 	{
-		FDebuffDataContext Data;
-		Data.DebuffType = ReplaceDebuffTypeToEnum(InDebuffType);
-		Data.DebuffDamage = InDamage;
-		Data.DebuffDuration = InDuration;
-		Data.DebuffFrequency = InFrequency;
+		FDamageDataContext DamageData = GetDamageData(EffectContextHandle);
+		DamageData.DeathImpulse = Impulse;
+		AuraEffectContext->SetDamageDataContext(DamageData);
+	}
+}
+
+void UAuraAbilitySystemLibrary::SetDebuffDataContext(FGameplayEffectContextHandle& EffectContextHandle, const FDebuffDataContext& Data)
+{
+	if (FAuraGameplayEffectContext* AuraEffectContext = static_cast<FAuraGameplayEffectContext*>(EffectContextHandle.Get()))
+	{
 		AuraEffectContext->SetDebuffDataContext(Data);
 	}
 }
@@ -283,22 +273,6 @@ FGameplayTag UAuraAbilitySystemLibrary::ReplaceDebuffTypeToTag(const EDebuffType
 	}
 	
 	return FGameplayTag();
-}
-
-void UAuraAbilitySystemLibrary::SetIsBlockedHit(FGameplayEffectContextHandle& EffectContextHandle, bool bInIsBlockedHit)
-{
-	if (FAuraGameplayEffectContext* AuraEffectContext = static_cast<FAuraGameplayEffectContext*>(EffectContextHandle.Get()))
-	{
-		AuraEffectContext->SetIsBlockedHit(bInIsBlockedHit);
-	}
-}
-
-void UAuraAbilitySystemLibrary::SetIsCriticalHit(FGameplayEffectContextHandle& EffectContextHandle, bool bInIsCriticalHit)
-{
-	if (FAuraGameplayEffectContext* AuraEffectContext = static_cast<FAuraGameplayEffectContext*>(EffectContextHandle.Get()))
-	{
-		AuraEffectContext->SetIsCriticalHit(bInIsCriticalHit);
-	}
 }
 
 void UAuraAbilitySystemLibrary::GetOverlappedLivePawns(const UObject* WorldContextObject, TArray<AActor*>& OutOverlappingActors, const TArray<AActor*>& ActorsToIgnore, float Radius, const FVector& SphereOrigin)

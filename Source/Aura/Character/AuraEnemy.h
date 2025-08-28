@@ -29,10 +29,10 @@ public:
 	virtual void RegisterPawn() override;
 	virtual void UnregisterPawn() override;
 	virtual int32 GetCharacterLevel_Implementation() override;
-	virtual void Die(bool bShouldAddImpulse, const FVector& Impulse) override;
+	virtual void Die(const FVector& Impulse) override;
 	// ~End of Combat Interface
 
-	virtual void MulticastHandleDeath_Implementation(bool bShouldAddImpulse, const FVector& Impulse) override;
+	virtual void MulticastHandleDeath_Implementation(const FVector& Impulse) override;
 	
 protected:
 	// ~AActor Interface

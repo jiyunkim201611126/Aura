@@ -71,11 +71,11 @@ FVector AAuraCharacterBase::GetCombatSocketLocation_Implementation(const FGamepl
 	return FVector::ZeroVector;
 }
 
-void AAuraCharacterBase::Die(bool bShouldAddImpulse, const FVector& Impulse)
+void AAuraCharacterBase::Die(const FVector& Impulse)
 {
 	// 서버에서만 호출되는 함수임이 명확하므로 권한 확인 필요 없이 등록 해제
 	UnregisterPawn();
-	MulticastHandleDeath(bShouldAddImpulse, Impulse);
+	MulticastHandleDeath(Impulse);
 }
 
 bool AAuraCharacterBase::IsDead_Implementation()
@@ -103,17 +103,11 @@ FOnDeath& AAuraCharacterBase::GetOnDeathDelegate()
 	return OnDeath;
 }
 
-void AAuraCharacterBase::MulticastHandleDeath_Implementation(bool bShouldAddImpulse, const FVector& Impulse)
-{
-	UWorld* World = GetWorld();
-	if (!World)
-	{
-		return;
-	}
-	
+void AAuraCharacterBase::MulticastHandleDeath_Implementation(const FVector& Impulse)
+{	
 	if (DeathSoundTag.IsValid())
 	{
-		UFXManagerSubsystem* FXManager = World->GetGameInstance()->GetSubsystem<UFXManagerSubsystem>();
+		UFXManagerSubsystem* FXManager = GetWorld()->GetGameInstance()->GetSubsystem<UFXManagerSubsystem>();
 		if (FXManager)
 		{
 			FXManager->AsyncPlaySoundAtLocation(DeathSoundTag, GetActorLocation());
@@ -136,11 +130,8 @@ void AAuraCharacterBase::MulticastHandleDeath_Implementation(bool bShouldAddImpu
 	
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
-	if (bShouldAddImpulse)
-	{
-		Weapon->AddImpulse(Impulse * Weapon->GetMass() * 100.f);
-		GetMesh()->AddImpulse(Impulse * GetMesh()->GetMass() * 300.f);
-	}
+	Weapon->AddImpulse(Impulse, NAME_None, true);
+	GetMesh()->AddImpulse(Impulse, NAME_None, true);
 
 	Dissolve();
 

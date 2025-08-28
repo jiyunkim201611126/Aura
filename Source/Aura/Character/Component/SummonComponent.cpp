@@ -24,7 +24,10 @@ void USummonComponent::CheckOwnerDie(const FOnAttributeChangeData& OnAttributeCh
 	{
 		for (auto Minion : CurrentMinions)
 		{
-			Cast<AAuraCharacterBase>(Minion.Get())->Die(false, FVector::ZeroVector);
+			if (ICombatInterface* CombatInterface = Cast<ICombatInterface>(Minion.Get()))
+			{
+				CombatInterface->Die(FVector::ZeroVector);
+			}
 		}
 	}
 }

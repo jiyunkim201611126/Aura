@@ -92,7 +92,12 @@ void UExecCalc_Debuff::Execute_Implementation(const FGameplayEffectCustomExecuti
 	}
 	
 	FGameplayEffectContextHandle EffectContextHandle = Spec.GetContext();
-	UAuraAbilitySystemLibrary::SetDebuffDataContext(EffectContextHandle, TypeTagForContext, Damage, Duration, Frequency);
+	FDebuffDataContext DebuffData = UAuraAbilitySystemLibrary::GetDebuffData(EffectContextHandle);
+	DebuffData.DebuffType = UAuraAbilitySystemLibrary::ReplaceDebuffTypeToEnum(TypeTagForContext);
+	DebuffData.DebuffDamage = Damage;
+	DebuffData.DebuffDuration = Duration;
+	DebuffData.DebuffFrequency = Frequency;
+	UAuraAbilitySystemLibrary::SetDebuffDataContext(EffectContextHandle, DebuffData);
 
 	// 이벤트 전달용 Attribute Modifier를 생성 및 할당합니다.
 	// Magnitude가 0이기 때문에 Attribute에 값 변화가 일어나지 않고 일어난다 해도 게임 플레이에 영향을 주지 않습니다.

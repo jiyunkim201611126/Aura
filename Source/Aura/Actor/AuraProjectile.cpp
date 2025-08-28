@@ -98,14 +98,26 @@ void AAuraProjectile::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, 
 		// Overlap 대상에게 데미지 부여
 		if (UAbilitySystemComponent* TargetASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(OtherActor))
 		{
-			for (auto& FGameplayEffectSpecHandle : DamageEffectSpecHandle)
+			TArray<TWeakObjectPtr<AActor>> TargetActors;
+			TargetActors.Add(OtherActor);
+			
+			if (DamageEffectContextHandle.IsValid() && DamageEffectSpecHandle.Num() > 0)
 			{
-				TargetASC->ApplyGameplayEffectSpecToSelf(*FGameplayEffectSpecHandle.Data.Get());
+				DamageEffectContextHandle.AddActors(TargetActors);
+				UAuraAbilitySystemLibrary::SetDeathImpulse(DamageEffectContextHandle, GetActorForwardVector() * DeathImpulseMagnitude);
+				for (auto& FGameplayEffectSpecHandle : DamageEffectSpecHandle)
+				{
+					TargetASC->ApplyGameplayEffectSpecToSelf(*FGameplayEffectSpecHandle.Data.Get());
+				}
 			}
 
-			for (auto& FGameplayEffectSpecHandle : DebuffEffectSpecHandle)
+			if (DebuffEffectContextHandle.IsValid() && DebuffEffectSpecHandle.Num() > 0)
 			{
-				TargetASC->ApplyGameplayEffectSpecToSelf(*FGameplayEffectSpecHandle.Data.Get());
+				DebuffEffectContextHandle.AddActors(TargetActors);
+				for (auto& FGameplayEffectSpecHandle : DebuffEffectSpecHandle)
+				{
+					TargetASC->ApplyGameplayEffectSpecToSelf(*FGameplayEffectSpecHandle.Data.Get());
+				}
 			}
 		}
 

@@ -56,6 +56,11 @@ void UAuraAbilitySystemComponent::AddCharacterPassiveAbilities(const TArray<TSub
 		FGameplayAbilitySpec AbilitySpec = FGameplayAbilitySpec(AbilityClass, 1);
 		// PassiveAbility이므로, 부여와 동시에 발동합니다.
 		GiveAbilityAndActivateOnce(AbilitySpec);
+			
+		if (UAuraGameplayAbility* Ability = Cast<UAuraGameplayAbility>(AbilitySpec.Ability))
+		{
+			Ability->RegisterAbilityToUsableTypeManagers(this);
+		}
 	}
 }
 
@@ -65,6 +70,11 @@ void UAuraAbilitySystemComponent::AddAbilities(const TArray<TSubclassOf<UGamepla
 	{
 		FGameplayAbilitySpec AbilitySpec = FGameplayAbilitySpec(AbilityClass, 1);
 		GiveAbility(AbilitySpec);
+			
+		if (UAuraGameplayAbility* Ability = Cast<UAuraGameplayAbility>(AbilitySpec.Ability))
+		{
+			Ability->RegisterAbilityToUsableTypeManagers(this);
+		}
 	}
 }
 

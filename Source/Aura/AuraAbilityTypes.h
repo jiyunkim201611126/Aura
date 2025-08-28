@@ -18,6 +18,26 @@ enum class EDamageTypeContext : uint8
 	Max
 };
 
+USTRUCT(BlueprintType)
+struct FDamageDataContext
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+	EDamageTypeContext DamageType = EDamageTypeContext::None;
+	
+	UPROPERTY()
+	bool bIsBlockedHit = false;
+
+	UPROPERTY()
+	bool bIsCriticalHit = false;
+
+	UPROPERTY()
+	FVector_NetQuantize DeathImpulse = FVector_NetQuantize::ZeroVector;
+
+	bool NetSerialize(FArchive& Ar, UPackageMap* Map, bool& bOutSuccess);
+};
+
 UENUM(BlueprintType)
 enum class EDebuffTypeContext : uint8
 {
@@ -71,14 +91,10 @@ struct FAuraGameplayEffectContext : public FGameplayEffectContext
 	GENERATED_BODY()
 
 public:
-	bool IsBlockedHit() const { return bIsBlockedHit; }
-	bool IsCriticalHit() const { return bIsCriticalHit; }
-	EDamageTypeContext GetDamageType() const { return  DamageType; }
+	const FDamageDataContext& GetDamageData() const { return DamageData; }
 	const FDebuffDataContext& GetDebuffData() const { return DebuffData; }
 
-	void SetIsBlockedHit(bool bInIsBlockedHit) { bIsBlockedHit = bInIsBlockedHit; }
-	void SetIsCriticalHit(bool bInIsCriticalHit) { bIsCriticalHit = bInIsCriticalHit; }
-	void SetDamageTypeContext(const EDamageTypeContext InDamageType);
+	void SetDamageDataContext(const FDamageDataContext& DamageDataContext);
 	void SetDebuffDataContext(const FDebuffDataContext& DebuffDataContext);
 	
 	virtual UScriptStruct* GetScriptStruct() const override
@@ -103,13 +119,7 @@ public:
 
 protected:
 	UPROPERTY()
-	bool bIsBlockedHit = false;
-
-	UPROPERTY()
-	bool bIsCriticalHit = false;
-
-	UPROPERTY()
-	EDamageTypeContext DamageType = EDamageTypeContext::None;
+	FDamageDataContext DamageData;
 
 	UPROPERTY()
 	FDebuffDataContext DebuffData;

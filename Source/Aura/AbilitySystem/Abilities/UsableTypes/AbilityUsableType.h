@@ -10,7 +10,7 @@ struct FGameplayAbilityActorInfo;
 class UAuraAbilitySystemComponent;
 class UAuraGameplayAbility;
 
-UCLASS(Abstract)
+UCLASS(Abstract, BlueprintType, EditInlineNew, DefaultToInstanced)
 class AURA_API UAbilityUsableType : public UObject
 {
 	GENERATED_BODY()

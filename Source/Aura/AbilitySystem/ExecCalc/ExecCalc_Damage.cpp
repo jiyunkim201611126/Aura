@@ -131,6 +131,7 @@ void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecuti
 	FGameplayEffectContextHandle EffectContextHandle = Spec.GetContext();
 
 	// 일치하는 데미지 타입 탐색 후 부여된 데미지에 따른 계산 진행
+	FGameplayTag DamageType;
 	float Damage = 0.f;
 	for (auto& Pair : FAuraGameplayTags::Get().DamageTypesToResistances)
 	{
@@ -149,7 +150,7 @@ void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecuti
 			ExecutionParams.AttemptCalculateCapturedAttributeMagnitude(Resistance, EvaluationParameters, ResistanceTypeValue);
 			// Resistance는 음수일 가능성도 있으므로 Clamp하지 않음
 
-			UAuraAbilitySystemLibrary::SetDamageTypeContext(EffectContextHandle, Pair.Key);
+			DamageType = Pair.Key;
 
 			// 속성 데미지 계산 결과 반영
 			DamageTypeValue *= ( 100.f - ResistanceTypeValue ) / 100.f;
@@ -221,12 +222,9 @@ void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecuti
 	// EffectiveArmor %만큼 데미지 경감
 	// EffectiveArmor: 5 / 결과: 데미지의 95%만 적용 (레벨 차이 10 미만인 경우만)
 	Damage *= FMath::Clamp(100 - EffectiveArmor * EffectiveArmorCoefficient, 0.f, 100.f) / 100.f;
-	
 
-	// Block 및 Critical 계산 결과를 Context에 기록
-	UAuraAbilitySystemLibrary::SetIsBlockedHit(EffectContextHandle, bBlocked);
-	UAuraAbilitySystemLibrary::SetIsCriticalHit(EffectContextHandle, bCritical);
-	
+	// Damage, Block 등 계산 결과를 Context에 기록
+	UAuraAbilitySystemLibrary::SetDamageDataContext(EffectContextHandle, UAuraAbilitySystemLibrary::ReplaceDamageTypeToEnum(DamageType), bBlocked, bCritical);
 	
 	// IncomingDamage Attribute에 Damage만큼 Additive(더하기) 연산을 적용하라는 Modifier 데이터를 생성
 	const FGameplayModifierEvaluatedData EvaluatedData(UAuraAttributeSet::GetIncomingDamageAttribute(), EGameplayModOp::Additive, Damage);

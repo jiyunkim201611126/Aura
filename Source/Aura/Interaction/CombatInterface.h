@@ -47,7 +47,7 @@ public:
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
 	void UpdateFacingTarget(const FVector& FacingTarget);
 
-	virtual void Die(bool bShouldAddImpulse, const FVector& Impulse) = 0;
+	virtual void Die(const FVector& Impulse) = 0;
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	bool IsDead();

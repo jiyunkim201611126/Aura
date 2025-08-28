@@ -31,8 +31,16 @@ public:
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UProjectileMovementComponent> ProjectileMovement;
 
+	UPROPERTY()
+	FGameplayEffectContextHandle DamageEffectContextHandle;
+
 	UPROPERTY(BlueprintReadWrite, meta = (ExposeOnSpawn = true))
 	TArray<FGameplayEffectSpecHandle> DamageEffectSpecHandle;
+
+	float DeathImpulseMagnitude = 0.f;
+
+	UPROPERTY()
+	FGameplayEffectContextHandle DebuffEffectContextHandle;
 
 	UPROPERTY(BlueprintReadWrite, meta = (ExposeOnSpawn = true))
 	TArray<FGameplayEffectSpecHandle> DebuffEffectSpecHandle;

@@ -2,6 +2,7 @@
 
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystemComponent.h"
+#include "Aura/AbilitySystem/AuraAbilitySystemLibrary.h"
 #include "Aura/Interaction/CombatInterface.h"
 #include "Aura/Manager/AuraTextManager.h"
 
@@ -18,7 +19,6 @@ TArray<FGameplayEffectSpecHandle> UAuraDamageGameplayAbility::MakeDamageSpecHand
 		// EffectContext를 생성 및 할당합니다.
 		// MakeEffectContext 함수는 자동으로 OwnerActor를 Instigator로, AvatarActor를 EffectCauser로 할당합니다.
 		DamageEffectContextHandle = GetAbilitySystemComponentFromActorInfo()->MakeEffectContext();
-		DamageEffectContextHandle.AddSourceObject(GetAvatarActorFromActorInfo());
 	}
 	
 	TArray<FGameplayEffectSpecHandle> DamageSpecs;
@@ -41,13 +41,16 @@ TArray<FGameplayEffectSpecHandle> UAuraDamageGameplayAbility::MakeDamageSpecHand
 }
 
 void UAuraDamageGameplayAbility::CauseDamage(AActor* TargetActor, TArray<FGameplayEffectSpecHandle> DamageSpecs)
-{	
-	// 관련 Actor에 추가
+{
 	if (DamageEffectContextHandle.IsValid())
 	{
+		// 대상을 관련 액터에 추가합니다.
 		TArray<TWeakObjectPtr<AActor>> TargetActors;
 		TargetActors.Add(TargetActor);
 		DamageEffectContextHandle.AddActors(TargetActors);
+
+		// DeathImpulse를 세팅합니다.
+		UAuraAbilitySystemLibrary::SetDeathImpulse(DamageEffectContextHandle, GetAvatarActorFromActorInfo()->GetActorForwardVector() * DeathImpulseMagnitude);
 	}
 
 	for (auto& Spec : DamageSpecs)

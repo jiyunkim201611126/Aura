@@ -27,7 +27,7 @@ public:
 	
 	// ~Combat Interface
 	virtual FVector GetCombatSocketLocation_Implementation(const FGameplayTag& SocketTag) override;
-	virtual void Die(bool bShouldAddImpulse, const FVector& Impulse) override;
+	virtual void Die(const FVector& Impulse) override;
 	virtual bool IsDead_Implementation() override;
 	virtual AActor* GetAvatar_Implementation() override;
 	virtual ECharacterRank GetCharacterRank_Implementation() override;
@@ -36,7 +36,7 @@ public:
 	// ~End of Combat Interface
 
 	UFUNCTION(NetMulticast, Reliable)
-	virtual void MulticastHandleDeath(bool bShouldAddImpulse, const FVector& Impulse);
+	virtual void MulticastHandleDeath(const FVector& Impulse);
 	
 protected:
 	// ~AActor Interface

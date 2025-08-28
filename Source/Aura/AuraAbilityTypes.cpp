@@ -1,5 +1,19 @@
 ﻿#include "AuraAbilityTypes.h"
 
+bool FDamageDataContext::NetSerialize(FArchive& Ar, UPackageMap* Map, bool& bOutSuccess)
+{
+	uint8 DamageTypeByte = static_cast<uint8>(DamageType);
+	Ar.SerializeBits(&DamageTypeByte, 8);
+	DamageType = static_cast<EDamageTypeContext>(DamageTypeByte);
+
+	Ar << bIsBlockedHit;
+	Ar << bIsCriticalHit;
+	Ar << DeathImpulse;
+
+	bOutSuccess = true;
+	return true;
+}
+
 bool FDebuffDataContext::NetSerialize(FArchive& Ar, UPackageMap* Map, bool& bOutSuccess)
 {
 	uint8 DebuffTypeByte = static_cast<uint8>(DebuffType);
@@ -14,9 +28,9 @@ bool FDebuffDataContext::NetSerialize(FArchive& Ar, UPackageMap* Map, bool& bOut
 	return true;
 }
 
-void FAuraGameplayEffectContext::SetDamageTypeContext(const EDamageTypeContext InDamageType)
+void FAuraGameplayEffectContext::SetDamageDataContext(const FDamageDataContext& DamageDataContext)
 {
-	DamageType = InDamageType;
+	DamageData = DamageDataContext;
 }
 
 void FAuraGameplayEffectContext::SetDebuffDataContext(const FDebuffDataContext& DebuffDataContext)
@@ -58,26 +72,18 @@ bool FAuraGameplayEffectContext::NetSerialize(FArchive& Ar, class UPackageMap* M
 		{
 			RepBits |= 1 << 6;
 		}
-		if (bIsBlockedHit)
+		if (DamageData.DamageType != EDamageTypeContext::None)
 		{
 			RepBits |= 1 << 7;
 		}
-		if (bIsCriticalHit)
-		{
-			RepBits |= 1 << 8;
-		}
-		if (DamageType != EDamageTypeContext::None)
-		{
-			RepBits |= 1 << 9;
-		}
 		if (DebuffData.DebuffType != EDebuffTypeContext::None)
 		{
-			RepBits |= 1 << 10;
+			RepBits |= 1 << 8;
 		}
 	}
 
 	// uint32를 몽땅 쓰지 않고 필요한 만큼의 길이로 잘라내 패킷 최적화
-	Ar.SerializeBits(&RepBits, 11);
+	Ar.SerializeBits(&RepBits, 9);
 
 	if (RepBits & (1 << 0))
 	{
@@ -121,19 +127,11 @@ bool FAuraGameplayEffectContext::NetSerialize(FArchive& Ar, class UPackageMap* M
 	}
 	if (RepBits & (1 << 7))
 	{
-		Ar << bIsBlockedHit;
-		bIsBlockedHit = true;
+		bool bSuccess = false;
+		DamageData.NetSerialize(Ar, Map, bOutSuccess);
+		bOutSuccess &= bSuccess;
 	}
 	if (RepBits & (1 << 8))
-	{
-		Ar << bIsCriticalHit;
-		bIsCriticalHit = true;
-	}
-	if (RepBits & (1 << 9))
-	{
-		Ar << DamageType;
-	}
-	if (RepBits & (1 << 10))
 	{
 		bool bSuccess = false;
 		DebuffData.NetSerialize(Ar, Map, bOutSuccess);

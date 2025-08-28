@@ -215,20 +215,8 @@ void UAuraAttributeSet::ApplyIncomingDamage(const FEffectProperties& Props, cons
 			ICombatInterface* CombatInterface = Cast<ICombatInterface>(Props.TargetAvatarActor);
 			if (CombatInterface)
 			{
-				bool bShouldAddImpulse = false;
-				FVector Impulse = FVector::ZeroVector;
-				const AActor* SourceObject = Cast<AActor>(Props.EffectContextHandle.Get()->GetSourceObject());
-				if (SourceObject)
-				{
-					bShouldAddImpulse = true;
-					FVector TargetLocation = Props.TargetAvatarActor->GetActorLocation();
-					TargetLocation.Z = 0.f;
-					FVector SourceLocation = SourceObject->GetActorLocation();
-					SourceLocation.Z = 0.f;
-					Impulse = (TargetLocation - SourceLocation).GetSafeNormal();
-					Impulse.Z = 0.3f;
-				}
-				CombatInterface->Die(bShouldAddImpulse, Impulse);
+				const FDamageDataContext DamageData = UAuraAbilitySystemLibrary::GetDamageData(Props.EffectContextHandle);
+				CombatInterface->Die(DamageData.DeathImpulse);
 			}
 
 			// 적을 처치했으므로, XP 이벤트를 송신합니다.
@@ -247,10 +235,8 @@ void UAuraAttributeSet::ApplyIncomingDamage(const FEffectProperties& Props, cons
 				Props.TargetASC->TryActivateAbilitiesByTag(HitReactTag);
 			}
 		}
-		
-		const bool bBlockedHit = UAuraAbilitySystemLibrary::IsBlockedHit(Props.EffectContextHandle);
-		const bool bCriticalHit = UAuraAbilitySystemLibrary::IsCriticalHit(Props.EffectContextHandle);
-		const EDamageTypeContext DamageType = UAuraAbilitySystemLibrary::GetDamageType(Props.EffectContextHandle);
+
+		const FDamageDataContext DamageData = UAuraAbilitySystemLibrary::GetDamageData(Props.EffectContextHandle);
 
 		// 데미지를 Text로 표시하는 위젯 컴포넌트를 AttributeSet이 직접 스폰하려면 그 클래스를 참조하고 있어야 합니다.
 		// 즉, 클라이언트당 하나만 있어도 되는 포인터가 AttributeSet마다 하나씩 있게 되기 때문에 메모리가 낭비됩니다.
@@ -258,7 +244,7 @@ void UAuraAttributeSet::ApplyIncomingDamage(const FEffectProperties& Props, cons
 		// 다만 NetMulticast 함수는 '그 액터가 클라이언트에 존재할 때'만 호출되므로, PlayerController를 순회하며 Client함수를 호출합니다.
 		for (TActorIterator<AAuraPlayerController> It(GetWorld()); It; ++It)
 		{
-			It->SpawnDamageText(LocalIncomingDamage, Props.TargetAvatarActor, bBlockedHit, bCriticalHit, DamageType);
+			It->SpawnDamageText(LocalIncomingDamage, Props.TargetAvatarActor, DamageData.bIsBlockedHit, DamageData.bIsCriticalHit, DamageData.DamageType);
 		}
 	}
 	else if (LocalIncomingDamage < 0.01f)
@@ -313,24 +299,25 @@ void UAuraAttributeSet::ApplyDebuff(const FEffectProperties& Props) const
 	const FGameplayEffectContextHandle EffectContextHandle = Props.EffectContextHandle;
 	
 	const FDebuffDataContext DebuffData = UAuraAbilitySystemLibrary::GetDebuffData(EffectContextHandle);
-	if (DebuffData.DebuffType == EDebuffTypeContext::Burn)
+	
+	// 이펙트 적용 시 GrantedTag가 자동으로 부여되므로, 그 전에 이미 해당 디버프가 부여되어있는지 확인해 나이아가라가 중복으로 생기지 않도록 방지합니다.
+	const FGameplayTag DebuffTypeTag = UAuraAbilitySystemLibrary::ReplaceDebuffTypeToTag(DebuffData.DebuffType);
+	if (!Props.TargetASC->HasMatchingGameplayTag(DebuffTypeTag))
 	{
-		// 이펙트 적용 시 GrantedTag가 자동으로 부여되므로, 그 전에 이미 해당 디버프가 부여되어있는지 확인해 나이아가라가 중복으로 생기지 않도록 방지합니다.
-		const FGameplayTag DebuffTypeTag = UAuraAbilitySystemLibrary::ReplaceDebuffTypeToTag(DebuffData.DebuffType);
-		if (!Props.TargetASC->HasMatchingGameplayTag(DebuffTypeTag))
+		if (Props.TargetCharacter)
 		{
-			if (Props.TargetCharacter)
+			UDebuffNiagaraComponent* NiagaraComponent = NewObject<UDebuffNiagaraComponent>(Props.TargetCharacter);
+			if (NiagaraComponent)
 			{
-				UDebuffNiagaraComponent* NiagaraComponent = NewObject<UDebuffNiagaraComponent>(Props.TargetCharacter);
-				if (NiagaraComponent)
-				{
-					NiagaraComponent->DebuffTag = DebuffTypeTag;
-					NiagaraComponent->SetupAttachment(Props.TargetCharacter->GetMesh());
-					NiagaraComponent->RegisterComponent();
-				}
+				NiagaraComponent->DebuffTag = DebuffTypeTag;
+				NiagaraComponent->SetupAttachment(Props.TargetCharacter->GetMesh(), FName("DebuffSocket"));
+				NiagaraComponent->RegisterComponent();
 			}
 		}
-		
+	}
+	
+	if (DebuffData.DebuffType == EDebuffTypeContext::Burn)
+	{
 		ApplyBurnDebuff(Props, EffectContextHandle, DebuffData);
 	}
 }
@@ -365,8 +352,11 @@ void UAuraAttributeSet::ApplyBurnDebuff(const FEffectProperties& Props, FGamepla
 	if (MutableSpec)
 	{
 		MutableSpec->DynamicGrantedTags.AddTag(UAuraAbilitySystemLibrary::ReplaceDebuffTypeToTag(DebuffData.DebuffType));
+		FDamageDataContext DamageData = UAuraAbilitySystemLibrary::GetDamageData(EffectContextHandle);
+		DamageData.DamageType = UAuraAbilitySystemLibrary::ReplaceDamageTypeToEnum(DamageType);
+		
 		FAuraGameplayEffectContext* AuraContext = static_cast<FAuraGameplayEffectContext*>(EffectContextHandle.Get());
-		AuraContext->SetDamageTypeContext(UAuraAbilitySystemLibrary::ReplaceDamageTypeToEnum(DamageType));
+		AuraContext->SetDamageDataContext(DamageData);
      
 		Props.TargetASC->ApplyGameplayEffectSpecToSelf(*MutableSpec);
 	}

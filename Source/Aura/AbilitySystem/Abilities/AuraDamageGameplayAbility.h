@@ -39,4 +39,7 @@ protected:
 	// 데미지 타입과 그 속성 데미지
 	UPROPERTY(EditDefaultsOnly, Category = "Damage")
 	TMap<FGameplayTag, FScalableFloat> DamageTypes;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Damage")
+	float DeathImpulseMagnitude = 300.f;
 };
