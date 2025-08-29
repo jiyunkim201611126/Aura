@@ -6,35 +6,27 @@ TArray<FVector> UAuraSummonAbility::GetSpawnLocations()
 {
 	const FVector Location = GetAvatarActorFromActorInfo()->GetActorLocation();
 	const FVector Forward = GetAvatarActorFromActorInfo()->GetActorForwardVector();
-
-	// 스폰 가능한 하수인 수를 계산합니다.
-	int32 SpawnableCount = 0;
-	if (AActor* Avatar = GetAvatarActorFromActorInfo())
-	{
-		if (USummonComponent* SummonComponent = Avatar->FindComponentByClass<USummonComponent>())
-		{
-			SpawnableCount = SummonComponent->SpawnableSummonMinionCount;
-			SpawnableCount = FMath::Min(SpawnableCount, NumMinions);
-		}
-	}
 	
-	// 스폰 지점을 정면 기준으로 부채꼴 모양으로 펼칩니다.
+	// 소환 위치를 지정합니다.
 	TArray<FVector> SpawnLocations;
-	if (SpawnableCount > 0)
+	if (NumMinions > 0)
 	{
-		float DeltaSpread = SpawnableCount > 1 ? SpawnSpread / (SpawnableCount - 1) : 0.f;
+		// 소환 가능한 수만큼 부채꼴 모양으로 펼칩니다.
+		const float DeltaSpread = NumMinions > 1 ? SpawnSpread / (NumMinions - 1) : 0.f;
 
 		const FVector LeftOfSpread = Forward.RotateAngleAxis(-SpawnSpread / 2.f, FVector::UpVector);
-		for (int32 i = 0; i < SpawnableCount; i++)
+		for (int32 i = 0; i < NumMinions; i++)
 		{
-			const FVector Direction = SpawnableCount > 1 ? LeftOfSpread.RotateAngleAxis(DeltaSpread * i, FVector::UpVector) : Forward;
+			const FVector Direction = NumMinions > 1 ? LeftOfSpread.RotateAngleAxis(DeltaSpread * i, FVector::UpVector) : Forward;
 			FVector ChosenSpawnLocation = Location + Direction * FMath::FRandRange(MinSpawnDistance, MaxSpawnDistance);
 
+			// 부채꼴 모양으로 펼쳐 허공에 점을 찍고, 그 위치에서 바닥으로 라인트레이스해 바닥을 검출해냅니다.
 			FHitResult Hit;
 			GetWorld()->LineTraceSingleByChannel(Hit, ChosenSpawnLocation, ChosenSpawnLocation - FVector(0.f, 0.f, 400.f), ECC_Visibility);
 			if (Hit.bBlockingHit)
 			{
-				ChosenSpawnLocation = Hit.ImpactPoint;
+				// 바닥보다 살짝 위를 지정합니다.
+				ChosenSpawnLocation = Hit.ImpactPoint + FVector(0.f, 0.f, 10.f);
 			}
 			
 			SpawnLocations.Add(ChosenSpawnLocation);
@@ -55,8 +47,7 @@ void UAuraSummonAbility::OnGiveAbility(const FGameplayAbilityActorInfo* ActorInf
 	Super::OnGiveAbility(ActorInfo, Spec);
 
 	// 이 Ability가 부여될 때, 대상에게 SummonComponent를 붙여줍니다.
-	AActor* Avatar = ActorInfo->AvatarActor.Get();
-	if (Avatar)
+	if (AActor* Avatar = ActorInfo->AvatarActor.Get())
 	{
 		if (!Avatar->FindComponentByClass<USummonComponent>())
 		{
@@ -68,32 +59,16 @@ void UAuraSummonAbility::OnGiveAbility(const FGameplayAbilityActorInfo* ActorInf
 
 bool UAuraSummonAbility::CheckCost(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, FGameplayTagContainer* OptionalRelevantTags) const
 {
-	// 소환 가능한 하수인 수를 계산합니다.
-	int32 SpawnableCount = 0;
-	if (AActor* Avatar = GetAvatarActorFromActorInfo())
+	if (const AActor* Avatar = ActorInfo->AvatarActor.Get())
 	{
-		if (USummonComponent* SummonComponent = Avatar->FindComponentByClass<USummonComponent>())
+		if (const USummonComponent* SummonComponent = Avatar->FindComponentByClass<USummonComponent>())
 		{
-			SpawnableCount = SummonComponent->SpawnableSummonMinionCount;
-			SpawnableCount = FMath::Min(SpawnableCount, NumMinions);
+			if (!SummonComponent->CanSummon())
+			{
+				return false;
+			}
 		}
-	}
-
-	// 소환 가능한 하수인이 없다면 false를 반환합니다.
-	if (SpawnableCount <= 0)
-	{
-		return false;
 	}
 	
 	return Super::CheckCost(Handle, ActorInfo, OptionalRelevantTags);
-}
-
-void UAuraSummonAbility::ApplyCost(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo) const
-{
-	Super::ApplyCost(Handle, ActorInfo, ActivationInfo);
-}
-
-void UAuraSummonAbility::OnRemoveAbility(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec)
-{
-	Super::OnRemoveAbility(ActorInfo, Spec);
 }

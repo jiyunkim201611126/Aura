@@ -8,28 +8,32 @@ void USummonComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	UAbilitySystemComponent* OwnerASC = GetOwner()->FindComponentByClass<UAbilitySystemComponent>();
-	if (OwnerASC)
+	if (ICombatInterface* Owner = Cast<ICombatInterface>(GetOwner()))
 	{
-		OwnerASC->GetGameplayAttributeValueChangeDelegate(UAuraAttributeSet::GetHealthAttribute()).AddUObject(this, &ThisClass::CheckOwnerDie);
+		Owner->GetOnDeathDelegate().AddDynamic(this, &ThisClass::OnOwnerDied);
 	}
 }
 
-void USummonComponent::CheckOwnerDie(const FOnAttributeChangeData& OnAttributeChangeData)
+void USummonComponent::OnOwnerDied(AActor* DeathActor)
 {
-	float NewHealth = OnAttributeChangeData.NewValue;
-	float OldHealth = OnAttributeChangeData.OldValue;
-
-	if (NewHealth <= 0.f && OldHealth > 0.f)
+	for (auto Minion : CurrentMinions)
 	{
-		for (auto Minion : CurrentMinions)
+		if (ICombatInterface* CombatInterface = Cast<ICombatInterface>(Minion.Get()))
 		{
-			if (ICombatInterface* CombatInterface = Cast<ICombatInterface>(Minion.Get()))
-			{
-				CombatInterface->Die(FVector::ZeroVector);
-			}
+			CombatInterface->Die(FVector::ZeroVector);
+		}
+		
+		Minion->OnDestroyed.RemoveDynamic(this, &ThisClass::RemoveMinion);
+		if (CurrentMinions.Contains(Minion))
+		{
+			CurrentMinions.Remove(Minion);
 		}
 	}
+}
+
+bool USummonComponent::CanSummon() const
+{
+	return MaxSummonMinionCount > CurrentMinions.Num();
 }
 
 void USummonComponent::AddMinion(AActor* InMinion)
@@ -42,7 +46,6 @@ void USummonComponent::AddMinion(AActor* InMinion)
 	if (!CurrentMinions.Contains(InMinion))
 	{
 		CurrentMinions.Add(InMinion);
-		--SpawnableSummonMinionCount;
 		InMinion->OnDestroyed.AddDynamic(this, &ThisClass::RemoveMinion);
 	}
 }
@@ -58,14 +61,4 @@ void USummonComponent::RemoveMinion(AActor* DestroyedActor)
 	{
 		CurrentMinions.Remove(DestroyedActor);
 	}
-
-	if (ResetCountThreshold >= CurrentMinions.Num())
-	{
-		ResetSpawnableCount();
-	}
-}
-
-void USummonComponent::ResetSpawnableCount()
-{
-	SpawnableSummonMinionCount = MaxSummonMinionCount;
 }

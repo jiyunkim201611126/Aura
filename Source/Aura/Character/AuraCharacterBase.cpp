@@ -121,18 +121,17 @@ void AAuraCharacterBase::MulticastHandleDeath_Implementation(const FVector& Impu
 	Weapon->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
 	Weapon->SetCollisionResponseToChannel(ECC_WorldStatic, ECR_Block);
 	Weapon->SetAnimationMode(EAnimationMode::Type::AnimationSingleNode);
+	Weapon->AddImpulse(Impulse, NAME_None, true);
 	
 	GetMesh()->SetEnableGravity(true);
 	GetMesh()->SetSimulatePhysics(true);
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
 	GetMesh()->SetCollisionResponseToChannel(ECC_WorldStatic, ECR_Block);
 	GetMesh()->SetAnimationMode(EAnimationMode::Type::AnimationSingleNode);
+	GetMesh()->AddImpulseToAllBodiesBelow(Impulse, NAME_None, true, true);
 	
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-
-	Weapon->AddImpulse(Impulse, NAME_None, true);
-	GetMesh()->AddImpulse(Impulse, NAME_None, true);
-
+	
 	Dissolve();
 
 	bDead = true;

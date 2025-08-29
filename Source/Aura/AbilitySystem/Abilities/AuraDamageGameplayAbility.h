@@ -41,5 +41,5 @@ protected:
 	TMap<FGameplayTag, FScalableFloat> DamageTypes;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Damage")
-	float DeathImpulseMagnitude = 300.f;
+	float DeathImpulseMagnitude = 1000.f;
 };
