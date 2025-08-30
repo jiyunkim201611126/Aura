@@ -10,6 +10,11 @@ bool FDamageDataContext::NetSerialize(FArchive& Ar, UPackageMap* Map, bool& bOut
 	Ar << bIsCriticalHit;
 	Ar << DeathImpulse;
 
+	if (!KnockbackForce.IsZero())
+	{
+		Ar << KnockbackForce;
+	}
+
 	bOutSuccess = true;
 	return true;
 }
@@ -28,9 +33,21 @@ bool FDebuffDataContext::NetSerialize(FArchive& Ar, UPackageMap* Map, bool& bOut
 	return true;
 }
 
-void FAuraGameplayEffectContext::SetDamageDataContext(const FDamageDataContext& DamageDataContext)
+void FAuraGameplayEffectContext::SetDamageDataContext(const EDamageTypeContext DamageType, bool bIsBlocked, bool bIsCritical)
 {
-	DamageData = DamageDataContext;
+	DamageData.DamageType = DamageType;
+	DamageData.bIsBlockedHit = bIsBlocked;
+	DamageData.bIsCriticalHit = bIsCritical;
+}
+
+void FAuraGameplayEffectContext::SetDeathImpulse(const FVector& Impulse)
+{
+	DamageData.DeathImpulse = Impulse;
+}
+
+void FAuraGameplayEffectContext::SetKnockbackForce(const FVector& Force)
+{
+	DamageData.KnockbackForce = Force;
 }
 
 void FAuraGameplayEffectContext::SetDebuffDataContext(const FDebuffDataContext& DebuffDataContext)

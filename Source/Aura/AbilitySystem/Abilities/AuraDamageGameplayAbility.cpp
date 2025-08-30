@@ -49,7 +49,7 @@ void UAuraDamageGameplayAbility::CauseDamage(AActor* TargetActor, TArray<FGamepl
 		TargetActors.Add(TargetActor);
 		DamageEffectContextHandle.AddActors(TargetActors);
 
-		// DeathImpulse를 세팅합니다.
+		// 여기선 사망 여부를 알 수 없으므로, DeathImpulse를 일단 세팅합니다.
 		UAuraAbilitySystemLibrary::SetDeathImpulse(DamageEffectContextHandle, GetAvatarActorFromActorInfo()->GetActorForwardVector() * DeathImpulseMagnitude);
 	}
 

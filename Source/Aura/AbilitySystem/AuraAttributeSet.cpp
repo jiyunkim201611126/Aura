@@ -348,6 +348,7 @@ void UAuraAttributeSet::ApplyBurnDebuff(const FEffectProperties& Props, FGamepla
 	ModifierInfo.Attribute = GetIncomingDamageAttribute();
      
 	// Context를 그대로 재사용해 EffectSpec을 생성합니다.
+	// 애초에 Damage Effect가 아니였기 때문에 새로운 Damage 관련 정보를 Context에 할당해도 무방합니다.
 	FGameplayEffectSpec* MutableSpec = new FGameplayEffectSpec(Effect, EffectContextHandle, 1.f);
 	if (MutableSpec)
 	{
@@ -356,7 +357,7 @@ void UAuraAttributeSet::ApplyBurnDebuff(const FEffectProperties& Props, FGamepla
 		DamageData.DamageType = UAuraAbilitySystemLibrary::ReplaceDamageTypeToEnum(DamageType);
 		
 		FAuraGameplayEffectContext* AuraContext = static_cast<FAuraGameplayEffectContext*>(EffectContextHandle.Get());
-		AuraContext->SetDamageDataContext(DamageData);
+		AuraContext->SetDamageDataContext(DamageData.DamageType, DamageData.bIsBlockedHit, DamageData.bIsCriticalHit);
      
 		Props.TargetASC->ApplyGameplayEffectSpecToSelf(*MutableSpec);
 	}

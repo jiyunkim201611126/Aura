@@ -18,12 +18,20 @@ protected:
 	virtual void BeginPlay() override;
 	// ~End of ActorComponent Interface
 
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
 	void DebuffTagChanged(const FGameplayTag CallbackTag, int32 NewCount);
 
 	UFUNCTION()
 	void OnOwnerDeath(AActor* DeadActor);
+
+	UFUNCTION()
+	void OnRep_DebuffTag();
+
+	UFUNCTION(Client, Reliable)
+	void ClientDeactivateNiagara();
 	
 public:
-	UPROPERTY()
+	UPROPERTY(ReplicatedUsing = OnRep_DebuffTag)
 	FGameplayTag DebuffTag;
 };

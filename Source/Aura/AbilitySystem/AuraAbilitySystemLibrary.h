@@ -59,7 +59,10 @@ public:
 	static void SetDamageDataContext(UPARAM(ref) FGameplayEffectContextHandle& EffectContextHandle, const EDamageTypeContext DamageType, bool bIsBlocked, bool bIsCritical);
 	
 	UFUNCTION(Category = "AuraAbilitySystemLibrary | GameplayEffects | Damage")
-	static void SetDeathImpulse(FGameplayEffectContextHandle& EffectContextHandle, const FVector& Impulse);
+	static void SetDeathImpulse(UPARAM(ref) FGameplayEffectContextHandle& EffectContextHandle, const FVector& Impulse);
+	
+	UFUNCTION(Category = "AuraAbilitySystemLibrary | GameplayEffects | Damage")
+	static void SetKnockbackForce(UPARAM(ref) FGameplayEffectContextHandle& EffectContextHandle, const FVector& Force);
 
 	UFUNCTION(Category = "AuraAbilitySystemLibrary | GameplayEffects | Debuff")
 	static void SetDebuffDataContext(UPARAM(ref) FGameplayEffectContextHandle& EffectContextHandle, const FDebuffDataContext& Data);

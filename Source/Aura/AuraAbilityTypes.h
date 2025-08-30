@@ -10,7 +10,7 @@
 UENUM(BlueprintType)
 enum class EDamageTypeContext : uint8
 {
-	None,
+	None, // 무속성 데미지가 아니고, 데미지 부여 실패를 의미합니다.
 	Fire,
 	Lightning,
 	Arcane,
@@ -34,6 +34,9 @@ struct FDamageDataContext
 
 	UPROPERTY()
 	FVector_NetQuantize DeathImpulse = FVector_NetQuantize::ZeroVector;
+
+	UPROPERTY()
+	FVector_NetQuantize KnockbackForce = FVector_NetQuantize::ZeroVector;
 
 	bool NetSerialize(FArchive& Ar, UPackageMap* Map, bool& bOutSuccess);
 };
@@ -94,7 +97,9 @@ public:
 	const FDamageDataContext& GetDamageData() const { return DamageData; }
 	const FDebuffDataContext& GetDebuffData() const { return DebuffData; }
 
-	void SetDamageDataContext(const FDamageDataContext& DamageDataContext);
+	void SetDamageDataContext(const EDamageTypeContext DamageType, bool bIsBlocked, bool bIsCritical);
+	void SetDeathImpulse(const FVector& Impulse);
+	void SetKnockbackForce(const FVector& Force);
 	void SetDebuffDataContext(const FDebuffDataContext& DebuffDataContext);
 	
 	virtual UScriptStruct* GetScriptStruct() const override

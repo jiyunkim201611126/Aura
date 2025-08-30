@@ -161,11 +161,7 @@ void UAuraAbilitySystemLibrary::SetDamageDataContext(FGameplayEffectContextHandl
 {
 	if (FAuraGameplayEffectContext* AuraEffectContext = static_cast<FAuraGameplayEffectContext*>(EffectContextHandle.Get()))
 	{
-		FDamageDataContext DamageData = GetDamageData(EffectContextHandle);
-		DamageData.DamageType = DamageType;
-		DamageData.bIsBlockedHit = bIsBlocked;
-		DamageData.bIsCriticalHit = bIsCritical;
-		AuraEffectContext->SetDamageDataContext(DamageData);
+		AuraEffectContext->SetDamageDataContext(DamageType, bIsBlocked, bIsCritical);
 	}
 }
 
@@ -173,9 +169,15 @@ void UAuraAbilitySystemLibrary::SetDeathImpulse(FGameplayEffectContextHandle& Ef
 {
 	if (FAuraGameplayEffectContext* AuraEffectContext = static_cast<FAuraGameplayEffectContext*>(EffectContextHandle.Get()))
 	{
-		FDamageDataContext DamageData = GetDamageData(EffectContextHandle);
-		DamageData.DeathImpulse = Impulse;
-		AuraEffectContext->SetDamageDataContext(DamageData);
+		AuraEffectContext->SetDeathImpulse(Impulse);
+	}
+}
+
+void UAuraAbilitySystemLibrary::SetKnockbackForce(FGameplayEffectContextHandle& EffectContextHandle, const FVector& Force)
+{
+	if (FAuraGameplayEffectContext* AuraEffectContext = static_cast<FAuraGameplayEffectContext*>(EffectContextHandle.Get()))
+	{
+		AuraEffectContext->SetKnockbackForce(Force);
 	}
 }
 
