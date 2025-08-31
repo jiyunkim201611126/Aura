@@ -37,6 +37,9 @@ void UDebuffNiagaraComponent::BeginPlay()
 		{
 			CombatInterface->GetOnDeathDelegate().AddDynamic(this, &ThisClass::OnOwnerDeath);
 		}
+
+		// 리슨 서버도 나이아가라 재생해야 하기 때문에 OnRep 함수를 그냥 호출합니다.
+		OnRep_DebuffTag();
 	}
 }
 

@@ -52,6 +52,12 @@ void UAuraProjectileSpell::SpawnProjectile(FVector& ProjectileSpawnLocation, FVe
 			Projectile->DamageEffectContextHandle = DamageEffectContextHandle;
 			Projectile->DeathImpulseMagnitude = DeathImpulseMagnitude;
 
+			const bool bKnockback = FMath::FRandRange(0.f, 100.f) < KnockbackChance;
+			if (bKnockback)
+			{
+				Projectile->KnockbackForceMagnitude = KnockbackForceMagnitude;
+			}
+
 			// 적중 시 데미지를 줄 수 있도록 Projectile에 Spec을 할당합니다.
 			Projectile->DamageEffectSpecHandle = MakeDamageSpecHandle();
 		}

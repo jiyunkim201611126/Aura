@@ -114,7 +114,7 @@ protected:
 
 protected:
 	// 이 아래로는 스택형 스킬을 구현하기 위한 구문입니다.
-	// Ability 객체가 충전 로직을 담당하게 되므로, 꼭 Instanced per Actor로 설정해줍니다. 
+	// 아래 포인터 배열이 초기화되어선 안 되므로 반드시 Instanced per Actor로 설정해줍니다. 
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UsableType")
 	TArray<TObjectPtr<UAbilityUsableType>> UsableTypes;

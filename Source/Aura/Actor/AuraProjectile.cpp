@@ -105,6 +105,10 @@ void AAuraProjectile::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, 
 			{
 				DamageEffectContextHandle.AddActors(TargetActors);
 				UAuraAbilitySystemLibrary::SetDeathImpulse(DamageEffectContextHandle, GetActorForwardVector() * DeathImpulseMagnitude);
+				if (KnockbackForceMagnitude > 0.f)
+				{
+					UAuraAbilitySystemLibrary::SetKnockbackForce(DamageEffectContextHandle, GetActorForwardVector() * KnockbackForceMagnitude);
+				}
 				for (auto& FGameplayEffectSpecHandle : DamageEffectSpecHandle)
 				{
 					TargetASC->ApplyGameplayEffectSpecToSelf(*FGameplayEffectSpecHandle.Data.Get());

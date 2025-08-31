@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
+#include "AuraAttributeSet.h"
 #include "Aura/AuraAbilityTypes.h"
 #include "Aura/Actor/AuraProjectile.h"
 #include "Kismet/BlueprintFunctionLibrary.h"

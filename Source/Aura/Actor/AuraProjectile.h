@@ -38,6 +38,7 @@ public:
 	TArray<FGameplayEffectSpecHandle> DamageEffectSpecHandle;
 
 	float DeathImpulseMagnitude = 0.f;
+	float KnockbackForceMagnitude = 0.f;
 
 	UPROPERTY()
 	FGameplayEffectContextHandle DebuffEffectContextHandle;

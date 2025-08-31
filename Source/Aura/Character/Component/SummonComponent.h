@@ -6,7 +6,6 @@
 #include "SummonComponent.generated.h"
 
 /**
- * 단순히 '충전식 스킬'을 구현하려면 굳이 Component까진 필요없으나,
  * '하수인 소환 스킬'의 경우 모든 하수인 통합 최대 소환 가능 수가 있어야 한다고 생각해 따로 Component를 선언해 관리합니다.
  */
 

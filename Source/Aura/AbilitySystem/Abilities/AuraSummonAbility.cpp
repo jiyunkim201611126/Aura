@@ -4,20 +4,29 @@
 
 TArray<FVector> UAuraSummonAbility::GetSpawnLocations()
 {
-	const FVector Location = GetAvatarActorFromActorInfo()->GetActorLocation();
-	const FVector Forward = GetAvatarActorFromActorInfo()->GetActorForwardVector();
+	int32 SpawnNum = NumMinions;
+	if (const AActor* Avatar = GetAvatarActorFromActorInfo())
+	{
+		if (const USummonComponent* SummonComponent = Avatar->FindComponentByClass<USummonComponent>())
+		{
+			SpawnNum = FMath::Min(NumMinions, SummonComponent->MaxSummonMinionCount);
+		}
+	}
 	
 	// 소환 위치를 지정합니다.
 	TArray<FVector> SpawnLocations;
-	if (NumMinions > 0)
+	if (SpawnNum > 0)
 	{
+		const FVector Location = GetAvatarActorFromActorInfo()->GetActorLocation();
+		const FVector Forward = GetAvatarActorFromActorInfo()->GetActorForwardVector();
+		
 		// 소환 가능한 수만큼 부채꼴 모양으로 펼칩니다.
-		const float DeltaSpread = NumMinions > 1 ? SpawnSpread / (NumMinions - 1) : 0.f;
+		const float DeltaSpread = SpawnNum > 1 ? SpawnSpread / (SpawnNum - 1) : 0.f;
 
 		const FVector LeftOfSpread = Forward.RotateAngleAxis(-SpawnSpread / 2.f, FVector::UpVector);
-		for (int32 i = 0; i < NumMinions; i++)
+		for (int32 i = 0; i < SpawnNum; i++)
 		{
-			const FVector Direction = NumMinions > 1 ? LeftOfSpread.RotateAngleAxis(DeltaSpread * i, FVector::UpVector) : Forward;
+			const FVector Direction = SpawnNum > 1 ? LeftOfSpread.RotateAngleAxis(DeltaSpread * i, FVector::UpVector) : Forward;
 			FVector ChosenSpawnLocation = Location + Direction * FMath::FRandRange(MinSpawnDistance, MaxSpawnDistance);
 
 			// 부채꼴 모양으로 펼쳐 허공에 점을 찍고, 그 위치에서 바닥으로 라인트레이스해 바닥을 검출해냅니다.
@@ -26,7 +35,7 @@ TArray<FVector> UAuraSummonAbility::GetSpawnLocations()
 			if (Hit.bBlockingHit)
 			{
 				// 바닥보다 살짝 위를 지정합니다.
-				ChosenSpawnLocation = Hit.ImpactPoint + FVector(0.f, 0.f, 10.f);
+				ChosenSpawnLocation = Hit.ImpactPoint + FVector(0.f, 0.f, 30.f);
 			}
 			
 			SpawnLocations.Add(ChosenSpawnLocation);

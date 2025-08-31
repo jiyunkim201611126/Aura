@@ -210,12 +210,13 @@ void UAuraAttributeSet::ApplyIncomingDamage(const FEffectProperties& Props, cons
 
 		const bool bFatal = NewHealth <= 0.f;
 
+		const FDamageDataContext DamageData = UAuraAbilitySystemLibrary::GetDamageData(Props.EffectContextHandle);
+		
 		if (bFatal)
 		{
 			ICombatInterface* CombatInterface = Cast<ICombatInterface>(Props.TargetAvatarActor);
 			if (CombatInterface)
 			{
-				const FDamageDataContext DamageData = UAuraAbilitySystemLibrary::GetDamageData(Props.EffectContextHandle);
 				CombatInterface->Die(DamageData.DeathImpulse);
 			}
 
@@ -234,9 +235,12 @@ void UAuraAttributeSet::ApplyIncomingDamage(const FEffectProperties& Props, cons
 				HitReactTag.AddTag(FAuraGameplayTags::Get().Abilities_HitReact);
 				Props.TargetASC->TryActivateAbilitiesByTag(HitReactTag);
 			}
-		}
 
-		const FDamageDataContext DamageData = UAuraAbilitySystemLibrary::GetDamageData(Props.EffectContextHandle);
+			if (!DamageData.KnockbackForce.IsNearlyZero(1.f))
+			{
+				Props.TargetCharacter->LaunchCharacter(DamageData.KnockbackForce, true, true);
+			}
+		}
 
 		// 데미지를 Text로 표시하는 위젯 컴포넌트를 AttributeSet이 직접 스폰하려면 그 클래스를 참조하고 있어야 합니다.
 		// 즉, 클라이언트당 하나만 있어도 되는 포인터가 AttributeSet마다 하나씩 있게 되기 때문에 메모리가 낭비됩니다.

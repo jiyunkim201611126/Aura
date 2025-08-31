@@ -34,8 +34,8 @@ private:
 	float SpawnSpread = 90.f;
 
 	
-	// ~Ability Interface
 protected:
+	// ~Ability Interface
 	virtual void OnGiveAbility(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec) override;
 	virtual bool CheckCost(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, FGameplayTagContainer* OptionalRelevantTags = nullptr) const override;
 	// ~End of Ability Interface
