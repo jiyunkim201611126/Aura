@@ -1,12 +1,14 @@
 ﻿#include "SummonComponent.h"
-
-#include "AbilitySystemComponent.h"
-#include "Aura/AbilitySystem/AuraAttributeSet.h"
 #include "Aura/Character/AuraCharacterBase.h"
 
 void USummonComponent::BeginPlay()
 {
 	Super::BeginPlay();
+	
+	if (!GetOwner()->HasAuthority())
+	{
+		return;
+	}
 
 	if (ICombatInterface* Owner = Cast<ICombatInterface>(GetOwner()))
 	{
@@ -22,12 +24,6 @@ void USummonComponent::OnOwnerDied(AActor* DeathActor)
 		{
 			CombatInterface->Die(FVector::ZeroVector);
 		}
-		
-		Minion->OnDestroyed.RemoveDynamic(this, &ThisClass::RemoveMinion);
-		if (CurrentMinions.Contains(Minion))
-		{
-			CurrentMinions.Remove(Minion);
-		}
 	}
 }
 
@@ -38,7 +34,7 @@ bool USummonComponent::CanSummon() const
 
 void USummonComponent::AddMinion(AActor* InMinion)
 {
-	if (!InMinion)
+	if (!InMinion || !GetOwner()->HasAuthority())
 	{
 		return;
 	}
@@ -52,7 +48,7 @@ void USummonComponent::AddMinion(AActor* InMinion)
 
 void USummonComponent::RemoveMinion(AActor* DestroyedActor)
 {
-	if (!DestroyedActor)
+	if (!DestroyedActor || !GetOwner()->HasAuthority())
 	{
 		return;
 	}
