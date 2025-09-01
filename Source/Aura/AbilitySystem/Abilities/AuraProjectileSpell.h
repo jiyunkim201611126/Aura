@@ -14,6 +14,9 @@ class AURA_API UAuraProjectileSpell : public UAuraDamageGameplayAbility
 public:
 	virtual FText GetDescription_Implementation(int32 Level) override;
 
+	UFUNCTION(BlueprintPure)
+	int32 GetProjectileNumsToSpawn(int32 Level) const;
+
 protected:
 	virtual void ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData) override;
 
@@ -26,5 +29,8 @@ protected:
 	TSubclassOf<AAuraProjectile> ProjectileClass;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Projectile")
-	int32 NumOfProjectiles = 1;
+	FScalableFloat NumOfProjectiles = 1.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Projectile")
+	float ProjectileSpread = 30.f;
 };

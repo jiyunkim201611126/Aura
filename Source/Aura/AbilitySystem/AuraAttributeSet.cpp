@@ -238,7 +238,7 @@ void UAuraAttributeSet::ApplyIncomingDamage(const FEffectProperties& Props, cons
 
 			if (!DamageData.KnockbackForce.IsNearlyZero(1.f))
 			{
-				Props.TargetCharacter->LaunchCharacter(DamageData.KnockbackForce, true, true);
+				Props.TargetCharacter->LaunchCharacter(DamageData.KnockbackForce, true, false);
 			}
 		}
 
@@ -278,18 +278,21 @@ void UAuraAttributeSet::ApplyIncomingXP(const FEffectProperties& Props)
 
 		if (NumLevelUps > 0)
 		{
-			// 레벨이 상승한 경우, 레벨업 보상을 계산 및 부여합니다.
-			const int32 AttributePointsReward = ILevelableInterface::Execute_GetAttributePointsReward(Props.SourceCharacter, CurrentLevel);
-			const int32 SpellPointsReward = ILevelableInterface::Execute_GetSpellPointsReward(Props.SourceCharacter, CurrentLevel);
+			for (int32 i = 0; i < NumLevelUps; i++)
+			{
+				// 레벨이 상승한 경우, 레벨업 보상을 계산 및 부여합니다.
+				const int32 AttributePointsReward = ILevelableInterface::Execute_GetAttributePointsReward(Props.SourceCharacter, CurrentLevel + i);
+				const int32 SpellPointsReward = ILevelableInterface::Execute_GetSpellPointsReward(Props.SourceCharacter, CurrentLevel + i);
+				ILevelableInterface::Execute_AddToAttributePoints(Props.SourceCharacter, AttributePointsReward);
+				ILevelableInterface::Execute_AddToSpellPoints(Props.SourceCharacter, SpellPointsReward);
+			}
 
 			ILevelableInterface::Execute_AddToLevel(Props.SourceCharacter, NumLevelUps);
-			ILevelableInterface::Execute_AddToAttributePoints(Props.SourceCharacter, AttributePointsReward);
-			ILevelableInterface::Execute_AddToSpellPoints(Props.SourceCharacter, SpellPointsReward);
 
 			// 레벨에 따른 MaxHealth와 MaxMana 반영 이후 Health, Mana를 최대치로 회복하기 위해 기록해둡니다. 
 			bTopOffHealth = true;
 			bTopOffMana = true;
-				
+			
 			ILevelableInterface::Execute_LevelUp(Props.SourceCharacter);
 		}
 
@@ -310,8 +313,7 @@ void UAuraAttributeSet::ApplyDebuff(const FEffectProperties& Props) const
 	{
 		if (Props.TargetCharacter)
 		{
-			UDebuffNiagaraComponent* NiagaraComponent = NewObject<UDebuffNiagaraComponent>(Props.TargetCharacter);
-			if (NiagaraComponent)
+			if (UDebuffNiagaraComponent* NiagaraComponent = NewObject<UDebuffNiagaraComponent>(Props.TargetCharacter))
 			{
 				NiagaraComponent->DebuffTag = DebuffTypeTag;
 				NiagaraComponent->SetupAttachment(Props.TargetCharacter->GetMesh(), FName("DebuffSocket"));

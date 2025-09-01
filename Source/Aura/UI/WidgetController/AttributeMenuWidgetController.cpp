@@ -11,20 +11,16 @@ void UAttributeMenuWidgetController::BindCallbacksToDependencies()
 	check(AttributeInfo);
 	for (auto& Pair : GetAuraAS()->TagsToAttributes)
 	{
-		AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(Pair.Value()).AddLambda(
-			[this, Pair](const FOnAttributeChangeData& Data)
+		AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(Pair.Value()).AddLambda([this, Pair](const FOnAttributeChangeData& Data)
 			{
 				BroadcastAttributeInfo(Pair.Key, Pair.Value());
-			}
-		);
+			});
 	}
 
-	GetAuraPS()->OnAttributePointsChangedDelegate.AddLambda(
-		[this](int32 NewAttributePoints)
+	GetAuraPS()->OnAttributePointsChangedDelegate.AddLambda([this](int32 NewAttributePoints)
 		{
 			OnAttributePointsChangedDelegate.Broadcast(NewAttributePoints);
-		}
-	);
+		});
 }
 
 void UAttributeMenuWidgetController::BroadcastInitialValue()

@@ -13,34 +13,29 @@ void UOverlayWidgetController::BindCallbacksToDependencies()
 		AuraPlayerState->OnLevelChangedDelegate.AddLambda([this](int32 NewLevel)
 			{
 				OnPlayerLevelChangedDelegate.Broadcast(NewLevel);
-			}
-		);
+			});
 	}
 
 	// 선언된 Attribute들에게 변동사항이 있는 경우 Widget Controller가 알 수 있도록 각 Attribute에게 함수를 바인드
 	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(GetAuraAS()->GetHealthAttribute()).AddLambda([this](const FOnAttributeChangeData& Data)
 		{
 			OnHealthChanged.Broadcast(Data.NewValue);
-		}
-	);
+		});
 	
 	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(GetAuraAS()->GetMaxHealthAttribute()).AddLambda([this](const FOnAttributeChangeData& Data)
 		{
 			OnMaxHealthChanged.Broadcast(Data.NewValue);
-		}
-	);
+		});
 	
 	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(GetAuraAS()->GetManaAttribute()).AddLambda([this](const FOnAttributeChangeData& Data)
 		{
 			OnManaChanged.Broadcast(Data.NewValue);
-		}
-	);
+		});
 	
 	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(GetAuraAS()->GetMaxManaAttribute()).AddLambda([this](const FOnAttributeChangeData& Data)
 		{
 			OnMaxManaChanged.Broadcast(Data.NewValue);
-		}
-	);
+		});
 
 	if (GetAuraASC())
 	{
@@ -104,13 +99,11 @@ void UOverlayWidgetController::BindForUsableTypes(UAuraAbilitySystemComponent* A
 		StackableAbilityManager->OnStackCountChanged.BindLambda([this](FGameplayTag InAbilityTag, int32 StackCount)
 			{
 				OnStackCountChangedDelegate.Broadcast(InAbilityTag, StackCount);
-			}
-		);
+			});
 		StackableAbilityManager->OnStackTimerStarted.BindLambda([this](FGameplayTag InAbilityTag, float RemainingTime, float RechargeTime)
 			{
 				OnStackTimerStartedDelegate.Broadcast(InAbilityTag, RemainingTime, RechargeTime);
-			}
-		);
+			});
 	}
 
 	// 특별한 사용 타입이 하나라도 있으면 이 분기 안으로 들어갑니다.
@@ -139,7 +132,7 @@ void UOverlayWidgetController::OnXPChanged(const int32 InXP)
 	const int32 Level = LevelUpInfo->FindLevelForXP(InXP);
 	const int32 MaxLevel = LevelUpInfo->LevelUpInformation.Num();
 
-	if (Level <= MaxLevel && Level > 0)
+	if (Level < MaxLevel && Level > 0)
 	{
 		// LevelUpInfo를 토대로 XP Bar Percent를 계산합니다.
 		const int32 LevelUpRequirement = LevelUpInfo->LevelUpInformation[Level].LevelUpRequirement;

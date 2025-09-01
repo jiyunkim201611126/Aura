@@ -24,8 +24,7 @@ TArray<FGameplayEffectSpecHandle> UAuraDamageGameplayAbility::MakeDamageSpecHand
 	TArray<FGameplayEffectSpecHandle> DamageSpecs;
 	for (TPair<FGameplayTag, FScalableFloat>& Pair : DamageTypes)
 	{
-		const float AbilityLevel = GetAbilityLevel();
-		const float ScaledDamage = Pair.Value.GetValueAtLevel(AbilityLevel);
+		const float ScaledDamage = Pair.Value.GetValueAtLevel(GetAbilityLevel());
 		
 		// 할당받은 DamageEffectClass를 기반으로 Projectile이 가질 GameplayEffectSpecHandle을 생성합니다.
 		FGameplayEffectSpecHandle DamageSpecHandle = GetAbilitySystemComponentFromActorInfo()->MakeOutgoingSpec(DamageEffectClass, 1.f, DamageEffectContextHandle);

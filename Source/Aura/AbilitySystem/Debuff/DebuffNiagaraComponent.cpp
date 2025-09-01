@@ -9,6 +9,7 @@
 UDebuffNiagaraComponent::UDebuffNiagaraComponent()
 {
 	SetIsReplicatedByDefault(true);
+	SetUsingAbsoluteScale(true);
 	bAutoActivate = false;
 }
 
