@@ -1,5 +1,6 @@
 ﻿#include "AuraSummonAbility.h"
 
+#include "Aura/AbilitySystem/AuraAbilitySystemLibrary.h"
 #include "Aura/Character/Component/SummonComponent.h"
 
 TArray<FVector> UAuraSummonAbility::GetSpawnLocations()
@@ -15,21 +16,20 @@ TArray<FVector> UAuraSummonAbility::GetSpawnLocations()
 	
 	// 소환 위치를 지정합니다.
 	TArray<FVector> SpawnLocations;
+	SpawnLocations.Reserve(SpawnNum);
 	if (SpawnNum > 0)
 	{
 		const FVector Location = GetAvatarActorFromActorInfo()->GetActorLocation();
 		const FVector Forward = GetAvatarActorFromActorInfo()->GetActorForwardVector();
-		
-		// 소환 가능한 수만큼 부채꼴 모양으로 펼칩니다.
-		const float DeltaSpread = SpawnNum > 1 ? SpawnSpread / (SpawnNum - 1) : 0.f;
 
-		const FVector LeftOfSpread = Forward.RotateAngleAxis(-SpawnSpread / 2.f, FVector::UpVector);
-		for (int32 i = 0; i < SpawnNum; i++)
+		// 소환 가능한 수만큼 부채꼴로 펼칩니다.
+		TArray<FVector> Directions = UAuraAbilitySystemLibrary::EvenlyRotatedVectors(Forward, FVector::UpVector, SpawnSpread, SpawnNum);
+		
+		for (const FVector& Direction : Directions)
 		{
-			const FVector Direction = SpawnNum > 1 ? LeftOfSpread.RotateAngleAxis(DeltaSpread * i, FVector::UpVector) : Forward;
+			// 부채꼴 모양으로 펼쳐 허공에 점을 찍고, 그 위치에서 바닥으로 라인트레이스해 바닥을 검출해냅니다.
 			FVector ChosenSpawnLocation = Location + Direction * FMath::FRandRange(MinSpawnDistance, MaxSpawnDistance);
 
-			// 부채꼴 모양으로 펼쳐 허공에 점을 찍고, 그 위치에서 바닥으로 라인트레이스해 바닥을 검출해냅니다.
 			FHitResult Hit;
 			GetWorld()->LineTraceSingleByChannel(Hit, ChosenSpawnLocation, ChosenSpawnLocation - FVector(0.f, 0.f, 400.f), ECC_Visibility);
 			if (Hit.bBlockingHit)

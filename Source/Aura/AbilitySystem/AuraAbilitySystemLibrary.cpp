@@ -277,6 +277,38 @@ FGameplayTag UAuraAbilitySystemLibrary::ReplaceDebuffTypeToTag(const EDebuffType
 	return FGameplayTag();
 }
 
+TArray<FVector> UAuraAbilitySystemLibrary::EvenlyRotatedVectors(const FVector& Forward, const FVector& Axis, const float Spread, const int32 NumOfVectors)
+{
+	const FVector LeftOfSpread = Forward.RotateAngleAxis(-Spread / 2.f, Axis);
+	const float DeltaSpread = NumOfVectors > 1 ? Spread / (NumOfVectors - 1) : 0.f;
+
+	TArray<FVector> ResultVectors;
+	ResultVectors.Reserve(NumOfVectors);
+	for (int i = 0; i < NumOfVectors; i++)
+	{
+		const FVector Direction = NumOfVectors > 1 ? LeftOfSpread.RotateAngleAxis(DeltaSpread * i, FVector::UpVector) : Forward;
+		ResultVectors.Add(Direction);
+	}
+
+	return ResultVectors;
+}
+
+TArray<FRotator> UAuraAbilitySystemLibrary::EvenlySpacedRotators(const FVector& Forward, const FVector& Axis, const float Spread, const int32 NumOfRotators)
+{
+	const FVector LeftOfSpread = Forward.RotateAngleAxis(-Spread / 2.f, Axis);
+	const float DeltaSpread = NumOfRotators > 1 ? Spread / (NumOfRotators - 1) : 0.f;
+
+	TArray<FRotator> ResultRotators;
+	ResultRotators.Reserve(NumOfRotators);
+	for (int i = 0; i < NumOfRotators; i++)
+	{
+		const FVector Direction = NumOfRotators > 1 ? LeftOfSpread.RotateAngleAxis(DeltaSpread * i, FVector::UpVector) : Forward;
+		ResultRotators.Add(Direction.Rotation());
+	}
+
+	return ResultRotators;
+}
+
 void UAuraAbilitySystemLibrary::GetOverlappedLivePawns(const UObject* WorldContextObject, TArray<AActor*>& OutOverlappingActors, const TArray<AActor*>& ActorsToIgnore, float Radius, const FVector& SphereOrigin)
 {
 	// 충돌 검사 조건 세부 설정하는 구조체

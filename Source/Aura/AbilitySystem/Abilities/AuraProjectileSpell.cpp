@@ -4,6 +4,7 @@
 #include "Aura/Interaction/CombatInterface.h"
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystemComponent.h"
+#include "Aura/AbilitySystem/AuraAbilitySystemLibrary.h"
 #include "Aura/Manager/AuraTextManager.h"
 
 FText UAuraProjectileSpell::GetDescription_Implementation(const int32 Level)
@@ -35,78 +36,67 @@ void UAuraProjectileSpell::SpawnProjectile(FVector& ProjectileSpawnLocation, FVe
 	ProjectileSpawnLocation.Z = GetAvatarActorFromActorInfo()->GetActorLocation().Z;
 	const FVector Forward = ProjectileTargetLocation - ProjectileSpawnLocation;
 	
-	TArray<FTransform> SpawnTransforms;
-	SpawnTransforms.Reserve(NumProjectilesToSpawn);
-
 	// ProjectileSpread가 중심각이 되는 부채꼴 모양으로 퍼지도록 계산합니다.
-	const FVector LeftOfSpread = Forward.RotateAngleAxis(-ProjectileSpread / 2.f, FVector::UpVector);
-	const float DeltaSpread = NumProjectilesToSpawn > 1 ? ProjectileSpread / (NumProjectilesToSpawn - 1) : 0.f;
-
-	for (int i = 0; i < NumProjectilesToSpawn; i++)
-	{
-		FTransform SpawnTransform;
-		const FVector Direction = NumProjectilesToSpawn > 1 ? LeftOfSpread.RotateAngleAxis(DeltaSpread * i, FVector::UpVector) : Forward;
-		SpawnTransform.SetLocation(ProjectileSpawnLocation);
-		SpawnTransform.SetRotation(Direction.Rotation().Quaternion());
-		SpawnTransforms.Add(SpawnTransform);
-	}
+	TArray<FRotator> Rotations = UAuraAbilitySystemLibrary::EvenlySpacedRotators(Forward, FVector::UpVector, ProjectileSpread, NumProjectilesToSpawn);
 
 	// SpawnActor는 생성 직후 BeginPlay까지 호출하지만 SpawnActorDeferred는 구성만 하고 생성은 대기합니다.
 	TArray<AAuraProjectile*> Projectiles;
 	Projectiles.Reserve(NumProjectilesToSpawn);
-	for (const auto& SpawnTransform : SpawnTransforms)
+	for (const auto& Rotation : Rotations)
 	{
+		FTransform SpawnTransform;
+		SpawnTransform.SetLocation(ProjectileSpawnLocation);
+		SpawnTransform.SetRotation(Rotation.Quaternion());
 		AAuraProjectile* Projectile = GetWorld()->SpawnActorDeferred<AAuraProjectile>(ProjectileClass, SpawnTransform, GetAvatarActorFromActorInfo(), Cast<APawn>(GetOwningActorFromActorInfo()), ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
 		Projectiles.Add(Projectile);
+		
+		SetHandlesToProjectile(Projectile, ProjectileTargetLocation);
+		
+		Projectile->FinishSpawning(SpawnTransform);
 	}
+}
 
+void UAuraProjectileSpell::SetHandlesToProjectile(AAuraProjectile* Projectile, const FVector& TargetLocation)
+{
 	// Ability를 소유한 AvatarActor의 AbilitySystemComponent 가져옵니다.
 	const UAbilitySystemComponent* SourceASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(GetAvatarActorFromActorInfo());
 
 	if (DamageTypes.Num() > 0)
 	{
 		// Damage Context를 생성 및 초기화합니다.
-		DamageEffectContextHandle = SourceASC->MakeEffectContext();
-		DamageEffectContextHandle.SetAbility(this);
-		FHitResult HitResult;
-		HitResult.Location = ProjectileTargetLocation;
-		DamageEffectContextHandle.AddHitResult(HitResult);
-		const bool bKnockback = FMath::FRandRange(0.f, 100.f) < KnockbackChance;
-
-		for (const auto& Projectile : Projectiles)
+		if (!DamageEffectContextHandle.IsValid())
 		{
-			Projectile->DamageEffectContextHandle = DamageEffectContextHandle;
-			Projectile->DeathImpulseMagnitude = DeathImpulseMagnitude;
-
-			if (bKnockback)
-			{
-				Projectile->KnockbackForceMagnitude = KnockbackForceMagnitude;
-			}
-
-			// 적중 시 데미지를 줄 수 있도록 Projectile에 Spec을 할당합니다.
-			Projectile->DamageEffectSpecHandle = MakeDamageSpecHandle();
+			DamageEffectContextHandle = SourceASC->MakeEffectContext();
+			DamageEffectContextHandle.SetAbility(this);
+			FHitResult HitResult;
+			HitResult.Location = TargetLocation;
+			DamageEffectContextHandle.AddHitResult(HitResult);
 		}
+		
+		Projectile->DamageEffectContextHandle = DamageEffectContextHandle;
+		Projectile->DeathImpulseMagnitude = DeathImpulseMagnitude;
+
+		if (FMath::FRandRange(0.f, 100.f) < KnockbackChance)
+		{
+			Projectile->KnockbackForceMagnitude = KnockbackForceMagnitude;
+		}
+
+		// 적중 시 데미지를 줄 수 있도록 Projectile에 Spec을 할당합니다.
+		Projectile->DamageEffectSpecHandle = MakeDamageSpecHandle();
 	}
 
 	if (DebuffData.Num() > 0)
 	{
 		// Debuff Context를 생성 및 초기화합니다.
-		DebuffEffectContextHandle = SourceASC->MakeEffectContext();
-		DebuffEffectContextHandle.SetAbility(this);
-
-		for (const auto& Projectile : Projectiles)
+		if (!DebuffEffectContextHandle.IsValid())
 		{
-			Projectile->DebuffEffectContextHandle = DebuffEffectContextHandle;
-
-			// 적중 시 디버프를 줄 수 있도록 Projectile에 Spec을 할당합니다.
-			Projectile->DebuffEffectSpecHandle = MakeDebuffSpecHandle();
+			DebuffEffectContextHandle = SourceASC->MakeEffectContext();
+			DebuffEffectContextHandle.SetAbility(this);
 		}
-	}
 
-	int32 Index = 0;
-	for (const auto& Projectile : Projectiles)
-	{
-		// 액터 스폰
-		Projectile->FinishSpawning(SpawnTransforms[Index++]);
+		Projectile->DebuffEffectContextHandle = DebuffEffectContextHandle;
+
+		// 적중 시 디버프를 줄 수 있도록 Projectile에 Spec을 할당합니다.
+		Projectile->DebuffEffectSpecHandle = MakeDebuffSpecHandle();
 	}
 }

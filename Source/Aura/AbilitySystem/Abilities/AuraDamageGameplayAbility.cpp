@@ -52,8 +52,7 @@ void UAuraDamageGameplayAbility::CauseDamage(AActor* TargetActor, TArray<FGamepl
 		UAuraAbilitySystemLibrary::SetDeathImpulse(DamageEffectContextHandle, GetAvatarActorFromActorInfo()->GetActorForwardVector() * DeathImpulseMagnitude);
 
 		// 넉백은 확률 계산 후 성공 시 세팅합니다.
-		const bool bKnockback = FMath::FRandRange(0.f, 100.f) < KnockbackChance;
-		if (bKnockback)
+		if (FMath::FRandRange(0.f, 100.f) < KnockbackChance)
 		{
 			UAuraAbilitySystemLibrary::SetKnockbackForce(DamageEffectContextHandle, GetAvatarActorFromActorInfo()->GetActorForwardVector() * KnockbackForceMagnitude);
 		}

@@ -24,6 +24,8 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "Projectile")
 	void SpawnProjectile(UPARAM(ref) FVector& ProjectileSpawnLocation, UPARAM(ref) FVector& ProjectileTargetLocation);
 
+	void SetHandlesToProjectile(AAuraProjectile* Projectile, const FVector& TargetLocation);
+
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Projectile")
 	TSubclassOf<AAuraProjectile> ProjectileClass;
