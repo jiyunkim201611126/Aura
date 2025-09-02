@@ -6,6 +6,7 @@
 #include "Components/CapsuleComponent.h"
 #include "Aura/Manager/AuraGameplayTags.h"
 #include "Aura/Manager/FXManagerSubsystem.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 // Sets default values
 AAuraCharacterBase::AAuraCharacterBase()
@@ -101,6 +102,38 @@ FOnASCRegistered& AAuraCharacterBase::GetOnASCRegisteredDelegate()
 FOnDeath& AAuraCharacterBase::GetOnDeathDelegate()
 {
 	return OnDeath;
+}
+
+void AAuraCharacterBase::ApplyKnockback(const FVector_NetQuantize& KnockbackForce, float Duration)
+{
+	UCharacterMovementComponent* MovementComponent = GetCharacterMovement();
+	if (!MovementComponent)
+	{
+		return;
+	}
+
+	TSharedPtr<FRootMotionSource_ConstantForce> ConstantForce = MakeShared<FRootMotionSource_ConstantForce>();
+	ConstantForce->InstanceName = FName("Knockback");
+	ConstantForce->Priority = 200;
+	ConstantForce->Force = KnockbackForce / Duration;
+	ConstantForce->Duration = Duration;
+	ConstantForce->FinishVelocityParams.Mode = ERootMotionFinishVelocityMode::MaintainLastRootMotionVelocity;
+	MovementComponent->RemoveRootMotionSource(FName("Knockback"));
+	if (GetMesh() && GetMesh()->GetAnimInstance())
+	{
+		GetMesh()->GetAnimInstance()->SetRootMotionMode(ERootMotionMode::IgnoreRootMotion);
+	}
+	
+	uint16 SourceID = MovementComponent->ApplyRootMotionSource(ConstantForce);
+
+	FTimerHandle TimerHandle;
+	GetWorld()->GetTimerManager().SetTimer(TimerHandle, [this]()
+	{
+		if (GetMesh() && GetMesh()->GetAnimInstance())
+		{
+			GetMesh()->GetAnimInstance()->SetRootMotionMode(ERootMotionMode::RootMotionFromMontagesOnly);
+		}
+	}, Duration, false);
 }
 
 void AAuraCharacterBase::MulticastHandleDeath_Implementation(const FVector& Impulse)

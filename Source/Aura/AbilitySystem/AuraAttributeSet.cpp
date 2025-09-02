@@ -214,8 +214,7 @@ void UAuraAttributeSet::ApplyIncomingDamage(const FEffectProperties& Props, cons
 		
 		if (bFatal)
 		{
-			ICombatInterface* CombatInterface = Cast<ICombatInterface>(Props.TargetAvatarActor);
-			if (CombatInterface)
+			if (ICombatInterface* CombatInterface = Cast<ICombatInterface>(Props.TargetAvatarActor))
 			{
 				CombatInterface->Die(DamageData.DeathImpulse);
 			}
@@ -238,7 +237,10 @@ void UAuraAttributeSet::ApplyIncomingDamage(const FEffectProperties& Props, cons
 
 			if (!DamageData.KnockbackForce.IsNearlyZero(1.f))
 			{
-				Props.TargetCharacter->LaunchCharacter(DamageData.KnockbackForce, true, false);
+				if (ICombatInterface* CombatInterface = Cast<ICombatInterface>(Props.TargetAvatarActor))
+				{
+					CombatInterface->ApplyKnockback(DamageData.KnockbackForce, 0.5f);
+				}
 			}
 		}
 

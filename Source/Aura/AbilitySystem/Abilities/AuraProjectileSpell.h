@@ -20,9 +20,16 @@ public:
 protected:
 	virtual void ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData) override;
 
-	// Montage의 Notify에 의해 실행되는 함수
+	/**
+	 * Projectile을 생성 및 발사하는 함수입니다.
+	 *
+	 * @param ProjectileSpawnLocation 
+	 * @param ProjectileTargetLocation 
+	 * @param PitchOverride 양수 입력 시 해당 각도만큼 위쪽으로 발사됩니다.
+	 * @param HomingTarget 추적할 타겟으로, nullptr로 호출 시 궤도 변경 없이 발사된 방향으로 나아갑니다.
+	 */
 	UFUNCTION(BlueprintCallable, Category = "Projectile")
-	void SpawnProjectile(UPARAM(ref) FVector& ProjectileSpawnLocation, UPARAM(ref) FVector& ProjectileTargetLocation);
+	void SpawnProjectile(UPARAM(ref) FVector& ProjectileSpawnLocation, UPARAM(ref) FVector& ProjectileTargetLocation, const float PitchOverride, const AActor* HomingTarget);
 
 	void SetHandlesToProjectile(AAuraProjectile* Projectile, const FVector& TargetLocation);
 
@@ -35,4 +42,7 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Projectile")
 	float ProjectileSpread = 30.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Projectile")
+	float HomingAcceleration = 1000.f;
 };

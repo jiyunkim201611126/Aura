@@ -33,6 +33,7 @@ public:
 	virtual ECharacterRank GetCharacterRank_Implementation() override;
 	virtual FOnASCRegistered& GetOnASCRegisteredDelegate() override;
 	virtual FOnDeath& GetOnDeathDelegate() override;
+	virtual void ApplyKnockback(const FVector_NetQuantize& KnockbackForce, float Duration) override;
 	// ~End of Combat Interface
 
 	UFUNCTION(NetMulticast, Reliable)

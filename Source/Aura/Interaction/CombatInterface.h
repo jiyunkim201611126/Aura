@@ -60,4 +60,6 @@ public:
 
 	virtual FOnASCRegistered& GetOnASCRegisteredDelegate() = 0;
 	virtual FOnDeath& GetOnDeathDelegate() = 0;
+
+	virtual void ApplyKnockback(const FVector_NetQuantize& KnockbackForce, float Duration);
 };

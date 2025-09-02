@@ -6,6 +6,7 @@
 #include "AbilitySystemComponent.h"
 #include "Aura/AbilitySystem/AuraAbilitySystemLibrary.h"
 #include "Aura/Manager/AuraTextManager.h"
+#include "GameFramework/ProjectileMovementComponent.h"
 
 FText UAuraProjectileSpell::GetDescription_Implementation(const int32 Level)
 {
@@ -22,7 +23,7 @@ void UAuraProjectileSpell::ActivateAbility(const FGameplayAbilitySpecHandle Hand
 	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
 }
 
-void UAuraProjectileSpell::SpawnProjectile(FVector& ProjectileSpawnLocation, FVector& ProjectileTargetLocation)
+void UAuraProjectileSpell::SpawnProjectile(FVector& ProjectileSpawnLocation, FVector& ProjectileTargetLocation, const float PitchOverride, const AActor* HomingTarget)
 {
 	if (!GetAvatarActorFromActorInfo()->HasAuthority())
 	{
@@ -38,6 +39,13 @@ void UAuraProjectileSpell::SpawnProjectile(FVector& ProjectileSpawnLocation, FVe
 	
 	// ProjectileSpread가 중심각이 되는 부채꼴 모양으로 퍼지도록 계산합니다.
 	TArray<FRotator> Rotations = UAuraAbilitySystemLibrary::EvenlySpacedRotators(Forward, FVector::UpVector, ProjectileSpread, NumProjectilesToSpawn);
+	if (PitchOverride > 0.f)
+	{
+		for (auto& Rotation : Rotations)
+		{
+			Rotation.Pitch += PitchOverride;
+		}
+	}
 
 	// SpawnActor는 생성 직후 BeginPlay까지 호출하지만 SpawnActorDeferred는 구성만 하고 생성은 대기합니다.
 	TArray<AAuraProjectile*> Projectiles;
@@ -53,6 +61,17 @@ void UAuraProjectileSpell::SpawnProjectile(FVector& ProjectileSpawnLocation, FVe
 		SetHandlesToProjectile(Projectile, ProjectileTargetLocation);
 		
 		Projectile->FinishSpawning(SpawnTransform);
+	}
+
+	if (HomingTarget && HomingTarget->Implements<UCombatInterface>())
+	{
+		for (const auto& Projectile : Projectiles)
+		{
+			UProjectileMovementComponent* ProjectileMovement = Projectile->ProjectileMovement;
+			ProjectileMovement->HomingTargetComponent = HomingTarget->GetRootComponent();
+			ProjectileMovement->HomingAccelerationMagnitude = HomingAcceleration;
+			ProjectileMovement->bIsHomingProjectile = true;
+		}
 	}
 }
 

@@ -47,5 +47,5 @@ protected:
 	float KnockbackChance = 0.f;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Damage")
-	float KnockbackForceMagnitude = 500.f;
+	float KnockbackForceMagnitude = 100.f;
 };
