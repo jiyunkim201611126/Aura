@@ -84,11 +84,13 @@ struct FAuraGameplayTags
 	FGameplayTag Abilities_HitReact;
 	FGameplayTag Abilities_Summon;
 	FGameplayTag Abilities_Fire_FireBolt;
+	FGameplayTag Abilities_Fire_FireRain;
 	FGameplayTag Abilities_Lighting_Electrocute;
 	// ~End of Abilities
 
 	// ~Cooldown
 	FGameplayTag Cooldown_Fire_FireBolt;
+	FGameplayTag Cooldown_Fire_FireRain;
 	FGameplayTag Cooldown_Lighting_Electrocute;
 	// ~End of Cooldown
 

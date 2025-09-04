@@ -23,7 +23,7 @@ void UAuraProjectileSpell::ActivateAbility(const FGameplayAbilitySpecHandle Hand
 	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
 }
 
-void UAuraProjectileSpell::SpawnProjectile(FVector& ProjectileSpawnLocation, FVector& ProjectileTargetLocation, const float PitchOverride, const AActor* HomingTarget)
+void UAuraProjectileSpell::SpawnProjectile(FVector& ProjectileSpawnLocation, FVector& ProjectileTargetLocation, const bool bHoming, const float PitchOverride, const AActor* HomingTarget)
 {
 	if (!GetAvatarActorFromActorInfo()->HasAuthority())
 	{
@@ -63,13 +63,27 @@ void UAuraProjectileSpell::SpawnProjectile(FVector& ProjectileSpawnLocation, FVe
 		Projectile->FinishSpawning(SpawnTransform);
 	}
 
-	if (HomingTarget && HomingTarget->Implements<UCombatInterface>())
+	// 추적할 위치 혹은 타겟을 결정합니다.
+	if (bHoming)
 	{
 		for (const auto& Projectile : Projectiles)
 		{
 			UProjectileMovementComponent* ProjectileMovement = Projectile->ProjectileMovement;
-			ProjectileMovement->HomingTargetComponent = HomingTarget->GetRootComponent();
-			ProjectileMovement->HomingAccelerationMagnitude = HomingAcceleration;
+			
+			if (HomingTarget && HomingTarget->Implements<UCombatInterface>())
+			{
+				// 추적 가능한 Ability이면서 추적할 타겟이 검출된 경우 들어오는 분기입니다.
+				ProjectileMovement->HomingTargetComponent = HomingTarget->GetRootComponent();
+			}
+			else
+			{
+				// 추적 가능한 Ability이나, 추적할 타겟이 마우스로 검출되지 않은 경우 들어오는 분기입니다.
+				USceneComponent* HomingTargetComponent = NewObject<USceneComponent>();
+				HomingTargetComponent->SetWorldLocation(ProjectileTargetLocation);
+				ProjectileMovement->HomingTargetComponent = HomingTargetComponent;
+			}
+			// 추적 속도를 결정합니다.
+			ProjectileMovement->HomingAccelerationMagnitude = FMath::RandRange(HomingAccelerationMin, HomingAccelerationMax);
 			ProjectileMovement->bIsHomingProjectile = true;
 		}
 	}

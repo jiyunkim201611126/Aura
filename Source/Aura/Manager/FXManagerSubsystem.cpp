@@ -72,9 +72,9 @@ void UFXManagerSubsystem::AsyncPlaySoundAtLocation(const FGameplayTag& SoundTag,
 	}
 	
 	// 이미 에셋이 로드되어있는 경우 들어가는 분기입니다.
-	if (USoundBase* LoadedSound = SoundToLoad.Get())
+	if (SoundToLoad.IsValid())
 	{
-		UGameplayStatics::PlaySoundAtLocation(GetWorld(), LoadedSound, Location, Rotation, VolumeMultiplier, PitchMultiplier);
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), SoundToLoad.Get(), Location, Rotation, VolumeMultiplier, PitchMultiplier);
 		return;
 	}
 	
@@ -158,9 +158,9 @@ void UFXManagerSubsystem::AsyncPlayNiagaraAtLocation(const FGameplayTag& Niagara
 	}
 
 	// 이미 에셋이 로드되어있는 경우 들어가는 분기입니다.
-	if (UNiagaraSystem* LoadedNiagara = NiagaraToLoad.Get())
+	if (NiagaraToLoad.IsValid())
 	{
-		UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), LoadedNiagara, Location, Rotation, Scale, bAutoDestroy, bAutoActivate);
+		UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), NiagaraToLoad.Get(), Location, Rotation, Scale, bAutoDestroy, bAutoActivate);
 		return;
 	}
 	

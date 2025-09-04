@@ -26,10 +26,11 @@ protected:
 	 * @param ProjectileSpawnLocation 
 	 * @param ProjectileTargetLocation 
 	 * @param PitchOverride 양수 입력 시 해당 각도만큼 위쪽으로 발사됩니다.
-	 * @param HomingTarget 추적할 타겟으로, nullptr로 호출 시 궤도 변경 없이 발사된 방향으로 나아갑니다.
+	 * @param bHoming 투사체가 타겟을 추적할지 결정합니다. false로 호출 시 궤도 변경 없이 발사된 방향으로 나아갑니다.
+	 * @param HomingTarget 추적할 타겟으로, bHoming이 true이며 nullptr인 경우 클릭한 위치로 나아갑니다.
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Projectile")
-	void SpawnProjectile(UPARAM(ref) FVector& ProjectileSpawnLocation, UPARAM(ref) FVector& ProjectileTargetLocation, const float PitchOverride, const AActor* HomingTarget);
+	void SpawnProjectile(UPARAM(ref) FVector& ProjectileSpawnLocation, UPARAM(ref) FVector& ProjectileTargetLocation, const bool bHoming, const float PitchOverride, const AActor* HomingTarget);
 
 	void SetHandlesToProjectile(AAuraProjectile* Projectile, const FVector& TargetLocation);
 
@@ -43,6 +44,11 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Projectile")
 	float ProjectileSpread = 30.f;
 
+	// 추적하며 궤도를 변경하는 최소 속도입니다.
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Projectile")
-	float HomingAcceleration = 1000.f;
+	float HomingAccelerationMin = 1000.f;
+
+	// 추적하며 궤도를 변경하는 최대 속도입니다.
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Projectile")
+	float HomingAccelerationMax = 1000.f;
 };
