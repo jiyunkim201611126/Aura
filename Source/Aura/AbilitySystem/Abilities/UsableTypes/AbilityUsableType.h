@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
+#include "Aura/AbilitySystem/Abilities/AuraGameplayAbility.h"
 #include "AbilityUsableType.generated.h"
 
 struct FGameplayAbilityActivationInfo;
@@ -20,6 +21,8 @@ public:
 	virtual void OnUnequipAbility(const UAuraGameplayAbility* OwningAbility, UAuraAbilitySystemComponent* ASC);
 	virtual bool CheckCost(const UAuraGameplayAbility* OwningAbility);
 	virtual void ApplyCost(const UAuraGameplayAbility* OwningAbility);
+	virtual void ActivateAbility(const UAuraGameplayAbility* OwningAbility);
+	virtual void EndAbility(const UAuraGameplayAbility* OwningAbility);
 
 	UFUNCTION(BlueprintPure, Category = "UsableType")
 	virtual FText GetDescription();

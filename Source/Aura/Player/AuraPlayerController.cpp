@@ -161,6 +161,11 @@ void AAuraPlayerController::AbilityInputTagPressed(FGameplayTag InputTag)
 
 	// 이동이 아닌 다른 입력이 들어온 경우 이동을 중단합니다.
 	bAutoRunning = false;
+
+	if (GetASC())
+	{
+		GetASC()->AbilityInputTagPressed(InputTag);
+	}
 }
 
 void AAuraPlayerController::AbilityInputTagHeld(FGameplayTag InputTag)

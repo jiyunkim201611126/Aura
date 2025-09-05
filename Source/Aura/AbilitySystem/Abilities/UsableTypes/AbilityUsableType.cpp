@@ -17,6 +17,14 @@ void UAbilityUsableType::ApplyCost(const UAuraGameplayAbility* OwningAbility)
 {
 }
 
+void UAbilityUsableType::ActivateAbility(const UAuraGameplayAbility* OwningAbility)
+{
+}
+
+void UAbilityUsableType::EndAbility(const UAuraGameplayAbility* OwningAbility)
+{
+}
+
 FText UAbilityUsableType::GetDescription()
 {
 	return FText();

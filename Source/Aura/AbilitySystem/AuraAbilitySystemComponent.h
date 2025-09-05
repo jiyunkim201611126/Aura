@@ -33,6 +33,7 @@ public:
 	// AddCharacterAbilities는 서버에서만 호출되기 때문에, 클라이언트에서 따로 호출해줘야 합니다.
 	virtual void OnRep_ActivateAbilities() override;
 
+	void AbilityInputTagPressed(const FGameplayTag& InputTag);
 	void AbilityInputTagHeld(const FGameplayTag& InputTag);
 	void AbilityInputTagReleased(const FGameplayTag& InputTag);
 

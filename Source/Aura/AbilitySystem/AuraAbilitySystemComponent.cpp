@@ -139,19 +139,45 @@ void UAuraAbilitySystemComponent::OnRep_ActivateAbilities()
 	CachedAbilities = MoveTemp(NewAbilities);
 }
 
+void UAuraAbilitySystemComponent::AbilityInputTagPressed(const FGameplayTag& InputTag)
+{
+	if (!InputTag.IsValid()) return;
+
+	// 현재 장착 중인 Ability를 가져옵니다.
+	for (FGameplayAbilitySpec& AbilitySpec : GetActivatableAbilities())
+	{
+		// 장착 중인 Ability 중 Tag가 일치하는 Ability가 있는지 탐색합니다.
+		if (AbilitySpec.GetDynamicSpecSourceTags().HasTagExact(InputTag))
+		{
+			// InputTag에 해당하는 Ability를 발동합니다.
+			AbilitySpecInputPressed(AbilitySpec);
+			
+			if (AbilitySpec.IsActive())
+			{
+				FPredictionKey PredKey;
+				if (GetOwner() && GetOwner()->HasAuthority())
+				{
+					PredKey = GetPredictionKeyForNewAction();					
+				}
+				FScopedPredictionWindow ScopedPred(this, PredKey);
+				InvokeReplicatedEvent(EAbilityGenericReplicatedEvent::InputPressed, AbilitySpec.Handle, PredKey);
+			}
+		}
+	}
+}
+
 void UAuraAbilitySystemComponent::AbilityInputTagHeld(const FGameplayTag& InputTag)
 {
 	if (!InputTag.IsValid()) return;
 
-	// 현재 장착 중인 Ability 가져오기
+	// 현재 장착 중인 Ability를 가져옵니다.
 	for (FGameplayAbilitySpec& AbilitySpec : GetActivatableAbilities())
 	{
-		// 장착 중인 Ability 중 Tag가 일치하는 Ability가 있는지 탐색
+		// 장착 중인 Ability 중 Tag가 일치하는 Ability가 있는지 탐색합니다.
 		if (AbilitySpec.GetDynamicSpecSourceTags().HasTagExact(InputTag))
 		{
-			// Pressed 이벤트도 발생시킴
 			AbilitySpecInputPressed(AbilitySpec);
-			// Ability가 이미 작동 중이라면 더 작동시키지 않음
+			// Ability가 이미 작동 중이라면 더 작동시키지 않습니다.
 			if (!AbilitySpec.IsActive())
 			{
 				TryActivateAbility(AbilitySpec.Handle);
@@ -166,9 +192,23 @@ void UAuraAbilitySystemComponent::AbilityInputTagReleased(const FGameplayTag& In
 
 	for (FGameplayAbilitySpec& AbilitySpec : GetActivatableAbilities())
 	{
-		if (AbilitySpec.GetDynamicSpecSourceTags().HasTagExact(InputTag))
+		if (AbilitySpec.GetDynamicSpecSourceTags().HasTagExact(InputTag) && AbilitySpec.IsActive())
 		{
 			AbilitySpecInputReleased(AbilitySpec);
+			
+			UGameplayAbility* Instance = AbilitySpec.GetPrimaryInstance();
+			if (!Instance || Instance->HasAnyFlags(RF_ClassDefaultObject))
+			{
+				continue;
+			}
+
+			const FPredictionKey ActivationKey = Instance->GetCurrentActivationInfo().GetActivationPredictionKey();
+
+			FScopedPredictionWindow ScopedPred(this, IsOwnerActorAuthoritative() ? FPredictionKey() : ActivationKey);
+			if (ActivationKey.IsValidKey() || IsOwnerActorAuthoritative())
+			{
+				InvokeReplicatedEvent(EAbilityGenericReplicatedEvent::InputReleased, AbilitySpec.Handle,  IsOwnerActorAuthoritative() ? FPredictionKey() : ActivationKey);
+			}
 		}
 	}
 }

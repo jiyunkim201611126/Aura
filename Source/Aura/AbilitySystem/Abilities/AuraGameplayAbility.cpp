@@ -136,12 +136,37 @@ bool UAuraGameplayAbility::CheckCost(const FGameplayAbilitySpecHandle Handle, co
 
 void UAuraGameplayAbility::ApplyCost(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo) const
 {
+	if (!ActorInfo->IsNetAuthority())
+	{
+		return;
+	}
+	
 	for (const auto AbilityUsableType : UsableTypes)
 	{
 		AbilityUsableType->ApplyCost(this);
 	}
 	
 	Super::ApplyCost(Handle, ActorInfo, ActivationInfo);
+}
+
+void UAuraGameplayAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)
+{
+	for (const auto AbilityUsableType : UsableTypes)
+	{
+		AbilityUsableType->ActivateAbility(this);
+	}
+	
+	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
+}
+
+void UAuraGameplayAbility::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled)
+{
+	for (const auto AbilityUsableType : UsableTypes)
+	{
+		AbilityUsableType->EndAbility(this);
+	}
+	
+	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
 }
 
 void UAuraGameplayAbility::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)

@@ -3,13 +3,13 @@
 #include "CoreMinimal.h"
 #include "StackableAbilityManager.h"
 #include "Aura/AbilitySystem/Abilities/UsableTypes/AbilityUsableType.h"
-#include "StackableAbility.generated.h"
+#include "StackableType.generated.h"
 
 class UAuraAbilitySystemComponent;
 struct FGameplayAbilityActorInfo;
 
 UCLASS(BlueprintType, EditInlineNew)
-class AURA_API UStackableAbility : public UAbilityUsableType
+class AURA_API UStackableType : public UAbilityUsableType
 {
 	GENERATED_BODY()
 
