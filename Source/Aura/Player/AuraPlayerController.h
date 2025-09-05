@@ -4,6 +4,7 @@
 #include "GameFramework/PlayerController.h"
 #include "AuraPlayerController.generated.h"
 
+class UNiagaraSystem;
 enum class EDamageTypeContext : uint8;
 class UInputMappingContext;
 class UInputAction;
@@ -23,7 +24,7 @@ class AURA_API AAuraPlayerController : public APlayerController
 public:
 	AAuraPlayerController();
 
-	// Damage를 보여주는 위젯 컴포넌트를 스폰하는 함수
+	// Damage를 보여주는 위젯 컴포넌트를 스폰하는 함수입니다.
 	UFUNCTION(Reliable, Client)
 	void SpawnDamageText(float DamageAmount, AActor* TargetActor, bool bBlockedHit, bool bCriticalHit, const EDamageTypeContext DamageType) const;
 
@@ -80,7 +81,7 @@ private:
 	UPROPERTY()
 	TObjectPtr<UAuraAbilitySystemComponent> AuraAbilitySystemComponent;
 
-	// 마우스 입력을 통한 Move를 구현하기 위한 관련 변수
+	// 마우스 입력을 통한 Move를 구현하기 위한 관련 변수들입니다.
 	FVector CachedDestination = FVector::ZeroVector;
 	float FollowTime = 0.f;
 	float ShortPressThreshold = 0.5f;
@@ -88,10 +89,13 @@ private:
 	bool bAutoRunning = false;
 	float AutoRunAcceptanceRadius = 50.f;
 
-	// FVector들을 추가해주면 자동으로 곡선 경로를 생성해주는 컴포넌트
+	// FVector들을 추가해주면 자동으로 곡선 경로를 생성해주는 컴포넌트입니다.
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<USplineComponent> Spline;
 
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<UDamageTextComponent> DamageTextComponentClass;
+
+	UPROPERTY(EditDefaultsOnly)
+	TObjectPtr<UNiagaraSystem> ClickNiagaraSystem;
 };

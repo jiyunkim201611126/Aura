@@ -377,7 +377,7 @@ void UAuraAbilitySystemComponent::ServerEquipAbility_Implementation(const FGamep
 		if (bStatusValid)
 		{
 			// 우선 장착하려는 InputTag에 있는 Ability의 InputTag를 제거합니다. 즉, 장착을 해제합니다.
-			ClearAbilitiesOfInputTag(InputTag);
+			ClearAbilitiesOfInputTag(AbilitySpec, InputTag);
 			// 장착하려는 Ability 또한 InputTag를 제거합니다. 마찬가지로 장착을 해제한다는 뜻입니다.
 			ClearInputTag(AbilitySpec);
 			// Ability를 InputTag에 장착합니다.
@@ -388,11 +388,12 @@ void UAuraAbilitySystemComponent::ServerEquipAbility_Implementation(const FGamep
 			{
 				AbilitySpec->GetDynamicSpecSourceTags().RemoveTag(GameplayTags.Abilities_Status_Unlocked);
 				AbilitySpec->GetDynamicSpecSourceTags().AddTag(GameplayTags.Abilities_Status_Equipped);
-			
-				if (UAuraGameplayAbility* Ability = Cast<UAuraGameplayAbility>(AbilitySpec->Ability))
-				{
-					Ability->RegisterAbilityToUsableTypeManagers(this);
-				}
+			}
+
+			// Ability가 장착되었으므로, UsableTypeManagers에게 이를 알려줍니다.
+			if (UAuraGameplayAbility* Ability = Cast<UAuraGameplayAbility>(AbilitySpec->Ability))
+			{
+				Ability->RegisterAbilityToUsableTypeManagers(this);
 			}
 
 			// 클라이언트에게 Ability의 변경사항을 알려줍니다.
@@ -423,13 +424,13 @@ void UAuraAbilitySystemComponent::ClearInputTag(FGameplayAbilitySpec* Spec)
 	MarkAbilitySpecDirty(*Spec);
 }
 
-void UAuraAbilitySystemComponent::ClearAbilitiesOfInputTag(const FGameplayTag& InputTag)
+void UAuraAbilitySystemComponent::ClearAbilitiesOfInputTag(const FGameplayAbilitySpec* AbilitySpec, const FGameplayTag& InputTag)
 {
-	// 이 함수로 들어오는 관련 Ability들은 무조건 장착 해제하는 상황입니다.
 	FScopedAbilityListLock ActiveScopeLock(*this);
 	for (FGameplayAbilitySpec& Spec : GetActivatableAbilities())
 	{
-		if (AbilityHasInputTag(&Spec, InputTag))
+		// 장착하려는 Ability와 선택한 InputTag에 장착된 Ability가 동일한 경우, 아래 분기로 진입하지 않습니다.
+		if (AbilityHasInputTag(&Spec, InputTag) && &Spec != AbilitySpec)
 		{
 			if (UAuraGameplayAbility* Ability = Cast<UAuraGameplayAbility>(Spec.Ability))
 			{

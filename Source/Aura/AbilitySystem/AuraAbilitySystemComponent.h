@@ -71,7 +71,7 @@ private:
 
 	// 장착이 해제되면 해당 Ability의 InputTag를 제거하는 함수
 	void ClearInputTag(FGameplayAbilitySpec* Spec);
-	void ClearAbilitiesOfInputTag(const FGameplayTag& InputTag);
+	void ClearAbilitiesOfInputTag(const FGameplayAbilitySpec* AbilitySpec, const FGameplayTag& InputTag);
 	bool AbilityHasInputTag(FGameplayAbilitySpec* Spec, const FGameplayTag& InputTag) const;
 	
 public:

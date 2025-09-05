@@ -102,21 +102,9 @@ void AStackableAbilityManager::RegisterAbility(const FGameplayTag& AbilityTag, i
 	{
 		return;
 	}
-
-	if (FAbilityStackItem* ExistingItem = FindItemMutable(AbilityTag))
-	{
-		// 이미 같은 Ability가 등록되어있는 경우 들어오는 분기
-		ExistingItem->CurrentStack = CurrentStack;
-		ExistingItem->MaxStack = MaxStack;
-		ExistingItem->RechargeTime = RechargeTime;
-
-		// 값이 변경되었으므로 클라이언트에게 알려줍니다.
-		AbilityStacks.MarkItemDirty(*ExistingItem);
-
-		// 서버의 로컬 HUD에 현재 충전 횟수를 알립니다.
-		OnStackCountChanged.ExecuteIfBound(AbilityTag, ExistingItem->CurrentStack);
-	}
-	else
+	
+	const FAbilityStackItem* ExistingItem = FindItem(AbilityTag);
+	if (!ExistingItem)
 	{
 		// 배열의 새로운 Element를 선언 및 초기화합니다.
 		FAbilityStackItem NewItem;
@@ -220,7 +208,7 @@ void AStackableAbilityManager::StartRecharge(const FGameplayTag& AbilityTag)
 			return;
 		}
 
-		if (UWorld* World = GetWorld())
+		if (const UWorld* World = GetWorld())
 		{
 			// 최대 충전 상태가 아니고, 타이머가 돌고 있지 않은 경우 타이머를 작동시킵니다.
 			if (!World->GetTimerManager().IsTimerActive(Item->RechargeTimerHandle))

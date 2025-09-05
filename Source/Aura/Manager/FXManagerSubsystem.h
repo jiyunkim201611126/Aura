@@ -115,7 +115,7 @@ public:
 	void AsyncGetNiagara(const FGameplayTag& NiagaraTag, const TFunction<void(UNiagaraSystem*)>& OnLoadedCallback);
 	void OnNiagaraAsyncLoadComplete(FSoftObjectPath LoadedAssetPath);
 
-	// 비동기 로드를 원하는 경우 사용하는 함수
+	// 동기 로드를 원하는 경우 사용하는 함수
 	USoundBase* GetSound(const FGameplayTag& SoundTag) const;
 	UNiagaraSystem* GetNiagara(const FGameplayTag& NiagaraTag) const;
 

@@ -200,7 +200,7 @@ void UFXManagerSubsystem::AsyncPlayNiagaraAtLocation(const FGameplayTag& Niagara
 
 void UFXManagerSubsystem::AsyncGetNiagara(const FGameplayTag& NiagaraTag, const TFunction<void(UNiagaraSystem*)>& OnLoadedCallback)
 {
-	// 위 함수와 마찬가지로 동기 로드를 요청하는 함수입니다.
+	// 위 함수와 마찬가지로 비동기 로드를 요청하는 함수입니다.
 	// 차이점은 NiagaraSystem을 반환받는다는 데에 있습니다.
 	// 예시가 궁금하다면 DebuffNiagaraComponent의 BeginPlay 구현을 참고해 주시기 바랍니다.
 	if (!NiagaraTag.IsValid() || !StreamableManager)

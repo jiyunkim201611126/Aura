@@ -8,6 +8,7 @@
 #include "Aura/Manager/AuraGameplayTags.h"
 #include "NavigationSystem.h"
 #include "NavigationPath.h"
+#include "NiagaraFunctionLibrary.h"
 #include "Aura/UI/Widget/WidgetComponent/DamageTextComponent.h"
 #include "Aura/Aura.h"
 #include "Aura/Interaction/CombatInterface.h"
@@ -24,7 +25,6 @@ void AAuraPlayerController::SpawnDamageText_Implementation(float DamageAmount, A
 	if (IsValid(TargetActor) && DamageTextComponentClass && IsLocalController())
 	{
 		UDamageTextComponent* DamageText = NewObject<UDamageTextComponent>(TargetActor, DamageTextComponentClass);
-		// Component 생성 후 등록하는 과정, 위젯의 AddToViewport 같은 개념
 		DamageText->RegisterComponent();
 		DamageText->SetWorldTransform(TargetActor->GetTransform());
 		DamageText->SetDamageText(DamageAmount, bBlockedHit, bCriticalHit, DamageType);
@@ -82,25 +82,25 @@ void AAuraPlayerController::SetupInputComponent()
 {
 	Super::SetupInputComponent();
 
-	// InputComponent는 ProjectSettings의 Input 탭에서 지정한다.
+	// InputComponent는 ProjectSettings의 Input 탭에서 지정합니다.
 	UAuraInputComponent* AuraInputComponent = CastChecked<UAuraInputComponent>(InputComponent);
 
 	AuraInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AAuraPlayerController::Move);
 	AuraInputComponent->BindAction(ShiftAction, ETriggerEvent::Started, this, &AAuraPlayerController::ShiftPressed);
 	AuraInputComponent->BindAction(ShiftAction, ETriggerEvent::Completed, this, &AAuraPlayerController::ShiftReleased);
 
-	// InputComponent에게 InputConfig(DataAsset)과 함수 포인터들을 전달
-	AuraInputComponent->BindAbilityActions(InputConfig, this,
-		&ThisClass::AbilityInputTagPressed, &ThisClass::AbilityInputTagHeld, &ThisClass::AbilityInputTagReleased);
+	// InputComponent에게 InputConfig(DataAsset)과 함수 포인터들을 전달합니다.
+	AuraInputComponent->BindAbilityActions(InputConfig, this, &ThisClass::AbilityInputTagPressed, &ThisClass::AbilityInputTagHeld, &ThisClass::AbilityInputTagReleased);
 }
 
 void AAuraPlayerController::CursorTrace()
 {
-	/**
-	 * Player와 Enemy Pawn들은 Visibility Trace에 대해 Ignore 반응을 갖습니다.
-	 * 대신 Ally 혹은 Enemy Channel에 대해 Block 반응을 갖습니다.
-	 * 따라서 PlayerController는 Visibility와 Enemy, 2개의 채널을 동시에 Trace해서 우선순위를 판별해 사용합니다.
-	 */
+	// 커서 아래의 적을 하이라이팅하며 그 위치를 멤버변수로 캐싱하는 함수입니다.
+	
+	// Player와 Enemy Pawn들은 Visibility Trace에 대해 Ignore 반응을 갖습니다.
+	// 대신 Ally 혹은 Enemy Channel에 대해 Block 반응을 갖습니다.
+	// 따라서 PlayerController는 Visibility와 Enemy, 2개의 채널을 동시에 Trace해서 우선순위를 판별해 사용합니다.
+	
 	FVector CameraLocation = PlayerCameraManager->GetCameraLocation();
 	
 	FHitResult VisibilityHit;
@@ -122,7 +122,10 @@ void AAuraPlayerController::CursorTrace()
 	
 	if (!CursorHit.bBlockingHit)
 	{
-		if (LastActor) LastActor->UnHighlightActor();
+		if (LastActor)
+		{
+			LastActor->UnHighlightActor();
+		}
 		LastActor = nullptr;
 		ThisActor = nullptr;
 		return;
@@ -133,30 +136,36 @@ void AAuraPlayerController::CursorTrace()
 	
 	if (LastActor != ThisActor)
 	{
-		if (LastActor) LastActor->UnHighlightActor();
-		if (ThisActor) ThisActor->HighlightActor();
+		if (LastActor)
+		{
+			LastActor->UnHighlightActor();
+		}
+		if (ThisActor)
+		{
+			ThisActor->HighlightActor();
+		}
 	}
 }
 
 void AAuraPlayerController::AbilityInputTagPressed(FGameplayTag InputTag)
 {
-	// RMB Input인 경우 들어가는 분기
+	// RMB Input인 경우 들어가는 분기입니다.
 	if (InputTag.MatchesTagExact(FAuraGameplayTags::Get().InputTag_RMB))
 	{
-		// 현재 마우스 아래에 Enemy가 존재하면 bTargeting이 true가 됨
+		// 현재 마우스 아래에 Enemy가 존재하면 bTargeting를 true로 할당합니다.
 		bTargeting = ThisActor ? true : false;
-		// 꾹 누른 시간 초기화하며 측정 시작
+		// 꾹 누른 시간을 0으로 초기화합니다.
 		FollowTime = 0.f;
 		return;
 	}
 
-	// 이동이 아닌 다른 입력이 들어온 경우 이동 중단
+	// 이동이 아닌 다른 입력이 들어온 경우 이동을 중단합니다.
 	bAutoRunning = false;
 }
 
 void AAuraPlayerController::AbilityInputTagHeld(FGameplayTag InputTag)
 {
-	// RMB Input이 아닌 경우 들어가는 분기
+	// RMB Input이 아닌 경우 들어가는 분기입니다.
 	if (!InputTag.MatchesTagExact(FAuraGameplayTags::Get().InputTag_RMB))
 	{
 		if (GetASC())
@@ -166,21 +175,21 @@ void AAuraPlayerController::AbilityInputTagHeld(FGameplayTag InputTag)
 		return;
 	}
 
-	// RMB Input인 경우 여기에 도달
+	// RMB Input인 경우 여기에 도달합니다.
 	if (bTargeting || bShiftKeyDown)
 	{
-		// 마우스 아래 Enemy가 있거나 Shift를 누른 상태면 Ability 사용
+		// 마우스 아래 Enemy가 있거나 Shift를 누른 상태면 Ability를 사용합니다.
 		if (GetASC())
 		{
 			GetASC()->AbilityInputTagHeld(InputTag);
 
-			// 이동 중단
+			// 이동을 중단합니다.
 			bAutoRunning = false;
 		}
 	}
 	else
 	{
-		// 마우스 아래 Enemy가 없으면 Move를 원한다고 간주, 얼마나 오랜 시간 동안 누르고 있었는지 기록 시작
+		// 마우스 아래 Enemy가 없으면 Move를 원한다고 간주, 얼마나 오랜 시간 동안 누르고 있었는지 기록을 시작합니다.
 		FollowTime += GetWorld()->GetDeltaSeconds();
 
 		if (CursorHit.bBlockingHit)
@@ -198,27 +207,24 @@ void AAuraPlayerController::AbilityInputTagHeld(FGameplayTag InputTag)
 
 void AAuraPlayerController::AbilityInputTagReleased(FGameplayTag InputTag)
 {
-	// RMB Input이 아닌 경우 들어가는 분기
-	if (!InputTag.MatchesTagExact(FAuraGameplayTags::Get().InputTag_RMB))
-	{
-		if (GetASC())
-		{
-			GetASC()->AbilityInputTagReleased(InputTag);
-		}
-		return;
-	}
-	
-	// RMB Input인 경우 여기에 도달
-	// GAS가 입력이 Release되었는지 알아야 하기 때문에 일단 호출
+	// ASC가 입력이 Release되었는지 알아야 하기 때문에 일단 호출합니다.
 	if (GetASC())
 	{
 		GetASC()->AbilityInputTagReleased(InputTag);
 	}
+	
+	// RMB Input이 아닌 경우 즉시 return합니다.
+	if (!InputTag.MatchesTagExact(FAuraGameplayTags::Get().InputTag_RMB))
+	{
+		return;
+	}
+	
+	// RMB Input인 경우 여기에 도달합니다.
 
-	// 커서 아래에 적이 없으며 Shift를 누른 상태가 아니면 들어가는 분기
+	// 커서 아래에 적이 없으며 Shift를 누른 상태가 아니면 들어가는 분기입니다.
 	if (!bTargeting && !bShiftKeyDown)
 	{
-		// 마우스 아래 Enemy가 없으면 Move를 원한다고 간주
+		// 마우스 아래 Enemy가 없으면 Move를 원한다고 간주합니다.
 		const APawn* ControlledPawn = GetPawn();
 		
 		// FollowTime(꾹 누르고 있던 시간)을 ShortPressThreshold(Released 이벤트가 발생하지 않는 임계점)와 비교
@@ -243,6 +249,7 @@ void AAuraPlayerController::AbilityInputTagReleased(FGameplayTag InputTag)
 					bAutoRunning = true;
 				}
 			}
+			UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, ClickNiagaraSystem, CachedDestination);
 		}
 		// 관련 변수 초기화
 		FollowTime = 0.f;
@@ -275,11 +282,11 @@ void AAuraPlayerController::AutoRun()
 	if (!bAutoRunning) return;
 	if (APawn* ControlledPawn = GetPawn())
 	{
-		// 곡선 경로 전체 중 캐릭터의 위치로부터 가장 가까운 Location을 구함 
+		// 곡선 경로 전체 중 캐릭터의 위치로부터 가장 가까운 Location을 구합니다.
 		const FVector LocationOnSpline = Spline->FindLocationClosestToWorldLocation(ControlledPawn->GetActorLocation(), ESplineCoordinateSpace::World);
-		// 구해진 해당 Location을 통해 곡선의 방향을 구함
+		// 구해진 해당 Location을 통해 곡선의 방향을 구합니다.
 		const FVector Direction = Spline->FindDirectionClosestToWorldLocation(LocationOnSpline, ESplineCoordinateSpace::World);
-		// 해당 방향으로 이동 시작
+		// 해당 방향으로 이동을 시작합니다.
 		ControlledPawn->AddMovementInput(Direction);
 
 		const float DistanceToDestination = (LocationOnSpline - CachedDestination).Length();
