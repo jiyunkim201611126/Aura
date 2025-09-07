@@ -80,30 +80,73 @@ void UFXManagerSubsystem::AsyncPlaySoundAtLocation(const FGameplayTag& SoundTag,
 	
 	FSoftObjectPath AssetPath = SoundToLoad.ToSoftObjectPath();
 	
+	// 함수를 바인드하기 위한 변수를 선언 및 초기화합니다.
+	FSoundAsyncPlayData NewPlayData;
+	NewPlayData.LocationsToPlay = Location;
+	NewPlayData.RotationsToPlay = Rotation;
+	NewPlayData.VolumeMultiplier = VolumeMultiplier;
+	NewPlayData.PitchMultiplier = PitchMultiplier;
+	
 	// 이미 로드 중인 경우 들어가는 분기입니다.
 	if (FSoundAsyncLoadRequest* ExistingRequest = PendingSoundLoadRequests.Find(AssetPath))
 	{
 		// 로드 중인 에셋이 로딩 완료 시점에 이 요청에 대해서도 함께 처리하기 위해 배열에 추가합니다.
-		ExistingRequest->LocationsToPlay.Add(Location);
-		ExistingRequest->RotationsToPlay.Add(Rotation);
-		ExistingRequest->VolumeMultiplier.Add(VolumeMultiplier);
-		ExistingRequest->PitchMultiplier.Add(PitchMultiplier);
-		
+		ExistingRequest->PlayRequests.Add(NewPlayData);
 		return;
 	}
 
 	// 새로 로드를 시작해야 하는 경우 여기로 내려옵니다.
-	// 함수를 바인드하기 위한 변수를 선언 및 초기화합니다.
-	FSoundAsyncLoadRequest NewRequest;
-	NewRequest.LocationsToPlay.Add(Location);
-	NewRequest.RotationsToPlay.Add(Rotation);
-	NewRequest.VolumeMultiplier.Add(VolumeMultiplier);
-	NewRequest.PitchMultiplier.Add(PitchMultiplier);
-
 	// 에셋 로드가 끝난 뒤 호출되는 델리게이트에 함수를 바인드합니다.
+	FSoundAsyncLoadRequest NewRequest;
+	NewRequest.PlayRequests.Add(NewPlayData);	
 	FStreamableDelegate StreamableCompleteDelegate = FStreamableDelegate::CreateUObject(this, &ThisClass::OnSoundAsyncLoadComplete, AssetPath);
 	StreamableManager->RequestAsyncLoad(AssetPath, StreamableCompleteDelegate);
 
+	PendingSoundLoadRequests.Add(AssetPath, NewRequest);
+}
+
+void UFXManagerSubsystem::AsyncGetSound(const FGameplayTag& SoundTag, const TFunction<void(USoundBase*)>& OnLoadedCallback)
+{
+	// 위 함수와 마찬가지로 비동기 로드를 요청하는 함수입니다.
+	// 차이점은 SoundBase을 반환받는다는 데에 있습니다.
+	// AuraProjectile의 BeginPlay에 예시가 있습니다.
+	// 나이아가라 예시는 DebuffNiagaraComponent의 OnRep_DebuffTag에 있습니다.
+	if (!SoundTag.IsValid() || !StreamableManager)
+	{
+		return;
+	}
+	
+	FScopeLock Lock(&PendingRequestsLock);
+	
+	const TSoftObjectPtr<USoundBase> SoundToLoad = SoundMap.FindRef(SoundTag);
+	if (SoundToLoad.IsNull())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("SoundTag %s에 해당하는 사운드를 찾을 수 없습니다."), *SoundTag.ToString());
+		return;
+	}
+
+	const FSoftObjectPath AssetPath = SoundToLoad.ToSoftObjectPath();
+
+	// 이미 에셋이 로드되어있는 경우 들어가는 분기입니다.
+	if (SoundToLoad.IsValid())
+	{
+		OnLoadedCallback(SoundToLoad.Get());
+		return;
+	}
+
+	// 이미 로드 중인 경우 콜백 함수만 등록하고 리턴합니다.
+	if (PendingSoundLoadRequests.Contains(AssetPath))
+	{
+		PendingSoundLoadRequests[AssetPath].GetterCallbacks.Add(OnLoadedCallback);
+		return;
+	}
+
+	// 처음 요청된 태그인 경우 콜백 리스트를 생성합니다.
+	FSoundAsyncLoadRequest NewRequest;
+	NewRequest.GetterCallbacks.Add(OnLoadedCallback);
+	FStreamableDelegate StreamableCompleteDelegate = FStreamableDelegate::CreateUObject(this, &ThisClass::OnSoundAsyncLoadComplete, AssetPath);
+	StreamableManager->RequestAsyncLoad(AssetPath, StreamableCompleteDelegate);
+	
 	PendingSoundLoadRequests.Add(AssetPath, NewRequest);
 }
 
@@ -118,15 +161,14 @@ void UFXManagerSubsystem::OnSoundAsyncLoadComplete(FSoftObjectPath LoadedAssetPa
 	{
 		if (LoadedSound && GetWorld())
 		{
-			for (int32 i = 0; i < CompletedRequest->LocationsToPlay.Num(); ++i)
+			for (const auto& PlayData : CompletedRequest->PlayRequests)
 			{
-				const FVector PlayLocation = CompletedRequest->LocationsToPlay[i];
-				const FRotator PlayRotation = CompletedRequest->RotationsToPlay[i];
-				const float PlayVolumeMultiplier = CompletedRequest->VolumeMultiplier[i];
-				const float PlayPitchMultiplier = CompletedRequest->PitchMultiplier[i];
-               
-				UGameplayStatics::PlaySoundAtLocation(GetWorld(), LoadedSound, PlayLocation, PlayRotation, PlayVolumeMultiplier, PlayPitchMultiplier);
+				UGameplayStatics::PlaySoundAtLocation(GetWorld(), LoadedSound, PlayData.LocationsToPlay, PlayData.RotationsToPlay, PlayData.VolumeMultiplier, PlayData.PitchMultiplier);
 			}
+			for (const auto& Callback : CompletedRequest->GetterCallbacks)
+			{
+				Callback(LoadedSound);
+			}			
 		}
 		else
 		{
@@ -166,29 +208,21 @@ void UFXManagerSubsystem::AsyncPlayNiagaraAtLocation(const FGameplayTag& Niagara
 	
 	FSoftObjectPath AssetPath = NiagaraToLoad.ToSoftObjectPath();
 	
-	// 이미 로드 중인 경우 들어가는 분기입니다.
-	if (FNiagaraAsyncLoadRequest* ExistingRequest = PendingNiagaraLoadRequests.Find(AssetPath))
-	{
-		FNiagaraAsyncPlayData NewPlayData;
-		NewPlayData.Location = Location;
-		NewPlayData.Rotation = Rotation;
-		NewPlayData.Scale = Scale;
-		NewPlayData.bAutoDestroy = bAutoDestroy;
-		NewPlayData.bAutoActivate = bAutoActivate;
-		
-		ExistingRequest->PlayRequests.Add(NewPlayData);
-
-		return;
-	}
-	
-	// 새로 로드를 시작해야 하는 경우 여기로 내려옵니다.
 	FNiagaraAsyncPlayData NewPlayData;
 	NewPlayData.Location = Location;
 	NewPlayData.Rotation = Rotation;
 	NewPlayData.Scale = Scale;
 	NewPlayData.bAutoDestroy = bAutoDestroy;
 	NewPlayData.bAutoActivate = bAutoActivate;
-
+	
+	// 이미 로드 중인 경우 들어가는 분기입니다.
+	if (FNiagaraAsyncLoadRequest* ExistingRequest = PendingNiagaraLoadRequests.Find(AssetPath))
+	{
+		ExistingRequest->PlayRequests.Add(NewPlayData);
+		return;
+	}
+	
+	// 새로 로드를 시작해야 하는 경우 여기로 내려옵니다.
 	// 에셋 로딩이 완료되면 위에서 초기화한 정보들을 참조할 수 있도록 배열에 추가합니다.
 	FNiagaraAsyncLoadRequest NewRequest;
 	NewRequest.PlayRequests.Add(NewPlayData);
@@ -200,9 +234,6 @@ void UFXManagerSubsystem::AsyncPlayNiagaraAtLocation(const FGameplayTag& Niagara
 
 void UFXManagerSubsystem::AsyncGetNiagara(const FGameplayTag& NiagaraTag, const TFunction<void(UNiagaraSystem*)>& OnLoadedCallback)
 {
-	// 위 함수와 마찬가지로 비동기 로드를 요청하는 함수입니다.
-	// 차이점은 NiagaraSystem을 반환받는다는 데에 있습니다.
-	// 예시가 궁금하다면 DebuffNiagaraComponent의 BeginPlay 구현을 참고해 주시기 바랍니다.
 	if (!NiagaraTag.IsValid() || !StreamableManager)
 	{
 		return;

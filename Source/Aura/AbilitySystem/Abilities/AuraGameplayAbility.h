@@ -70,8 +70,6 @@ public:
 	void CauseDebuff(AActor* TargetActor, const TArray<FGameplayEffectSpecHandle>& DebuffSpecs);
 
 protected:
-	
-	
 	UFUNCTION(BlueprintCallable)
 	float GetManaCost(int32 InLevel = 1) const;
 	UFUNCTION(BlueprintCallable)

@@ -141,7 +141,10 @@ void UAuraAbilitySystemComponent::OnRep_ActivateAbilities()
 
 void UAuraAbilitySystemComponent::AbilityInputTagPressed(const FGameplayTag& InputTag)
 {
-	if (!InputTag.IsValid()) return;
+	if (!InputTag.IsValid())
+	{
+		return;
+	}
 
 	// 현재 장착 중인 Ability를 가져옵니다.
 	for (FGameplayAbilitySpec& AbilitySpec : GetActivatableAbilities())
@@ -151,13 +154,28 @@ void UAuraAbilitySystemComponent::AbilityInputTagPressed(const FGameplayTag& Inp
 		{
 			// InputTag에 해당하는 Ability를 발동합니다.
 			AbilitySpecInputPressed(AbilitySpec);
+
+			if (AbilitySpec.IsActive())
+			{
+				// Ability가 WaitInput Task를 생성하면 해당 PredictionKey를 키로 하여 델리게이트에 콜백을 걸고, 이벤트를 발동하면 Task가 수신합니다.
+				// XP와 Attribute 증가 로직 구현에 사용했던 SendGameplayEventToActor와 작동 원리가 일치합니다.
+				// 5.5 이후로 ActivationInfo에 경고 문구가 출력되고 있으나, Lyra에서도 아래와 같이 구현하고 있는 걸 봐서 아직은 대체할 방식이 전부 구현되진 않은 것으로 보입니다.
+				const UGameplayAbility* Instance = AbilitySpec.GetPrimaryInstance();
+PRAGMA_DISABLE_DEPRECATION_WARNINGS
+				FPredictionKey OriginalPredictionKey = Instance ? Instance->GetCurrentActivationInfo().GetActivationPredictionKey() : AbilitySpec.ActivationInfo.GetActivationPredictionKey();
+				InvokeReplicatedEvent(EAbilityGenericReplicatedEvent::InputPressed, AbilitySpec.Handle, OriginalPredictionKey);
+PRAGMA_ENABLE_DEPRECATION_WARNINGS
+			}
 		}
 	}
 }
 
 void UAuraAbilitySystemComponent::AbilityInputTagHeld(const FGameplayTag& InputTag)
 {
-	if (!InputTag.IsValid()) return;
+	if (!InputTag.IsValid())
+	{
+		return;
+	}
 
 	// 현재 장착 중인 Ability를 가져옵니다.
 	for (FGameplayAbilitySpec& AbilitySpec : GetActivatableAbilities())
@@ -177,13 +195,25 @@ void UAuraAbilitySystemComponent::AbilityInputTagHeld(const FGameplayTag& InputT
 
 void UAuraAbilitySystemComponent::AbilityInputTagReleased(const FGameplayTag& InputTag)
 {
-	if (!InputTag.IsValid()) return;
+	if (!InputTag.IsValid())
+	{
+		return;
+	}
 
 	for (FGameplayAbilitySpec& AbilitySpec : GetActivatableAbilities())
 	{
 		if (AbilitySpec.GetDynamicSpecSourceTags().HasTagExact(InputTag) && AbilitySpec.IsActive())
 		{
 			AbilitySpecInputReleased(AbilitySpec);
+
+			if (AbilitySpec.IsActive())
+			{
+				const UGameplayAbility* Instance = AbilitySpec.GetPrimaryInstance();
+PRAGMA_DISABLE_DEPRECATION_WARNINGS
+				FPredictionKey OriginalPredictionKey = Instance ? Instance->GetCurrentActivationInfo().GetActivationPredictionKey() : AbilitySpec.ActivationInfo.GetActivationPredictionKey();
+				InvokeReplicatedEvent(EAbilityGenericReplicatedEvent::InputReleased, AbilitySpec.Handle, OriginalPredictionKey);
+PRAGMA_ENABLE_DEPRECATION_WARNINGS
+			}
 		}
 	}
 }

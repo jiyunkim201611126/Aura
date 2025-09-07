@@ -37,23 +37,39 @@ struct FTaggedNiagaraRow : public FTableRowBase
 
 // 내부적으로 로딩 중인 에셋의 상태를 관리할 구조체
 USTRUCT()
-struct FSoundAsyncLoadRequest
+struct FSoundAsyncPlayData
 {
 	GENERATED_BODY()
 
 	UPROPERTY()
-	TArray<FVector> LocationsToPlay;
+	FVector LocationsToPlay;
 
 	UPROPERTY()
-	TArray<FRotator> RotationsToPlay;
+	FRotator RotationsToPlay;
 
 	UPROPERTY()
-	TArray<float> VolumeMultiplier;
+	float VolumeMultiplier;
 
 	UPROPERTY()
-	TArray<float> PitchMultiplier;
+	float PitchMultiplier;
 
 	// 필요하면 변수 추가
+	
+	FSoundAsyncPlayData()
+	{
+	}
+};
+
+USTRUCT()
+struct FSoundAsyncLoadRequest
+{
+	GENERATED_BODY()
+	// 나이아가라는 그 자리에서 재생해야 하는 경우도 있지만, 사운드와 달리 NiagaraSystem 자체를 반환받아야 하는 경우가 존재합니다.
+	// 이를 구분하기 위해 2개의 배열이 있으며, 에셋 로드가 완되면 두 개의 배열을 모두 돌며 나이아가라 재생 함수 혹은 콜백 함수를 호출합니다.
+	UPROPERTY()
+	TArray<FSoundAsyncPlayData> PlayRequests;
+
+	TArray<TFunction<void(USoundBase*)>> GetterCallbacks;
 	
 	FSoundAsyncLoadRequest()
 	{
@@ -108,6 +124,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "FX")
 	void AsyncPlaySoundAtLocation(const FGameplayTag& SoundTag, const FVector Location, const FRotator Rotation = FRotator::ZeroRotator, const float VolumeMultiplier = 1.f, const float PitchMultiplier = 1.f);
+	void AsyncGetSound(const FGameplayTag& SoundTag, const TFunction<void(USoundBase*)>& OnLoadedCallback);
 	void OnSoundAsyncLoadComplete(FSoftObjectPath LoadedAssetPath);
 
 	UFUNCTION(BlueprintCallable, Category = "FX")

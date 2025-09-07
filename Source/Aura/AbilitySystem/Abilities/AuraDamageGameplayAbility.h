@@ -29,10 +29,9 @@ protected:
 	UFUNCTION(BlueprintPure)
 	FText GetDamageTexts(int32 InLevel);
 
-public:
-	FGameplayEffectContextHandle DamageEffectContextHandle;
-
 protected:
+	FGameplayEffectContextHandle DamageEffectContextHandle;
+	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Damage")
 	TSubclassOf<UGameplayEffect> DamageEffectClass;
 

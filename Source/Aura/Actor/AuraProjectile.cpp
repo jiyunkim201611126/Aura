@@ -37,13 +37,15 @@ void AAuraProjectile::BeginPlay()
 	SetLifeSpan(LifeSpan);
 	Sphere->OnComponentBeginOverlap.AddDynamic(this, &AAuraProjectile::OnSphereOverlap);
 
-	if (const UFXManagerSubsystem* FXManagerSubsystem = GetWorld()->GetGameInstance()->GetSubsystem<UFXManagerSubsystem>())
+	if (UFXManagerSubsystem* FXManager = GetWorld()->GetGameInstance()->GetSubsystem<UFXManagerSubsystem>())
 	{
-		USoundBase* LoopingSound = FXManagerSubsystem->GetSound(LoopingSoundTag);
-		if (LoopingSound)
+		FXManager->AsyncGetSound(LoopingSoundTag, [this](USoundBase* LoopingSound)
 		{
-			LoopingSoundComponent = UGameplayStatics::SpawnSoundAttached(LoopingSound, GetRootComponent());
-		}
+			if (LoopingSound)
+			{
+				LoopingSoundComponent = UGameplayStatics::SpawnSoundAttached(LoopingSound, GetRootComponent());
+			}
+		});
 	}
 }
 
@@ -60,6 +62,12 @@ void AAuraProjectile::Destroyed()
 	{
 		PlayHitFXs();
 		bHit = true;
+	}
+
+	if (LoopingSoundComponent)
+	{
+		LoopingSoundComponent->Stop();
+		LoopingSoundComponent->DestroyComponent();
 	}
 	
 	Super::Destroyed();
@@ -153,10 +161,5 @@ void AAuraProjectile::PlayHitFXs() const
 	{
 		FXManagerSubsystem->AsyncPlaySoundAtLocation(ImpactSoundTag, GetActorLocation());
 		FXManagerSubsystem->AsyncPlayNiagaraAtLocation(ImpactEffectTag, GetActorLocation());
-	}
-		
-	if (LoopingSoundComponent)
-	{
-		LoopingSoundComponent->Stop();
 	}
 }
