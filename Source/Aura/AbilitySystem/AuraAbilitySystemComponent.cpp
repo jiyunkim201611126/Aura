@@ -151,17 +151,6 @@ void UAuraAbilitySystemComponent::AbilityInputTagPressed(const FGameplayTag& Inp
 		{
 			// InputTag에 해당하는 Ability를 발동합니다.
 			AbilitySpecInputPressed(AbilitySpec);
-			
-			if (AbilitySpec.IsActive())
-			{
-				FPredictionKey PredKey;
-				if (GetOwner() && GetOwner()->HasAuthority())
-				{
-					PredKey = GetPredictionKeyForNewAction();					
-				}
-				FScopedPredictionWindow ScopedPred(this, PredKey);
-				InvokeReplicatedEvent(EAbilityGenericReplicatedEvent::InputPressed, AbilitySpec.Handle, PredKey);
-			}
 		}
 	}
 }
@@ -195,20 +184,6 @@ void UAuraAbilitySystemComponent::AbilityInputTagReleased(const FGameplayTag& In
 		if (AbilitySpec.GetDynamicSpecSourceTags().HasTagExact(InputTag) && AbilitySpec.IsActive())
 		{
 			AbilitySpecInputReleased(AbilitySpec);
-			
-			UGameplayAbility* Instance = AbilitySpec.GetPrimaryInstance();
-			if (!Instance || Instance->HasAnyFlags(RF_ClassDefaultObject))
-			{
-				continue;
-			}
-
-			const FPredictionKey ActivationKey = Instance->GetCurrentActivationInfo().GetActivationPredictionKey();
-
-			FScopedPredictionWindow ScopedPred(this, IsOwnerActorAuthoritative() ? FPredictionKey() : ActivationKey);
-			if (ActivationKey.IsValidKey() || IsOwnerActorAuthoritative())
-			{
-				InvokeReplicatedEvent(EAbilityGenericReplicatedEvent::InputReleased, AbilitySpec.Handle,  IsOwnerActorAuthoritative() ? FPredictionKey() : ActivationKey);
-			}
 		}
 	}
 }
