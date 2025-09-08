@@ -96,6 +96,23 @@ void AAuraPlayerController::SetupInputComponent()
 void AAuraPlayerController::CursorTrace()
 {
 	// 커서 아래의 적을 하이라이팅하며 그 위치를 멤버변수로 캐싱하는 함수입니다.
+
+	// CursorTrace가 Block된 상태라면 모두 UnHighlight합니다.
+	if (GetASC() && GetASC()->HasMatchingGameplayTag(FAuraGameplayTags::Get().Player_Block_CursorTrace))
+	{
+		if (LastActor)
+		{
+			LastActor->UnHighlightActor();
+		}
+		if (ThisActor)
+		{
+			ThisActor->UnHighlightActor();
+		}
+		
+		LastActor = nullptr;
+		ThisActor = nullptr;
+		return;
+	}
 	
 	// Player와 Enemy Pawn들은 Visibility Trace에 대해 Ignore 반응을 갖습니다.
 	// 대신 Ally 혹은 Enemy Channel에 대해 Block 반응을 갖습니다.
@@ -149,6 +166,11 @@ void AAuraPlayerController::CursorTrace()
 
 void AAuraPlayerController::AbilityInputTagPressed(FGameplayTag InputTag)
 {
+	if (GetASC() && GetASC()->HasMatchingGameplayTag(FAuraGameplayTags::Get().Player_Block_InputPressed))
+	{
+		return;
+	}
+	
 	// RMB Input인 경우 들어가는 분기입니다.
 	if (InputTag.MatchesTagExact(FAuraGameplayTags::Get().InputTag_RMB))
 	{
@@ -170,6 +192,11 @@ void AAuraPlayerController::AbilityInputTagPressed(FGameplayTag InputTag)
 
 void AAuraPlayerController::AbilityInputTagHeld(FGameplayTag InputTag)
 {
+	if (GetASC() && GetASC()->HasMatchingGameplayTag(FAuraGameplayTags::Get().Player_Block_InputHeld))
+	{
+		return;
+	}
+	
 	// RMB Input이 아닌 경우 들어가는 분기입니다.
 	if (!InputTag.MatchesTagExact(FAuraGameplayTags::Get().InputTag_RMB))
 	{
@@ -212,6 +239,11 @@ void AAuraPlayerController::AbilityInputTagHeld(FGameplayTag InputTag)
 
 void AAuraPlayerController::AbilityInputTagReleased(FGameplayTag InputTag)
 {
+	if (GetASC() && GetASC()->HasMatchingGameplayTag(FAuraGameplayTags::Get().Player_Block_InputReleased))
+	{
+		return;
+	}
+	
 	// ASC가 입력이 Release되었는지 알아야 하기 때문에 일단 호출합니다.
 	if (GetASC())
 	{
@@ -254,7 +286,10 @@ void AAuraPlayerController::AbilityInputTagReleased(FGameplayTag InputTag)
 					bAutoRunning = true;
 				}
 			}
-			UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, ClickNiagaraSystem, CachedDestination);
+			if (GetASC() && !GetASC()->HasMatchingGameplayTag(FAuraGameplayTags::Get().Player_Block_InputPressed))
+			{
+				UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, ClickNiagaraSystem, CachedDestination);
+			}
 		}
 		// 관련 변수 초기화
 		FollowTime = 0.f;
@@ -264,6 +299,11 @@ void AAuraPlayerController::AbilityInputTagReleased(FGameplayTag InputTag)
 
 void AAuraPlayerController::Move(const FInputActionValue& InputActionValue)
 {
+	if (GetASC() && GetASC()->HasMatchingGameplayTag(FAuraGameplayTags::Get().Player_Block_InputPressed))
+	{
+		return;
+	}
+	
 	if (Spline->GetNumberOfSplinePoints())
 	{
 		Spline->ClearSplinePoints();

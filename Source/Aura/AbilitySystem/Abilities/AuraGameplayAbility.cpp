@@ -17,6 +17,39 @@ void UAuraGameplayAbility::UpdateFacingToCombatTarget() const
 	ICombatInterface::Execute_UpdateFacingTarget(SourceActor, TargetLocation);
 }
 
+void UAuraGameplayAbility::ApplyAllEffect(AActor* TargetActor)
+{
+	for (const auto EffectPolicy : EffectPolicies)
+	{
+		if (EffectPolicy && TargetActor)
+		{
+			EffectPolicy->ApplyAllEffect(this, TargetActor);
+		}
+	}
+}
+
+FGameplayEffectContextHandle UAuraGameplayAbility::GetDamageContextHandle() const
+{
+	UAbilityEffectPolicy_Damage* DamageEffectPolicy = GetEffectPoliciesOfClass<UAbilityEffectPolicy_Damage>(EffectPolicies);
+	if (DamageEffectPolicy)
+	{
+		return DamageEffectPolicy->DamageEffectContextHandle;
+	}
+
+	return FGameplayEffectContextHandle();
+}
+
+FGameplayEffectContextHandle UAuraGameplayAbility::GetDebuffContextHandle() const
+{
+	UAbilityEffectPolicy_Debuff* DebuffEffectPolicy = GetEffectPoliciesOfClass<UAbilityEffectPolicy_Debuff>(EffectPolicies);
+	if (DebuffEffectPolicy)
+	{
+		return DebuffEffectPolicy->DebuffEffectContextHandle;
+	}
+	
+	return FGameplayEffectContextHandle();
+}
+
 FText UAuraGameplayAbility::GetDescription_Implementation(int32 Level)
 {
 	return FAuraTextManager::GetText(EStringTableTextType::UI, DescriptionKey);
@@ -25,26 +58,6 @@ FText UAuraGameplayAbility::GetDescription_Implementation(int32 Level)
 FText UAuraGameplayAbility::GetLockedDescription(int32 Level)
 {
 	return FText::Format(FAuraTextManager::GetText(EStringTableTextType::UI, TEXT("Abilities_Description_Locked")), Level);
-}
-
-void UAuraGameplayAbility::ApplyAllEffect(AActor* TargetActor)
-{
-	for (const auto EffectPolicy : EffectPolicies)
-	{
-		EffectPolicy->ApplyAllEffect(this, TargetActor);
-	}
-}
-
-FGameplayEffectContextHandle UAuraGameplayAbility::GetDamageContextHandle() const
-{
-	UAbilityEffectPolicy_Damage* DamageEffectPolicy = GetEffectPoliciesOfClass<UAbilityEffectPolicy_Damage>(EffectPolicies);
-	return DamageEffectPolicy->DamageEffectContextHandle;
-}
-
-FGameplayEffectContextHandle UAuraGameplayAbility::GetDebuffContextHandle() const
-{
-	UAbilityEffectPolicy_Debuff* DebuffEffectPolicy = GetEffectPoliciesOfClass<UAbilityEffectPolicy_Debuff>(EffectPolicies);
-	return DebuffEffectPolicy->DebuffEffectContextHandle;
 }
 
 float UAuraGameplayAbility::GetManaCost(int32 InLevel) const
@@ -74,14 +87,11 @@ float UAuraGameplayAbility::GetCooldown(int32 InLevel) const
 	return Cooldown;
 }
 
-FText UAuraGameplayAbility::GetDamageTexts(int32 InLevel)
+FText UAuraGameplayAbility::GetDamageTexts(int32 InLevel) const
 {
-	for (auto EffectPolicy : EffectPolicies)
+	if (UAbilityEffectPolicy_Damage* DamagePolicy = GetEffectPoliciesOfClass<UAbilityEffectPolicy_Damage>(EffectPolicies))
 	{
-		if (UAbilityEffectPolicy_Damage* DamageEffectPolicy = Cast<UAbilityEffectPolicy_Damage>(EffectPolicy))
-		{
-			return DamageEffectPolicy->GetDamageTexts(InLevel);
-		}
+		return DamagePolicy->GetDamageTexts(InLevel);
 	}
 	return FText();
 }
@@ -140,21 +150,11 @@ void UAuraGameplayAbility::ApplyCost(const FGameplayAbilitySpecHandle Handle, co
 
 void UAuraGameplayAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)
 {
-	for (const auto AdditionalCost : AdditionalCosts)
-	{
-		AdditionalCost->ActivateAbility(this);
-	}
-	
 	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
 }
 
 void UAuraGameplayAbility::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled)
 {
-	for (const auto AdditionalCost : AdditionalCosts)
-	{
-		AdditionalCost->EndAbility(this);
-	}
-
 	for (const auto EffectPolicy : EffectPolicies)
 	{
 		EffectPolicy->EndAbility();
@@ -163,6 +163,9 @@ void UAuraGameplayAbility::EndAbility(const FGameplayAbilitySpecHandle Handle, c
 	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
 }
 
+
+
+#if WITH_EDITOR
 void UAuraGameplayAbility::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
 	Super::PostEditChangeProperty(PropertyChangedEvent);
@@ -190,3 +193,4 @@ void UAuraGameplayAbility::SyncAbilityTagToAssetTags()
 		SetAssetTags(NewAbilityTags);
 	}
 }
+#endif

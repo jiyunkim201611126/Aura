@@ -26,7 +26,7 @@ struct FTaggedMontage
 	FGameplayTag ImpactSoundTag;
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	FGameplayTag NiagaraTag;
+	FGameplayTag ImpactNiagaraTag;
 };
 
 UCLASS()
@@ -39,10 +39,6 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void UpdateFacingToCombatTarget() const;
 
-	UFUNCTION(BlueprintNativeEvent)
-	FText GetDescription(int32 Level);
-	static FText GetLockedDescription(int32 Level);
-
 	UFUNCTION(BlueprintCallable)
 	void ApplyAllEffect(AActor* TargetActor);
 	
@@ -51,13 +47,17 @@ public:
 	UFUNCTION(BlueprintPure)
 	FGameplayEffectContextHandle GetDebuffContextHandle() const;
 
+	UFUNCTION(BlueprintNativeEvent)
+	FText GetDescription(int32 Level);
+	static FText GetLockedDescription(int32 Level);
+
 protected:
 	UFUNCTION(BlueprintCallable)
 	float GetManaCost(int32 InLevel = 1) const;
 	UFUNCTION(BlueprintCallable)
 	float GetCooldown(int32 InLevel = 1) const;
 	UFUNCTION(BlueprintPure)
-	FText GetDamageTexts(int32 InLevel);
+	FText GetDamageTexts(int32 InLevel) const;
 
 private:
 	// TaggedMontages 중 랜덤하게 하나 가져오는 함수입니다.
@@ -85,14 +85,14 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Description")
 	FString DescriptionKey;
 
-	UPROPERTY(EditDefaultsOnly, Instanced, Category = "Effects")
+	UPROPERTY(EditDefaultsOnly, Instanced, Category = "Effect")
 	TArray<TObjectPtr<UAbilityEffectPolicy>> EffectPolicies;
 
 protected:
 	// 이 아래로는 스택형 스킬을 구현하기 위한 구문입니다.
 	// 아래 포인터 배열이 초기화되어선 안 되므로 반드시 Instanced per Actor로 설정해줍니다.
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Instanced, Category = "AdditionalCosts")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Instanced, Category = "AdditionalCost")
 	TArray<TObjectPtr<UAbilityAdditionalCost>> AdditionalCosts;
 
 public:
@@ -119,6 +119,7 @@ private:
 template<typename T>
 T* GetEffectPoliciesOfClass(const TArray<TObjectPtr<UAbilityEffectPolicy>>& Policies)
 {
+	// T가 UAbilityEffectPolicy를 상속받지 않는 경우 오류를 발생시키는 구문입니다.
 	static_assert(TIsDerivedFrom<T, UAbilityEffectPolicy>::IsDerived, "T는 반드시 UAbilityEffectPolicy를 상속받아야 합니다.");
 
 	for (UAbilityEffectPolicy* Policy : Policies)

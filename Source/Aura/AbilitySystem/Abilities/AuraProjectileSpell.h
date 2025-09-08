@@ -18,23 +18,30 @@ public:
 	int32 GetProjectileNumsToSpawn(int32 Level) const;
 
 protected:
-	virtual void ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData) override;
-
+	UFUNCTION(BlueprintCallable)
+	void SetTarget(const FGameplayAbilityTargetDataHandle& Handle);
+	
 	/**
 	 * Projectile을 생성 및 발사하는 함수입니다.
 	 *
-	 * @param ProjectileSpawnLocation 
-	 * @param ProjectileTargetLocation 
+	 * @param InProjectileSpawnLocation
+	 * @param InProjectileTargetLocation 이미 멤버변수 ProjectileTargetLocation이 있지만, AI의 해당 Ability 사용을 위해 매개변수로도 선언합니다.
 	 * @param PitchOverride 양수 입력 시 해당 각도만큼 위쪽으로 발사됩니다.
 	 * @param bHoming 투사체가 타겟을 추적할지 결정합니다. false로 호출 시 궤도 변경 없이 발사된 방향으로 나아갑니다.
 	 * @param HomingTarget 추적할 타겟으로, bHoming이 true이며 nullptr인 경우 클릭한 위치로 나아갑니다.
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Projectile")
-	void SpawnProjectile(UPARAM(ref) FVector& ProjectileSpawnLocation, UPARAM(ref) FVector& ProjectileTargetLocation, const bool bHoming, const float PitchOverride, const AActor* HomingTarget);
+	void SpawnProjectile(UPARAM(ref) FVector& InProjectileSpawnLocation, UPARAM(ref) FVector& InProjectileTargetLocation, const bool bHoming = false, const float PitchOverride = 0.f);
 
 	void SetHandlesToProjectile(AAuraProjectile* Projectile, const FVector& TargetLocation) const;
 
 protected:
+	UPROPERTY(BlueprintReadWrite)
+	FVector ProjectileTargetLocation;
+	
+	UPROPERTY(BlueprintReadOnly)
+	TWeakObjectPtr<AActor> HomingTarget;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Projectile")
 	TSubclassOf<AAuraProjectile> ProjectileClass;
 

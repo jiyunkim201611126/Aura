@@ -11,6 +11,11 @@ struct FGameplayAbilityActorInfo;
 class UAuraAbilitySystemComponent;
 class UAuraGameplayAbility;
 
+/**
+ * Ability의 추가적인 Cost를 구현하는 클래스입니다.
+ * OnEquip, OnUnequip에서 관련 Manager클래스에게 자신을 가진 Ability를 등록 및 해제합니다.
+ * 그 뒤 Ability 발동 시마다 CheckCost, ApplyCost가 Ability의 함수와 함께 호출됩니다.
+ */
 UCLASS(Abstract, BlueprintType, EditInlineNew, DefaultToInstanced)
 class AURA_API UAbilityAdditionalCost : public UObject
 {
@@ -21,9 +26,7 @@ public:
 	virtual void OnUnequipAbility(const UAuraGameplayAbility* OwningAbility, UAuraAbilitySystemComponent* ASC);
 	virtual bool CheckCost(const UAuraGameplayAbility* OwningAbility);
 	virtual void ApplyCost(const UAuraGameplayAbility* OwningAbility);
-	virtual void ActivateAbility(const UAuraGameplayAbility* OwningAbility);
-	virtual void EndAbility(const UAuraGameplayAbility* OwningAbility);
 
-	UFUNCTION(BlueprintPure, Category = "UsableType")
+	UFUNCTION(BlueprintPure, Category = "AdditionalCost")
 	virtual FText GetDescription();
 };

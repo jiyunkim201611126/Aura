@@ -17,14 +17,6 @@ void UAbilityAdditionalCost::ApplyCost(const UAuraGameplayAbility* OwningAbility
 {
 }
 
-void UAbilityAdditionalCost::ActivateAbility(const UAuraGameplayAbility* OwningAbility)
-{
-}
-
-void UAbilityAdditionalCost::EndAbility(const UAuraGameplayAbility* OwningAbility)
-{
-}
-
 FText UAbilityAdditionalCost::GetDescription()
 {
 	return FText();

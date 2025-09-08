@@ -25,6 +25,7 @@ private:
 	AStackableAbilityManager* GetStackableAbilityManager(const UAuraGameplayAbility* OwningAbility) const;
 
 protected:
+	// Manager 클래스의 AbilityStackItem을 그대로 사용하는 것이 아닌, 독자적으로 FScalableFloat을 선언하는 방법으로 레벨별 StackData를 따로 구성할 수도 있습니다.
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	FAbilityStackItem StackData;
 };

@@ -7,6 +7,7 @@
 #include "AbilityEffectPolicy/AbilityEffectPolicy_Damage.h"
 #include "AbilityEffectPolicy/AbilityEffectPolicy_Debuff.h"
 #include "Aura/AbilitySystem/AuraAbilitySystemLibrary.h"
+#include "Aura/Interaction/EnemyInterface.h"
 #include "Aura/Manager/AuraTextManager.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 
@@ -20,12 +21,24 @@ int32 UAuraProjectileSpell::GetProjectileNumsToSpawn(const int32 Level) const
 	return NumOfProjectiles.GetValueAtLevel(Level);
 }
 
-void UAuraProjectileSpell::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)
+void UAuraProjectileSpell::SetTarget(const FGameplayAbilityTargetDataHandle& Handle)
 {
-	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
+	const FHitResult* HitResult = Handle.Get(0)->GetHitResult();
+	if (AActor* HitActor = HitResult->GetActor())
+	{
+		if (HitActor->Implements<UEnemyInterface>())
+		{
+			ProjectileTargetLocation = HitActor->GetActorLocation();
+			HomingTarget = HitActor;
+		}
+		else
+		{
+			ProjectileTargetLocation = HitResult->Location;
+		}
+	}
 }
 
-void UAuraProjectileSpell::SpawnProjectile(FVector& ProjectileSpawnLocation, FVector& ProjectileTargetLocation, const bool bHoming, const float PitchOverride, const AActor* HomingTarget)
+void UAuraProjectileSpell::SpawnProjectile(FVector& InProjectileSpawnLocation, FVector& InProjectileTargetLocation, const bool bHoming, const float PitchOverride)
 {
 	if (!GetAvatarActorFromActorInfo()->HasAuthority())
 	{
@@ -36,8 +49,8 @@ void UAuraProjectileSpell::SpawnProjectile(FVector& ProjectileSpawnLocation, FVe
 	const int32 NumProjectilesToSpawn = GetProjectileNumsToSpawn(GetAbilityLevel());
 	
 	// Projectile이 스폰될 위치와 날아갈 방향을 결정합니다.
-	ProjectileSpawnLocation.Z = GetAvatarActorFromActorInfo()->GetActorLocation().Z;
-	const FVector Forward = ProjectileTargetLocation - ProjectileSpawnLocation;
+	InProjectileSpawnLocation.Z = GetAvatarActorFromActorInfo()->GetActorLocation().Z;
+	const FVector Forward = InProjectileTargetLocation - InProjectileSpawnLocation;
 	
 	// ProjectileSpread가 중심각이 되는 부채꼴 모양으로 퍼지도록 계산합니다.
 	TArray<FRotator> Rotations = UAuraAbilitySystemLibrary::EvenlySpacedRotators(Forward, FVector::UpVector, ProjectileSpread, NumProjectilesToSpawn);
@@ -55,12 +68,12 @@ void UAuraProjectileSpell::SpawnProjectile(FVector& ProjectileSpawnLocation, FVe
 	for (const auto& Rotation : Rotations)
 	{
 		FTransform SpawnTransform;
-		SpawnTransform.SetLocation(ProjectileSpawnLocation);
+		SpawnTransform.SetLocation(InProjectileSpawnLocation);
 		SpawnTransform.SetRotation(Rotation.Quaternion());
 		AAuraProjectile* Projectile = GetWorld()->SpawnActorDeferred<AAuraProjectile>(ProjectileClass, SpawnTransform, GetAvatarActorFromActorInfo(), Cast<APawn>(GetOwningActorFromActorInfo()), ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
 		Projectiles.Add(Projectile);
 		
-		SetHandlesToProjectile(Projectile, ProjectileTargetLocation);
+		SetHandlesToProjectile(Projectile, InProjectileTargetLocation);
 		
 		Projectile->FinishSpawning(SpawnTransform);
 	}
@@ -72,7 +85,7 @@ void UAuraProjectileSpell::SpawnProjectile(FVector& ProjectileSpawnLocation, FVe
 		{
 			UProjectileMovementComponent* ProjectileMovement = Projectile->ProjectileMovement;
 			
-			if (HomingTarget && HomingTarget->Implements<UCombatInterface>())
+			if (HomingTarget.IsValid() && HomingTarget->Implements<UCombatInterface>())
 			{
 				// 추적 가능한 Ability이면서 추적할 타겟이 검출된 경우 들어오는 분기입니다.
 				ProjectileMovement->HomingTargetComponent = HomingTarget->GetRootComponent();
@@ -81,7 +94,7 @@ void UAuraProjectileSpell::SpawnProjectile(FVector& ProjectileSpawnLocation, FVe
 			{
 				// 추적 가능한 Ability이나, 추적할 타겟이 마우스로 검출되지 않은 경우 들어오는 분기입니다.
 				USceneComponent* HomingTargetComponent = NewObject<USceneComponent>();
-				HomingTargetComponent->SetWorldLocation(ProjectileTargetLocation);
+				HomingTargetComponent->SetWorldLocation(InProjectileTargetLocation);
 				ProjectileMovement->HomingTargetComponent = HomingTargetComponent;
 			}
 			// 추적 속도를 결정합니다.

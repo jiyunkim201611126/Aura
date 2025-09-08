@@ -13,24 +13,24 @@ public:
 	UFUNCTION(BlueprintCallable)
 	TArray<FVector> GetSpawnLocations();
 
-	UFUNCTION(BlueprintPure, Category = "Summoning")
+	UFUNCTION(BlueprintPure, Category = "Summon")
 	TSubclassOf<APawn> GetRandomMinionClass() const;
 
 private:
 	// 한 번에 스폰하는 하수인 수
-	UPROPERTY(EditAnywhere, Category = "Summoning")
+	UPROPERTY(EditAnywhere, Category = "Summon")
 	int32 NumMinions = 1;
 
-	UPROPERTY(EditAnywhere, Category = "Summoning")
+	UPROPERTY(EditAnywhere, Category = "Summon")
 	TArray<TSubclassOf<APawn>> MinionClasses;
 
-	UPROPERTY(EditAnywhere, Category = "Summoning")
+	UPROPERTY(EditAnywhere, Category = "Summon")
 	float MinSpawnDistance = 150.f;
 
-	UPROPERTY(EditAnywhere, Category = "Summoning")
+	UPROPERTY(EditAnywhere, Category = "Summon")
 	float MaxSpawnDistance = 300.f;
 	
-	UPROPERTY(EditAnywhere, Category = "Summoning")
+	UPROPERTY(EditAnywhere, Category = "Summon")
 	float SpawnSpread = 90.f;
 
 	
