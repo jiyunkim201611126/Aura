@@ -1,13 +1,13 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "AuraDamageGameplayAbility.h"
+#include "AuraGameplayAbility.h"
 #include "AuraProjectileSpell.generated.h"
 
 class AAuraProjectile;
 
 UCLASS()
-class AURA_API UAuraProjectileSpell : public UAuraDamageGameplayAbility
+class AURA_API UAuraProjectileSpell : public UAuraGameplayAbility
 {
 	GENERATED_BODY()
 
@@ -32,7 +32,7 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "Projectile")
 	void SpawnProjectile(UPARAM(ref) FVector& ProjectileSpawnLocation, UPARAM(ref) FVector& ProjectileTargetLocation, const bool bHoming, const float PitchOverride, const AActor* HomingTarget);
 
-	void SetHandlesToProjectile(AAuraProjectile* Projectile, const FVector& TargetLocation);
+	void SetHandlesToProjectile(AAuraProjectile* Projectile, const FVector& TargetLocation) const;
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Projectile")

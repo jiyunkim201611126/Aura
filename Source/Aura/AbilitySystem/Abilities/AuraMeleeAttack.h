@@ -1,11 +1,11 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "AuraDamageGameplayAbility.h"
+#include "AuraGameplayAbility.h"
 #include "AuraMeleeAttack.generated.h"
 
 UCLASS()
-class AURA_API UAuraMeleeAttack : public UAuraDamageGameplayAbility
+class AURA_API UAuraMeleeAttack : public UAuraGameplayAbility
 {
 	GENERATED_BODY()
 

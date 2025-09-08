@@ -1,11 +1,11 @@
-﻿#include "StackableType.h"
+﻿#include "AbilityAdditionalCost_Stackable.h"
 
 #include "StackableAbilityManager.h"
 #include "Aura/AbilitySystem/AuraAbilitySystemComponent.h"
 #include "Aura/AbilitySystem/Abilities/AuraGameplayAbility.h"
 #include "Aura/Manager/AuraTextManager.h"
 
-void UStackableType::OnEquipAbility(const UAuraGameplayAbility* OwningAbility, UAuraAbilitySystemComponent* ASC)
+void UAbilityAdditionalCost_Stackable::OnEquipAbility(const UAuraGameplayAbility* OwningAbility, UAuraAbilitySystemComponent* ASC)
 {
 	// Equip 시점에선 아직 Ability가 제대로 초기화되지 않아 Ability를 통해 ASC를 추적하는 데에 실패할 가능성이 있습니다.
 	// 또, UCLASS 매크로에서 DefaultToInstanced를 사용하지 않았기 때문에 런타임 중 값에 변화를 줄 수 없습니다.
@@ -21,7 +21,7 @@ void UStackableType::OnEquipAbility(const UAuraGameplayAbility* OwningAbility, U
 	}
 }
 
-void UStackableType::OnUnequipAbility(const UAuraGameplayAbility* OwningAbility, UAuraAbilitySystemComponent* ASC)
+void UAbilityAdditionalCost_Stackable::OnUnequipAbility(const UAuraGameplayAbility* OwningAbility, UAuraAbilitySystemComponent* ASC)
 {
 	// 이 객체를 소유한 Ability를 장착 해제할 때, Component에서 이 Ability의 등록을 해제합니다.
 	// Ability를 해제하는 게 아니라 Status 태그만 바꾸고 호출하는 타이밍인데도 ActorInfo가 정리되어있습니다.
@@ -32,7 +32,7 @@ void UStackableType::OnUnequipAbility(const UAuraGameplayAbility* OwningAbility,
 	}
 }
 
-bool UStackableType::CheckCost(const UAuraGameplayAbility* OwningAbility)
+bool UAbilityAdditionalCost_Stackable::CheckCost(const UAuraGameplayAbility* OwningAbility)
 {
 	// 충전된 스택이 없다면 false를 반환합니다.
 	if (const AStackableAbilityManager* Manager = GetStackableAbilityManager(OwningAbility))
@@ -46,7 +46,7 @@ bool UStackableType::CheckCost(const UAuraGameplayAbility* OwningAbility)
 	return true;
 }
 
-void UStackableType::ApplyCost(const UAuraGameplayAbility* OwningAbility)
+void UAbilityAdditionalCost_Stackable::ApplyCost(const UAuraGameplayAbility* OwningAbility)
 {
 	// 충전된 스택을 소모합니다.
 	if (AStackableAbilityManager* Manager = GetStackableAbilityManager(OwningAbility))
@@ -55,12 +55,12 @@ void UStackableType::ApplyCost(const UAuraGameplayAbility* OwningAbility)
 	}
 }
 
-FText UStackableType::GetDescription()
+FText UAbilityAdditionalCost_Stackable::GetDescription()
 {
 	return FText::Format(FAuraTextManager::GetText(EStringTableTextType::UI, FString("Abilities_Description_Stackable")), StackData.CurrentStack, StackData.MaxStack, StackData.RechargeTime);
 }
 
-AStackableAbilityManager* UStackableType::GetStackableAbilityManager(const UAuraGameplayAbility* OwningAbility) const
+AStackableAbilityManager* UAbilityAdditionalCost_Stackable::GetStackableAbilityManager(const UAuraGameplayAbility* OwningAbility) const
 {
 	UAuraAbilitySystemComponent* ASC = Cast<UAuraAbilitySystemComponent>(OwningAbility->GetAbilitySystemComponentFromActorInfo());
 

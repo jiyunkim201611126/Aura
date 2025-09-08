@@ -2,7 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Aura/AbilitySystem/Abilities/AuraGameplayAbility.h"
-#include "AbilityUsableType.generated.h"
+#include "AbilityAdditionalCost.generated.h"
 
 struct FGameplayAbilityActivationInfo;
 struct FGameplayAbilitySpecHandle;
@@ -12,7 +12,7 @@ class UAuraAbilitySystemComponent;
 class UAuraGameplayAbility;
 
 UCLASS(Abstract, BlueprintType, EditInlineNew, DefaultToInstanced)
-class AURA_API UAbilityUsableType : public UObject
+class AURA_API UAbilityAdditionalCost : public UObject
 {
 	GENERATED_BODY()
 

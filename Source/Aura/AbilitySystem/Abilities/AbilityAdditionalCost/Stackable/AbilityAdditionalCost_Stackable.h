@@ -2,14 +2,14 @@
 
 #include "CoreMinimal.h"
 #include "StackableAbilityManager.h"
-#include "Aura/AbilitySystem/Abilities/UsableTypes/AbilityUsableType.h"
-#include "StackableType.generated.h"
+#include "Aura/AbilitySystem/Abilities/AbilityAdditionalCost/AbilityAdditionalCost.h"
+#include "AbilityAdditionalCost_Stackable.generated.h"
 
 class UAuraAbilitySystemComponent;
 struct FGameplayAbilityActorInfo;
 
 UCLASS(BlueprintType, EditInlineNew)
-class AURA_API UStackableType : public UAbilityUsableType
+class AURA_API UAbilityAdditionalCost_Stackable : public UAbilityAdditionalCost
 {
 	GENERATED_BODY()
 

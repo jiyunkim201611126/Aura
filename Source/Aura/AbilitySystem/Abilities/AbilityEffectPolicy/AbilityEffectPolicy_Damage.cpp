@@ -1,33 +1,43 @@
-﻿#include "AuraDamageGameplayAbility.h"
-
+﻿#include "AbilityEffectPolicy_Damage.h"
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystemComponent.h"
+#include "Abilities/GameplayAbility.h"
 #include "Aura/AbilitySystem/AuraAbilitySystemLibrary.h"
 #include "Aura/Interaction/CombatInterface.h"
 #include "Aura/Manager/AuraTextManager.h"
 
-void UAuraDamageGameplayAbility::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled)
+void UAbilityEffectPolicy_Damage::EndAbility()
 {
 	DamageEffectContextHandle.Clear();
-	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
 }
 
-TArray<FGameplayEffectSpecHandle> UAuraDamageGameplayAbility::MakeDamageSpecHandle()
+void UAbilityEffectPolicy_Damage::ApplyAllEffect(UGameplayAbility* OwningAbility, AActor* TargetActor)
 {
+	CauseDamage(OwningAbility, TargetActor, MakeDamageSpecHandle(OwningAbility));
+}
+
+TArray<FGameplayEffectSpecHandle> UAbilityEffectPolicy_Damage::MakeDamageSpecHandle(const UGameplayAbility* OwningAbility)
+{
+	const UAbilitySystemComponent* ASC = OwningAbility->GetAbilitySystemComponentFromActorInfo();
+	if (!ASC)
+	{
+		return TArray<FGameplayEffectSpecHandle>();
+	}
+	
 	if (!DamageEffectContextHandle.Get())
 	{
 		// EffectContext를 생성 및 할당합니다.
 		// MakeEffectContext 함수는 자동으로 OwnerActor를 Instigator로, AvatarActor를 EffectCauser로 할당합니다.
-		DamageEffectContextHandle = GetAbilitySystemComponentFromActorInfo()->MakeEffectContext();
+		DamageEffectContextHandle = ASC->MakeEffectContext();
 	}
 	
 	TArray<FGameplayEffectSpecHandle> DamageSpecs;
 	for (TPair<FGameplayTag, FScalableFloat>& Pair : DamageTypes)
 	{
-		const float ScaledDamage = Pair.Value.GetValueAtLevel(GetAbilityLevel());
+		const float ScaledDamage = Pair.Value.GetValueAtLevel(OwningAbility->GetAbilityLevel());
 		
 		// 할당받은 DamageEffectClass를 기반으로 Projectile이 가질 GameplayEffectSpecHandle을 생성합니다.
-		FGameplayEffectSpecHandle DamageSpecHandle = GetAbilitySystemComponentFromActorInfo()->MakeOutgoingSpec(DamageEffectClass, 1.f, DamageEffectContextHandle);
+		FGameplayEffectSpecHandle DamageSpecHandle = ASC->MakeOutgoingSpec(DamageEffectClass, 1.f, DamageEffectContextHandle);
 		
 		// Spec 안에 SetByCallerMagnitudes라는 이름의 TMap이 있으며, 거기에 Tag를 키, Damage를 밸류로 값을 추가하는 함수입니다.
 		// 이 값은 GetSetByCallerMagnitude로 꺼내올 수 있습니다.
@@ -39,7 +49,7 @@ TArray<FGameplayEffectSpecHandle> UAuraDamageGameplayAbility::MakeDamageSpecHand
 	return DamageSpecs;
 }
 
-void UAuraDamageGameplayAbility::CauseDamage(AActor* TargetActor, TArray<FGameplayEffectSpecHandle> DamageSpecs)
+void UAbilityEffectPolicy_Damage::CauseDamage(const UGameplayAbility* OwningAbility, AActor* TargetActor, const TArray<FGameplayEffectSpecHandle>& DamageSpecs)
 {
 	if (DamageEffectContextHandle.IsValid())
 	{
@@ -48,13 +58,16 @@ void UAuraDamageGameplayAbility::CauseDamage(AActor* TargetActor, TArray<FGamepl
 		TargetActors.Add(TargetActor);
 		DamageEffectContextHandle.AddActors(TargetActors);
 
-		// 여기선 사망 여부를 알 수 없으므로, DeathImpulse를 일단 세팅합니다.
-		UAuraAbilitySystemLibrary::SetDeathImpulse(DamageEffectContextHandle, GetAvatarActorFromActorInfo()->GetActorForwardVector() * DeathImpulseMagnitude);
-
-		// 넉백은 확률 계산 후 성공 시 세팅합니다.
-		if (FMath::FRandRange(0.f, 100.f) < KnockbackChance)
+		if (const AActor* AvatarActor = OwningAbility->GetAvatarActorFromActorInfo())
 		{
-			UAuraAbilitySystemLibrary::SetKnockbackForce(DamageEffectContextHandle, GetAvatarActorFromActorInfo()->GetActorForwardVector() * KnockbackForceMagnitude);
+			// 여기선 사망 여부를 알 수 없으므로, DeathImpulse를 일단 세팅합니다.
+			UAuraAbilitySystemLibrary::SetDeathImpulse(DamageEffectContextHandle,AvatarActor->GetActorForwardVector() * DeathImpulseMagnitude);
+
+			// 넉백은 확률 계산 후 성공 시 세팅합니다.
+			if (FMath::FRandRange(0.f, 100.f) < KnockbackChance)
+			{
+				UAuraAbilitySystemLibrary::SetKnockbackForce(DamageEffectContextHandle, AvatarActor->GetActorForwardVector() * KnockbackForceMagnitude);
+			}
 		}
 	}
 
@@ -65,13 +78,14 @@ void UAuraDamageGameplayAbility::CauseDamage(AActor* TargetActor, TArray<FGamepl
 			return;
 		}
 		
-		GetAbilitySystemComponentFromActorInfo()->ApplyGameplayEffectSpecToTarget(*Spec.Data.Get(), UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(TargetActor));
+		if (UAbilitySystemComponent* ASC = OwningAbility->GetAbilitySystemComponentFromActorInfo())
+		{
+			ASC->ApplyGameplayEffectSpecToTarget(*Spec.Data.Get(), UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(TargetActor));
+		}
 	}
-	
-	CauseDebuff(TargetActor, MakeDebuffSpecHandle());
 }
 
-FText UAuraDamageGameplayAbility::GetDamageTexts(int32 InLevel)
+FText UAbilityEffectPolicy_Damage::GetDamageTexts(int32 InLevel)
 {
 	TArray<FText> FormattedTexts;
 
@@ -93,14 +107,4 @@ FText UAuraDamageGameplayAbility::GetDamageTexts(int32 InLevel)
 	}
 	
 	return FText::Join(FText::FromString(TEXT("\n")), FormattedTexts);
-}
-
-FGameplayEffectContextHandle UAuraDamageGameplayAbility::GetContext()
-{
-	if (DamageEffectContextHandle.IsValid())
-	{
-		return DamageEffectContextHandle;
-	}
-
-	return FGameplayEffectContextHandle();
 }

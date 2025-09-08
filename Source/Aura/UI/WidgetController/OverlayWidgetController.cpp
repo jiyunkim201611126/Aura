@@ -1,7 +1,7 @@
 ﻿#include "OverlayWidgetController.h"
 #include "Aura/AbilitySystem/AuraAttributeSet.h"
 #include "Aura/AbilitySystem/AuraAbilitySystemComponent.h"
-#include "Aura/AbilitySystem/Abilities/UsableTypes/StackableUsableType/StackableAbilityManager.h"
+#include "Aura/AbilitySystem/Abilities/AbilityAdditionalCost/Stackable/StackableAbilityManager.h"
 #include "Aura/Manager/AuraGameplayTags.h"
 #include "Aura/Player/AuraPlayerState.h"
 

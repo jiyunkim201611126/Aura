@@ -2,10 +2,11 @@
 
 #include "CoreMinimal.h"
 #include "Abilities/GameplayAbility.h"
+#include "AbilityEffectPolicy/AbilityEffectPolicy.h"
 #include "AuraGameplayAbility.generated.h"
 
 class UAuraAbilitySystemComponent;
-class UAbilityUsableType;
+class UAbilityAdditionalCost;
 
 USTRUCT(BlueprintType)
 struct FTaggedMontage
@@ -28,27 +29,6 @@ struct FTaggedMontage
 	FGameplayTag NiagaraTag;
 };
 
-USTRUCT(BlueprintType)
-struct FDebuffData
-{
-	GENERATED_BODY()
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	FGameplayTag DebuffType;
-	
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	float DebuffChance = 0.f;
-	
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	float DebuffDamage = 0.f;
-	
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	float DebuffDuration = 0.f;
-	
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	float DebuffFrequency = 0.f;
-};
-
 UCLASS()
 class AURA_API UAuraGameplayAbility : public UGameplayAbility
 {
@@ -64,16 +44,20 @@ public:
 	static FText GetLockedDescription(int32 Level);
 
 	UFUNCTION(BlueprintCallable)
-	TArray<FGameplayEffectSpecHandle> MakeDebuffSpecHandle();
-
-	UFUNCTION(BlueprintCallable)
-	void CauseDebuff(AActor* TargetActor, const TArray<FGameplayEffectSpecHandle>& DebuffSpecs);
+	void ApplyAllEffect(AActor* TargetActor);
+	
+	UFUNCTION(BlueprintPure)
+	FGameplayEffectContextHandle GetDamageContextHandle() const;
+	UFUNCTION(BlueprintPure)
+	FGameplayEffectContextHandle GetDebuffContextHandle() const;
 
 protected:
 	UFUNCTION(BlueprintCallable)
 	float GetManaCost(int32 InLevel = 1) const;
 	UFUNCTION(BlueprintCallable)
 	float GetCooldown(int32 InLevel = 1) const;
+	UFUNCTION(BlueprintPure)
+	FText GetDamageTexts(int32 InLevel);
 
 private:
 	// TaggedMontages 중 랜덤하게 하나 가져오는 함수입니다.
@@ -93,10 +77,6 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	FGameplayTag StartupInputTag;
 
-	// 디버프 부여 용도로 사용되는 변수입니다.
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Debuff")
-	TArray<FDebuffData> DebuffData;
-
 protected:
 	// 애니메이션 몽타주 및 각종 필요 변수를 한 번 래핑한 구조체의 배열입니다.
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Montage")
@@ -104,19 +84,16 @@ protected:
 	
 	UPROPERTY(EditDefaultsOnly, Category = "Description")
 	FString DescriptionKey;
-	
-	FGameplayEffectContextHandle DebuffEffectContextHandle;
 
-protected:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Debuff")
-	TSubclassOf<UGameplayEffect> DebuffEffectClass;
+	UPROPERTY(EditDefaultsOnly, Instanced, Category = "Effects")
+	TArray<TObjectPtr<UAbilityEffectPolicy>> EffectPolicies;
 
 protected:
 	// 이 아래로는 스택형 스킬을 구현하기 위한 구문입니다.
-	// 아래 포인터 배열이 초기화되어선 안 되므로 반드시 Instanced per Actor로 설정해줍니다. 
+	// 아래 포인터 배열이 초기화되어선 안 되므로 반드시 Instanced per Actor로 설정해줍니다.
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UsableType")
-	TArray<TObjectPtr<UAbilityUsableType>> UsableTypes;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Instanced, Category = "AdditionalCosts")
+	TArray<TObjectPtr<UAbilityAdditionalCost>> AdditionalCosts;
 
 public:
 	void RegisterAbilityToUsableTypeManagers(UAuraAbilitySystemComponent* ASC);
@@ -138,3 +115,19 @@ private:
 	void SyncAbilityTagToAssetTags();
 #endif
 };
+
+template<typename T>
+T* GetEffectPoliciesOfClass(const TArray<TObjectPtr<UAbilityEffectPolicy>>& Policies)
+{
+	static_assert(TIsDerivedFrom<T, UAbilityEffectPolicy>::IsDerived, "T는 반드시 UAbilityEffectPolicy를 상속받아야 합니다.");
+
+	for (UAbilityEffectPolicy* Policy : Policies)
+	{
+		if (Policy && Policy->IsA<T>())
+		{
+			return Cast<T>(Policy);
+		}
+	}
+
+	return nullptr;
+}

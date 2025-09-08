@@ -1,12 +1,13 @@
 #include "AuraGameplayAbility.h"
 
 #include "AbilitySystemBlueprintLibrary.h"
+#include "AbilityEffectPolicy/AbilityEffectPolicy_Damage.h"
+#include "AbilityEffectPolicy/AbilityEffectPolicy_Debuff.h"
 #include "Aura/AbilitySystem/AuraAttributeSet.h"
 #include "Aura/Interaction/CombatInterface.h"
 #include "Aura/Interaction/EnemyInterface.h"
-#include "Aura/Manager/AuraGameplayTags.h"
 #include "Aura/Manager/AuraTextManager.h"
-#include "UsableTypes/AbilityUsableType.h"
+#include "AbilityAdditionalCost/AbilityAdditionalCost.h"
 
 void UAuraGameplayAbility::UpdateFacingToCombatTarget() const
 {
@@ -26,48 +27,24 @@ FText UAuraGameplayAbility::GetLockedDescription(int32 Level)
 	return FText::Format(FAuraTextManager::GetText(EStringTableTextType::UI, TEXT("Abilities_Description_Locked")), Level);
 }
 
-TArray<FGameplayEffectSpecHandle> UAuraGameplayAbility::MakeDebuffSpecHandle()
+void UAuraGameplayAbility::ApplyAllEffect(AActor* TargetActor)
 {
-	if (!DebuffEffectContextHandle.Get())
+	for (const auto EffectPolicy : EffectPolicies)
 	{
-		DebuffEffectContextHandle = GetAbilitySystemComponentFromActorInfo()->MakeEffectContext();
+		EffectPolicy->ApplyAllEffect(this, TargetActor);
 	}
-	
-	const FAuraGameplayTags& GameplayTags = FAuraGameplayTags::Get();
-	TArray<FGameplayEffectSpecHandle> DebuffSpecs;
-	for (const auto& Data : DebuffData)
-	{
-		FGameplayEffectSpecHandle DebuffSpecHandle = GetAbilitySystemComponentFromActorInfo()->MakeOutgoingSpec(DebuffEffectClass, 1.f, DebuffEffectContextHandle);
-		UAbilitySystemBlueprintLibrary::AddGrantedTag(DebuffSpecHandle, Data.DebuffType);
-		UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(DebuffSpecHandle, GameplayTags.Debuff_Chance, Data.DebuffChance);
-		UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(DebuffSpecHandle, GameplayTags.Debuff_Damage, Data.DebuffDamage);
-		UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(DebuffSpecHandle, GameplayTags.Debuff_Duration, Data.DebuffDuration);
-		UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(DebuffSpecHandle, GameplayTags.Debuff_Frequency, Data.DebuffFrequency);
-		DebuffSpecs.Add(DebuffSpecHandle);
-	}
-
-	return DebuffSpecs;
 }
 
-void UAuraGameplayAbility::CauseDebuff(AActor* TargetActor, const TArray<FGameplayEffectSpecHandle>& DebuffSpecs)
+FGameplayEffectContextHandle UAuraGameplayAbility::GetDamageContextHandle() const
 {
-	// 관련 Actor에 추가
-	if (DebuffEffectContextHandle.IsValid())
-	{
-		TArray<TWeakObjectPtr<AActor>> TargetActors;
-		TargetActors.Add(TargetActor);
-		DebuffEffectContextHandle.AddActors(TargetActors);
-	}
-	
-	for (auto& DebuffSpecHandle : DebuffSpecs)
-	{
-		if (TargetActor->Implements<UCombatInterface>() && ICombatInterface::Execute_IsDead(TargetActor))
-		{
-			return;
-		}
-		
-		GetAbilitySystemComponentFromActorInfo()->ApplyGameplayEffectSpecToTarget(*DebuffSpecHandle.Data.Get(), UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(TargetActor));
-	}
+	UAbilityEffectPolicy_Damage* DamageEffectPolicy = GetEffectPoliciesOfClass<UAbilityEffectPolicy_Damage>(EffectPolicies);
+	return DamageEffectPolicy->DamageEffectContextHandle;
+}
+
+FGameplayEffectContextHandle UAuraGameplayAbility::GetDebuffContextHandle() const
+{
+	UAbilityEffectPolicy_Debuff* DebuffEffectPolicy = GetEffectPoliciesOfClass<UAbilityEffectPolicy_Debuff>(EffectPolicies);
+	return DebuffEffectPolicy->DebuffEffectContextHandle;
 }
 
 float UAuraGameplayAbility::GetManaCost(int32 InLevel) const
@@ -97,6 +74,18 @@ float UAuraGameplayAbility::GetCooldown(int32 InLevel) const
 	return Cooldown;
 }
 
+FText UAuraGameplayAbility::GetDamageTexts(int32 InLevel)
+{
+	for (auto EffectPolicy : EffectPolicies)
+	{
+		if (UAbilityEffectPolicy_Damage* DamageEffectPolicy = Cast<UAbilityEffectPolicy_Damage>(EffectPolicy))
+		{
+			return DamageEffectPolicy->GetDamageTexts(InLevel);
+		}
+	}
+	return FText();
+}
+
 FTaggedMontage UAuraGameplayAbility::GetRandomMontage()
 {
 	const int RandomIndex = FMath::RandRange(0, TaggedMontages.Num() - 1);
@@ -107,25 +96,25 @@ FTaggedMontage UAuraGameplayAbility::GetRandomMontage()
 
 void UAuraGameplayAbility::RegisterAbilityToUsableTypeManagers(UAuraAbilitySystemComponent* ASC)
 {
-	for (const auto AbilityUsableType : UsableTypes)
+	for (const auto AdditionalCost : AdditionalCosts)
 	{
-		AbilityUsableType->OnEquipAbility(this, ASC);
+		AdditionalCost->OnEquipAbility(this, ASC);
 	}
 }
 
 void UAuraGameplayAbility::UnregisterAbilityFromUsableTypeManagers(UAuraAbilitySystemComponent* ASC)
 {
-	for (const auto AbilityUsableType : UsableTypes)
+	for (const auto AdditionalCost : AdditionalCosts)
 	{
-		AbilityUsableType->OnUnequipAbility(this, ASC);
+		AdditionalCost->OnUnequipAbility(this, ASC);
 	}
 }
 
 bool UAuraGameplayAbility::CheckCost(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, FGameplayTagContainer* OptionalRelevantTags) const
 {	
-	for (const auto AbilityUsableType : UsableTypes)
+	for (const auto AdditionalCost : AdditionalCosts)
 	{
-		if (!AbilityUsableType->CheckCost(this))
+		if (!AdditionalCost->CheckCost(this))
 		{
 			return false;
 		}
@@ -141,9 +130,9 @@ void UAuraGameplayAbility::ApplyCost(const FGameplayAbilitySpecHandle Handle, co
 		return;
 	}
 	
-	for (const auto AbilityUsableType : UsableTypes)
+	for (const auto AdditionalCost : AdditionalCosts)
 	{
-		AbilityUsableType->ApplyCost(this);
+		AdditionalCost->ApplyCost(this);
 	}
 	
 	Super::ApplyCost(Handle, ActorInfo, ActivationInfo);
@@ -151,9 +140,9 @@ void UAuraGameplayAbility::ApplyCost(const FGameplayAbilitySpecHandle Handle, co
 
 void UAuraGameplayAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)
 {
-	for (const auto AbilityUsableType : UsableTypes)
+	for (const auto AdditionalCost : AdditionalCosts)
 	{
-		AbilityUsableType->ActivateAbility(this);
+		AdditionalCost->ActivateAbility(this);
 	}
 	
 	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
@@ -161,9 +150,14 @@ void UAuraGameplayAbility::ActivateAbility(const FGameplayAbilitySpecHandle Hand
 
 void UAuraGameplayAbility::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled)
 {
-	for (const auto AbilityUsableType : UsableTypes)
+	for (const auto AdditionalCost : AdditionalCosts)
 	{
-		AbilityUsableType->EndAbility(this);
+		AdditionalCost->EndAbility(this);
+	}
+
+	for (const auto EffectPolicy : EffectPolicies)
+	{
+		EffectPolicy->EndAbility();
 	}
 	
 	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
