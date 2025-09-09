@@ -76,7 +76,7 @@ void AAuraCharacterBase::Die(const FVector& Impulse)
 {
 	// 서버에서만 호출되는 함수임이 명확하므로 권한 확인 필요 없이 등록 해제
 	UnregisterPawn();
-	MulticastHandleDeath(Impulse);
+	MulticastDeath(Impulse);
 }
 
 bool AAuraCharacterBase::IsDead_Implementation()
@@ -124,7 +124,7 @@ void AAuraCharacterBase::ApplyKnockback(const FVector_NetQuantize& KnockbackForc
 		GetMesh()->GetAnimInstance()->SetRootMotionMode(ERootMotionMode::IgnoreRootMotion);
 	}
 	
-	uint16 SourceID = MovementComponent->ApplyRootMotionSource(ConstantForce);
+	MovementComponent->ApplyRootMotionSource(ConstantForce);
 
 	FTimerHandle TimerHandle;
 	GetWorld()->GetTimerManager().SetTimer(TimerHandle, [this]()
@@ -136,7 +136,7 @@ void AAuraCharacterBase::ApplyKnockback(const FVector_NetQuantize& KnockbackForc
 	}, Duration, false);
 }
 
-void AAuraCharacterBase::MulticastHandleDeath_Implementation(const FVector& Impulse)
+void AAuraCharacterBase::MulticastDeath_Implementation(const FVector& Impulse)
 {	
 	if (DeathSoundTag.IsValid())
 	{

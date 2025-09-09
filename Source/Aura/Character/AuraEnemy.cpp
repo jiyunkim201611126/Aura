@@ -100,7 +100,7 @@ void AAuraEnemy::Die(const FVector& Impulse)
 	Super::Die(Impulse);
 }
 
-void AAuraEnemy::MulticastHandleDeath_Implementation(const FVector& Impulse)
+void AAuraEnemy::MulticastDeath_Implementation(const FVector& Impulse)
 {
 	// 하수인의 경우, 주인 사망 시 Damage에 의해 사망하는 게 아닌 기믹에 의한 사망이므로 체력바가 반영되지 않는 경우가 있습니다.
 	// 따라서 사망 시 강제로 체력바를 0%로 표시합니다.
@@ -108,7 +108,7 @@ void AAuraEnemy::MulticastHandleDeath_Implementation(const FVector& Impulse)
 	{
 		Cast<UAuraProgressBar>(HealthBar->GetWidget())->SetBarPercent_Implementation(0, 1);
 	}
-	Super::MulticastHandleDeath_Implementation(Impulse);
+	Super::MulticastDeath_Implementation(Impulse);
 }
 
 void AAuraEnemy::BeginPlay()

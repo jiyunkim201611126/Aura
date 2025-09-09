@@ -11,10 +11,17 @@ class AURA_API UAuraSummonAbility : public UAuraGameplayAbility
 
 public:
 	UFUNCTION(BlueprintCallable)
-	TArray<FVector> GetSpawnLocations();
+	TArray<FVector_NetQuantize> GetSpawnLocations();
 
 	UFUNCTION(BlueprintPure, Category = "Summon")
 	TSubclassOf<APawn> GetRandomMinionClass() const;
+
+	UFUNCTION(BlueprintCallable)
+	void SpawnNiagaras(const TArray<FVector_NetQuantize>& SpawnLocations);
+
+protected:
+	UPROPERTY(EditDefaultsOnly)
+	FGameplayTag SpawnNiagaraTag;
 
 private:
 	// 한 번에 스폰하는 하수인 수

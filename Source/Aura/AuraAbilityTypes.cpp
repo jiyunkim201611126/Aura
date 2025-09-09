@@ -55,6 +55,11 @@ void FAuraGameplayEffectContext::SetDebuffDataContext(const FDebuffDataContext& 
 	DebuffData = DebuffDataContext;
 }
 
+void FAuraGameplayEffectContext::SetLocations(const TArray<FVector_NetQuantize>& InLocations)
+{
+	Locations = InLocations;
+}
+
 bool FAuraGameplayEffectContext::NetSerialize(FArchive& Ar, class UPackageMap* Map, bool& bOutSuccess)
 {
 	// 동기화해야 하는 정보가 늘어났기 때문에 기존 uint8 대신 uint32로 선언  
@@ -97,10 +102,14 @@ bool FAuraGameplayEffectContext::NetSerialize(FArchive& Ar, class UPackageMap* M
 		{
 			RepBits |= 1 << 8;
 		}
+		if (Locations.Num() > 0)
+		{
+			RepBits |= 1 << 9;
+		}
 	}
 
 	// uint32를 몽땅 쓰지 않고 필요한 만큼의 길이로 잘라내 패킷 최적화
-	Ar.SerializeBits(&RepBits, 9);
+	Ar.SerializeBits(&RepBits, 10);
 
 	if (RepBits & (1 << 0))
 	{
@@ -153,6 +162,10 @@ bool FAuraGameplayEffectContext::NetSerialize(FArchive& Ar, class UPackageMap* M
 		bool bSuccess = false;
 		DebuffData.NetSerialize(Ar, Map, bOutSuccess);
 		bOutSuccess &= bSuccess;
+	}
+	if (RepBits & (1 << 9))
+	{
+		Ar << Locations;
 	}
 
 	if (Ar.IsLoading())

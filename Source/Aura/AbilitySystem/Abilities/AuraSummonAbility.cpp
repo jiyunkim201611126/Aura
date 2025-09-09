@@ -3,7 +3,7 @@
 #include "Aura/AbilitySystem/AuraAbilitySystemLibrary.h"
 #include "Aura/Character/Component/SummonComponent.h"
 
-TArray<FVector> UAuraSummonAbility::GetSpawnLocations()
+TArray<FVector_NetQuantize> UAuraSummonAbility::GetSpawnLocations()
 {
 	int32 SpawnNum = NumMinions;
 	if (const AActor* Avatar = GetAvatarActorFromActorInfo())
@@ -15,7 +15,7 @@ TArray<FVector> UAuraSummonAbility::GetSpawnLocations()
 	}
 	
 	// 소환 위치를 지정합니다.
-	TArray<FVector> SpawnLocations;
+	TArray<FVector_NetQuantize> SpawnLocations;
 	SpawnLocations.Reserve(SpawnNum);
 	if (SpawnNum > 0)
 	{
@@ -49,6 +49,25 @@ TSubclassOf<APawn> UAuraSummonAbility::GetRandomMinionClass() const
 {
 	const int32 Selection = FMath::RandRange(0, MinionClasses.Num() - 1);
 	return MinionClasses[Selection];
+}
+
+void UAuraSummonAbility::SpawnNiagaras(const TArray<FVector_NetQuantize>& SpawnLocations)
+{
+	if (UAbilitySystemComponent* ASC = GetAbilitySystemComponentFromActorInfo())
+	{
+		FGameplayEffectContextHandle ContextHandle = ASC->MakeEffectContext();
+		UAuraAbilitySystemLibrary::SetLocationsToContext(ContextHandle, SpawnLocations);
+		
+		FGameplayTagContainer NiagaraTag;
+		NiagaraTag.AddTag(SpawnNiagaraTag);
+
+		FGameplayCueParameters CueParams;
+		CueParams.EffectContext = ContextHandle;
+		CueParams.AggregatedSourceTags = NiagaraTag;
+		
+		const FGameplayTag CueTag = FGameplayTag::RequestGameplayTag(TEXT("GameplayCue.Common.NiagaraWithLocationArray"));
+		ASC->ExecuteGameplayCue(CueTag, CueParams);
+	}
 }
 
 void UAuraSummonAbility::OnGiveAbility(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec)

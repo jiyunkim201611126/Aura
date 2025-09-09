@@ -37,7 +37,7 @@ public:
 	// ~End of Combat Interface
 
 	UFUNCTION(NetMulticast, Reliable)
-	virtual void MulticastHandleDeath(const FVector& Impulse);
+	virtual void MulticastDeath(const FVector& Impulse);
 	
 protected:
 	// ~AActor Interface

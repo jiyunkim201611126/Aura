@@ -157,6 +157,15 @@ FDebuffDataContext UAuraAbilitySystemLibrary::GetDebuffData(const FGameplayEffec
 	return FDebuffDataContext();
 }
 
+TArray<FVector_NetQuantize> UAuraAbilitySystemLibrary::GetLocationsFromContext( const FGameplayEffectContextHandle& EffectContextHandle)
+{
+	if (const FAuraGameplayEffectContext* AuraEffectContext = static_cast<const FAuraGameplayEffectContext*>(EffectContextHandle.Get()))
+	{
+		return AuraEffectContext->GetLocations();
+	}
+	return TArray<FVector_NetQuantize>();
+}
+
 void UAuraAbilitySystemLibrary::SetDamageDataContext(FGameplayEffectContextHandle& EffectContextHandle, const EDamageTypeContext DamageType, bool bIsBlocked, bool bIsCritical)
 {
 	if (FAuraGameplayEffectContext* AuraEffectContext = static_cast<FAuraGameplayEffectContext*>(EffectContextHandle.Get()))
@@ -186,6 +195,14 @@ void UAuraAbilitySystemLibrary::SetDebuffDataContext(FGameplayEffectContextHandl
 	if (FAuraGameplayEffectContext* AuraEffectContext = static_cast<FAuraGameplayEffectContext*>(EffectContextHandle.Get()))
 	{
 		AuraEffectContext->SetDebuffDataContext(Data);
+	}
+}
+
+void UAuraAbilitySystemLibrary::SetLocationsToContext(FGameplayEffectContextHandle& EffectContextHandle, const TArray<FVector_NetQuantize>& InLocations)
+{
+	if (FAuraGameplayEffectContext* AuraEffectContext = static_cast<FAuraGameplayEffectContext*>(EffectContextHandle.Get()))
+	{
+		AuraEffectContext->SetLocations(InLocations);
 	}
 }
 

@@ -55,18 +55,15 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "AuraAbilitySystemLibrary | GameplayEffects")
 	static FDebuffDataContext GetDebuffData(const FGameplayEffectContextHandle& EffectContextHandle);
-	
-	UFUNCTION(Category = "AuraAbilitySystemLibrary | GameplayEffects | Damage")
-	static void SetDamageDataContext(UPARAM(ref) FGameplayEffectContextHandle& EffectContextHandle, const EDamageTypeContext DamageType, bool bIsBlocked, bool bIsCritical);
-	
-	UFUNCTION(Category = "AuraAbilitySystemLibrary | GameplayEffects | Damage")
-	static void SetDeathImpulse(UPARAM(ref) FGameplayEffectContextHandle& EffectContextHandle, const FVector& Impulse);
-	
-	UFUNCTION(Category = "AuraAbilitySystemLibrary | GameplayEffects | Damage")
-	static void SetKnockbackForce(UPARAM(ref) FGameplayEffectContextHandle& EffectContextHandle, const FVector& Force);
 
-	UFUNCTION(Category = "AuraAbilitySystemLibrary | GameplayEffects | Debuff")
-	static void SetDebuffDataContext(UPARAM(ref) FGameplayEffectContextHandle& EffectContextHandle, const FDebuffDataContext& Data);
+	UFUNCTION(BlueprintPure, Category = "AuraAbilitySystemLibrary | GameplayEffects")
+	static TArray<FVector_NetQuantize> GetLocationsFromContext(const FGameplayEffectContextHandle& EffectContextHandle);
+	
+	static void SetDamageDataContext(FGameplayEffectContextHandle& EffectContextHandle, const EDamageTypeContext DamageType, bool bIsBlocked, bool bIsCritical);
+	static void SetDeathImpulse(FGameplayEffectContextHandle& EffectContextHandle, const FVector& Impulse);
+	static void SetKnockbackForce(FGameplayEffectContextHandle& EffectContextHandle, const FVector& Force);
+	static void SetDebuffDataContext(FGameplayEffectContextHandle& EffectContextHandle, const FDebuffDataContext& Data);
+	static void SetLocationsToContext(FGameplayEffectContextHandle& EffectContextHandle, const TArray<FVector_NetQuantize>& InLocations);
 
 	static EDamageTypeContext ReplaceDamageTypeToEnum(const FGameplayTag& DamageTypeTag);
 	static FGameplayTag ReplaceDamageTypeToTag(const EDamageTypeContext DamageTypeEnum);

@@ -32,7 +32,7 @@ public:
 	virtual void Die(const FVector& Impulse) override;
 	// ~End of Combat Interface
 
-	virtual void MulticastHandleDeath_Implementation(const FVector& Impulse) override;
+	virtual void MulticastDeath_Implementation(const FVector& Impulse) override;
 	
 protected:
 	// ~AActor Interface
