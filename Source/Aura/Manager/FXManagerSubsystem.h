@@ -152,7 +152,7 @@ private:
 	
 	FStreamableManager* StreamableManager;
 	
-	// 고정된 위치에서 재생되어야 할 때 사용하는 Pending입니다.
+	// 동일한 에셋에 대한 요청이 여러 개 동시에 들어올 경우, 로드가 끝날 때 모두 처리할 수 있도록 콜백 함수나 재생 관련 변수를 캐싱해 대기시키는 TMap입니다.
 	UPROPERTY()
 	TMap<FSoftObjectPath, FSoundAsyncLoadRequest> PendingSoundLoadRequests;
 	

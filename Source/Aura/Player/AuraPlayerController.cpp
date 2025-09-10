@@ -20,14 +20,16 @@ AAuraPlayerController::AAuraPlayerController()
 	Spline = CreateDefaultSubobject<USplineComponent>("Spline");
 }
 
-void AAuraPlayerController::SpawnDamageText_Implementation(float DamageAmount, AActor* TargetActor, bool bBlockedHit, bool bCriticalHit, const EDamageTypeContext DamageType) const
+void AAuraPlayerController::ClientSpawnDamageText_Implementation(float DamageAmount, AActor* TargetActor, bool bBlockedHit, bool bCriticalHit, const EDamageTypeContext DamageType)
 {
-	if (IsValid(TargetActor) && DamageTextComponentClass && IsLocalController())
+	if (IsValid(TargetActor) && DamageTextComponentClass)
 	{
-		UDamageTextComponent* DamageText = NewObject<UDamageTextComponent>(TargetActor, DamageTextComponentClass);
-		DamageText->RegisterComponent();
-		DamageText->SetWorldTransform(TargetActor->GetTransform());
-		DamageText->SetDamageText(DamageAmount, bBlockedHit, bCriticalHit, DamageType);
+		if (UDamageTextComponent* DamageText = NewObject<UDamageTextComponent>(TargetActor, DamageTextComponentClass))
+		{
+			DamageText->RegisterComponent();
+			DamageText->SetWorldTransform(TargetActor->GetActorTransform());
+			DamageText->InitDamageText(DamageAmount, bBlockedHit, bCriticalHit, DamageType);
+		}
 	}
 }
 

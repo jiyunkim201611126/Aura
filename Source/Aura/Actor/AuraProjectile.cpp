@@ -1,5 +1,4 @@
 ﻿#include "AuraProjectile.h"
-
 #include "Components/SphereComponent.h"
 #include "Aura/Aura.h"
 #include "GameFramework/ProjectileMovementComponent.h"
@@ -162,4 +161,22 @@ void AAuraProjectile::PlayHitFXs() const
 		FXManagerSubsystem->AsyncPlaySoundAtLocation(ImpactSoundTag, GetActorLocation());
 		FXManagerSubsystem->AsyncPlayNiagaraAtLocation(ImpactEffectTag, GetActorLocation());
 	}
+}
+
+void AAuraProjectile::MulticastSpawnHomingTargetComponent_Implementation(const FVector_NetQuantize& TargetLocation, const float HomingAcceleration)
+{
+	USceneComponent* HomingTargetComponent = NewObject<USceneComponent>();
+	HomingTargetComponent->SetWorldLocation(TargetLocation);
+	ProjectileMovement->HomingTargetComponent = HomingTargetComponent;
+	
+	// 추적 속도를 결정합니다.
+	ProjectileMovement->HomingAccelerationMagnitude = HomingAcceleration;
+	ProjectileMovement->bIsHomingProjectile = true;
+}
+
+void AAuraProjectile::MulticastSetHomingTargetComponent_Implementation(USceneComponent* HomingTargetComponent, const float HomingAcceleration) const
+{
+	ProjectileMovement->HomingTargetComponent = HomingTargetComponent;
+	ProjectileMovement->HomingAccelerationMagnitude = HomingAcceleration;
+	ProjectileMovement->bIsHomingProjectile = true;
 }

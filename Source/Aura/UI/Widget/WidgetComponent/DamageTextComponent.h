@@ -13,7 +13,7 @@ class AURA_API UDamageTextComponent : public UWidgetComponent
 
 public:	
 	UFUNCTION(BlueprintImplementableEvent)
-	void SetDamageText(float Damage, bool bBlockedHit, bool bCriticalHit, const EDamageTypeContext DamageType);
+	void InitDamageText(float Damage, bool bBlockedHit, bool bCriticalHit, const EDamageTypeContext DamageType);
 	
 	// ~UActorComponent Interface
 	virtual void BeginPlay() override;

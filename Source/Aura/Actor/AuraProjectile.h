@@ -17,6 +17,12 @@ class AURA_API AAuraProjectile : public AActor
 public:
 	AAuraProjectile();
 
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastSpawnHomingTargetComponent(const FVector_NetQuantize& TargetLocation, const float HomingAcceleration);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastSetHomingTargetComponent(USceneComponent* HomingTargetComponent, const float HomingAcceleration) const;
+
 protected:
 	// ~AActor Interface
 	virtual void BeginPlay() override;
@@ -27,6 +33,7 @@ protected:
 	void OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
 	void PlayHitFXs() const;
+	
 public:
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UProjectileMovementComponent> ProjectileMovement;

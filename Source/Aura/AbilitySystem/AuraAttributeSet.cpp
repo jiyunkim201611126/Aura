@@ -250,7 +250,7 @@ void UAuraAttributeSet::ApplyIncomingDamage(const FEffectProperties& Props, cons
 		// 다만 NetMulticast 함수는 '그 액터가 클라이언트에 존재할 때'만 호출되므로, PlayerController를 순회하며 Client함수를 호출합니다.
 		for (TActorIterator<AAuraPlayerController> It(GetWorld()); It; ++It)
 		{
-			It->SpawnDamageText(LocalIncomingDamage, Props.TargetAvatarActor, DamageData.bIsBlockedHit, DamageData.bIsCriticalHit, DamageData.DamageType);
+			It->ClientSpawnDamageText(LocalIncomingDamage, Props.TargetAvatarActor, DamageData.bIsBlockedHit, DamageData.bIsCriticalHit, DamageData.DamageType);
 		}
 	}
 	else if (LocalIncomingDamage < 0.01f)
@@ -259,7 +259,7 @@ void UAuraAttributeSet::ApplyIncomingDamage(const FEffectProperties& Props, cons
 		SetIncomingDamage(0.f);
 		for (TActorIterator<AAuraPlayerController> It(GetWorld()); It; ++It)
 		{
-			It->SpawnDamageText(LocalIncomingDamage, Props.TargetAvatarActor, false, false, EDamageTypeContext::None);
+			It->ClientSpawnDamageText(LocalIncomingDamage, Props.TargetAvatarActor, false, false, EDamageTypeContext::None);
 		}
 	}
 }

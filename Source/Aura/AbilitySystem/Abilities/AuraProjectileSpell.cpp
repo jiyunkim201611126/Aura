@@ -9,7 +9,6 @@
 #include "Aura/AbilitySystem/AuraAbilitySystemLibrary.h"
 #include "Aura/Interaction/EnemyInterface.h"
 #include "Aura/Manager/AuraTextManager.h"
-#include "GameFramework/ProjectileMovementComponent.h"
 
 FText UAuraProjectileSpell::GetDescription_Implementation(const int32 Level)
 {
@@ -38,7 +37,7 @@ void UAuraProjectileSpell::SetTarget(const FGameplayAbilityTargetDataHandle& Han
 	}
 }
 
-void UAuraProjectileSpell::SpawnProjectile(FVector& InProjectileSpawnLocation, FVector& InProjectileTargetLocation, const bool bHoming, const float PitchOverride)
+void UAuraProjectileSpell::SpawnProjectile(FVector& InProjectileSpawnLocation, FVector& InProjectileTargetLocation, const float PitchOverride)
 {
 	if (!GetAvatarActorFromActorInfo()->HasAuthority())
 	{
@@ -78,28 +77,21 @@ void UAuraProjectileSpell::SpawnProjectile(FVector& InProjectileSpawnLocation, F
 		Projectile->FinishSpawning(SpawnTransform);
 	}
 
-	// 추적할 위치 혹은 타겟을 결정합니다.
+	// 타겟을 추적하는 Ability인 경우 들어가는 분기입니다.
 	if (bHoming)
 	{
 		for (const auto& Projectile : Projectiles)
 		{
-			UProjectileMovementComponent* ProjectileMovement = Projectile->ProjectileMovement;
-			
 			if (HomingTarget.IsValid() && HomingTarget->Implements<UCombatInterface>())
 			{
-				// 추적 가능한 Ability이면서 추적할 타겟이 검출된 경우 들어오는 분기입니다.
-				ProjectileMovement->HomingTargetComponent = HomingTarget->GetRootComponent();
+				// 추적할 타겟이 검출된 경우 들어오는 분기입니다.
+				Projectile->MulticastSetHomingTargetComponent(HomingTarget->GetRootComponent(), FMath::RandRange(HomingAccelerationMin, HomingAccelerationMax));
 			}
 			else
 			{
-				// 추적 가능한 Ability이나, 추적할 타겟이 마우스로 검출되지 않은 경우 들어오는 분기입니다.
-				USceneComponent* HomingTargetComponent = NewObject<USceneComponent>();
-				HomingTargetComponent->SetWorldLocation(InProjectileTargetLocation);
-				ProjectileMovement->HomingTargetComponent = HomingTargetComponent;
+				// 추적할 타겟이 마우스로 검출되지 않은 경우 들어오는 분기입니다.
+				Projectile->MulticastSpawnHomingTargetComponent(InProjectileTargetLocation, FMath::RandRange(HomingAccelerationMin, HomingAccelerationMax));
 			}
-			// 추적 속도를 결정합니다.
-			ProjectileMovement->HomingAccelerationMagnitude = FMath::RandRange(HomingAccelerationMin, HomingAccelerationMax);
-			ProjectileMovement->bIsHomingProjectile = true;
 		}
 	}
 }
