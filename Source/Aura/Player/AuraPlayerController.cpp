@@ -9,8 +9,8 @@
 #include "NavigationSystem.h"
 #include "NavigationPath.h"
 #include "NiagaraFunctionLibrary.h"
-#include "Aura/UI/Widget/WidgetComponent/DamageTextComponent.h"
 #include "Aura/Aura.h"
+#include "Aura/Actor/DamageTextActor.h"
 #include "Aura/Interaction/CombatInterface.h"
 
 AAuraPlayerController::AAuraPlayerController()
@@ -22,12 +22,11 @@ AAuraPlayerController::AAuraPlayerController()
 
 void AAuraPlayerController::ClientSpawnDamageText_Implementation(float DamageAmount, AActor* TargetActor, bool bBlockedHit, bool bCriticalHit, const EDamageTypeContext DamageType)
 {
-	if (IsValid(TargetActor) && DamageTextComponentClass)
+	if (TargetActor && DamageTextClass && IsLocalController())
 	{
-		if (UDamageTextComponent* DamageText = NewObject<UDamageTextComponent>(TargetActor, DamageTextComponentClass))
+		if (ADamageTextActor* DamageText = GetWorld()->SpawnActor<ADamageTextActor>(DamageTextClass))
 		{
-			DamageText->RegisterComponent();
-			DamageText->SetWorldTransform(TargetActor->GetActorTransform());
+			DamageText->SetActorTransform(TargetActor->GetActorTransform());
 			DamageText->InitDamageText(DamageAmount, bBlockedHit, bCriticalHit, DamageType);
 		}
 	}

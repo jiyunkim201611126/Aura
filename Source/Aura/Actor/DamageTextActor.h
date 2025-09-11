@@ -1,25 +1,26 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "Components/WidgetComponent.h"
-#include "DamageTextComponent.generated.h"
+#include "GameFramework/Actor.h"
+#include "DamageTextActor.generated.h"
 
 enum class EDamageTypeContext : uint8;
 
-UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
-class AURA_API UDamageTextComponent : public UWidgetComponent
+UCLASS()
+class AURA_API ADamageTextActor : public AActor
 {
 	GENERATED_BODY()
-
-public:	
+	
+public:
+	ADamageTextActor();
+	
 	UFUNCTION(BlueprintImplementableEvent)
 	void InitDamageText(float Damage, bool bBlockedHit, bool bCriticalHit, const EDamageTypeContext DamageType);
-	
-	// ~UActorComponent Interface
-	virtual void BeginPlay() override;
-	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-	// ~End of UActorComponent Interface
 
+protected:
+	virtual void BeginPlay() override;
+	virtual void Tick(float DeltaSeconds) override;
+	
 private:
 	void InitMovement();
 
@@ -33,9 +34,9 @@ private:
 	UPROPERTY(EditDefaultsOnly)
 	float DescentGravityScale = 0.5f;
 
-	// 현재 속도
+	// 현재 속도입니다.
 	FVector Velocity;
 	
-	// 하강 상태 여부
+	// 하강 상태 여부입니다.
 	bool bIsFalling = false;
 };

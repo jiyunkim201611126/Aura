@@ -4,6 +4,7 @@
 #include "GameFramework/PlayerController.h"
 #include "AuraPlayerController.generated.h"
 
+class ADamageTextActor;
 class UNiagaraSystem;
 enum class EDamageTypeContext : uint8;
 class UInputMappingContext;
@@ -12,7 +13,6 @@ class IEnemyInterface;
 class UAuraInputConfig;
 class UAuraAbilitySystemComponent;
 class USplineComponent;
-class UDamageTextComponent;
 struct FInputActionValue;
 struct FGameplayTag;
 
@@ -94,7 +94,7 @@ private:
 	TObjectPtr<USplineComponent> Spline;
 
 	UPROPERTY(EditDefaultsOnly)
-	TSubclassOf<UDamageTextComponent> DamageTextComponentClass;
+	TSubclassOf<ADamageTextActor> DamageTextClass;
 
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<UNiagaraSystem> ClickNiagaraSystem;
