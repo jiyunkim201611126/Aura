@@ -183,7 +183,7 @@ void UFXManagerSubsystem::OnSoundAsyncLoadComplete(FSoftObjectPath LoadedAssetPa
 	}
 }
 
-void UFXManagerSubsystem::AsyncPlayNiagaraAtLocation(const FGameplayTag& NiagaraTag, const FVector Location, const FRotator Rotation, const FVector Scale, bool bAutoDestroy, bool bAutoActivate)
+void UFXManagerSubsystem::AsyncSpawnNiagaraAtLocation(const FGameplayTag& NiagaraTag, const FVector Location, const FRotator Rotation, const FVector Scale, bool bAutoDestroy, bool bAutoActivate)
 {
 	if (!NiagaraTag.IsValid() || !StreamableManager)
 	{
@@ -208,7 +208,7 @@ void UFXManagerSubsystem::AsyncPlayNiagaraAtLocation(const FGameplayTag& Niagara
 	
 	FSoftObjectPath AssetPath = NiagaraToLoad.ToSoftObjectPath();
 	
-	FNiagaraAsyncPlayData NewPlayData;
+	FNiagaraAsyncSpawnData NewPlayData;
 	NewPlayData.Location = Location;
 	NewPlayData.Rotation = Rotation;
 	NewPlayData.Scale = Scale;
@@ -218,14 +218,14 @@ void UFXManagerSubsystem::AsyncPlayNiagaraAtLocation(const FGameplayTag& Niagara
 	// 이미 로드 중인 경우 들어가는 분기입니다.
 	if (FNiagaraAsyncLoadRequest* ExistingRequest = PendingNiagaraLoadRequests.Find(AssetPath))
 	{
-		ExistingRequest->PlayRequests.Add(NewPlayData);
+		ExistingRequest->SpawnRequests.Add(NewPlayData);
 		return;
 	}
 	
 	// 새로 로드를 시작해야 하는 경우 여기로 내려옵니다.
 	// 에셋 로딩이 완료되면 위에서 초기화한 정보들을 참조할 수 있도록 배열에 추가합니다.
 	FNiagaraAsyncLoadRequest NewRequest;
-	NewRequest.PlayRequests.Add(NewPlayData);
+	NewRequest.SpawnRequests.Add(NewPlayData);
 	FStreamableDelegate StreamableCompleteDelegate = FStreamableDelegate::CreateUObject(this, &ThisClass::OnNiagaraAsyncLoadComplete, AssetPath);
 	StreamableManager->RequestAsyncLoad(AssetPath, StreamableCompleteDelegate);
 
@@ -283,7 +283,7 @@ void UFXManagerSubsystem::OnNiagaraAsyncLoadComplete(FSoftObjectPath LoadedAsset
 	{
 		if (LoadedNiagara && GetWorld())
 		{
-			for (const auto& PlayData : CompletedRequest->PlayRequests)
+			for (const auto& PlayData : CompletedRequest->SpawnRequests)
 			{
 				UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), LoadedNiagara, PlayData.Location, PlayData.Rotation, PlayData.Scale, PlayData.bAutoDestroy, PlayData.bAutoActivate);
 			}

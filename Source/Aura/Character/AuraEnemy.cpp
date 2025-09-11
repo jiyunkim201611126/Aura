@@ -14,6 +14,7 @@
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Aura/Manager/PawnManagerSubsystem.h"
 #include "Aura/UI/Widget/ProgressBar/AuraProgressBar.h"
+#include "Net/UnrealNetwork.h"
 
 AAuraEnemy::AAuraEnemy()
 {
@@ -40,6 +41,12 @@ AAuraEnemy::AAuraEnemy()
 	Weapon->SetCustomDepthStencilValue(CUSTOM_DEPTH_RED);
 }
 
+void AAuraEnemy::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(AAuraEnemy, bPlaySpawnAnimation);
+}
+
 void AAuraEnemy::HighlightActor()
 {
 	GetMesh()->SetRenderCustomDepth(true);
@@ -60,6 +67,11 @@ void AAuraEnemy::SetCombatTarget_Implementation(AActor* InCombatTarget)
 AActor* AAuraEnemy::GetCombatTarget_Implementation() const
 {
 	return CombatTarget;
+}
+
+void AAuraEnemy::ShouldPlaySpawnAnimation()
+{
+	bPlaySpawnAnimation = true;
 }
 
 void AAuraEnemy::RegisterPawn()
@@ -211,5 +223,13 @@ void AAuraEnemy::HitReactTagChanged(const FGameplayTag CallbackTag, int32 NewCou
 	if (AuraAIController && AuraAIController->GetBlackboardComponent())
 	{
 		AuraAIController->GetBlackboardComponent()->SetValueAsBool(FName("HitReacting"), bHitReacting);
+	}
+}
+
+void AAuraEnemy::OnRep_PlaySpawnAnimation()
+{
+	if (bPlaySpawnAnimation)
+	{
+		Execute_PlaySpawnAnimation(this);
 	}
 }

@@ -2,7 +2,6 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
-#include "GameplayTagContainer.h"
 #include "Aura/AbilitySystem/Data/EliminateRewardInfo.h"
 #include "CombatInterface.generated.h"
 
@@ -62,4 +61,7 @@ public:
 	virtual FOnDeath& GetOnDeathDelegate() = 0;
 
 	virtual void ApplyKnockback(const FVector_NetQuantize& KnockbackForce, float Duration);
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	USkeletalMeshComponent* GetWeapon();
 };

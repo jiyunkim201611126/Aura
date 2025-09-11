@@ -77,7 +77,7 @@ struct FSoundAsyncLoadRequest
 };
 
 USTRUCT()
-struct FNiagaraAsyncPlayData
+struct FNiagaraAsyncSpawnData
 {
 	GENERATED_BODY()
 	
@@ -102,9 +102,9 @@ struct FNiagaraAsyncLoadRequest
 {
 	GENERATED_BODY()
 	// 나이아가라는 그 자리에서 재생해야 하는 경우도 있지만, 사운드와 달리 NiagaraSystem 자체를 반환받아야 하는 경우가 존재합니다.
-	// 이를 구분하기 위해 2개의 배열이 있으며, 에셋 로드가 완되면 두 개의 배열을 모두 돌며 나이아가라 재생 함수 혹은 콜백 함수를 호출합니다.
+	// 이를 구분하기 위해 여러 개의 배열이 있으며, 에셋 로드가 완되면 두 개의 배열을 모두 돌며 나이아가라 재생 함수 혹은 콜백 함수를 호출합니다.
 	UPROPERTY()
-	TArray<FNiagaraAsyncPlayData> PlayRequests;
+	TArray<FNiagaraAsyncSpawnData> SpawnRequests;
 
 	TArray<TFunction<void(UNiagaraSystem*)>> GetterCallbacks;
 	
@@ -128,7 +128,7 @@ public:
 	void OnSoundAsyncLoadComplete(FSoftObjectPath LoadedAssetPath);
 
 	UFUNCTION(BlueprintCallable, Category = "FX")
-	void AsyncPlayNiagaraAtLocation(const FGameplayTag& NiagaraTag, const FVector Location, const FRotator Rotation = FRotator::ZeroRotator, const FVector Scale = FVector(1.f), bool bAutoDestroy = true, bool bAutoActivate = true);
+	void AsyncSpawnNiagaraAtLocation(const FGameplayTag& NiagaraTag, const FVector Location, const FRotator Rotation = FRotator::ZeroRotator, const FVector Scale = FVector(1.f), bool bAutoDestroy = true, bool bAutoActivate = true);
 	void AsyncGetNiagara(const FGameplayTag& NiagaraTag, const TFunction<void(UNiagaraSystem*)>& OnLoadedCallback);
 	void OnNiagaraAsyncLoadComplete(FSoftObjectPath LoadedAssetPath);
 

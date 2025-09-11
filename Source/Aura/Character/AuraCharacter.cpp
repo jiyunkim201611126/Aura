@@ -194,7 +194,7 @@ void AAuraCharacter::MulticastLevelUpParticles_Implementation() const
 	{
 		if (UFXManagerSubsystem* FXManager = GameInstance->GetSubsystem<UFXManagerSubsystem>())
 		{
-			FXManager->AsyncPlayNiagaraAtLocation(LevelUpNiagaraTag, GetActorLocation());
+			FXManager->AsyncSpawnNiagaraAtLocation(LevelUpNiagaraTag, GetActorLocation());
 		}
 	}
 }

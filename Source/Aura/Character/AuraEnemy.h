@@ -18,11 +18,14 @@ class AURA_API AAuraEnemy : public AAuraCharacterBase, public IEnemyInterface
 public:
 	AAuraEnemy();
 
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
 	// ~Enemy Interface
 	virtual void HighlightActor() override;
 	virtual void UnHighlightActor() override;
 	virtual void SetCombatTarget_Implementation(AActor* InCombatTarget) override;
 	virtual AActor* GetCombatTarget_Implementation() const override;
+	virtual void ShouldPlaySpawnAnimation() override;
 	// ~End of Enemy Interface
 
 	// ~Combat Interface
@@ -47,6 +50,10 @@ protected:
 	virtual void AddCharacterStartupAbilities() const override;
 	
 	void HitReactTagChanged(const FGameplayTag CallbackTag, int32 NewCount);
+
+private:
+	UFUNCTION()
+	void OnRep_PlaySpawnAnimation();
 
 public:
 	// 아래 2개의 델리게이트 선언으로 인해 이 클래스가 OverlayWidgetController를 참조하게 되었으나,
@@ -106,4 +113,8 @@ public:
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AI")
 	TObjectPtr<UBehaviorTree> CombatBehaviorTree;
+
+private:
+	UPROPERTY(ReplicatedUsing = OnRep_PlaySpawnAnimation)
+	bool bPlaySpawnAnimation = false;
 };

@@ -26,4 +26,6 @@ public:
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	void PlaySpawnAnimation();
+
+	virtual void ShouldPlaySpawnAnimation() = 0;
 };

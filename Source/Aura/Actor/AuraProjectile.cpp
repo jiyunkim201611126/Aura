@@ -159,7 +159,7 @@ void AAuraProjectile::PlayHitFXs() const
 	if (UFXManagerSubsystem* FXManagerSubsystem = GetWorld()->GetGameInstance()->GetSubsystem<UFXManagerSubsystem>())
 	{
 		FXManagerSubsystem->AsyncPlaySoundAtLocation(ImpactSoundTag, GetActorLocation());
-		FXManagerSubsystem->AsyncPlayNiagaraAtLocation(ImpactEffectTag, GetActorLocation());
+		FXManagerSubsystem->AsyncSpawnNiagaraAtLocation(ImpactEffectTag, GetActorLocation());
 	}
 }
 

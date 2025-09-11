@@ -10,7 +10,7 @@ bool UGC_NiagaraWithLocationArray::OnExecute_Implementation(AActor* MyTarget, co
 	{
 		if (UFXManagerSubsystem* FXManager = GetWorld()->GetGameInstance()->GetSubsystem<UFXManagerSubsystem>())
 		{
-			FXManager->AsyncPlayNiagaraAtLocation(Parameters.AggregatedSourceTags.GetByIndex(0), Location);
+			FXManager->AsyncSpawnNiagaraAtLocation(Parameters.AggregatedSourceTags.GetByIndex(0), Location);
 		}
 	}
 	

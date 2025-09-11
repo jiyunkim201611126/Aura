@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "AbilitySystemInterface.h"
+#include "GameplayTagContainer.h"
 #include "Aura/Interaction/CombatInterface.h"
 #include "GameFramework/Character.h"
 #include "Aura/AbilitySystem/Data/CharacterClassInfo.h"
@@ -34,10 +35,17 @@ public:
 	virtual FOnASCRegistered& GetOnASCRegisteredDelegate() override;
 	virtual FOnDeath& GetOnDeathDelegate() override;
 	virtual void ApplyKnockback(const FVector_NetQuantize& KnockbackForce, float Duration) override;
+	virtual USkeletalMeshComponent* GetWeapon_Implementation() override;
 	// ~End of Combat Interface
 
 	UFUNCTION(NetMulticast, Reliable)
 	virtual void MulticastDeath(const FVector& Impulse);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastPlayLoopAnimMontage(UAnimMontage* LoopMontage);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastStopLoopAnimMontage(UAnimMontage* LoopMontage);
 	
 protected:
 	// ~AActor Interface

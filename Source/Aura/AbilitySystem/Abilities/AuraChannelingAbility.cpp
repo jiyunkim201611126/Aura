@@ -1,5 +1,6 @@
 ﻿#include "AuraChannelingAbility.h"
-#include "GameFramework/Character.h"
+
+#include "Aura/Character/AuraCharacterBase.h"
 
 void UAuraChannelingAbility::StoreMouseDataInfo(const FHitResult& HitResult)
 {
@@ -18,6 +19,22 @@ void UAuraChannelingAbility::StoreOwnerVariables()
 {
 	if (CurrentActorInfo)
 	{
-		OwnerCharacter = Cast<ACharacter>(CurrentActorInfo->AvatarActor);
+		OwnerCharacter = Cast<AAuraCharacterBase>(CurrentActorInfo->AvatarActor);
+	}
+}
+
+void UAuraChannelingAbility::PlayLoopAnimMontage()
+{
+	if (OwnerCharacter)
+	{
+		OwnerCharacter->MulticastPlayLoopAnimMontage(LoopAnimMontage);
+	}
+}
+
+void UAuraChannelingAbility::StopLoopAnimMontage()
+{
+	if (OwnerCharacter)
+	{
+		OwnerCharacter->MulticastStopLoopAnimMontage(LoopAnimMontage);
 	}
 }

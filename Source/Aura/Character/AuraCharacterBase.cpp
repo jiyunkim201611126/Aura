@@ -136,6 +136,21 @@ void AAuraCharacterBase::ApplyKnockback(const FVector_NetQuantize& KnockbackForc
 	}, Duration, false);
 }
 
+USkeletalMeshComponent* AAuraCharacterBase::GetWeapon_Implementation()
+{
+	return Weapon;
+}
+
+void AAuraCharacterBase::MulticastPlayLoopAnimMontage_Implementation(UAnimMontage* LoopMontage)
+{
+	PlayAnimMontage(LoopMontage);
+}
+
+void AAuraCharacterBase::MulticastStopLoopAnimMontage_Implementation(UAnimMontage* LoopMontage)
+{
+	StopAnimMontage(LoopMontage);
+}
+
 void AAuraCharacterBase::MulticastDeath_Implementation(const FVector& Impulse)
 {	
 	if (DeathSoundTag.IsValid())

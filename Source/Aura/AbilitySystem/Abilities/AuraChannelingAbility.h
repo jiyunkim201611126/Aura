@@ -4,6 +4,8 @@
 #include "AuraGameplayAbility.h"
 #include "AuraChannelingAbility.generated.h"
 
+class AAuraCharacterBase;
+
 UCLASS()
 class AURA_API UAuraChannelingAbility : public UAuraGameplayAbility
 {
@@ -15,6 +17,12 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void StoreOwnerVariables();
+
+	UFUNCTION(BlueprintCallable)
+	void PlayLoopAnimMontage();
+
+	UFUNCTION(BlueprintCallable)
+	void StopLoopAnimMontage();
 	
 protected:
 	UPROPERTY(BlueprintReadOnly, Category = "Channeling")
@@ -23,6 +31,9 @@ protected:
 	UPROPERTY(BlueprintReadOnly, Category = "Channeling")
 	TObjectPtr<AActor> MouseHitActor;
 
-	UPROPERTY(BlueprintReadOnly, Category = "Channeling")
-	TObjectPtr<ACharacter> OwnerCharacter;
+	UPROPERTY()
+	TObjectPtr<AAuraCharacterBase> OwnerCharacter;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Channeling")
+	TObjectPtr<UAnimMontage> LoopAnimMontage;
 };

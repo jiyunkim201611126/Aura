@@ -1,7 +1,15 @@
 ﻿#include "AuraSummonAbility.h"
 
 #include "Aura/AbilitySystem/AuraAbilitySystemLibrary.h"
+#include "Aura/Character/AuraEnemy.h"
 #include "Aura/Character/Component/SummonComponent.h"
+#include "Kismet/KismetMathLibrary.h"
+
+TSubclassOf<APawn> UAuraSummonAbility::GetRandomMinionClass() const
+{
+	const int32 Selection = FMath::RandRange(0, MinionClasses.Num() - 1);
+	return MinionClasses[Selection];
+}
 
 TArray<FVector_NetQuantize> UAuraSummonAbility::GetSpawnLocations()
 {
@@ -45,16 +53,11 @@ TArray<FVector_NetQuantize> UAuraSummonAbility::GetSpawnLocations()
 	return SpawnLocations;
 }
 
-TSubclassOf<APawn> UAuraSummonAbility::GetRandomMinionClass() const
-{
-	const int32 Selection = FMath::RandRange(0, MinionClasses.Num() - 1);
-	return MinionClasses[Selection];
-}
-
 void UAuraSummonAbility::SpawnNiagaras(const TArray<FVector_NetQuantize>& SpawnLocations)
 {
 	if (UAbilitySystemComponent* ASC = GetAbilitySystemComponentFromActorInfo())
 	{
+		// GC에서 사용하기 위한 Location을 할당합니다.
 		FGameplayEffectContextHandle ContextHandle = ASC->MakeEffectContext();
 		UAuraAbilitySystemLibrary::SetLocationsToContext(ContextHandle, SpawnLocations);
 		
@@ -67,6 +70,42 @@ void UAuraSummonAbility::SpawnNiagaras(const TArray<FVector_NetQuantize>& SpawnL
 		
 		const FGameplayTag CueTag = FGameplayTag::RequestGameplayTag(TEXT("GameplayCue.Common.NiagaraWithLocationArray"));
 		ASC->ExecuteGameplayCue(CueTag, CueParams);
+	}
+}
+
+void UAuraSummonAbility::SpawnMinion(const FVector_NetQuantize& SpawnLocation)
+{
+	const AActor* AvatarActor = GetAvatarActorFromActorInfo();
+	if (AvatarActor)
+	{
+		if (APawn* SpawnedMinion = GetWorld()->SpawnActorDeferred<APawn>(GetRandomMinionClass(), FTransform(), nullptr, nullptr, ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn))
+		{
+			// 스폰할 Transform 세팅
+			FTransform SpawnTransform;
+			SpawnTransform.SetLocation(SpawnLocation);
+			const FRotator SpawnRotation = UKismetMathLibrary::FindLookAtRotation(AvatarActor->GetActorLocation(), SpawnLocation);
+			SpawnTransform.SetRotation(SpawnRotation.Quaternion());
+
+			// AI 컨트롤러를 할당합니다.
+			SpawnedMinion->SpawnDefaultController();
+			if (USummonComponent* SummonComponent = AvatarActor->GetComponentByClass<USummonComponent>())
+			{
+				SummonComponent->AddMinion(SpawnedMinion);
+			}
+			
+			SpawnedMinion->FinishSpawning(SpawnTransform);
+			
+			// 클라이언트에게 SpawnAnimation이 재생될 수 있도록 설정해줍니다.
+			// Client RPC를 사용할 경우, 클라이언트에게 하수인이 스폰되지 않았을 때 호출해버려 애니메이션이 재생되지 않을 수 있습니다.
+			// 따라서 Replicate 기반으로 작동하는 로직을 작성했습니다.
+			if (IEnemyInterface* Enemy = Cast<IEnemyInterface>(SpawnedMinion))
+			{
+				Enemy->ShouldPlaySpawnAnimation();
+			}
+			
+			// 위 함수는 Replicate 기반으로 작동하므로, 서버도 SpawnAnimation이 재생되도록 직접 호출합니다.
+			IEnemyInterface::Execute_PlaySpawnAnimation(SpawnedMinion);
+		}
 	}
 }
 

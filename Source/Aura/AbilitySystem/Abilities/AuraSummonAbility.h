@@ -10,14 +10,18 @@ class AURA_API UAuraSummonAbility : public UAuraGameplayAbility
 	GENERATED_BODY()
 
 public:
+	UFUNCTION(BlueprintPure, Category = "Summon")
+	TSubclassOf<APawn> GetRandomMinionClass() const;
+	
+protected:
 	UFUNCTION(BlueprintCallable)
 	TArray<FVector_NetQuantize> GetSpawnLocations();
 
-	UFUNCTION(BlueprintPure, Category = "Summon")
-	TSubclassOf<APawn> GetRandomMinionClass() const;
-
 	UFUNCTION(BlueprintCallable)
 	void SpawnNiagaras(const TArray<FVector_NetQuantize>& SpawnLocations);
+
+	UFUNCTION(BlueprintCallable)
+	void SpawnMinion(const FVector_NetQuantize& SpawnLocation);
 
 protected:
 	UPROPERTY(EditDefaultsOnly)
