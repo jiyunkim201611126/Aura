@@ -1,21 +1,14 @@
 #include "AuraCharacter.h"
-
-#include "Aura/Aura.h"
-#include "Components/CapsuleComponent.h"
 #include "Aura/AbilitySystem/AuraAbilitySystemComponent.h"
 #include "Aura/Player/AuraPlayerState.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Aura/Player/AuraPlayerController.h"
 #include "Aura/UI/HUD/AuraHUD.h"
 #include "Aura/Manager/PawnManagerSubsystem.h"
-#include "NiagaraComponent.h"
 #include "Aura/Manager/FXManagerSubsystem.h"
 
 AAuraCharacter::AAuraCharacter()
 {
-	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Ally, ECR_Block);
-	GetMesh()->SetCollisionResponseToChannel(ECC_Ally, ECR_Block);
-
 	CharacterClass = ECharacterClass::Elementalist;
 }
 

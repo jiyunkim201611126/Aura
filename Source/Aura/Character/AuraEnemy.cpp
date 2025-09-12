@@ -1,7 +1,6 @@
 #include "AuraEnemy.h"
 
 #include "Aura/Aura.h"
-#include "Components/CapsuleComponent.h"
 #include "Aura/AbilitySystem/AuraAbilitySystemComponent.h"
 #include "Aura/AbilitySystem/AuraAttributeSet.h"
 #include "Components/WidgetComponent.h"
@@ -18,9 +17,6 @@
 
 AAuraEnemy::AAuraEnemy()
 {
-	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Enemy, ECR_Block);
-	GetMesh()->SetCollisionResponseToChannel(ECC_Enemy, ECR_Block);
-
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationRoll = false;
 	bUseControllerRotationYaw = false;

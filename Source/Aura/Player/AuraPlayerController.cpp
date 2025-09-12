@@ -115,28 +115,7 @@ void AAuraPlayerController::CursorTrace()
 		return;
 	}
 	
-	// Player와 Enemy Pawn들은 Visibility Trace에 대해 Ignore 반응을 갖습니다.
-	// 대신 Ally 혹은 Enemy Channel에 대해 Block 반응을 갖습니다.
-	// 따라서 PlayerController는 Visibility와 Enemy, 2개의 채널을 동시에 Trace해서 우선순위를 판별해 사용합니다.
-	
-	FVector CameraLocation = PlayerCameraManager->GetCameraLocation();
-	
-	FHitResult VisibilityHit;
-	FHitResult EnemyHit;
-	GetHitResultUnderCursor(ECC_Visibility, false, VisibilityHit);
-	GetHitResultUnderCursor(ECC_Enemy, false, EnemyHit);
-
-	if (VisibilityHit.bBlockingHit != EnemyHit.bBlockingHit)
-	{
-		CursorHit = VisibilityHit.bBlockingHit ? VisibilityHit : EnemyHit;
-	}
-	else
-	{
-		float VisibilityHitDist = FVector::Dist(CameraLocation, VisibilityHit.ImpactPoint);
-		float EnemyHitDist = FVector::Dist(CameraLocation, EnemyHit.ImpactPoint);
-
-		CursorHit = VisibilityHitDist < EnemyHitDist ? VisibilityHit : EnemyHit;
-	}
+	GetHitResultUnderCursor(ECC_Target, false, CursorHit);
 	
 	if (!CursorHit.bBlockingHit)
 	{
