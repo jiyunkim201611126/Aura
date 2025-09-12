@@ -25,13 +25,13 @@ public:
 	void StopLoopAnimMontage();
 	
 protected:
-	UPROPERTY(BlueprintReadOnly, Category = "Channeling")
+	UPROPERTY(BlueprintReadWrite, Category = "Channeling")
 	FVector MouseHitLocation;
 
-	UPROPERTY(BlueprintReadOnly, Category = "Channeling")
+	UPROPERTY(BlueprintReadWrite, Category = "Channeling")
 	TObjectPtr<AActor> MouseHitActor;
 
-	UPROPERTY()
+	UPROPERTY(BlueprintReadOnly, Category = "Channeling")
 	TObjectPtr<AAuraCharacterBase> OwnerCharacter;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Channeling")

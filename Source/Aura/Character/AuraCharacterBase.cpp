@@ -4,7 +4,6 @@
 #include "Aura/Aura.h"
 #include "Aura/AbilitySystem/AuraAbilitySystemComponent.h"
 #include "Components/CapsuleComponent.h"
-#include "Aura/Manager/AuraGameplayTags.h"
 #include "Aura/Manager/FXManagerSubsystem.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
@@ -48,25 +47,16 @@ UAbilitySystemComponent* AAuraCharacterBase::GetAbilitySystemComponent() const
 	return AbilitySystemComponent;
 }
 
-FVector AAuraCharacterBase::GetCombatSocketLocation_Implementation(const FGameplayTag& SocketTag)
+FVector AAuraCharacterBase::GetCombatSocketLocation_Implementation(FName SocketName, bool bFindFromWeapon)
 {
-	const FAuraGameplayTags& GameplayTags = FAuraGameplayTags::Get();
-	
-	if (SocketTag.MatchesTagExact(GameplayTags.CombatSocket_Weapon) && IsValid(Weapon))
+	if (bFindFromWeapon && Weapon)
 	{
-		return Weapon->GetSocketLocation(FName("TipSocket"));
+		return Weapon->GetSocketLocation(SocketName);
 	}
-	else if (SocketTag.MatchesTagExact(GameplayTags.CombatSocket_LeftHand))
+
+	if (GetMesh())
 	{
-		return GetMesh()->GetSocketLocation(FName("LeftHandSocket"));
-	}
-	else if (SocketTag.MatchesTagExact(GameplayTags.CombatSocket_RightHand))
-	{
-		return GetMesh()->GetSocketLocation(FName("RightHandSocket"));
-	}
-	else if (SocketTag.MatchesTagExact(GameplayTags.CombatSocket_Tail))
-	{
-		return GetMesh()->GetSocketLocation(FName("TailSocket"));
+		return GetMesh()->GetSocketLocation(SocketName);
 	}
 
 	return FVector::ZeroVector;

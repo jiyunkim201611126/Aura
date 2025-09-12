@@ -326,7 +326,7 @@ TArray<FRotator> UAuraAbilitySystemLibrary::EvenlySpacedRotators(const FVector& 
 	return ResultRotators;
 }
 
-void UAuraAbilitySystemLibrary::GetOverlappedLivePawns(const UObject* WorldContextObject, TArray<AActor*>& OutOverlappingActors, const TArray<AActor*>& ActorsToIgnore, float Radius, const FVector& SphereOrigin)
+void UAuraAbilitySystemLibrary::GetOverlappedLivePawnsWithinRadius(const UObject* WorldContextObject, TArray<AActor*>& OutOverlappingActors, const TArray<AActor*>& ActorsToIgnore, float Radius, const FVector& SphereOrigin)
 {
 	// 충돌 검사 조건 세부 설정하는 구조체
 	FCollisionQueryParams SphereParams;
@@ -342,6 +342,45 @@ void UAuraAbilitySystemLibrary::GetOverlappedLivePawns(const UObject* WorldConte
 			{
 				OutOverlappingActors.AddUnique(ICombatInterface::Execute_GetAvatar(Overlap.GetActor()));
 			}
+		}
+	}
+}
+
+void UAuraAbilitySystemLibrary::GetClosestTargets(int32 MaxTargets, const TArray<AActor*>& Actors, TArray<AActor*>& OutClosestTargets, const FVector& Origin)
+{
+	if (Actors.Num() < MaxTargets)
+	{
+		OutClosestTargets = Actors;
+		return;
+	}
+	
+	for (const auto Actor : Actors)
+	{
+		// 아직 MaxTargets 수를 다 채우지 못 했다면 바로 추가합니다.
+		if (OutClosestTargets.Num() < MaxTargets)
+		{
+			OutClosestTargets.AddUnique(Actor);
+			continue;
+		}
+		
+		// 가장 먼 타겟을 탐색합니다.
+		int32 FarthestActorIndex = 0;
+		float MaxDistance = FVector::DistSquared(Origin, OutClosestTargets[0]->GetActorLocation());
+		for (int32 i = 1; i < OutClosestTargets.Num(); i++)
+		{
+			const float CompareDistance = FVector::DistSquared(Origin, OutClosestTargets[i]->GetActorLocation());
+			if (CompareDistance > MaxDistance)
+			{
+				MaxDistance = CompareDistance;
+				FarthestActorIndex = i;
+			}
+		}
+
+		// 가장 먼 타겟의 거리보다 이번 타겟의 거리가 가까우면 교체합니다.
+		const float CurrentActorDistance = FVector::DistSquared(Origin, Actor->GetActorLocation());
+		if (CurrentActorDistance < MaxDistance)
+		{
+			OutClosestTargets[FarthestActorIndex] = Actor;
 		}
 	}
 }

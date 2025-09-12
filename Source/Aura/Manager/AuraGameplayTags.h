@@ -112,14 +112,6 @@ struct FAuraGameplayTags
 	FGameplayTag Effects_GrantHitReact;
 	// ~End of Effects
 	
-	
-
-	// ~Combat Sockets
-	FGameplayTag CombatSocket_Weapon;
-	FGameplayTag CombatSocket_LeftHand;
-	FGameplayTag CombatSocket_RightHand;
-	FGameplayTag CombatSocket_Tail;
-	// ~End of Combat Sockets
 
 	// ~BehaviorTree
 	FGameplayTag BT_Sub_Agro;

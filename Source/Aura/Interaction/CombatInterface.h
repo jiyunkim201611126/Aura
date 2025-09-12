@@ -30,19 +30,19 @@ class AURA_API ICombatInterface
 	GENERATED_BODY()
 
 public:
-	// PawnManagerSubsystem에 Pawn을 등록 및 해제하는 함수
-	// Controller만 해도 작동엔 문제가 없으나, 멀티플레이 환경에서 강제종료 등의 상황 발생 시 문제가 생길 수 있으므로 Controller와 Character가 모두 한 번씩 호출
+	// PawnManagerSubsystem에 Pawn을 등록 및 해제하는 함수입니다.
+	// Controller만 해도 작동엔 문제가 없으나, 멀티플레이 환경에서 강제종료 등의 상황 발생 시 문제가 생길 수 있으므로 Controller와 Character가 모두 한 번씩 호출합니다.
 	virtual void RegisterPawn();
 	virtual void UnregisterPawn();
 
 	UFUNCTION(BlueprintNativeEvent)
 	int32 GetCharacterLevel();
 	
-	// 무기의 Socket으로부터 위치를 가져오는 함수
+	// Socket으로부터 위치를 가져오는 함수입니다.
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
-	FVector GetCombatSocketLocation(const FGameplayTag& SocketTag);
+	FVector GetCombatSocketLocation(FName SocketName, bool bFindFromWeapon = false);
 	
-	// Motion Warping Component를 통해 캐릭터를 원하는 방향으로 회전시키는 기능을 블루프린트에서 구현 및 호출
+	// Motion Warping Component를 통해 캐릭터를 원하는 방향으로 회전시키는 기능을 블루프린트에서 구현 및 호출합니다.
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
 	void UpdateFacingTarget(const FVector& FacingTarget);
 
