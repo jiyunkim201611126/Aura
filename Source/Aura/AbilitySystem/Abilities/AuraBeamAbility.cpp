@@ -16,7 +16,7 @@ void UAuraBeamAbility::TraceFirstTarget()
 	const FVector TraceStartLocation = ICombatInterface::Execute_GetCombatSocketLocation(OwnerCharacter, FName("TipSocket"), true);
 	GetWorld()->LineTraceSingleByChannel(HitResult, TraceStartLocation, MouseHitLocation, ECC_Target, Params);
 	
-	// Trace 결과 부딪힌 액터가 있다면 해당 액터를, 없다면 처음 Mouse 기준으로 Trace했던 결과를 그대로 반환합니다.
+	// Trace 결과가 Enemy라면 해당 액터를 할당하고 return합니다.
 	if (HitResult.bBlockingHit)
 	{
 		TargetHitActor = HitResult.GetActor();
@@ -29,6 +29,7 @@ void UAuraBeamAbility::TraceFirstTarget()
 
 void UAuraBeamAbility::StoreAdditionalTargets(TArray<AActor*>& OutAdditionalTargets)
 {
+	int32 NumOfHitTargets = MaxAdditionalHitTargets;
 	TArray<AActor*> OverlappingActors;
 	TArray<AActor*> ActorsToIgnore;
 	FVector SphereOrigin;
@@ -40,9 +41,11 @@ void UAuraBeamAbility::StoreAdditionalTargets(TArray<AActor*>& OutAdditionalTarg
 	}
 	else
 	{
+		// 첫 적중 대상이 Enemy가 아닌 경우(벽이나 바닥일 때) 총 적중 대상이 일치할 수 있도록 Beam을 하나 더 생성합니다.
+		NumOfHitTargets++;
 		SphereOrigin = MouseHitLocation;
 	}
 	
 	UAuraAbilitySystemLibrary::GetOverlappedLivePawnsWithinRadius(GetAvatarActorFromActorInfo(), OverlappingActors, ActorsToIgnore, SplashRadius, SphereOrigin);
-	UAuraAbilitySystemLibrary::GetClosestTargets(MaxAdditionalHitTargets, OverlappingActors, OutAdditionalTargets, SphereOrigin);
+	UAuraAbilitySystemLibrary::GetClosestTargets(NumOfHitTargets, OverlappingActors, OutAdditionalTargets, SphereOrigin);
 }

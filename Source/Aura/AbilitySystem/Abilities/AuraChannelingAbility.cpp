@@ -11,12 +11,10 @@ void UAuraChannelingAbility::StoreMouseDataInfo(const FHitResult& HitResult)
 	}
 	else
 	{
+		// Trace 결과가 아무것도 없다면 Ability 발동을 취소합니다.
 		CancelAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true);
 	}
-}
-
-void UAuraChannelingAbility::StoreOwnerVariables()
-{
+	
 	if (CurrentActorInfo)
 	{
 		OwnerCharacter = Cast<AAuraCharacterBase>(CurrentActorInfo->AvatarActor);

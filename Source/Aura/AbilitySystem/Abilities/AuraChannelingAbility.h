@@ -16,9 +16,6 @@ public:
 	void StoreMouseDataInfo(const FHitResult& HitResult);
 
 	UFUNCTION(BlueprintCallable)
-	void StoreOwnerVariables();
-
-	UFUNCTION(BlueprintCallable)
 	void PlayLoopAnimMontage();
 
 	UFUNCTION(BlueprintCallable)
