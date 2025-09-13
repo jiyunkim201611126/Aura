@@ -90,13 +90,13 @@ private:
 	// 런타임 중 드물게 변하는 배열이며, Owner 클라이언트에게만 복제되기 때문에 FastArray를 굳이 사용하지 않았습니다.
 	// 현재는 Stackable Ability Manager 클래스뿐이며, 보유 Ability 중 하나라도 Stackable Ability라면 Manager 객체를 런타임 중에 할당받습니다.
 	UPROPERTY(Replicated)
-	TArray<TObjectPtr<AActor>> AbilityManagers;
+	TArray<TObjectPtr<AActor>> AdditionalCostManagers;
 };
 
 template<typename T>
 T* UAuraAbilitySystemComponent::FindAbilityManager()
 {
-	for (AActor* Manager : AbilityManagers)
+	for (AActor* Manager : AdditionalCostManagers)
 	{
 		if (T* Typed = Cast<T>(Manager))
 		{
@@ -140,7 +140,7 @@ T* UAuraAbilitySystemComponent::FindOrAddAbilityManager()
 	if (NewManager && Avatar && Avatar->GetRootComponent())
 	{
 		NewManager->AttachToComponent(Avatar->GetRootComponent(), FAttachmentTransformRules::KeepRelativeTransform);
-		AbilityManagers.Add(NewManager);
+		AdditionalCostManagers.Add(NewManager);
 	}
 	
 	return NewManager;

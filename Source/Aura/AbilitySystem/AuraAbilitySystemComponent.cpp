@@ -17,7 +17,7 @@ void UAuraAbilitySystemComponent::GetLifetimeReplicatedProps(TArray<FLifetimePro
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	
-	DOREPLIFETIME_CONDITION(UAuraAbilitySystemComponent, AbilityManagers, COND_OwnerOnly);
+	DOREPLIFETIME_CONDITION(UAuraAbilitySystemComponent, AdditionalCostManagers, COND_OwnerOnly);
 }
 
 void UAuraAbilitySystemComponent::AddCharacterAbilities(const TArray<TSubclassOf<UGameplayAbility>>& StartupAbilities)

@@ -26,5 +26,5 @@ protected:
 
 	// 최대 추가 타격 가능한 적 수입니다.
 	UPROPERTY(EditDefaultsOnly, Category = "Beam")
-	int32 MaxAdditionalHitTargets = 3;
+	int32 MaxHitTargets = 3;
 };

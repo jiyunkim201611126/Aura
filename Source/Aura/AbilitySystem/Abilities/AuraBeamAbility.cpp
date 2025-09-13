@@ -1,4 +1,5 @@
 ﻿#include "AuraBeamAbility.h"
+
 #include "Aura/Aura.h"
 #include "Aura/AbilitySystem/AuraAbilitySystemLibrary.h"
 #include "Aura/Character/AuraCharacterBase.h"
@@ -29,23 +30,24 @@ void UAuraBeamAbility::TraceFirstTarget()
 
 void UAuraBeamAbility::StoreAdditionalTargets(TArray<AActor*>& OutAdditionalTargets)
 {
-	int32 NumOfHitTargets = MaxAdditionalHitTargets;
+	int32 NumOfHitTargets = MaxHitTargets;
 	TArray<AActor*> OverlappingActors;
 	TArray<AActor*> ActorsToIgnore;
 	FVector SphereOrigin;
 	ActorsToIgnore.Add(TargetHitActor);
+	ActorsToIgnore.Add(GetAvatarActorFromActorInfo());
 	if (TargetHitActor->Implements<UEnemyInterface>())
 	{
-		ActorsToIgnore.Add(GetAvatarActorFromActorInfo());
+		// 첫 적중 대상이 Enemy인 경우 MaxHitTargets - 1 만큼 추가 대상을 지정합니다.
+		NumOfHitTargets--;
 		SphereOrigin = TargetHitActor->GetActorLocation();
 	}
 	else
 	{
-		// 첫 적중 대상이 Enemy가 아닌 경우(벽이나 바닥일 때) 총 적중 대상이 일치할 수 있도록 Beam을 하나 더 생성합니다.
-		NumOfHitTargets++;
 		SphereOrigin = MouseHitLocation;
 	}
-	
+
+	// 첫 적중 위치에서 가장 가까운 적을 NumOfHitTarget만큼 지정, OutAdditionalTargets에 채웁니다.
 	UAuraAbilitySystemLibrary::GetOverlappedLivePawnsWithinRadius(GetAvatarActorFromActorInfo(), OverlappingActors, ActorsToIgnore, SplashRadius, SphereOrigin);
 	UAuraAbilitySystemLibrary::GetClosestTargets(NumOfHitTargets, OverlappingActors, OutAdditionalTargets, SphereOrigin);
 }

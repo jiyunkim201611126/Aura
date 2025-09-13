@@ -35,7 +35,6 @@ struct FTaggedNiagaraRow : public FTableRowBase
 	TSoftObjectPtr<UNiagaraSystem> NiagaraAsset;
 };
 
-// 내부적으로 로딩 중인 에셋의 상태를 관리할 구조체
 USTRUCT()
 struct FSoundAsyncPlayData
 {
@@ -64,8 +63,7 @@ USTRUCT()
 struct FSoundAsyncLoadRequest
 {
 	GENERATED_BODY()
-	// 나이아가라는 그 자리에서 재생해야 하는 경우도 있지만, 사운드와 달리 NiagaraSystem 자체를 반환받아야 하는 경우가 존재합니다.
-	// 이를 구분하기 위해 2개의 배열이 있으며, 에셋 로드가 완되면 두 개의 배열을 모두 돌며 나이아가라 재생 함수 혹은 콜백 함수를 호출합니다.
+	
 	UPROPERTY()
 	TArray<FSoundAsyncPlayData> PlayRequests;
 
@@ -101,8 +99,7 @@ USTRUCT()
 struct FNiagaraAsyncLoadRequest
 {
 	GENERATED_BODY()
-	// 나이아가라는 그 자리에서 재생해야 하는 경우도 있지만, 사운드와 달리 NiagaraSystem 자체를 반환받아야 하는 경우가 존재합니다.
-	// 이를 구분하기 위해 여러 개의 배열이 있으며, 에셋 로드가 완되면 두 개의 배열을 모두 돌며 나이아가라 재생 함수 혹은 콜백 함수를 호출합니다.
+	
 	UPROPERTY()
 	TArray<FNiagaraAsyncSpawnData> SpawnRequests;
 
