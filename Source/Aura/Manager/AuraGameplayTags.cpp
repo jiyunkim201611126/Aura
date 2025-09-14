@@ -6,42 +6,42 @@ FAuraGameplayTags FAuraGameplayTags::GameplayTags;
 void FAuraGameplayTags::InitializeNativeGameplayTags()
 {
 	GameplayTags.Attributes_Vital_Health = UGameplayTagsManager::Get().AddNativeGameplayTag(
-		FName("Attributes.Vital.Health")), FString("Value needed to survive");
+		FName("Attributes.Vital.Health"), FString("Value needed to survive"));
 	GameplayTags.Attributes_Vital_Mana = UGameplayTagsManager::Get().AddNativeGameplayTag(
-		FName("Attributes.Vital.Mana")), FString("Value needed to use the skills");
+		FName("Attributes.Vital.Mana"), FString("Value needed to use the skills"));
 	
 	GameplayTags.Attributes_Primary_Strength = UGameplayTagsManager::Get().AddNativeGameplayTag(
-		FName("Attributes.Primary.Strength")), FString("Increases physical damage");
+		FName("Attributes.Primary.Strength"), FString("Increases physical damage"));
 	GameplayTags.Attributes_Primary_Intelligence = UGameplayTagsManager::Get().AddNativeGameplayTag(
-		FName("Attributes.Primary.Intelligence")), FString("Increases magical damage");
+		FName("Attributes.Primary.Intelligence"), FString("Increases magical damage"));
 	GameplayTags.Attributes_Primary_Resilience = UGameplayTagsManager::Get().AddNativeGameplayTag(
-		FName("Attributes.Primary.Resilience")), FString("Increases Armor and Armor Penetration");
+		FName("Attributes.Primary.Resilience"), FString("Increases Armor and Armor Penetration"));
 	GameplayTags.Attributes_Primary_Vigor = UGameplayTagsManager::Get().AddNativeGameplayTag(
-		FName("Attributes.Primary.Vigor")), FString("Increases Health");
+		FName("Attributes.Primary.Vigor"), FString("Increases Health"));
 	
 	GameplayTags.Attributes_Secondary_Armor = UGameplayTagsManager::Get().AddNativeGameplayTag(
-		FName("Attributes.Secondary.Armor")), FString("Reduces damage taken, improves Block Chance");
+		FName("Attributes.Secondary.Armor"), FString("Reduces damage taken, improves Block Chance"));
 	GameplayTags.Attributes_Secondary_ArmorPenetration = UGameplayTagsManager::Get().AddNativeGameplayTag(
-		FName("Attributes.Secondary.ArmorPenetration")), FString("Ignores Percentage of enemy Armor, increases Critical Hit Chance");
+		FName("Attributes.Secondary.ArmorPenetration"), FString("Ignores Percentage of enemy Armor, increases Critical Hit Chance"));
 	GameplayTags.Attributes_Secondary_BlockChance = UGameplayTagsManager::Get().AddNativeGameplayTag(
-		FName("Attributes.Secondary.BlockChance")), FString("Chance to cut incoming damage in half");
+		FName("Attributes.Secondary.BlockChance"), FString("Chance to cut incoming damage in half"));
 	GameplayTags.Attributes_Secondary_CriticalHitChance = UGameplayTagsManager::Get().AddNativeGameplayTag(
-		FName("Attributes.Secondary.CriticalHitChance")), FString("Chance to double damage plus critical hit bonus");
+		FName("Attributes.Secondary.CriticalHitChance"), FString("Chance to double damage plus critical hit bonus"));
 	GameplayTags.Attributes_Secondary_CriticalHitDamage = UGameplayTagsManager::Get().AddNativeGameplayTag(
-		FName("Attributes.Secondary.CriticalHitDamage")), FString("Bonus damage added when a critical hit is scored");
+		FName("Attributes.Secondary.CriticalHitDamage"), FString("Bonus damage added when a critical hit is scored"));
 	GameplayTags.Attributes_Secondary_CriticalHitResistance = UGameplayTagsManager::Get().AddNativeGameplayTag(
-		FName("Attributes.Secondary.CriticalHitResistance")), FString("Reduces Critical Hit Chance of attacking enemies");
+		FName("Attributes.Secondary.CriticalHitResistance"), FString("Reduces Critical Hit Chance of attacking enemies"));
 	GameplayTags.Attributes_Secondary_HealthRegeneration = UGameplayTagsManager::Get().AddNativeGameplayTag(
-		FName("Attributes.Secondary.HealthRegeneration")), FString("Amount of Health regenerated every 1 second");
+		FName("Attributes.Secondary.HealthRegeneration"), FString("Amount of Health regenerated every 1 second"));
 	GameplayTags.Attributes_Secondary_ManaRegeneration = UGameplayTagsManager::Get().AddNativeGameplayTag(
-		FName("Attributes.Secondary.ManaRegeneration")), FString("Amount of Mana regenerated every 1 second");
+		FName("Attributes.Secondary.ManaRegeneration"), FString("Amount of Mana regenerated every 1 second"));
 	GameplayTags.Attributes_Secondary_MaxHealth = UGameplayTagsManager::Get().AddNativeGameplayTag(
-		FName("Attributes.Secondary.MaxHealth")), FString("The maximum amount of Health obtainable");
+		FName("Attributes.Secondary.MaxHealth"), FString("The maximum amount of Health obtainable"));
 	GameplayTags.Attributes_Secondary_MaxMana = UGameplayTagsManager::Get().AddNativeGameplayTag(
-		FName("Attributes.Secondary.MaxMana")), FString("The maximum amount of Mana obtainable");
+		FName("Attributes.Secondary.MaxMana"), FString("The maximum amount of Mana obtainable"));
 	
 	GameplayTags.Attributes_Meta_IncomingXP = UGameplayTagsManager::Get().AddNativeGameplayTag(
-		FName("Attributes.Meta.IncomingXP")), FString("Incoming XP Meta Attribute");
+		FName("Attributes.Meta.IncomingXP"), FString("Incoming XP Meta Attribute"));
 
 	GameplayTags.InputTag_LMB = UGameplayTagsManager::Get().AddNativeGameplayTag(
 		FName("InputTag.LMB"),FString("Input Tag for Left Mouse Button"));
@@ -93,12 +93,12 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 	GameplayTags.DamageTypesToResistances.Add(GameplayTags.Damage_Physical, GameplayTags.Attributes_Resistance_Physical);
 
 	// Debuffs
-	GameplayTags.Debuff_Burn = UGameplayTagsManager::Get().AddNativeGameplayTag(
-		FName("Debuff.Burn"), FString("Debuff for Fire Damage"));
-	GameplayTags.Debuff_Stun = UGameplayTagsManager::Get().AddNativeGameplayTag(
-		FName("Debuff.Stun"), FString("Debuff for Lightning Damage"));
-	GameplayTags.Debuff_Confuse = UGameplayTagsManager::Get().AddNativeGameplayTag(
-		FName("Debuff.Confuse"), FString("Debuff for Arcane Damage"));
+	GameplayTags.Debuff_Type_Burn = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("Debuff.Type.Burn"), FString("Debuff for Fire Damage"));
+	GameplayTags.Debuff_Type_Stun = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("Debuff.Type.Stun"), FString("Debuff for Lightning Damage"));
+	GameplayTags.Debuff_Type_Confuse = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("Debuff.Type.Confuse"), FString("Debuff for Arcane Damage"));
 	
 	GameplayTags.Debuff_Chance = UGameplayTagsManager::Get().AddNativeGameplayTag(
 		FName("Debuff.Chance"), FString("Debuff Chance"));

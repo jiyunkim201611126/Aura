@@ -10,15 +10,29 @@ class AURA_API UAuraBeamAbility : public UAuraChannelingAbility
 	GENERATED_BODY()
 
 protected:
+	// ~UGameplayAbility Interface
+	virtual void CancelAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateCancelAbility) override;
+	// ~End of UGameplayAbility Interface
+	
 	UFUNCTION(BlueprintCallable)
 	void TraceFirstTarget();
 
 	UFUNCTION(BlueprintCallable)
+	bool CheckRange();
+
+	UFUNCTION(BlueprintCallable)
 	void StoreAdditionalTargets(TArray<AActor*>& OutAdditionalTargets);
+
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
+	void ApplyEndAbility();
 
 protected:
 	UPROPERTY(BlueprintReadOnly, Category = "Beam")
 	TObjectPtr<AActor> TargetHitActor;
+
+	// 사정거리입니다.
+	UPROPERTY(EditDefaultsOnly, Category = "Beam")
+	float BeamRange = 800.f;
 
 	// Beam이 주변 적에게 전이되는 범위입니다.
 	UPROPERTY(EditDefaultsOnly, Category = "Beam")

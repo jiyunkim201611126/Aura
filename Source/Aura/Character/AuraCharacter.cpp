@@ -1,5 +1,6 @@
 #include "AuraCharacter.h"
 #include "Aura/AbilitySystem/AuraAbilitySystemComponent.h"
+#include "Aura/Manager/AuraGameplayTags.h"
 #include "Aura/Player/AuraPlayerState.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Aura/Player/AuraPlayerController.h"
@@ -179,6 +180,8 @@ void AAuraCharacter::InitAbilityActorInfo()
 
 	// 초기 Attribute 초기화
 	InitializeDefaultAttributes();
+	
+	Super::InitAbilityActorInfo();
 }
 
 void AAuraCharacter::MulticastLevelUpParticles_Implementation() const
@@ -197,4 +200,26 @@ void AAuraCharacter::InitializeDefaultAttributes() const
 	ApplyEffectToSelf(DefaultPrimaryAttributes, 1.f);
 	ApplyEffectToSelf(DefaultSecondaryAttributes, 1.f);
 	ApplyEffectToSelf(DefaultVitalAttributes, 1.f);
+}
+
+void AAuraCharacter::OnRep_Stunned()
+{
+	// 클라이언트측에서 명시적으로 BlockedTags를 부여해주지 않으면, 기절 상태이상 중에 움직이려 시도하면서 러버밴딩 현상이 발생합니다.
+	if (UAuraAbilitySystemComponent* AuraASC = Cast<UAuraAbilitySystemComponent>(AbilitySystemComponent))
+	{
+		const FAuraGameplayTags GameplayTags = FAuraGameplayTags::Get();
+		FGameplayTagContainer BlockedTags;
+		BlockedTags.AddTag(GameplayTags.Player_Block_CursorTrace);
+		BlockedTags.AddTag(GameplayTags.Player_Block_InputHeld);
+		BlockedTags.AddTag(GameplayTags.Player_Block_InputPressed);
+		BlockedTags.AddTag(GameplayTags.Player_Block_InputReleased);
+		if (bIsStunned)
+		{
+			AuraASC->AddLooseGameplayTags(BlockedTags);
+		}
+		else
+		{
+			AuraASC->RemoveLooseGameplayTags(BlockedTags);
+		}
+	}
 }

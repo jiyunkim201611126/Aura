@@ -72,6 +72,18 @@ void AAuraProjectile::Destroyed()
 	Super::Destroyed();
 }
 
+void AAuraProjectile::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+
+	if (ProjectileMovement->HomingTargetComponent.IsValid())
+	{
+		// 추적 중인 타겟이 사망한 경우 일반 Projectile로 변경합니다.
+		ProjectileMovement->bIsHomingProjectile = false;
+		ProjectileMovement->HomingTargetComponent = nullptr;
+	}
+}
+
 void AAuraProjectile::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	// GameplayEffectSpec이 아직 유효하지 않을 때 Overlap되거나, Projectile을 발사한 캐릭터 자신이 부딪히면 이 이벤트를 무시함
@@ -172,11 +184,18 @@ void AAuraProjectile::MulticastSpawnHomingTargetComponent_Implementation(const F
 	// 추적 속도를 결정합니다.
 	ProjectileMovement->HomingAccelerationMagnitude = HomingAcceleration;
 	ProjectileMovement->bIsHomingProjectile = true;
+
+	// 적을 추적하는 Projectile은 추적 도중 적이 사망했을 때를 대비한 로직을 위해 Tick을 활성화합니다.
+	SetActorTickEnabled(true);
+	SetActorTickInterval(0.2f);
 }
 
-void AAuraProjectile::MulticastSetHomingTargetComponent_Implementation(USceneComponent* HomingTargetComponent, const float HomingAcceleration) const
+void AAuraProjectile::MulticastSetHomingTargetComponent_Implementation(USceneComponent* HomingTargetComponent, const float HomingAcceleration)
 {
 	ProjectileMovement->HomingTargetComponent = HomingTargetComponent;
 	ProjectileMovement->HomingAccelerationMagnitude = HomingAcceleration;
 	ProjectileMovement->bIsHomingProjectile = true;
+	
+	SetActorTickEnabled(true);
+	SetActorTickInterval(0.2f);
 }

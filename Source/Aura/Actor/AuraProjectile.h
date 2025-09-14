@@ -21,12 +21,13 @@ public:
 	void MulticastSpawnHomingTargetComponent(const FVector_NetQuantize& TargetLocation, const float HomingAcceleration);
 
 	UFUNCTION(NetMulticast, Reliable)
-	void MulticastSetHomingTargetComponent(USceneComponent* HomingTargetComponent, const float HomingAcceleration) const;
+	void MulticastSetHomingTargetComponent(USceneComponent* HomingTargetComponent, const float HomingAcceleration);
 
 protected:
 	// ~AActor Interface
 	virtual void BeginPlay() override;
 	virtual void Destroyed() override;
+	virtual void Tick(float DeltaSeconds) override;
 	// ~End of AActor Interface
 
 	UFUNCTION()

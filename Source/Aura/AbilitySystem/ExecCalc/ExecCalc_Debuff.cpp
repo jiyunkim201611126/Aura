@@ -65,28 +65,28 @@ void UExecCalc_Debuff::Execute_Implementation(const FGameplayEffectCustomExecuti
 	EvaluationParameters.SourceTags = SourceTags;
 	EvaluationParameters.TargetTags = TargetTags;
 
-	const bool bIsBurn = GrantedTags.HasTagExact(GameplayTags.Debuff_Burn);
-	const bool bIsStun = GrantedTags.HasTagExact(GameplayTags.Debuff_Stun);
-	const bool bIsConfuse = GrantedTags.HasTagExact(GameplayTags.Debuff_Confuse);
+	const bool bIsBurn = GrantedTags.HasTagExact(GameplayTags.Debuff_Type_Burn);
+	const bool bIsStun = GrantedTags.HasTagExact(GameplayTags.Debuff_Type_Stun);
+	const bool bIsConfuse = GrantedTags.HasTagExact(GameplayTags.Debuff_Type_Confuse);
 
 	// 타입에 해당하는 태그(Context용)와 함께 관련 저항력 Attribute를 가져옵니다.
 	FGameplayTag TypeTagForContext;
 	float ResistanceTypeValue = 0.f;
 	if (bIsBurn)
 	{
-		TypeTagForContext = GameplayTags.Debuff_Burn;
+		TypeTagForContext = GameplayTags.Debuff_Type_Burn;
 		const FGameplayEffectAttributeCaptureDefinition Resistance = AuraDebuffStatics().TagsToCaptureResistanceDefs[GameplayTags.Attributes_Resistance_Fire];
 		ExecutionParams.AttemptCalculateCapturedAttributeMagnitude(Resistance, EvaluationParameters, ResistanceTypeValue);
 	}
 	else if (bIsStun)
 	{
-		TypeTagForContext = GameplayTags.Debuff_Stun;
+		TypeTagForContext = GameplayTags.Debuff_Type_Stun;
 		const FGameplayEffectAttributeCaptureDefinition Resistance = AuraDebuffStatics().TagsToCaptureResistanceDefs[GameplayTags.Attributes_Resistance_Lightning];
 		ExecutionParams.AttemptCalculateCapturedAttributeMagnitude(Resistance, EvaluationParameters, ResistanceTypeValue);
 	}
 	else if (bIsConfuse)
 	{
-		TypeTagForContext = GameplayTags.Debuff_Confuse;
+		TypeTagForContext = GameplayTags.Debuff_Type_Confuse;
 		const FGameplayEffectAttributeCaptureDefinition Resistance = AuraDebuffStatics().TagsToCaptureResistanceDefs[GameplayTags.Attributes_Resistance_Arcane];
 		ExecutionParams.AttemptCalculateCapturedAttributeMagnitude(Resistance, EvaluationParameters, ResistanceTypeValue);
 	}

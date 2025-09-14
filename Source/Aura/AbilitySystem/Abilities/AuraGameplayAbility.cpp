@@ -31,23 +31,15 @@ void UAuraGameplayAbility::ApplyAllEffect(AActor* TargetActor)
 FGameplayEffectContextHandle UAuraGameplayAbility::GetDamageContextHandle() const
 {
 	UAbilityEffectPolicy_Damage* DamageEffectPolicy = GetEffectPoliciesOfClass<UAbilityEffectPolicy_Damage>(EffectPolicies);
-	if (DamageEffectPolicy)
-	{
-		return DamageEffectPolicy->DamageEffectContextHandle;
-	}
-
-	return FGameplayEffectContextHandle();
+	check(DamageEffectPolicy);
+	return DamageEffectPolicy->DamageEffectContextHandle;
 }
 
 FGameplayEffectContextHandle UAuraGameplayAbility::GetDebuffContextHandle() const
 {
 	UAbilityEffectPolicy_Debuff* DebuffEffectPolicy = GetEffectPoliciesOfClass<UAbilityEffectPolicy_Debuff>(EffectPolicies);
-	if (DebuffEffectPolicy)
-	{
-		return DebuffEffectPolicy->DebuffEffectContextHandle;
-	}
-	
-	return FGameplayEffectContextHandle();
+	check(DebuffEffectPolicy);
+	return DebuffEffectPolicy->DebuffEffectContextHandle;
 }
 
 FText UAuraGameplayAbility::GetDescription_Implementation(int32 Level)

@@ -68,9 +68,9 @@ struct FAuraGameplayTags
 	// ~End of Damage Type
 
 	// ~Debuff Type
-	FGameplayTag Debuff_Burn;
-	FGameplayTag Debuff_Stun;
-	FGameplayTag Debuff_Confuse;
+	FGameplayTag Debuff_Type_Burn;
+	FGameplayTag Debuff_Type_Stun;
+	FGameplayTag Debuff_Type_Confuse;
 
 	FGameplayTag Debuff_Chance;
 	FGameplayTag Debuff_Damage;

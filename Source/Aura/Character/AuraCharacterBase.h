@@ -69,12 +69,27 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent)
 	void StartDissolveTimeline(UMaterialInstanceDynamic* DynamicMaterialInstance, UMaterialInstanceDynamic* WeaponDynamicMaterialInstance);
 
+	virtual void HitReactTagChanged(const FGameplayTag CallbackTag, int32 NewCount);
+	virtual void StunTagChanged(const FGameplayTag CallbackTag, int32 NewCount);
+
+	UFUNCTION()
+	virtual void OnRep_Stunned();
+	
 public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Character Class Defaults")
 	ECharacterClass CharacterClass = ECharacterClass::Elementalist;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Character Rank")
 	ECharacterRank CharacterRank = ECharacterRank::Normal;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat")
+	float BaseWalkSpeed = 600.f;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Debuff")
+	bool bHitReacting = false;
+
+	UPROPERTY(ReplicatedUsing = OnRep_Stunned, BlueprintReadOnly, Category = "Debuff")
+	bool bIsStunned = false;
 
 protected:
 	// 모든 캐릭터가 무기를 사용하는 건 아니지만, 확장성과 유연성을 위해 선언해놓습니다.

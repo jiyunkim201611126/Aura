@@ -35,6 +35,8 @@ AAuraEnemy::AAuraEnemy()
 	
 	GetMesh()->SetCustomDepthStencilValue(CUSTOM_DEPTH_RED);
 	Weapon->SetCustomDepthStencilValue(CUSTOM_DEPTH_RED);
+
+	BaseWalkSpeed = 250.f;
 }
 
 void AAuraEnemy::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -150,10 +152,6 @@ void AAuraEnemy::BeginPlay()
 			{
 				OnMaxHealthChanged.Broadcast(Data.NewValue);
 			});
-
-		// Effects.HitReact가 부여되었을 때에 대한 콜백 함수 바인드, EGameplayTagEventType은 언제 호출할 건지 결정하는 enum
-		// NewOrRemoved는 카운트가 0에서 1로 증가하거나, 1에서 0이 될때만 호출, AnyCountChange는 카운트가 변경되면 무조건 호출 
-		AbilitySystemComponent->RegisterGameplayTagEvent(FAuraGameplayTags::Get().Effects_HitReact, EGameplayTagEventType::NewOrRemoved).AddUObject(this, &AAuraEnemy::HitReactTagChanged);
 		
 		OnHealthChanged.Broadcast(AuraAS->GetHealth());
 		OnMaxHealthChanged.Broadcast(AuraAS->GetMaxHealth());
@@ -200,6 +198,8 @@ void AAuraEnemy::InitAbilityActorInfo()
 		UAuraAbilitySystemLibrary::InitializeDefaultAttributes(this, CharacterClass, Level, AbilitySystemComponent);
 	}
 	OnASCRegistered.Broadcast(AbilitySystemComponent);
+	
+	Super::InitAbilityActorInfo();
 }
 
 void AAuraEnemy::AddCharacterStartupAbilities() const
@@ -214,11 +214,19 @@ void AAuraEnemy::AddCharacterStartupAbilities() const
 
 void AAuraEnemy::HitReactTagChanged(const FGameplayTag CallbackTag, int32 NewCount)
 {
-	bHitReacting = NewCount > 0;
-	GetCharacterMovement()->MaxWalkSpeed = bHitReacting ? 0.f : BaseWalkSpeed;
+	Super::HitReactTagChanged(CallbackTag, NewCount);
 	if (AuraAIController && AuraAIController->GetBlackboardComponent())
 	{
 		AuraAIController->GetBlackboardComponent()->SetValueAsBool(FName("HitReacting"), bHitReacting);
+	}
+}
+
+void AAuraEnemy::StunTagChanged(const FGameplayTag CallbackTag, int32 NewCount)
+{
+	Super::StunTagChanged(CallbackTag, NewCount);
+	if (AuraAIController && AuraAIController->GetBlackboardComponent())
+	{
+		AuraAIController->GetBlackboardComponent()->SetValueAsBool(FName("Stunned"), bIsStunned);
 	}
 }
 

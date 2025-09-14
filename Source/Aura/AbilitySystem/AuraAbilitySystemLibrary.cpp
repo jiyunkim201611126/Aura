@@ -258,15 +258,15 @@ EDebuffTypeContext UAuraAbilitySystemLibrary::ReplaceDebuffTypeToEnum(const FGam
 {
 	const FAuraGameplayTags& GameplayTags = FAuraGameplayTags::Get();
 	
-	if (DebuffTypeTag == GameplayTags.Debuff_Burn)
+	if (DebuffTypeTag == GameplayTags.Debuff_Type_Burn)
 	{
 		return EDebuffTypeContext::Burn;
 	}
-	if (DebuffTypeTag == GameplayTags.Debuff_Stun)
+	if (DebuffTypeTag == GameplayTags.Debuff_Type_Stun)
 	{
 		return EDebuffTypeContext::Stun;
 	}
-	if (DebuffTypeTag == GameplayTags.Debuff_Confuse)
+	if (DebuffTypeTag == GameplayTags.Debuff_Type_Confuse)
 	{
 		return EDebuffTypeContext::Confuse;
 	}
@@ -280,15 +280,15 @@ FGameplayTag UAuraAbilitySystemLibrary::ReplaceDebuffTypeToTag(const EDebuffType
 
 	if (DebuffTypeEnum == EDebuffTypeContext::Burn)
 	{
-		return GameplayTags.Debuff_Burn;
+		return GameplayTags.Debuff_Type_Burn;
 	}
 	if (DebuffTypeEnum == EDebuffTypeContext::Stun)
 	{
-		return GameplayTags.Debuff_Stun;
+		return GameplayTags.Debuff_Type_Stun;
 	}
 	if (DebuffTypeEnum == EDebuffTypeContext::Confuse)
 	{
-		return GameplayTags.Debuff_Confuse;
+		return GameplayTags.Debuff_Type_Confuse;
 	}
 	
 	return FGameplayTag();
@@ -333,7 +333,7 @@ void UAuraAbilitySystemLibrary::GetOverlappedLivePawnsWithinRadius(const UObject
 	SphereParams.AddIgnoredActors(ActorsToIgnore);
 	
 	TArray<FOverlapResult> Overlaps;
-	if (UWorld* World = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::LogAndReturnNull))
+	if (const UWorld* World = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::LogAndReturnNull))
 	{
 		World->OverlapMultiByObjectType(Overlaps, SphereOrigin, FQuat::Identity, FCollisionObjectQueryParams(FCollisionObjectQueryParams::InitType::AllDynamicObjects), FCollisionShape::MakeSphere(Radius), SphereParams);
 		for (FOverlapResult& Overlap : Overlaps)

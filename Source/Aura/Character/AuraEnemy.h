@@ -45,11 +45,13 @@ protected:
 	// ~APawn Interface
 	virtual void PossessedBy(AController* NewController) override;
 	// ~End of APawn Interface
-	
+
+	// ~AuraCharacterBase Interface
 	virtual void InitAbilityActorInfo() override;
 	virtual void AddCharacterStartupAbilities() const override;
-	
-	void HitReactTagChanged(const FGameplayTag CallbackTag, int32 NewCount);
+	virtual void HitReactTagChanged(const FGameplayTag CallbackTag, int32 NewCount) override;
+	virtual void StunTagChanged(const FGameplayTag CallbackTag, int32 NewCount) override;
+	// ~End of AuraCharacterBase Interface
 
 private:
 	UFUNCTION()
@@ -57,19 +59,12 @@ private:
 
 public:
 	// 아래 2개의 델리게이트 선언으로 인해 이 클래스가 OverlayWidgetController를 참조하게 되었으나,
-	// 여기서 같은 델리게이트를 선언하거나 WidgetComponent를 위한 또 다른 WidgetController 클래스를 만드는 것보다 이게 더 단순함
-	// 물론 이 델리게이트의 선언부만 따로 클래스로 뽑아낼 수도 있겠지만, 당장은 이렇게 구현
+	// 이 클래스에 이름이 다른 같은 역할의 델리게이트를 선언하는 게 불필요하다 생각되어 이렇게 선언합니다.
 	UPROPERTY(BlueprintAssignable)
 	FOnAttributeChangedSignature OnHealthChanged;
 	
 	UPROPERTY(BlueprintAssignable)
 	FOnAttributeChangedSignature OnMaxHealthChanged;
-
-	UPROPERTY(BlueprintReadOnly, Category = "Combat")
-	bool bHitReacting = false;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat")
-	float BaseWalkSpeed = 250.f;
 
 	// Die 함수 호출 시 해당 시간 이후 객체가 파괴됩니다.
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat")
