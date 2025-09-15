@@ -119,11 +119,6 @@ void UAuraAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallba
 	{
 		ApplyIncomingXP(Props);
 	}
-	
-	if (Data.EvaluatedData.Attribute == GetIncomingDebuffAttribute())
-	{
-		ApplyDebuff(Props);
-	}
 }
 
 void UAuraAttributeSet::PostAttributeChange(const FGameplayAttribute& Attribute, float OldValue, float NewValue)
@@ -322,87 +317,6 @@ void UAuraAttributeSet::ApplyDebuff(const FEffectProperties& Props) const
 				NiagaraComponent->RegisterComponent();
 			}
 		}
-	}
-
-	switch (DebuffData.DebuffType)
-	{
-	case EDebuffTypeContext::Burn:
-		ApplyBurnDebuff(Props, EffectContextHandle, DebuffData);
-		break;
-	case EDebuffTypeContext::Stun:
-		ApplyStunDebuff(Props, EffectContextHandle, DebuffData);
-		break;
-	default:
-		break;
-	}
-}
-
-void UAuraAttributeSet::InitDebuffEffect(UGameplayEffect* DebuffEffect, const FDebuffDataContext& DebuffData) const
-{
-	DebuffEffect->DurationPolicy = EGameplayEffectDurationType::HasDuration;
-	DebuffEffect->Period = DebuffData.DebuffFrequency;
-	DebuffEffect->bExecutePeriodicEffectOnApplication = false;
-	DebuffEffect->DurationMagnitude = FScalableFloat(DebuffData.DebuffDuration);
-     
-	DebuffEffect->StackingType = EGameplayEffectStackingType::AggregateBySource;
-	DebuffEffect->StackLimitCount = 1;
-}
-
-void UAuraAttributeSet::ApplyBurnDebuff(const FEffectProperties& Props, FGameplayEffectContextHandle EffectContextHandle, const FDebuffDataContext& DebuffData) const
-{
-	const FAuraGameplayTags& GameplayTags = FAuraGameplayTags::Get();
-	const FGameplayTag DamageType = GameplayTags.Damage_Fire;
-     
-	// 동적으로 새로운 GE를 생성합니다.
-	const FString DebuffName = FString::Printf(TEXT("DynamicDebuff_%s"), *UAuraAbilitySystemLibrary::ReplaceDebuffTypeToTag(DebuffData.DebuffType).ToString());
-	UGameplayEffect* Effect = NewObject<UGameplayEffect>(GetTransientPackage(), FName(DebuffName));
-	InitDebuffEffect(Effect, DebuffData);
-	
-	const int32 Index = Effect->Modifiers.Num();
-	Effect->Modifiers.Add(FGameplayModifierInfo());
-	FGameplayModifierInfo& ModifierInfo = Effect->Modifiers[Index];
-	
-	ModifierInfo.ModifierMagnitude = FScalableFloat(DebuffData.DebuffDamage);
-	ModifierInfo.ModifierOp = EGameplayModOp::Additive;
-	ModifierInfo.Attribute = GetIncomingDamageAttribute();
-     
-	// Context를 그대로 재사용해 EffectSpec을 생성합니다.
-	// 애초에 Damage Effect가 아니였기 때문에 새로운 Damage 관련 정보를 Context에 할당해도 무방합니다.
-	FGameplayEffectSpec* MutableSpec = new FGameplayEffectSpec(Effect, EffectContextHandle, 1.f);
-	if (MutableSpec)
-	{
-		MutableSpec->DynamicGrantedTags.AddTag(UAuraAbilitySystemLibrary::ReplaceDebuffTypeToTag(DebuffData.DebuffType));
-		FDamageDataContext DamageData = UAuraAbilitySystemLibrary::GetDamageData(EffectContextHandle);
-		DamageData.DamageType = UAuraAbilitySystemLibrary::ReplaceDamageTypeToEnum(DamageType);
-		
-		FAuraGameplayEffectContext* AuraContext = static_cast<FAuraGameplayEffectContext*>(EffectContextHandle.Get());
-		AuraContext->SetDamageDataContext(DamageData.DamageType, DamageData.bIsBlockedHit, DamageData.bIsCriticalHit);
-     
-		Props.TargetASC->ApplyGameplayEffectSpecToSelf(*MutableSpec);
-	}
-}
-
-void UAuraAttributeSet::ApplyStunDebuff(const FEffectProperties& Props, FGameplayEffectContextHandle EffectContextHandle, const FDebuffDataContext& DebuffData) const
-{
-	const FAuraGameplayTags& GameplayTags = FAuraGameplayTags::Get();
-	
-	const FString DebuffName = FString::Printf(TEXT("DynamicDebuff_%s"), *UAuraAbilitySystemLibrary::ReplaceDebuffTypeToTag(DebuffData.DebuffType).ToString());
-	UGameplayEffect* Effect = NewObject<UGameplayEffect>(GetTransientPackage(), FName(DebuffName));
-	InitDebuffEffect(Effect, DebuffData);
-
-	FGameplayEffectSpec* MutableSpec = new FGameplayEffectSpec(Effect, EffectContextHandle, 1.f);
-	if (MutableSpec)
-	{
-		MutableSpec->DynamicGrantedTags.AddTag(UAuraAbilitySystemLibrary::ReplaceDebuffTypeToTag(DebuffData.DebuffType));
-		MutableSpec->DynamicGrantedTags.AddTag(GameplayTags.Player_Block_CursorTrace);
-		MutableSpec->DynamicGrantedTags.AddTag(GameplayTags.Player_Block_InputHeld);
-		MutableSpec->DynamicGrantedTags.AddTag(GameplayTags.Player_Block_InputPressed);
-		MutableSpec->DynamicGrantedTags.AddTag(GameplayTags.Player_Block_InputReleased);
-		
-		Props.TargetASC->ApplyGameplayEffectSpecToSelf(*MutableSpec);
-
-		FGameplayTagContainer Tags;
-		Props.TargetASC->GetOwnedGameplayTags(Tags);
 	}
 }
 

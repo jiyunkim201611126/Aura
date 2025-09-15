@@ -13,19 +13,13 @@ struct FDebuffData
 	GENERATED_BODY()
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	FGameplayTag DebuffType;
-	
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	float DebuffChance = 0.f;
-	
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	float DebuffDamage = 0.f;
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	float DebuffDuration = 0.f;
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	float DebuffFrequency = 0.f;
+	float DebuffDamage = 0.f;
 };
 
 UCLASS()

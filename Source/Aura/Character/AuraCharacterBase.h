@@ -8,6 +8,7 @@
 #include "Aura/AbilitySystem/Data/CharacterClassInfo.h"
 #include "AuraCharacterBase.generated.h"
 
+class UDebuffComponent;
 class UAbilitySystemComponent;
 class UAttributeSet;
 class UGameplayEffect;
@@ -50,7 +51,6 @@ public:
 protected:
 	// ~AActor Interface
 	virtual void BeginPlay() override;
-	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	// ~End of AActor Interface
 	
 	// ~APawn Interface
@@ -68,12 +68,6 @@ protected:
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void StartDissolveTimeline(UMaterialInstanceDynamic* DynamicMaterialInstance, UMaterialInstanceDynamic* WeaponDynamicMaterialInstance);
-
-	virtual void HitReactTagChanged(const FGameplayTag CallbackTag, int32 NewCount);
-	virtual void StunTagChanged(const FGameplayTag CallbackTag, int32 NewCount);
-
-	UFUNCTION()
-	virtual void OnRep_Stunned();
 	
 public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Character Class Defaults")
@@ -85,12 +79,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat")
 	float BaseWalkSpeed = 600.f;
 
-	UPROPERTY(BlueprintReadOnly, Category = "Debuff")
-	bool bHitReacting = false;
-
-	UPROPERTY(ReplicatedUsing = OnRep_Stunned, BlueprintReadOnly, Category = "Debuff")
-	bool bIsStunned = false;
-
 protected:
 	// 모든 캐릭터가 무기를 사용하는 건 아니지만, 확장성과 유연성을 위해 선언해놓습니다.
 	// 무기가 없는 캐릭터라도, 캐릭터에게 '무기처럼 보이는 이펙트'나 '임시 무기'를 쥐여줘야 하는 때에 무리 없이 구현할 수 있습니다.
@@ -99,6 +87,9 @@ protected:
 
 	UPROPERTY()
 	TObjectPtr<UAbilitySystemComponent> AbilitySystemComponent;
+
+	UPROPERTY(BlueprintReadOnly)
+	TObjectPtr<UDebuffComponent> DebuffComponent;
 
 	UPROPERTY()
 	TObjectPtr<UAttributeSet> AttributeSet;

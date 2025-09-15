@@ -79,9 +79,6 @@ private:
 	void ApplyIncomingXP(const FEffectProperties& Props);
 
 	void ApplyDebuff(const FEffectProperties& Props) const;
-	void InitDebuffEffect(UGameplayEffect* DebuffEffect, const FDebuffDataContext& DebuffData) const;
-	void ApplyBurnDebuff(const FEffectProperties& Props, FGameplayEffectContextHandle EffectContextHandle, const FDebuffDataContext& DebuffData) const;
-	void ApplyStunDebuff(const FEffectProperties& Props, FGameplayEffectContextHandle EffectContextHandle, const FDebuffDataContext& DebuffData) const;
 
 public:
 	/**

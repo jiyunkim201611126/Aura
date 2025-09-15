@@ -49,8 +49,6 @@ protected:
 	// ~AuraCharacterBase Interface
 	virtual void InitAbilityActorInfo() override;
 	virtual void AddCharacterStartupAbilities() const override;
-	virtual void HitReactTagChanged(const FGameplayTag CallbackTag, int32 NewCount) override;
-	virtual void StunTagChanged(const FGameplayTag CallbackTag, int32 NewCount) override;
 	// ~End of AuraCharacterBase Interface
 
 private:

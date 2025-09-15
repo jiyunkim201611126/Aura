@@ -3,11 +3,10 @@
 #include "AbilitySystemComponent.h"
 #include "Aura/Aura.h"
 #include "Aura/AbilitySystem/AuraAbilitySystemComponent.h"
-#include "Aura/Manager/AuraGameplayTags.h"
 #include "Components/CapsuleComponent.h"
 #include "Aura/Manager/FXManagerSubsystem.h"
+#include "Component/DebuffComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "Net/UnrealNetwork.h"
 
 // Sets default values
 AAuraCharacterBase::AAuraCharacterBase()
@@ -25,6 +24,8 @@ AAuraCharacterBase::AAuraCharacterBase()
 	Weapon = CreateDefaultSubobject<USkeletalMeshComponent>("Weapon");
 	Weapon->SetupAttachment(GetMesh(), FName("WeaponHandSocket"));
 	Weapon->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	DebuffComponent = CreateDefaultSubobject<UDebuffComponent>("DebuffComponent");
 }
 
 void AAuraCharacterBase::BeginPlay()
@@ -32,12 +33,6 @@ void AAuraCharacterBase::BeginPlay()
 	Super::BeginPlay();
 
 	RegisterPawn();
-}
-
-void AAuraCharacterBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
-{
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-	DOREPLIFETIME_CONDITION(AAuraCharacterBase, bIsStunned, COND_OwnerOnly);
 }
 
 void AAuraCharacterBase::PossessedBy(AController* NewController)
@@ -182,11 +177,7 @@ void AAuraCharacterBase::MulticastDeath_Implementation(const FVector& Impulse)
 
 void AAuraCharacterBase::InitAbilityActorInfo()
 {
-	// Effects.HitReact가 부여되었을 때에 대한 콜백 함수 바인드 구문입니다.
-	// EGameplayTagEventType은 언제 호출할 건지 결정하는 enum으로,
-	// NewOrRemoved는 카운트가 0에서 1로 증가하거나, 1에서 0이 될때만 호출, AnyCountChange는 카운트가 변경되면 무조건 호출됩니다.
-	AbilitySystemComponent->RegisterGameplayTagEvent(FAuraGameplayTags::Get().Effects_HitReact, EGameplayTagEventType::NewOrRemoved).AddUObject(this, &ThisClass::HitReactTagChanged);
-	AbilitySystemComponent->RegisterGameplayTagEvent(FAuraGameplayTags::Get().Debuff_Type_Stun, EGameplayTagEventType::NewOrRemoved).AddUObject(this, &ThisClass::StunTagChanged);
+	DebuffComponent->InitAbilityActorInfo(AbilitySystemComponent);
 }
 
 void AAuraCharacterBase::ApplyEffectToSelf(const TSubclassOf<UGameplayEffect> GameplayEffectClass, float Level) const
@@ -239,26 +230,4 @@ void AAuraCharacterBase::Dissolve()
 		2.f,
 		false
 	);
-}
-
-void AAuraCharacterBase::HitReactTagChanged(const FGameplayTag CallbackTag, int32 NewCount)
-{
-	bHitReacting = NewCount > 0;
-	GetCharacterMovement()->MaxWalkSpeed = bHitReacting ? (BaseWalkSpeed / 2.f) : BaseWalkSpeed;
-}
-
-void AAuraCharacterBase::StunTagChanged(const FGameplayTag CallbackTag, int32 NewCount)
-{
-	// 기절 상태이상에 걸리면 현재 발동 중인 Active 스킬을 모두 취소합니다.
-	const FAuraGameplayTags AuraGameplayTags = FAuraGameplayTags::Get();
-	FGameplayTagContainer CancelAbilityTags;
-	CancelAbilityTags.AddTag(AuraGameplayTags.Abilities_Types_Active);
-	
-	bIsStunned = NewCount > 0;
-	GetCharacterMovement()->MaxWalkSpeed = bIsStunned ? 0.f : BaseWalkSpeed;
-	AbilitySystemComponent->CancelAbilities(&CancelAbilityTags);
-}
-
-void AAuraCharacterBase::OnRep_Stunned()
-{
 }

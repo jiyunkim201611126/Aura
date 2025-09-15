@@ -72,10 +72,7 @@ struct FAuraGameplayTags
 	FGameplayTag Debuff_Type_Stun;
 	FGameplayTag Debuff_Type_Confuse;
 
-	FGameplayTag Debuff_Chance;
 	FGameplayTag Debuff_Damage;
-	FGameplayTag Debuff_Duration;
-	FGameplayTag Debuff_Frequency;
 	// ~End of Debuff Type
 	
 	// ~Abilities

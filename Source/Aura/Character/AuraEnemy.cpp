@@ -212,24 +212,6 @@ void AAuraEnemy::AddCharacterStartupAbilities() const
 	AuraASC->AddCharacterPassiveAbilities(StartupPassiveAbilities);
 }
 
-void AAuraEnemy::HitReactTagChanged(const FGameplayTag CallbackTag, int32 NewCount)
-{
-	Super::HitReactTagChanged(CallbackTag, NewCount);
-	if (AuraAIController && AuraAIController->GetBlackboardComponent())
-	{
-		AuraAIController->GetBlackboardComponent()->SetValueAsBool(FName("HitReacting"), bHitReacting);
-	}
-}
-
-void AAuraEnemy::StunTagChanged(const FGameplayTag CallbackTag, int32 NewCount)
-{
-	Super::StunTagChanged(CallbackTag, NewCount);
-	if (AuraAIController && AuraAIController->GetBlackboardComponent())
-	{
-		AuraAIController->GetBlackboardComponent()->SetValueAsBool(FName("Stunned"), bIsStunned);
-	}
-}
-
 void AAuraEnemy::OnRep_PlaySpawnAnimation()
 {
 	if (bPlaySpawnAnimation)

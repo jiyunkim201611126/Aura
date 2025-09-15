@@ -31,6 +31,7 @@ public class Aura : ModuleRules
 			"NavigationSystem",
 			"Niagara",
 			"AIModule",
+			"ModularGameplay",
 		});
 
 		PrivateDependencyModuleNames.AddRange(new string[]

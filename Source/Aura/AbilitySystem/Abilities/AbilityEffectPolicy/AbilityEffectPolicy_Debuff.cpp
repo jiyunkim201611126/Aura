@@ -33,12 +33,16 @@ TArray<FGameplayEffectSpecHandle> UAbilityEffectPolicy_Debuff::MakeDebuffSpecHan
 	TArray<FGameplayEffectSpecHandle> DebuffSpecs;
 	for (const auto& Data : DebuffData)
 	{
+		// 디버프 부여 확률을 계산합니다.
+		const bool bDebuff = FMath::FRandRange(0.f, 100.f) < Data.DebuffChance;
+		if (!bDebuff)
+		{
+			continue;
+		}
+		
 		FGameplayEffectSpecHandle DebuffSpecHandle = ASC->MakeOutgoingSpec(DebuffEffectClass, 1.f, DebuffEffectContextHandle);
-		UAbilitySystemBlueprintLibrary::AddGrantedTag(DebuffSpecHandle, Data.DebuffType);
-		UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(DebuffSpecHandle, GameplayTags.Debuff_Chance, Data.DebuffChance);
 		UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(DebuffSpecHandle, GameplayTags.Debuff_Damage, Data.DebuffDamage);
-		UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(DebuffSpecHandle, GameplayTags.Debuff_Duration, Data.DebuffDuration);
-		UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(DebuffSpecHandle, GameplayTags.Debuff_Frequency, Data.DebuffFrequency);
+		UAbilitySystemBlueprintLibrary::SetDuration(DebuffSpecHandle, Data.DebuffDuration);
 		DebuffSpecs.Add(DebuffSpecHandle);
 	}
 

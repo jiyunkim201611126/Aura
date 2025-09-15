@@ -42,22 +42,11 @@ void UExecCalc_Debuff::Execute_Implementation(const FGameplayEffectCustomExecuti
 	const FAuraGameplayTags& GameplayTags = FAuraGameplayTags::Get();
 	
 	const FGameplayEffectSpec& Spec = ExecutionParams.GetOwningSpec();
-
-	// 디버프 부여 확률을 계산합니다.
-	const float Chance = Spec.GetSetByCallerMagnitude(GameplayTags.Debuff_Chance, false);
-	const bool bDebuff = FMath::FRandRange(0.f, 100.f) < Chance;
-	if (!bDebuff)
-	{
-		return;
-	}
-
+	
 	// 부여 성공 시 디버프 관련 계산을 시작합니다.
-	const float Damage = Spec.GetSetByCallerMagnitude(GameplayTags.Debuff_Damage, false);
-	const float Duration = Spec.GetSetByCallerMagnitude(GameplayTags.Debuff_Duration, false);
-	const float Frequency = Spec.GetSetByCallerMagnitude(GameplayTags.Debuff_Frequency, false);
-
 	FGameplayTagContainer GrantedTags;
 	Spec.GetAllGrantedTags(GrantedTags);
+	const float Damage = Spec.GetSetByCallerMagnitude(GameplayTags.Debuff_Damage, false);
 	
 	const FGameplayTagContainer* SourceTags = Spec.CapturedSourceTags.GetAggregatedTags();
 	const FGameplayTagContainer* TargetTags = Spec.CapturedTargetTags.GetAggregatedTags();
@@ -69,40 +58,27 @@ void UExecCalc_Debuff::Execute_Implementation(const FGameplayEffectCustomExecuti
 	const bool bIsStun = GrantedTags.HasTagExact(GameplayTags.Debuff_Type_Stun);
 	const bool bIsConfuse = GrantedTags.HasTagExact(GameplayTags.Debuff_Type_Confuse);
 
-	// 타입에 해당하는 태그(Context용)와 함께 관련 저항력 Attribute를 가져옵니다.
-	FGameplayTag TypeTagForContext;
+	// 타입에 해당하는 관련 저항력 Attribute를 가져옵니다.
 	float ResistanceTypeValue = 0.f;
 	if (bIsBurn)
 	{
-		TypeTagForContext = GameplayTags.Debuff_Type_Burn;
 		const FGameplayEffectAttributeCaptureDefinition Resistance = AuraDebuffStatics().TagsToCaptureResistanceDefs[GameplayTags.Attributes_Resistance_Fire];
 		ExecutionParams.AttemptCalculateCapturedAttributeMagnitude(Resistance, EvaluationParameters, ResistanceTypeValue);
+		
+		FGameplayEffectContextHandle EffectContextHandle = Spec.GetContext();
+		UAuraAbilitySystemLibrary::SetDamageDataContext(EffectContextHandle, EDamageTypeContext::Fire, false, false);
+		const FGameplayModifierEvaluatedData EvaluatedData(UAuraAttributeSet::GetIncomingDamageAttribute(), EGameplayModOp::Additive, Damage);
+		OutExecutionOutput.AddOutputModifier(EvaluatedData);
 	}
 	else if (bIsStun)
 	{
-		TypeTagForContext = GameplayTags.Debuff_Type_Stun;
 		const FGameplayEffectAttributeCaptureDefinition Resistance = AuraDebuffStatics().TagsToCaptureResistanceDefs[GameplayTags.Attributes_Resistance_Lightning];
 		ExecutionParams.AttemptCalculateCapturedAttributeMagnitude(Resistance, EvaluationParameters, ResistanceTypeValue);
 	}
 	else if (bIsConfuse)
 	{
-		TypeTagForContext = GameplayTags.Debuff_Type_Confuse;
+		// 미구현 디버프입니다.
 		const FGameplayEffectAttributeCaptureDefinition Resistance = AuraDebuffStatics().TagsToCaptureResistanceDefs[GameplayTags.Attributes_Resistance_Arcane];
 		ExecutionParams.AttemptCalculateCapturedAttributeMagnitude(Resistance, EvaluationParameters, ResistanceTypeValue);
 	}
-	
-	FGameplayEffectContextHandle EffectContextHandle = Spec.GetContext();
-	FDebuffDataContext DebuffData = UAuraAbilitySystemLibrary::GetDebuffData(EffectContextHandle);
-	DebuffData.DebuffType = UAuraAbilitySystemLibrary::ReplaceDebuffTypeToEnum(TypeTagForContext);
-	DebuffData.DebuffDamage = Damage;
-	DebuffData.DebuffDuration = Duration;
-	DebuffData.DebuffFrequency = Frequency;
-	UAuraAbilitySystemLibrary::SetDebuffDataContext(EffectContextHandle, DebuffData);
-
-	// 이벤트 전달용 Attribute Modifier를 생성 및 할당합니다.
-	// Magnitude가 0이기 때문에 Attribute에 값 변화가 일어나지 않고 일어난다 해도 게임 플레이에 영향을 주지 않습니다.
-	// 하지만 AttributeSet에게 '이 Attribute에 값 변화가 발생했다.'고 이벤트가 전달됩니다.
-	// 사실상 GAS의 시스템을 이용한 트릭성 로직입니다.
-	const FGameplayModifierEvaluatedData EvaluatedData(UAuraAttributeSet::GetIncomingDebuffAttribute(), EGameplayModOp::Additive, 0.f);
-	OutExecutionOutput.AddOutputModifier(EvaluatedData);
 }
