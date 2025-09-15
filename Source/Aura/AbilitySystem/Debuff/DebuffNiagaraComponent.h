@@ -5,7 +5,7 @@
 #include "NiagaraComponent.h"
 #include "DebuffNiagaraComponent.generated.h"
 
-UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
+UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent), Blueprintable, BlueprintType)
 class AURA_API UDebuffNiagaraComponent : public UNiagaraComponent
 {
 	GENERATED_BODY()

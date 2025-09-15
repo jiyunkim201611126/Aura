@@ -2,8 +2,12 @@
 
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystemComponent.h"
+#include "Aura/AbilitySystem/AuraAbilitySystemLibrary.h"
+#include "Aura/Character/AuraCharacterBase.h"
 #include "Aura/Interaction/CombatInterface.h"
+#include "Aura/Manager/AuraGameplayTags.h"
 #include "Aura/Manager/FXManagerSubsystem.h"
+#include "Components/CapsuleComponent.h"
 #include "Net/UnrealNetwork.h"
 
 UDebuffNiagaraComponent::UDebuffNiagaraComponent()
@@ -71,6 +75,31 @@ void UDebuffNiagaraComponent::OnRep_DebuffTag()
 			SetAsset(InNiagaraSystem);
 			Activate();
 		});
+	}
+
+	FAuraGameplayTags AuraGameplayTags = FAuraGameplayTags::Get();
+	switch (UAuraAbilitySystemLibrary::ReplaceDebuffTypeToEnum(DebuffTag))
+	{
+	case EDebuffTypeContext::Stun:
+		{
+			if (AAuraCharacterBase* Character = Cast<AAuraCharacterBase>(GetOwner()))
+			{
+				float CharacterHeight = Character->GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
+				float CharacterWidth = Character->GetCapsuleComponent()->GetScaledCapsuleRadius();
+				SetRelativeLocation(FVector(0.f, 0.f, CharacterHeight * 2.f));
+				SetRelativeScale3D(FVector(CharacterWidth / 36.f));
+			}
+		}
+		break;
+	default:
+		{
+			if (AAuraCharacterBase* Character = Cast<AAuraCharacterBase>(GetOwner()))
+			{
+				float CharacterHeight = Character->GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
+				SetRelativeLocation(FVector(0.f, 0.f, CharacterHeight));
+			}
+		}
+		break;
 	}
 }
 

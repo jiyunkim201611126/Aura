@@ -318,7 +318,7 @@ void UAuraAttributeSet::ApplyDebuff(const FEffectProperties& Props) const
 			if (UDebuffNiagaraComponent* NiagaraComponent = NewObject<UDebuffNiagaraComponent>(Props.TargetCharacter))
 			{
 				NiagaraComponent->DebuffTag = DebuffTypeTag;
-				NiagaraComponent->SetupAttachment(Props.TargetCharacter->GetMesh(), FName("DebuffSocket"));
+				NiagaraComponent->SetupAttachment(Props.TargetCharacter->GetMesh(), FName("RootSocket"));
 				NiagaraComponent->RegisterComponent();
 			}
 		}
