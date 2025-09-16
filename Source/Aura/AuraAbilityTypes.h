@@ -95,13 +95,11 @@ struct FAuraGameplayEffectContext : public FGameplayEffectContext
 
 public:
 	const FDamageDataContext& GetDamageData() const { return DamageData; }
-	const FDebuffDataContext& GetDebuffData() const { return DebuffData; }
 	const TArray<FVector_NetQuantize>& GetLocations() const { return Locations; }
 
 	void SetDamageDataContext(const EDamageTypeContext DamageType, bool bIsBlocked, bool bIsCritical);
 	void SetDeathImpulse(const FVector& Impulse);
 	void SetKnockbackForce(const FVector& Force);
-	void SetDebuffDataContext(const FDebuffDataContext& DebuffDataContext);
 	void SetLocations(const TArray<FVector_NetQuantize>& InLocations);
 	
 	virtual UScriptStruct* GetScriptStruct() const override
@@ -127,9 +125,6 @@ public:
 protected:
 	UPROPERTY()
 	FDamageDataContext DamageData;
-
-	UPROPERTY()
-	FDebuffDataContext DebuffData;
 
 	UPROPERTY()
 	TArray<FVector_NetQuantize> Locations;

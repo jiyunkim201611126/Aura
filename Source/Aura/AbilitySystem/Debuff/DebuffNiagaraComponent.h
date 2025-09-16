@@ -13,13 +13,15 @@ class AURA_API UDebuffNiagaraComponent : public UNiagaraComponent
 public:
 	UDebuffNiagaraComponent();
 
-protected:
-	// ~ActorComponent Interface
-	virtual void BeginPlay() override;
-	// ~End of ActorComponent Interface
-
+	//~ Begin Object Interface
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	//~ End Object Interface
 
+protected:
+	//~ Begin ActorComponent Interface
+	virtual void BeginPlay() override;
+	//~ End ActorComponent Interface
+	
 	void DebuffTagChanged(const FGameplayTag CallbackTag, int32 NewCount);
 
 	UFUNCTION()

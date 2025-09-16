@@ -18,8 +18,10 @@ public:
 	void InitDamageText(float Damage, bool bBlockedHit, bool bCriticalHit, const EDamageTypeContext DamageType);
 
 protected:
+	//~ Begin Actor Interface
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaSeconds) override;
+	//~ End Actor Interface
 	
 private:
 	void InitMovement();

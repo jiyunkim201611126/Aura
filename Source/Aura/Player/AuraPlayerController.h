@@ -29,19 +29,19 @@ public:
 	void ClientSpawnDamageText(float DamageAmount, AActor* TargetActor, bool bBlockedHit, bool bCriticalHit, const EDamageTypeContext DamageType);
 
 protected:
-	// ~AActor Interface
+	//~ Begin Actor Interface
 	virtual void BeginPlay() override;
-	// ~End of AActor Interface
+	//~ End Actor Interface
 	
-	// ~AController Interface
+	//~ Begin Controller Interface
 	virtual void PlayerTick(float DeltaTime) override;
 	virtual void OnPossess(APawn* InPawn) override;
 	virtual void OnUnPossess() override;
-	// ~End of AController Interface
+	//~ End Controller Interface
 
-	// ~APlayerController Interface
+	//~ Begin PlayerController Interface
 	virtual void SetupInputComponent() override;
-	// ~End of APlayerController Interface
+	//~ End APlayerController Interface
 
 private:
 	void CursorTrace();

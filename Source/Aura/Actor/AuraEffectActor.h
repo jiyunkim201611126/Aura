@@ -64,9 +64,9 @@ public:
 	AAuraEffectActor();
 	
 protected:
-	// ~AActor Interface
+	//~ Begin Actor Interface
 	virtual void BeginPlay() override;
-	// ~End of AActor Interface
+	//~ End Actor Interface
 
 	UFUNCTION(BlueprintCallable)
 	void OnOverlap(AActor* TargetActor);

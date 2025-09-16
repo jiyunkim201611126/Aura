@@ -1,5 +1,6 @@
 ﻿#include "DebuffComponent.h"
 #include "Aura/AbilitySystem/AuraAbilitySystemComponent.h"
+#include "Aura/AbilitySystem/Debuff/DebuffNiagaraComponent.h"
 #include "Aura/AI/AuraAIController.h"
 #include "Aura/Character/AuraEnemy.h"
 #include "Aura/Manager/AuraGameplayTags.h"
@@ -20,8 +21,8 @@ void UDebuffComponent::InitAbilityActorInfo(UAbilitySystemComponent* InAbilitySy
 	// NewOrRemoved는 카운트가 0에서 1로 증가하거나, 1에서 0이 될때만 호출, AnyCountChange는 카운트가 변경되면 무조건 호출됩니다.
 	AbilitySystemComponent = InAbilitySystemComponent;
 	AbilitySystemComponent->RegisterGameplayTagEvent(FAuraGameplayTags::Get().Effects_HitReact, EGameplayTagEventType::NewOrRemoved).AddUObject(this, &ThisClass::HitReactTagChanged);
-	AbilitySystemComponent->RegisterGameplayTagEvent(FAuraGameplayTags::Get().Debuff_Type_Stun, EGameplayTagEventType::NewOrRemoved).AddUObject(this, &ThisClass::StunTagChanged);
-	AbilitySystemComponent->RegisterGameplayTagEvent(FAuraGameplayTags::Get().Debuff_Type_Burn, EGameplayTagEventType::NewOrRemoved).AddUObject(this, &ThisClass::BurnTagChanged);
+	AbilitySystemComponent->RegisterGameplayTagEvent(FAuraGameplayTags::Get().Debuff_Types_Stun, EGameplayTagEventType::NewOrRemoved).AddUObject(this, &ThisClass::StunTagChanged);
+	AbilitySystemComponent->RegisterGameplayTagEvent(FAuraGameplayTags::Get().Debuff_Types_Burn, EGameplayTagEventType::NewOrRemoved).AddUObject(this, &ThisClass::BurnTagChanged);
 }
 
 void UDebuffComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -40,15 +41,28 @@ void UDebuffComponent::BeginPlay()
 	}
 }
 
+void UDebuffComponent::CreateNiagaraComponent(const FGameplayTag& DebuffTypeTag)
+{
+	// 이펙트 적용 시 GrantedTag가 자동으로 부여되므로, 그 전에 이미 해당 디버프가 부여되어있는지 확인해 나이아가라가 중복으로 생기지 않도록 방지합니다.
+	if (UDebuffNiagaraComponent* NiagaraComponent = NewObject<UDebuffNiagaraComponent>(this))
+	{
+		NiagaraComponent->DebuffTag = DebuffTypeTag;
+		NiagaraComponent->SetupAttachment(GetPawn<ACharacter>()->GetMesh(), FName("RootSocket"));
+		NiagaraComponent->RegisterComponent();
+	}
+}
+
 void UDebuffComponent::HitReactTagChanged(const FGameplayTag CallbackTag, int32 NewCount)
 {
 	bHitReacting = NewCount > 0;
-	
+
+	// 플레이어 캐릭터의 동작입니다.
 	if (const AAuraCharacterBase* OwnerCharacter = GetPawn<AAuraCharacterBase>())
 	{
 		OwnerCharacter->GetCharacterMovement()->MaxWalkSpeed = bHitReacting ? (OwnerCharacter->BaseWalkSpeed / 2.f) : OwnerCharacter->BaseWalkSpeed;
 	}
-	
+
+	// AI 캐릭터의 동작입니다.
 	if (AuraAIController.IsValid() && AuraAIController->GetBlackboardComponent())
 	{
 		AuraAIController->GetBlackboardComponent()->SetValueAsBool(FName("HitReacting"), bHitReacting);
@@ -57,11 +71,19 @@ void UDebuffComponent::HitReactTagChanged(const FGameplayTag CallbackTag, int32 
 
 void UDebuffComponent::BurnTagChanged(const FGameplayTag CallbackTag, int32 NewCount)
 {
+	if (NewCount > 0)
+	{
+		CreateNiagaraComponent(CallbackTag);
+	}
 }
 
 void UDebuffComponent::StunTagChanged(const FGameplayTag CallbackTag, int32 NewCount)
 {
 	bIsStunned = NewCount > 0;
+	if (bIsStunned)
+	{
+		CreateNiagaraComponent(CallbackTag);
+	}
 	
 	// 기절 상태이상에 걸리면 현재 발동 중인 Active 스킬을 모두 취소합니다.
 	const FAuraGameplayTags AuraGameplayTags = FAuraGameplayTags::Get();
@@ -71,12 +93,14 @@ void UDebuffComponent::StunTagChanged(const FGameplayTag CallbackTag, int32 NewC
 	{
 		AbilitySystemComponent->CancelAbilities(&CancelAbilityTags);
 	}
-	
+
+	// 플레이어 캐릭터의 동작입니다.
 	if (const AAuraCharacterBase* OwnerCharacter = GetPawn<AAuraCharacterBase>())
 	{
 		OwnerCharacter->GetCharacterMovement()->MaxWalkSpeed = bIsStunned ? 0.f : OwnerCharacter->BaseWalkSpeed;
 	}
-	
+
+	// AI 캐릭터의 동작입니다.
 	if (AuraAIController.IsValid() && AuraAIController->GetBlackboardComponent())
 	{
 		AuraAIController->GetBlackboardComponent()->SetValueAsBool(FName("Stunned"), bIsStunned);
@@ -85,6 +109,7 @@ void UDebuffComponent::StunTagChanged(const FGameplayTag CallbackTag, int32 NewC
 
 void UDebuffComponent::OnRep_Stunned()
 {
+	// 자신의 캐릭터가 아닌 경우 즉시 return합니다.
 	if (!GetPawn<APawn>() || !GetPawn<APawn>()->IsLocallyControlled())
 	{
 		return;

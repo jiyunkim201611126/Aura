@@ -20,12 +20,14 @@ public:
 	void InitAbilityActorInfo(UAbilitySystemComponent* InAbilitySystemComponent);
 
 protected:
-	// ~UActorComponent Interface
+	//~ Begin ActorComponent Interface
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void BeginPlay() override;
-	// ~End of UActorComponent Interface
+	//~ End ActorComponent Interface
 
 private:
+	void CreateNiagaraComponent(const FGameplayTag& DebuffTypeTag);
+	
 	void HitReactTagChanged(const FGameplayTag CallbackTag, int32 NewCount);
 	void BurnTagChanged(const FGameplayTag CallbackTag, int32 NewCount);
 	void StunTagChanged(const FGameplayTag CallbackTag, int32 NewCount);

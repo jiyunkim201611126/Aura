@@ -24,11 +24,11 @@ public:
 	void MulticastSetHomingTargetComponent(USceneComponent* HomingTargetComponent, const float HomingAcceleration);
 
 protected:
-	// ~AActor Interface
+	//~ Begin Actor Interface
 	virtual void BeginPlay() override;
 	virtual void Destroyed() override;
 	virtual void Tick(float DeltaSeconds) override;
-	// ~End of AActor Interface
+	//~ End Actor Interface
 
 	UFUNCTION()
 	void OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);

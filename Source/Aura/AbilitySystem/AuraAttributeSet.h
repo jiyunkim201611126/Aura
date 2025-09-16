@@ -14,7 +14,10 @@
 	GAMEPLAYATTRIBUTE_VALUE_SETTER(PropertyName) \
 	GAMEPLAYATTRIBUTE_VALUE_INITTER(PropertyName)
 
-struct FDebuffDataContext;
+// 극도로 추악하고 지저분하게 작성된 형태를 이쁘게 포장
+template<class T>
+using TStaticFuncPtr = TBaseStaticDelegateInstance<T, FDefaultDelegateUserPolicy>::FFuncPtr;
+
 // Attribute에게 변화가 적용되는 모든 상황에 대해서 Source와 Target을 추적하기 위해 선언, 초기화하는 구조체
 USTRUCT(BlueprintType)
 struct FEffectProperties
@@ -50,10 +53,6 @@ struct FEffectProperties
 	ACharacter* TargetCharacter = nullptr;
 };
 
-// 극도로 추악하고 지저분하게 작성된 형태를 이쁘게 포장
-template<class T>
-using TStaticFuncPtr = typename TBaseStaticDelegateInstance<T, FDefaultDelegateUserPolicy>::FFuncPtr;
-
 UCLASS()
 class AURA_API UAuraAttributeSet : public UAttributeSet
 {
@@ -62,14 +61,17 @@ class AURA_API UAuraAttributeSet : public UAttributeSet
 public:
 	UAuraAttributeSet();
 
-	// ~AttributeSet Interface
+	//~ Begin Object Interface
 	// 어떤 변수들이 Replicate될지, 어떻게 Replicate될지 지정하는 함수입니다.
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	//~ En Object Interface
+	
+	//~ Begin AttributeSet Interface
 	// GameplayEffect의 적용으로 인해 Attribute에 변동사항이 있으면 호출되는 함수입니다.
 	virtual void PostGameplayEffectExecute(const FGameplayEffectModCallbackData& Data) override;
 	// Attribute의 값이 변화할 때 호출되는 함수입니다.
 	virtual void PostAttributeChange(const FGameplayAttribute& Attribute, float OldValue, float NewValue) override;
-	// ~End of AttributeSet Interface
+	//~ End AttributeSet Interface
 
 private:
 	// GE 적용 시점에 Source와 Target을 편리하게 추적하기 위해 구조체에 그 정보를 채워주는 함수
@@ -77,8 +79,6 @@ private:
 	void SendXPEvent(const FEffectProperties& Props) const;
 	void ApplyIncomingDamage(const FEffectProperties& Props, const FGameplayEffectModCallbackData& Data);
 	void ApplyIncomingXP(const FEffectProperties& Props);
-
-	void ApplyDebuff(const FEffectProperties& Props) const;
 
 public:
 	/**

@@ -94,12 +94,12 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 
 	// Debuffs
 	
-	GameplayTags.Debuff_Type_Burn = UGameplayTagsManager::Get().AddNativeGameplayTag(
-		FName("Debuff.Type.Burn"), FString("Debuff for Fire Damage"));
-	GameplayTags.Debuff_Type_Stun = UGameplayTagsManager::Get().AddNativeGameplayTag(
-		FName("Debuff.Type.Stun"), FString("Debuff for Lightning Damage"));
-	GameplayTags.Debuff_Type_Confuse = UGameplayTagsManager::Get().AddNativeGameplayTag(
-		FName("Debuff.Type.Confuse"), FString("Debuff for Arcane Damage"));
+	GameplayTags.Debuff_Types_Burn = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("Debuff.Types.Burn"), FString("Debuff for Fire Damage"));
+	GameplayTags.Debuff_Types_Stun = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("Debuff.Types.Stun"), FString("Debuff for Lightning Damage"));
+	GameplayTags.Debuff_Types_Confuse = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("Debuff.Types.Confuse"), FString("Debuff for Arcane Damage"));
 	
 	GameplayTags.Debuff_Damage = UGameplayTagsManager::Get().AddNativeGameplayTag(
 		FName("Debuff.Damage"), FString("Debuff Damage"));

@@ -60,8 +60,10 @@ class AURA_API UOverlayWidgetController : public UAuraWidgetController
 	GENERATED_BODY()
 
 public:
+	//~ Begin AuraWidgetController Interface
 	virtual void BindCallbacksToDependencies() override;
 	virtual void BroadcastInitialValue() override;
+	//~ End AuraWidgetController Interface
 
 protected:
 	template<typename T>
@@ -96,18 +98,14 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "GAS | Level")
 	FOnPlayerStatChangedSignature OnPlayerLevelChangedDelegate;
 
-	// ~Ability Usable Type
 	UPROPERTY(BlueprintAssignable, Category = "GAS | AbilityIcon")
 	FOnAbilityUsableTypeSignature OnAbilityUsableTypeDelegate;
 
-	// ~Stackable Ability
 	UPROPERTY(BlueprintAssignable, Category = "GAS | AbilityIcon")
 	FOnStackCountChangedSignature OnStackCountChangedDelegate;
 	
 	UPROPERTY(BlueprintAssignable, Category = "GAS | AbilityIcon")
 	FOnStackTimerStartedSignature OnStackTimerStartedDelegate;
-	// ~End of Stackable Ability
-	// ~End of Ability Usable Type
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Widget Data")

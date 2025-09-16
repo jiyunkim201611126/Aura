@@ -17,7 +17,7 @@ struct FAuraGameplayTags
 	static const FAuraGameplayTags& Get() { return GameplayTags; }
 	static void InitializeNativeGameplayTags();
 
-	// ~Attributes
+	//~ Begin Attributes
 	FGameplayTag Attributes_Vital_Health;
 	FGameplayTag Attributes_Vital_Mana;
 	
@@ -43,9 +43,9 @@ struct FAuraGameplayTags
 	FGameplayTag Attributes_Resistance_Physical;
 	
 	FGameplayTag Attributes_Meta_IncomingXP;
-	// ~End of Attributes
+	//~ End Attributes
 
-	// ~Input Tags
+	//~ Begin Input Tags
 	FGameplayTag InputTag_LMB;
 	FGameplayTag InputTag_RMB;
 	FGameplayTag InputTag_1;
@@ -54,9 +54,9 @@ struct FAuraGameplayTags
 	FGameplayTag InputTag_4;
 	FGameplayTag InputTag_Passive_1;
 	FGameplayTag InputTag_Passive_2;
-	// ~End of Input Tags
+	//~ End Input Tags
 
-	// ~Damage Type
+	//~ Begin Damage Types
 	FGameplayTag Damage;
 	FGameplayTag Damage_Fire;
 	FGameplayTag Damage_Lightning;
@@ -65,17 +65,17 @@ struct FAuraGameplayTags
 
 	// 데미지 타입과 Resistance 타입을 묶는 TMap
 	TMap<FGameplayTag, FGameplayTag> DamageTypesToResistances;
-	// ~End of Damage Type
+	//~ End Damage Types
 
-	// ~Debuff Type
-	FGameplayTag Debuff_Type_Burn;
-	FGameplayTag Debuff_Type_Stun;
-	FGameplayTag Debuff_Type_Confuse;
+	//~ Begin Debuff Types
+	FGameplayTag Debuff_Types_Burn;
+	FGameplayTag Debuff_Types_Stun;
+	FGameplayTag Debuff_Types_Confuse;
 
 	FGameplayTag Debuff_Damage;
-	// ~End of Debuff Type
+	//~ End Debuff Types
 	
-	// ~Abilities
+	//~ Begin Abilities
 	FGameplayTag Abilities_None;
 	FGameplayTag Abilities_Attack;
 	FGameplayTag Abilities_HitReact;
@@ -83,44 +83,44 @@ struct FAuraGameplayTags
 	FGameplayTag Abilities_Fire_FireBolt;
 	FGameplayTag Abilities_Fire_FireRain;
 	FGameplayTag Abilities_Lighting_Electrocute;
-	// ~End of Abilities
+	//~ End Abilities
 
-	// ~Cooldown
+	//~ Begin Cooldown
 	FGameplayTag Cooldown_Fire_FireBolt;
 	FGameplayTag Cooldown_Fire_FireRain;
 	FGameplayTag Cooldown_Lighting_Electrocute;
-	// ~End of Cooldown
+	//~ End Cooldown
 
-	// ~Ability Status
+	//~ Begin Ability Status
 	FGameplayTag Abilities_Status_Locked;
 	FGameplayTag Abilities_Status_Eligible;
 	FGameplayTag Abilities_Status_Unlocked;
 	FGameplayTag Abilities_Status_Equipped;
-	// ~End of AbilityStatus
+	//~ End AbilityStatus
 
-	// ~Ability Types
+	//~ Begin Ability Types
 	FGameplayTag Abilities_Types_Active;
 	FGameplayTag Abilities_Types_Passive;
 	FGameplayTag Abilities_Types_None;
-	// ~End of Ability Types
+	//~ End Ability Types
 
-	// ~Effects
+	//~Begin Effects
 	FGameplayTag Effects_HitReact;
 	FGameplayTag Effects_GrantHitReact;
-	// ~End of Effects
+	//~ End Effects
 	
 
-	// ~BehaviorTree
+	//~ Begin BehaviorTree
 	FGameplayTag BT_Sub_Agro;
 	FGameplayTag BT_Sub_Combat;
-	// ~End of BehaviorTree
+	//~ End BehaviorTree
 
-	// ~Player Block Tags
+	//~ Begin Player Block Tags
 	FGameplayTag Player_Block_InputPressed;
 	FGameplayTag Player_Block_InputHeld;
 	FGameplayTag Player_Block_InputReleased;
 	FGameplayTag Player_Block_CursorTrace;
-	// ~End of Player Block Tags
+	//~ End Player Block Tags
 
 private:
 	static FAuraGameplayTags GameplayTags;

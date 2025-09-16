@@ -26,7 +26,9 @@ class AURA_API UTargetDataUnderMouse : public UAbilityTask
 	static UTargetDataUnderMouse* CreateTargetDataUnderMouse(UGameplayAbility* OwningAbility);
 
 protected:
+	//~ Begin GameplayTask Interface
 	virtual void Activate() override;
+	//~ End GameplayTask Interface
 
 private:
 	void SendMouseCursorData();

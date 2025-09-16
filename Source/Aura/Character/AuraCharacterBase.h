@@ -27,7 +27,7 @@ public:
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 	UAttributeSet* GetAttributeSet() const { return AttributeSet; }
 	
-	// ~Combat Interface
+	//~ Begin Combat Interface
 	virtual FVector GetCombatSocketLocation_Implementation(FName SocketName, bool bFindFromWeapon = false) override;
 	virtual void Die(const FVector& Impulse) override;
 	virtual bool IsDead_Implementation() override;
@@ -37,7 +37,7 @@ public:
 	virtual FOnDeath& GetOnDeathDelegate() override;
 	virtual void ApplyKnockback(const FVector_NetQuantize& KnockbackForce, float Duration) override;
 	virtual USkeletalMeshComponent* GetWeapon_Implementation() override;
-	// ~End of Combat Interface
+	//~ End Combat Interface
 
 	UFUNCTION(NetMulticast, Reliable)
 	virtual void MulticastDeath(const FVector& Impulse);
@@ -49,13 +49,13 @@ public:
 	void MulticastStopLoopAnimMontage(UAnimMontage* LoopMontage);
 	
 protected:
-	// ~AActor Interface
+	//~ Begin Actor Interface
 	virtual void BeginPlay() override;
-	// ~End of AActor Interface
+	//~ End AActor Interface
 	
-	// ~APawn Interface
+	//~ Begin Pawn Interface
 	virtual void PossessedBy(AController* NewController) override;
-	// ~End of APawn Interface
+	//~ End Pawn Interface
 
 	virtual void InitAbilityActorInfo();
 

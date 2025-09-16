@@ -3,7 +3,6 @@
 #include "CoreMinimal.h"
 #include "AuraAttributeSet.h"
 #include "Aura/AuraAbilityTypes.h"
-#include "Aura/Actor/AuraProjectile.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "Data/CharacterClassInfo.h"
 #include "AuraAbilitySystemLibrary.generated.h"
@@ -54,15 +53,11 @@ public:
 	static FDamageDataContext GetDamageData(const FGameplayEffectContextHandle& EffectContextHandle);
 
 	UFUNCTION(BlueprintPure, Category = "AuraAbilitySystemLibrary | GameplayEffects")
-	static FDebuffDataContext GetDebuffData(const FGameplayEffectContextHandle& EffectContextHandle);
-
-	UFUNCTION(BlueprintPure, Category = "AuraAbilitySystemLibrary | GameplayEffects")
 	static TArray<FVector_NetQuantize> GetLocationsFromContext(const FGameplayEffectContextHandle& EffectContextHandle);
 	
 	static void SetDamageDataContext(FGameplayEffectContextHandle& EffectContextHandle, const EDamageTypeContext DamageType, bool bIsBlocked, bool bIsCritical);
 	static void SetDeathImpulse(FGameplayEffectContextHandle& EffectContextHandle, const FVector& Impulse);
 	static void SetKnockbackForce(FGameplayEffectContextHandle& EffectContextHandle, const FVector& Force);
-	static void SetDebuffDataContext(FGameplayEffectContextHandle& EffectContextHandle, const FDebuffDataContext& Data);
 	static void SetLocationsToContext(FGameplayEffectContextHandle& EffectContextHandle, const TArray<FVector_NetQuantize>& InLocations);
 
 	static EDamageTypeContext ReplaceDamageTypeToEnum(const FGameplayTag& DamageTypeTag);

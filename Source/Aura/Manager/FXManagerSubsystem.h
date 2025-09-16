@@ -116,8 +116,10 @@ class AURA_API UFXManagerSubsystem : public UGameInstanceSubsystem
 	GENERATED_BODY()
 
 public:
+	//~ Begin Subsystem Interface
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 	virtual void Deinitialize() override;
+	//~ End Subsystem Interface
 
 	UFUNCTION(BlueprintCallable, Category = "FX")
 	void AsyncPlaySoundAtLocation(const FGameplayTag& SoundTag, const FVector Location, const FRotator Rotation = FRotator::ZeroRotator, const float VolumeMultiplier = 1.f, const float PitchMultiplier = 1.f);

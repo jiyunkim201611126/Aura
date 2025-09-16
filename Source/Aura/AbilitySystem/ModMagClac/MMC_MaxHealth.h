@@ -21,7 +21,9 @@ class AURA_API UMMC_MaxHealth : public UGameplayModMagnitudeCalculation
 public:
 	UMMC_MaxHealth();
 
+	//~ Begin GameplayEffectCalculation Interface
 	virtual float CalculateBaseMagnitude_Implementation(const FGameplayEffectSpec& Spec) const override;
+	//~ End GameplayEffectCalculation Interface
 
 private:
 	// 어떤 Attribute를, 누구로부터, 언제 가져올지 정의하는 구조체

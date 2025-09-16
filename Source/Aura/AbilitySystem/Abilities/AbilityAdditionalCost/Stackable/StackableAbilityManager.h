@@ -75,11 +75,11 @@ class AURA_API AStackableAbilityManager : public AActor
 public:
 	AStackableAbilityManager();
 
-	// ~Actor Interface
+	//~ Begin Actor Interface
 	virtual void BeginPlay() override;
 	virtual void Destroyed() override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
-	// ~End of Actor Interface
+	//~ End Actor Interface
 	
 	void RegisterAbility(const FGameplayTag& AbilityTag, int32 CurrentStack, int32 MaxStack, float RechargeTime);
 	void UnregisterAbility(const FGameplayTag& AbilityTag);

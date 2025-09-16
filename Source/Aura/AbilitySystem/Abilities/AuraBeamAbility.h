@@ -10,9 +10,9 @@ class AURA_API UAuraBeamAbility : public UAuraChannelingAbility
 	GENERATED_BODY()
 
 protected:
-	// ~UGameplayAbility Interface
+	//~ Begin GameplayAbility Interface
 	virtual void CancelAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateCancelAbility) override;
-	// ~End of UGameplayAbility Interface
+	//~ End GameplayAbility Interface
 	
 	UFUNCTION(BlueprintCallable)
 	void TraceFirstTarget();

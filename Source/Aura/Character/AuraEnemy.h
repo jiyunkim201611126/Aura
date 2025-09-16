@@ -20,36 +20,36 @@ public:
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
-	// ~Enemy Interface
+	//~ Begin Enemy Interface
 	virtual void HighlightActor() override;
 	virtual void UnHighlightActor() override;
 	virtual void SetCombatTarget_Implementation(AActor* InCombatTarget) override;
 	virtual AActor* GetCombatTarget_Implementation() const override;
 	virtual void ShouldPlaySpawnAnimation() override;
-	// ~End of Enemy Interface
+	//~ End Enemy Interface
 
-	// ~Combat Interface
+	//~ Begin Combat Interface
 	virtual void RegisterPawn() override;
 	virtual void UnregisterPawn() override;
 	virtual int32 GetCharacterLevel_Implementation() override;
 	virtual void Die(const FVector& Impulse) override;
-	// ~End of Combat Interface
+	//~ End Combat Interface
 
 	virtual void MulticastDeath_Implementation(const FVector& Impulse) override;
 	
 protected:
-	// ~AActor Interface
+	//~ Begin Actor Interface
 	virtual void BeginPlay() override;
-	// ~End of AActor Interface
+	//~ End Actor Interface
 	
-	// ~APawn Interface
+	//~ Begin Pawn Interface
 	virtual void PossessedBy(AController* NewController) override;
-	// ~End of APawn Interface
+	//~ End Pawn Interface
 
-	// ~AuraCharacterBase Interface
+	//~ Begin AuraCharacterBase Interface
 	virtual void InitAbilityActorInfo() override;
 	virtual void AddCharacterStartupAbilities() const override;
-	// ~End of AuraCharacterBase Interface
+	//~ End AuraCharacterBase Interface
 
 private:
 	UFUNCTION()

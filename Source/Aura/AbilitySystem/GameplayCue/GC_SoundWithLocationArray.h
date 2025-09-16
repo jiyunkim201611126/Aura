@@ -10,5 +10,7 @@ class AURA_API UGC_SoundWithLocationArray : public UGameplayCueNotify_Burst
 {
 	GENERATED_BODY()
 
+	//~ Begin GameplayCueNotify_Static Interface
 	virtual bool OnExecute_Implementation(AActor* MyTarget, const FGameplayCueParameters& Parameters) const override;
+	//~ End GameplayCueNotify_Static Interface
 };

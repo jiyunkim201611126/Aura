@@ -148,15 +148,6 @@ FDamageDataContext UAuraAbilitySystemLibrary::GetDamageData(const FGameplayEffec
 	return FDamageDataContext();
 }
 
-FDebuffDataContext UAuraAbilitySystemLibrary::GetDebuffData(const FGameplayEffectContextHandle& EffectContextHandle)
-{
-	if (const FAuraGameplayEffectContext* AuraEffectContext = static_cast<const FAuraGameplayEffectContext*>(EffectContextHandle.Get()))
-	{
-		return AuraEffectContext->GetDebuffData();
-	}
-	return FDebuffDataContext();
-}
-
 TArray<FVector_NetQuantize> UAuraAbilitySystemLibrary::GetLocationsFromContext( const FGameplayEffectContextHandle& EffectContextHandle)
 {
 	if (const FAuraGameplayEffectContext* AuraEffectContext = static_cast<const FAuraGameplayEffectContext*>(EffectContextHandle.Get()))
@@ -187,14 +178,6 @@ void UAuraAbilitySystemLibrary::SetKnockbackForce(FGameplayEffectContextHandle& 
 	if (FAuraGameplayEffectContext* AuraEffectContext = static_cast<FAuraGameplayEffectContext*>(EffectContextHandle.Get()))
 	{
 		AuraEffectContext->SetKnockbackForce(Force);
-	}
-}
-
-void UAuraAbilitySystemLibrary::SetDebuffDataContext(FGameplayEffectContextHandle& EffectContextHandle, const FDebuffDataContext& Data)
-{
-	if (FAuraGameplayEffectContext* AuraEffectContext = static_cast<FAuraGameplayEffectContext*>(EffectContextHandle.Get()))
-	{
-		AuraEffectContext->SetDebuffDataContext(Data);
 	}
 }
 
@@ -258,15 +241,15 @@ EDebuffTypeContext UAuraAbilitySystemLibrary::ReplaceDebuffTypeToEnum(const FGam
 {
 	const FAuraGameplayTags& GameplayTags = FAuraGameplayTags::Get();
 	
-	if (DebuffTypeTag == GameplayTags.Debuff_Type_Burn)
+	if (DebuffTypeTag == GameplayTags.Debuff_Types_Burn)
 	{
 		return EDebuffTypeContext::Burn;
 	}
-	if (DebuffTypeTag == GameplayTags.Debuff_Type_Stun)
+	if (DebuffTypeTag == GameplayTags.Debuff_Types_Stun)
 	{
 		return EDebuffTypeContext::Stun;
 	}
-	if (DebuffTypeTag == GameplayTags.Debuff_Type_Confuse)
+	if (DebuffTypeTag == GameplayTags.Debuff_Types_Confuse)
 	{
 		return EDebuffTypeContext::Confuse;
 	}
@@ -280,15 +263,15 @@ FGameplayTag UAuraAbilitySystemLibrary::ReplaceDebuffTypeToTag(const EDebuffType
 
 	if (DebuffTypeEnum == EDebuffTypeContext::Burn)
 	{
-		return GameplayTags.Debuff_Type_Burn;
+		return GameplayTags.Debuff_Types_Burn;
 	}
 	if (DebuffTypeEnum == EDebuffTypeContext::Stun)
 	{
-		return GameplayTags.Debuff_Type_Stun;
+		return GameplayTags.Debuff_Types_Stun;
 	}
 	if (DebuffTypeEnum == EDebuffTypeContext::Confuse)
 	{
-		return GameplayTags.Debuff_Type_Confuse;
+		return GameplayTags.Debuff_Types_Confuse;
 	}
 	
 	return FGameplayTag();

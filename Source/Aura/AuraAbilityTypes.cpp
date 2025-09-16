@@ -50,11 +50,6 @@ void FAuraGameplayEffectContext::SetKnockbackForce(const FVector& Force)
 	DamageData.KnockbackForce = Force;
 }
 
-void FAuraGameplayEffectContext::SetDebuffDataContext(const FDebuffDataContext& DebuffDataContext)
-{
-	DebuffData = DebuffDataContext;
-}
-
 void FAuraGameplayEffectContext::SetLocations(const TArray<FVector_NetQuantize>& InLocations)
 {
 	Locations = InLocations;
@@ -98,18 +93,14 @@ bool FAuraGameplayEffectContext::NetSerialize(FArchive& Ar, class UPackageMap* M
 		{
 			RepBits |= 1 << 7;
 		}
-		if (DebuffData.DebuffType != EDebuffTypeContext::None)
-		{
-			RepBits |= 1 << 8;
-		}
 		if (Locations.Num() > 0)
 		{
-			RepBits |= 1 << 9;
+			RepBits |= 1 << 8;
 		}
 	}
 
 	// uint32를 몽땅 쓰지 않고 필요한 만큼의 길이로 잘라내 패킷 최적화
-	Ar.SerializeBits(&RepBits, 10);
+	Ar.SerializeBits(&RepBits, 9);
 
 	if (RepBits & (1 << 0))
 	{
@@ -158,12 +149,6 @@ bool FAuraGameplayEffectContext::NetSerialize(FArchive& Ar, class UPackageMap* M
 		bOutSuccess &= bSuccess;
 	}
 	if (RepBits & (1 << 8))
-	{
-		bool bSuccess = false;
-		DebuffData.NetSerialize(Ar, Map, bOutSuccess);
-		bOutSuccess &= bSuccess;
-	}
-	if (RepBits & (1 << 9))
 	{
 		Ar << Locations;
 	}

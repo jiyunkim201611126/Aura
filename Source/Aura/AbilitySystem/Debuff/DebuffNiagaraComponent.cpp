@@ -17,6 +17,13 @@ UDebuffNiagaraComponent::UDebuffNiagaraComponent()
 	bAutoActivate = false;
 }
 
+void UDebuffNiagaraComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ThisClass, DebuffTag);
+}
+
 void UDebuffNiagaraComponent::BeginPlay()
 {
 	Super::BeginPlay();
@@ -48,13 +55,6 @@ void UDebuffNiagaraComponent::BeginPlay()
 	}
 }
 
-void UDebuffNiagaraComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
-{
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-
-	DOREPLIFETIME(ThisClass, DebuffTag);
-}
-
 void UDebuffNiagaraComponent::OnRep_DebuffTag()
 {
 	// 나이아가라 재생을 동기 로드로 시작합니다.
@@ -82,10 +82,10 @@ void UDebuffNiagaraComponent::OnRep_DebuffTag()
 	{
 	case EDebuffTypeContext::Stun:
 		{
-			if (AAuraCharacterBase* Character = Cast<AAuraCharacterBase>(GetOwner()))
+			if (const AAuraCharacterBase* Character = Cast<AAuraCharacterBase>(GetOwner()))
 			{
-				float CharacterHeight = Character->GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
-				float CharacterWidth = Character->GetCapsuleComponent()->GetScaledCapsuleRadius();
+				const float CharacterHeight = Character->GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
+				const float CharacterWidth = Character->GetCapsuleComponent()->GetScaledCapsuleRadius();
 				SetRelativeLocation(FVector(0.f, 0.f, CharacterHeight * 2.f));
 				SetRelativeScale3D(FVector(CharacterWidth / 36.f));
 			}
@@ -93,9 +93,9 @@ void UDebuffNiagaraComponent::OnRep_DebuffTag()
 		break;
 	default:
 		{
-			if (AAuraCharacterBase* Character = Cast<AAuraCharacterBase>(GetOwner()))
+			if (const AAuraCharacterBase* Character = Cast<AAuraCharacterBase>(GetOwner()))
 			{
-				float CharacterHeight = Character->GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
+				const float CharacterHeight = Character->GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
 				SetRelativeLocation(FVector(0.f, 0.f, CharacterHeight));
 			}
 		}

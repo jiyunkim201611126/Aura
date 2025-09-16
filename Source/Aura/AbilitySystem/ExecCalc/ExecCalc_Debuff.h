@@ -12,5 +12,7 @@ class AURA_API UExecCalc_Debuff : public UGameplayEffectExecutionCalculation
 public:
 	UExecCalc_Debuff();
 
+	//~ Begin GameplayEffectExecutionCalculation Interface
 	virtual void Execute_Implementation(const FGameplayEffectCustomExecutionParameters& ExecutionParams, FGameplayEffectCustomExecutionOutput& OutExecutionOutput) const override;
+	//~ End GameplayEffectExecutionCalculation Interface
 };

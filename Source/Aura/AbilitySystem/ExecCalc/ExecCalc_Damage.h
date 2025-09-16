@@ -21,5 +21,7 @@ class AURA_API UExecCalc_Damage : public UGameplayEffectExecutionCalculation
 public:
 	UExecCalc_Damage();
 
+	//~ Begin GameplayEffectExecutionCalculation Interface
 	virtual void Execute_Implementation(const FGameplayEffectCustomExecutionParameters& ExecutionParams, FGameplayEffectCustomExecutionOutput& OutExecutionOutput) const override;
+	//~ End GameplayEffectExecutionCalculation Interface
 };

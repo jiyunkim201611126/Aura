@@ -54,9 +54,9 @@ void UExecCalc_Debuff::Execute_Implementation(const FGameplayEffectCustomExecuti
 	EvaluationParameters.SourceTags = SourceTags;
 	EvaluationParameters.TargetTags = TargetTags;
 
-	const bool bIsBurn = GrantedTags.HasTagExact(GameplayTags.Debuff_Type_Burn);
-	const bool bIsStun = GrantedTags.HasTagExact(GameplayTags.Debuff_Type_Stun);
-	const bool bIsConfuse = GrantedTags.HasTagExact(GameplayTags.Debuff_Type_Confuse);
+	const bool bIsBurn = GrantedTags.HasTagExact(GameplayTags.Debuff_Types_Burn);
+	const bool bIsStun = GrantedTags.HasTagExact(GameplayTags.Debuff_Types_Stun);
+	const bool bIsConfuse = GrantedTags.HasTagExact(GameplayTags.Debuff_Types_Confuse);
 
 	// 타입에 해당하는 관련 저항력 Attribute를 가져옵니다.
 	float ResistanceTypeValue = 0.f;

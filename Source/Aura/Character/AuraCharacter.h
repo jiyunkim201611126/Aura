@@ -17,13 +17,13 @@ public:
 	
 	virtual void OnRep_PlayerState() override;
 
-	// ~Combat Interface
+	//~ Begin Combat Interface
 	virtual void RegisterPawn() override;
 	virtual void UnregisterPawn() override;
 	virtual int32 GetCharacterLevel_Implementation() override;
-	// ~End of Combat Interface
+	//~ End Combat Interface
 	
-	// ~Levelable Interface
+	//~ Begin Levelable Interface
 	virtual int32 FindLevelForXP_Implementation(int32 InXP) const override;
 	virtual int32 GetXP_Implementation() const override;
 	virtual int32 GetAttributePointsReward_Implementation(int32 Level) const override;
@@ -35,16 +35,16 @@ public:
 	virtual void AddToSpellPoints_Implementation(const int32 InSpellPoints) override;
 	virtual int32 GetSpellPoints_Implementation() const override;
 	virtual void LevelUp_Implementation() override;
-	// ~End of Levelable Interface
+	//~ End Levelable Interface
 
 protected:
-	// ~AActor Interface
+	//~ Begin Actor Interface
 	virtual void BeginPlay() override;
-	// ~End of AActor Interface
+	//~ End Actor Interface
 
-	// ~APawn Interface
+	//~ Begin Pawn Interface
 	virtual void PossessedBy(AController* NewController) override;
-	// ~End of APawn Interface
+	//~ End Pawn Interface
 	
 	// 게임 시작 시 Attribute를 초기화하는 함수
 	void InitializeDefaultAttributes() const;

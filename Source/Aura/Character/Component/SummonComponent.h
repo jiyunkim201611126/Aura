@@ -27,9 +27,9 @@ public:
 	void RemoveMinion(AActor* DestroyedActor);
 
 protected:
-	// ~UActorComponent Interface
+	//~ Begin ActorComponent Interface
 	virtual void BeginPlay() override;
-	// ~End of UActorComponent Interface
+	//~ End ActorComponent Interface
 	
 public:
 	UPROPERTY()

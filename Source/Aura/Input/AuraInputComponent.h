@@ -21,13 +21,13 @@ void UAuraInputComponent::BindAbilityActions(const UAuraInputConfig* InputConfig
 {
 	check(InputConfig);
 
-	// DataAsset이 갖고 있는 구조체 배열을 통해 InputAction들을 가져온다.
+	// DataAsset이 갖고 있는 구조체 배열을 통해 InputAction들을 가져옵니다.
 	for (const FAuraInputAction& Action : InputConfig->AbilityInputActions)
 	{
 		if (Action.InputAction && Action.InputTag.IsValid())
 		{
-			// InputAction마다 총 3개의 함수를 바인드하는데, 매개변수로 Action.InputTag를 함께 전달한다. 
-			// 이 경우 InputAction에 해당하는 함수들(Func들)은 호출될 때 자동으로 Action.InputTag가 매개변수로 들어간다.
+			// InputAction마다 총 3개의 함수를 바인드하는데, 매개변수로 Action.InputTag를 함께 전달합니다.
+			// 이 경우 InputAction에 해당하는 함수들(Func들)은 호출될 때 자동으로 Action.InputTag가 매개변수로 들어갑니다.
 			if (PressedFunc)
 			{
 				BindAction(Action.InputAction, ETriggerEvent::Started, Object, PressedFunc, Action.InputTag);
