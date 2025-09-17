@@ -10,6 +10,7 @@ class UAbilityInfo;
 DECLARE_MULTICAST_DELEGATE_OneParam(FEffectAssetTags, const FGameplayTagContainer&);
 DECLARE_MULTICAST_DELEGATE_ThreeParams(FAbilityStatusChanged, const FGameplayTag& /*AbilityTag*/, const FGameplayTag& /*StatusTag*/, const int32 /*AbilityLevel*/);
 DECLARE_MULTICAST_DELEGATE_FourParams(FAbilityEquipped, const FGameplayTag& /*AbilityTag*/, const FGameplayTag& /*StatusTag*/, const FGameplayTag& /*InputTag*/, const FGameplayTag& /*PreviousInputTag*/)
+DECLARE_MULTICAST_DELEGATE_OneParam(FDeactivatePassiveAbility, const FGameplayTag& /*AbilityTag*/);
 
 UCLASS()
 class AURA_API UAuraAbilitySystemComponent : public UAbilitySystemComponent
@@ -82,6 +83,7 @@ public:
 	FEffectAssetTags EffectAssetTags;
 	FAbilityStatusChanged OnAbilityStatusOrLevelChangedDelegate;
 	FAbilityEquipped OnAbilityEquipped;
+	FDeactivatePassiveAbility OnDeactivatePassiveAbility;
 
 private:
 	// OnRep_ActivateAbilities가 호출되기 전, 클라이언트에서 캐싱해두고 있는 Ability 부여 정보입니다.
