@@ -1,10 +1,11 @@
 ﻿#include "DebuffComponent.h"
 #include "Aura/AbilitySystem/AuraAbilitySystemComponent.h"
-#include "Aura/AbilitySystem/Debuff/DebuffNiagaraComponent.h"
+#include "Aura/AbilitySystem/Niagara/AuraNiagaraComponent.h"
 #include "Aura/AI/AuraAIController.h"
 #include "Aura/Character/AuraEnemy.h"
 #include "Aura/Manager/AuraGameplayTags.h"
 #include "BehaviorTree/BlackboardComponent.h"
+#include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Net/UnrealNetwork.h"
 
@@ -41,15 +42,18 @@ void UDebuffComponent::BeginPlay()
 	}
 }
 
-void UDebuffComponent::CreateNiagaraComponent(const FGameplayTag& DebuffTypeTag)
+UAuraNiagaraComponent* UDebuffComponent::CreateNiagaraComponent(const FGameplayTag& DebuffTypeTag)
 {
 	// 이펙트 적용 시 GrantedTag가 자동으로 부여되므로, 그 전에 이미 해당 디버프가 부여되어있는지 확인해 나이아가라가 중복으로 생기지 않도록 방지합니다.
-	if (UDebuffNiagaraComponent* NiagaraComponent = NewObject<UDebuffNiagaraComponent>(this))
+	if (UAuraNiagaraComponent* NiagaraComponent = NewObject<UAuraNiagaraComponent>(this))
 	{
-		NiagaraComponent->DebuffTag = DebuffTypeTag;
+		NiagaraComponent->NiagaraTag = DebuffTypeTag;
 		NiagaraComponent->SetupAttachment(GetPawn<ACharacter>()->GetMesh(), FName("RootSocket"));
 		NiagaraComponent->RegisterComponent();
+		return NiagaraComponent;
 	}
+	
+	return nullptr;
 }
 
 void UDebuffComponent::HitReactTagChanged(const FGameplayTag CallbackTag, int32 NewCount)
@@ -73,7 +77,14 @@ void UDebuffComponent::BurnTagChanged(const FGameplayTag CallbackTag, int32 NewC
 {
 	if (NewCount > 0)
 	{
-		CreateNiagaraComponent(CallbackTag);
+		if (UAuraNiagaraComponent* NiagaraComponent = CreateNiagaraComponent(CallbackTag))
+		{
+			if (const ACharacter* Character = GetPawn<ACharacter>())
+			{
+				const float CharacterHeight = Character->GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
+				NiagaraComponent->SetRelativeLocation(FVector(0.f, 0.f, CharacterHeight));
+			}
+		}
 	}
 }
 
@@ -82,7 +93,16 @@ void UDebuffComponent::StunTagChanged(const FGameplayTag CallbackTag, int32 NewC
 	bIsStunned = NewCount > 0;
 	if (bIsStunned)
 	{
-		CreateNiagaraComponent(CallbackTag);
+		if (UAuraNiagaraComponent* NiagaraComponent = CreateNiagaraComponent(CallbackTag))
+		{
+			if (const ACharacter* Character = GetPawn<ACharacter>())
+			{
+				const float CharacterHeight = Character->GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
+				const float CharacterWidth = Character->GetCapsuleComponent()->GetScaledCapsuleRadius();
+				NiagaraComponent->SetRelativeLocation(FVector(0.f, 0.f, CharacterHeight * 2.f));
+				NiagaraComponent->SetRelativeScale3D(FVector(CharacterWidth / 36.f));
+			}
+		}
 	}
 	
 	// 기절 상태이상에 걸리면 현재 발동 중인 Active 스킬을 모두 취소합니다.

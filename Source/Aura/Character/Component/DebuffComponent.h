@@ -4,6 +4,7 @@
 #include "Components/PawnComponent.h"
 #include "DebuffComponent.generated.h"
 
+class UAuraNiagaraComponent;
 class AAuraAIController;
 class AAuraCharacterBase;
 class UAbilitySystemComponent;
@@ -26,7 +27,7 @@ protected:
 	//~ End ActorComponent Interface
 
 private:
-	void CreateNiagaraComponent(const FGameplayTag& DebuffTypeTag);
+	UAuraNiagaraComponent* CreateNiagaraComponent(const FGameplayTag& DebuffTypeTag);
 	
 	void HitReactTagChanged(const FGameplayTag CallbackTag, int32 NewCount);
 	void BurnTagChanged(const FGameplayTag CallbackTag, int32 NewCount);

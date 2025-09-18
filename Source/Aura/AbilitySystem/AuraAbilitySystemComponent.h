@@ -21,9 +21,9 @@ public:
 	// InitAbilityActorInfo(OwnerActor와 AvatarActor를 할당해주는 함수)가 호출된 직후 호출되는 함수
 	void AbilityActorInfoSet();
 
-	//~ Begin Object Interface
+	//~ Begin UObject Interface
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
-	//~ End Object Interface
+	//~ End UObject Interface
 
 	// 키 입력에 따라 발동하는 Ability를 장착하는 플레이어 캐릭터용 함수입니다. UAuraGameplayAbility를 사용합니다.
 	void AddCharacterAbilities(const TArray<TSubclassOf<UGameplayAbility>>& StartupAbilities);
@@ -75,8 +75,10 @@ private:
 
 	// 장착이 해제되면 해당 Ability의 InputTag를 제거하는 함수
 	void ClearInputTag(FGameplayAbilitySpec* Spec);
-	void ClearAbilitiesOfInputTag(const FGameplayAbilitySpec* AbilitySpec, const FGameplayTag& InputTag);
-	bool AbilityHasInputTag(FGameplayAbilitySpec* Spec, const FGameplayTag& InputTag) const;
+	void ClearAbilityOfInputTag(const FGameplayAbilitySpec* AbilitySpecToEquip, const FGameplayTag& InputTag);
+	
+	bool AbilityHasInputTag(const FGameplayAbilitySpec& AbilitySpec, const FGameplayTag& InputTag) const;
+	bool IsPassiveAbility(const FGameplayAbilitySpec& AbilitySpec) const;
 	
 public:
 	// Widget Controller가 바인드할 델리게이트

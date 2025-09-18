@@ -96,7 +96,7 @@ FTaggedMontage UAuraGameplayAbility::GetRandomMontage()
 	return TaggedMontage;
 }
 
-void UAuraGameplayAbility::RegisterAbilityToUsableTypeManagers(UAuraAbilitySystemComponent* ASC)
+void UAuraGameplayAbility::RegisterAbilityToAdditionalCostManagers(UAuraAbilitySystemComponent* ASC)
 {
 	for (const auto AdditionalCost : AdditionalCosts)
 	{
@@ -104,7 +104,7 @@ void UAuraGameplayAbility::RegisterAbilityToUsableTypeManagers(UAuraAbilitySyste
 	}
 }
 
-void UAuraGameplayAbility::UnregisterAbilityFromUsableTypeManagers(UAuraAbilitySystemComponent* ASC)
+void UAuraGameplayAbility::UnregisterAbilityFromAdditionalCostManagers(UAuraAbilitySystemComponent* ASC)
 {
 	for (const auto AdditionalCost : AdditionalCosts)
 	{
@@ -181,8 +181,11 @@ void UAuraGameplayAbility::SyncAbilityTagToAssetTags()
 		{
 			NewAbilityTags.AddTag(AssetTag);
 		}
-		
-		SetAssetTags(NewAbilityTags);
+PRAGMA_DISABLE_DEPRECATION_WARNINGS
+		// AbilityTag에 값을 할당하면 자동으로 AbilityTags(AssetTags)에도 함께 할당해주는 구문입니다.
+		// 에디터에서만 호출되기 때문에 안전합니다.
+		AbilityTags = NewAbilityTags;
+PRAGMA_DISABLE_DEPRECATION_WARNINGS
 	}
 }
 #endif

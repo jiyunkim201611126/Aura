@@ -59,7 +59,7 @@ void UAuraAbilitySystemComponent::AddCharacterPassiveAbilities(const TArray<TSub
 			
 		if (UAuraGameplayAbility* Ability = Cast<UAuraGameplayAbility>(AbilitySpec.Ability))
 		{
-			Ability->RegisterAbilityToUsableTypeManagers(this);
+			Ability->RegisterAbilityToAdditionalCostManagers(this);
 		}
 	}
 }
@@ -73,7 +73,7 @@ void UAuraAbilitySystemComponent::AddAbilities(const TArray<TSubclassOf<UGamepla
 			
 		if (UAuraGameplayAbility* Ability = Cast<UAuraGameplayAbility>(AbilitySpec.Ability))
 		{
-			Ability->RegisterAbilityToUsableTypeManagers(this);
+			Ability->RegisterAbilityToAdditionalCostManagers(this);
 		}
 	}
 }
@@ -82,6 +82,7 @@ void UAuraAbilitySystemComponent::OnRep_ActivateAbilities()
 {
 	Super::OnRep_ActivateAbilities();
 
+	FScopedAbilityListLock ActiveScopeLock(*this);
 	TMap<FGameplayAbilitySpecHandle, FGameplayAbilitySpec> NewAbilities;
 	NewAbilities.Reserve(GetActivatableAbilities().Num());
 
@@ -145,7 +146,8 @@ void UAuraAbilitySystemComponent::AbilityInputTagPressed(const FGameplayTag& Inp
 	{
 		return;
 	}
-
+	
+	FScopedAbilityListLock ActiveScopeLock(*this);
 	// 현재 장착 중인 Ability를 가져옵니다.
 	for (FGameplayAbilitySpec& AbilitySpec : GetActivatableAbilities())
 	{
@@ -177,6 +179,7 @@ void UAuraAbilitySystemComponent::AbilityInputTagHeld(const FGameplayTag& InputT
 		return;
 	}
 
+	FScopedAbilityListLock ActiveScopeLock(*this);
 	// 현재 장착 중인 Ability를 가져옵니다.
 	for (FGameplayAbilitySpec& AbilitySpec : GetActivatableAbilities())
 	{
@@ -200,6 +203,7 @@ void UAuraAbilitySystemComponent::AbilityInputTagReleased(const FGameplayTag& In
 		return;
 	}
 
+	FScopedAbilityListLock ActiveScopeLock(*this);
 	for (FGameplayAbilitySpec& AbilitySpec : GetActivatableAbilities())
 	{
 		if (AbilitySpec.GetDynamicSpecSourceTags().HasTagExact(InputTag) && AbilitySpec.IsActive())
@@ -409,101 +413,6 @@ void UAuraAbilitySystemComponent::UpdateAbilityStatuses(int32 Level)
 	}
 }
 
-void UAuraAbilitySystemComponent::ServerEquipAbility_Implementation(const FGameplayTag& AbilityTag, const FGameplayTag& InputTag)
-{
-	if (FGameplayAbilitySpec* AbilitySpec = GetGivenAbilitySpecFromAbilityTag(AbilityTag))
-	{
-		const FAuraGameplayTags& GameplayTags = FAuraGameplayTags::Get();
-		const FGameplayTag& PreviousInputTag = GetInputTagFromSpec(*AbilitySpec);
-		const FGameplayTag& StatusTag = GetStatusFromSpec(*AbilitySpec);
-
-		// 장착 가능한 Ability인지 판별합니다.
-		const bool bStatusValid = StatusTag == GameplayTags.Abilities_Status_Equipped || StatusTag == GameplayTags.Abilities_Status_Unlocked;
-		if (bStatusValid)
-		{
-			// 우선 장착하려는 InputTag에 있는 Ability의 InputTag를 제거합니다. 즉, 장착을 해제합니다.
-			ClearAbilitiesOfInputTag(AbilitySpec, InputTag);
-			// 장착하려는 Ability 또한 InputTag를 제거합니다. 마찬가지로 장착을 해제한다는 뜻입니다.
-			ClearInputTag(AbilitySpec);
-			// Ability를 InputTag에 장착합니다.
-			AbilitySpec->GetDynamicSpecSourceTags().AddTag(InputTag);
-
-			// Ability가 부여 상태였다면 장착 상태로 변경합니다.
-			if (StatusTag.MatchesTagExact(GameplayTags.Abilities_Status_Unlocked))
-			{
-				AbilitySpec->GetDynamicSpecSourceTags().RemoveTag(GameplayTags.Abilities_Status_Unlocked);
-				AbilitySpec->GetDynamicSpecSourceTags().AddTag(GameplayTags.Abilities_Status_Equipped);
-			}
-
-			// Ability가 장착되었으므로, UsableTypeManagers에게 이를 알려줍니다.
-			if (UAuraGameplayAbility* Ability = Cast<UAuraGameplayAbility>(AbilitySpec->Ability))
-			{
-				Ability->RegisterAbilityToUsableTypeManagers(this);
-			}
-
-			// 클라이언트에게 Ability의 변경사항을 알려줍니다.
-			MarkAbilitySpecDirty(*AbilitySpec);
-		}
-		
-		// 리슨 서버가 UI에 변경 사항을 표시할 수 있도록 델리게이트를 호출합니다.
-		// 클라이언트는 OnRep_ActivateAbilities 함수에서 각종 Tag를 비교 및 변경 사항을 독자적으로 추적해 UI에 반영합니다.
-		OnAbilityEquipped.Broadcast(AbilityTag, InputTag, GameplayTags.Abilities_Status_Equipped, PreviousInputTag);
-	}
-}
-
-void UAuraAbilitySystemComponent::ClientEffectApplied_Implementation(UAbilitySystemComponent* AbilitySystemComponent, const FGameplayEffectSpec& EffectSpec, FActiveGameplayEffectHandle ActiveEffectHandle)
-{
-	FGameplayTagContainer TagContainer;
-	EffectSpec.GetAllAssetTags(TagContainer);
-
-	// Widget Controller에게 Tag를 가진 Effect가 Apply되었음을 알림
-	EffectAssetTags.Broadcast(TagContainer);
-}
-
-void UAuraAbilitySystemComponent::ClearInputTag(FGameplayAbilitySpec* Spec)
-{
-	// 이 함수로 들어오는 관련 Ability는 장착 위치를 변경하는 중일 수 있습니다.
-	// 따라서 Status 태그 변경은 하지 않으며, UsableTypeManager에게도 접근하지 않습니다.
-	const FGameplayTag InputTag = GetInputTagFromSpec(*Spec);
-	Spec->GetDynamicSpecSourceTags().RemoveTag(InputTag);
-	MarkAbilitySpecDirty(*Spec);
-}
-
-void UAuraAbilitySystemComponent::ClearAbilitiesOfInputTag(const FGameplayAbilitySpec* AbilitySpec, const FGameplayTag& InputTag)
-{
-	FScopedAbilityListLock ActiveScopeLock(*this);
-	for (FGameplayAbilitySpec& Spec : GetActivatableAbilities())
-	{
-		// 장착하려는 Ability와 선택한 InputTag에 장착된 Ability가 동일한 경우, 아래 분기로 진입하지 않습니다.
-		if (AbilityHasInputTag(&Spec, InputTag) && &Spec != AbilitySpec)
-		{
-			if (UAuraGameplayAbility* Ability = Cast<UAuraGameplayAbility>(Spec.Ability))
-			{
-				// 장착 해제하는 중이므로, Manager 객체들에게서 이 Ability 관련 로직을 중단시킵니다.
-				Ability->UnregisterAbilityFromUsableTypeManagers(this);
-			}
-			
-			const FAuraGameplayTags& GameplayTags = FAuraGameplayTags::Get();
-			Spec.GetDynamicSpecSourceTags().RemoveTag(GameplayTags.Abilities_Status_Equipped);
-			Spec.GetDynamicSpecSourceTags().AddTag(GameplayTags.Abilities_Status_Unlocked);
-			
-			ClearInputTag(&Spec);
-		}
-	}
-}
-
-bool UAuraAbilitySystemComponent::AbilityHasInputTag(FGameplayAbilitySpec* Spec, const FGameplayTag& InputTag) const
-{
-	for (FGameplayTag Tag : Spec->GetDynamicSpecSourceTags())
-	{
-		if (Tag.MatchesTagExact(InputTag))
-		{
-			return true;
-		}
-	}
-	return false;
-}
-
 void UAuraAbilitySystemComponent::ServerSpendSpellPoint_Implementation(const FGameplayTag& AbilityTag)
 {
 	// 부여된 Ability 중 매개변수로 들어온 AbilityTag와 일치하는 태그를 가진 Ability를 탐색합니다.
@@ -536,4 +445,121 @@ void UAuraAbilitySystemComponent::ServerSpendSpellPoint_Implementation(const FGa
 		// 클라이언트는 OnRep_ActivateAbilities에서 변경 사항을 독자적으로 추적해 UI에 반영합니다.
 		OnAbilityStatusOrLevelChangedDelegate.Broadcast(AbilityTag, StatusTag, AbilitySpec->Level);
 	}
+}
+
+void UAuraAbilitySystemComponent::ServerEquipAbility_Implementation(const FGameplayTag& AbilityTag, const FGameplayTag& InputTag)
+{
+	if (FGameplayAbilitySpec* AbilitySpec = GetGivenAbilitySpecFromAbilityTag(AbilityTag))
+	{
+		const FAuraGameplayTags& GameplayTags = FAuraGameplayTags::Get();
+		const FGameplayTag& PreviousInputTag = GetInputTagFromSpec(*AbilitySpec);
+		const FGameplayTag& StatusTag = GetStatusFromSpec(*AbilitySpec);
+
+		// 장착 가능한 Ability인지 판별합니다.
+		const bool bStatusValid = StatusTag == GameplayTags.Abilities_Status_Equipped || StatusTag == GameplayTags.Abilities_Status_Unlocked;
+		if (bStatusValid)
+		{
+			// 우선 장착하려는 InputTag에 있는 Ability의 InputTag를 제거합니다. 즉, 장착을 해제합니다.
+			ClearAbilityOfInputTag(AbilitySpec, InputTag);
+			// 장착하려는 Ability 또한 InputTag를 제거합니다. 마찬가지로 장착을 해제한다는 뜻입니다.
+			ClearInputTag(AbilitySpec);
+			
+			// Ability를 InputTag에 장착합니다.
+			AbilitySpec->GetDynamicSpecSourceTags().AddTag(InputTag);
+
+			// Ability가 부여 상태였다면 장착 상태로 변경합니다.
+			if (StatusTag.MatchesTagExact(GameplayTags.Abilities_Status_Unlocked))
+			{
+				AbilitySpec->GetDynamicSpecSourceTags().RemoveTag(GameplayTags.Abilities_Status_Unlocked);
+				AbilitySpec->GetDynamicSpecSourceTags().AddTag(GameplayTags.Abilities_Status_Equipped);
+			}
+
+			// Ability가 장착되었으므로, AdditionalCostManagers에게 이를 알려줍니다.
+			if (UAuraGameplayAbility* Ability = Cast<UAuraGameplayAbility>(AbilitySpec->Ability))
+			{
+				Ability->RegisterAbilityToAdditionalCostManagers(this);
+			}
+
+			if (IsPassiveAbility(*AbilitySpec) && !AbilitySpec->IsActive())
+			{
+				TryActivateAbility(AbilitySpec->Handle);
+			}
+
+			// 클라이언트에게 Ability의 변경사항을 알려줍니다.
+			MarkAbilitySpecDirty(*AbilitySpec);
+		}
+		
+		// 리슨 서버가 UI에 변경 사항을 표시할 수 있도록 델리게이트를 호출합니다.
+		// 클라이언트는 OnRep_ActivateAbilities 함수에서 각종 Tag를 비교 및 변경 사항을 독자적으로 추적해 UI에 반영합니다.
+		OnAbilityEquipped.Broadcast(AbilityTag, InputTag, GameplayTags.Abilities_Status_Equipped, PreviousInputTag);
+	}
+}
+
+void UAuraAbilitySystemComponent::ClientEffectApplied_Implementation(UAbilitySystemComponent* AbilitySystemComponent, const FGameplayEffectSpec& EffectSpec, FActiveGameplayEffectHandle ActiveEffectHandle)
+{
+	FGameplayTagContainer TagContainer;
+	EffectSpec.GetAllAssetTags(TagContainer);
+
+	// Widget Controller에게 Tag를 가진 Effect가 Apply되었음을 알림
+	EffectAssetTags.Broadcast(TagContainer);
+}
+
+void UAuraAbilitySystemComponent::ClearInputTag(FGameplayAbilitySpec* Spec)
+{
+	FScopedAbilityListLock ActiveScopeLock(*this);
+	// 이 함수로 들어오는 관련 Ability는 장착 위치를 변경하는 중일 수 있습니다.
+	// 따라서 Status 태그 변경은 하지 않으며, AdditionalCostManager에게도 접근하지 않습니다.
+	const FGameplayTag InputTag = GetInputTagFromSpec(*Spec);
+	Spec->GetDynamicSpecSourceTags().RemoveTag(InputTag);
+}
+
+void UAuraAbilitySystemComponent::ClearAbilityOfInputTag(const FGameplayAbilitySpec* AbilitySpecToEquip, const FGameplayTag& InputTag)
+{
+	FScopedAbilityListLock ActiveScopeLock(*this);
+	// 현재 부여된 모든 Ability를 순회합니다.
+	for (FGameplayAbilitySpec& GivenAbilitySpec : GetActivatableAbilities())
+	{
+		// '장착하려는 Ability'와 '장착하려는 InputTag에 이미 장착된 Ability'가 서로 다른 경우, 즉 이미 장착된 Ability를 해제할 때 들어가는 분기입니다.
+		if (AbilityHasInputTag(GivenAbilitySpec, InputTag) && &GivenAbilitySpec != AbilitySpecToEquip)
+		{
+			if (UAuraGameplayAbility* GivenAbility = Cast<UAuraGameplayAbility>(GivenAbilitySpec.Ability))
+			{
+				// 장착 해제하는 중이므로, Manager 객체들에게서 이 Ability 관련 로직을 중단시킵니다.
+				GivenAbility->UnregisterAbilityFromAdditionalCostManagers(this);
+			}
+
+			// 이미 장착되어있던 다른 Ability가 해제되는 상황인 게 확실하므로, StatusTag를 변경합니다.
+			const FAuraGameplayTags& GameplayTags = FAuraGameplayTags::Get();
+			GivenAbilitySpec.GetDynamicSpecSourceTags().RemoveTag(GameplayTags.Abilities_Status_Equipped);
+			GivenAbilitySpec.GetDynamicSpecSourceTags().AddTag(GameplayTags.Abilities_Status_Unlocked);
+
+			if (IsPassiveAbility(GivenAbilitySpec))
+			{
+				// 해제하는 Ability가 Passive Ability인 경우 이를 알립니다.
+				OnDeactivatePassiveAbility.Broadcast(GetAbilityTagFromSpec(GivenAbilitySpec));
+			}
+
+			// Ability의 InputTag를 제거합니다.
+			ClearInputTag(&GivenAbilitySpec);
+
+			// 클라이언트에게 Ability의 변경사항을 알려줍니다.
+			MarkAbilitySpecDirty(GivenAbilitySpec);
+			
+			return;
+		}
+	}
+}
+
+bool UAuraAbilitySystemComponent::AbilityHasInputTag(const FGameplayAbilitySpec& AbilitySpec, const FGameplayTag& InputTag) const
+{
+	return AbilitySpec.GetDynamicSpecSourceTags().HasTagExact(InputTag);
+}
+
+bool UAuraAbilitySystemComponent::IsPassiveAbility(const FGameplayAbilitySpec& AbilitySpec) const
+{
+	const UAbilityInfo* AbilityInfo = UAuraAbilitySystemLibrary::GetAbilityInfo(GetAvatarActor());
+	const FGameplayTag AbilityTag = GetAbilityTagFromSpec(AbilitySpec);
+	const FAuraAbilityInfo& Info = AbilityInfo->FindAbilityInfoForTag(AbilityTag);
+	const FGameplayTag AbilityType = Info.AbilityType;
+	return AbilityType.MatchesTagExact(FAuraGameplayTags::Get().Abilities_Types_Passive);
 }

@@ -32,7 +32,7 @@ struct FUIWidgetRow : public FTableRowBase
 };
 
 USTRUCT(BlueprintType)
-struct FAbilityUsableTypeInfo
+struct FAbilityAdditionalCostInfo
 {
 	GENERATED_BODY()
 
@@ -50,7 +50,7 @@ struct FAbilityUsableTypeInfo
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAttributeChangedSignature, float, NewValue);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMessageWidgetRowSignature, FUIWidgetRow, Row);
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnAbilityUsableTypeSignature, FGameplayTag, InAbilityTag, const FAbilityUsableTypeInfo&, Info);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnAbilityAdditionalCostSignature, FGameplayTag, InAbilityTag, const FAbilityAdditionalCostInfo&, Info);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnStackCountChangedSignature, FGameplayTag, InAbilityTag, int32, StackCount);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnStackTimerStartedSignature, FGameplayTag, InAbilityTag, float, RemainingTime, float, RechargeTime);
 
@@ -69,7 +69,7 @@ protected:
 	template<typename T>
 	T* GetDataTableRowByTag(UDataTable* DataTable, const FGameplayTag& Tag);
 
-	void BindForUsableTypes(UAuraAbilitySystemComponent* AuraASC, FGameplayTag AbilityTag, bool bShouldRequestStackTime) const;
+	void BindForAdditionalCosts(UAuraAbilitySystemComponent* AuraASC, FGameplayTag AbilityTag, bool bShouldRequestStackTime) const;
 	
 	void OnXPChanged(int32 InXP);
 	
@@ -99,7 +99,7 @@ public:
 	FOnPlayerStatChangedSignature OnPlayerLevelChangedDelegate;
 
 	UPROPERTY(BlueprintAssignable, Category = "GAS | AbilityIcon")
-	FOnAbilityUsableTypeSignature OnAbilityUsableTypeDelegate;
+	FOnAbilityAdditionalCostSignature OnAbilityAdditionalCostDelegate;
 
 	UPROPERTY(BlueprintAssignable, Category = "GAS | AbilityIcon")
 	FOnStackCountChangedSignature OnStackCountChangedDelegate;

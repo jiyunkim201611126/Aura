@@ -77,16 +77,16 @@ void UOverlayWidgetController::OnAbilityEquipped(const FGameplayTag& AbilityTag,
 	// 사용 규칙(Stackable 등)에 대한 위젯 생성 및 바인드 로직을 수행합니다.
 	// PreviousInputTag가 유효하면 다른 InputTag에 장착된 상태였으므로, 충전 로직이 수행중이었을 가능성이 높습니다.
 	// 따라서 이 점을 이용해 서버에 남은 시간을 요청할지 말지 결정합니다.
-	// 추후 다른 UsableType이 추가되어 매개변수가 많아진다면 구조체로 묶어야 할 수 있습니다.
+	// 추후 다른 AdditionalCost가 추가되어 매개변수가 많아진다면 구조체로 묶어야 할 수 있습니다.
 	if (StatusTag == FAuraGameplayTags::Get().Abilities_Status_Equipped)
 	{
-		BindForUsableTypes(GetAuraASC(), AbilityTag, PreviousInputTag.IsValid());
+		BindForAdditionalCosts(GetAuraASC(), AbilityTag, PreviousInputTag.IsValid());
 	}
 }
 
-void UOverlayWidgetController::BindForUsableTypes(UAuraAbilitySystemComponent* AuraASC, const FGameplayTag AbilityTag, const bool bShouldRequestStackTime) const
+void UOverlayWidgetController::BindForAdditionalCosts(UAuraAbilitySystemComponent* AuraASC, const FGameplayTag AbilityTag, const bool bShouldRequestStackTime) const
 {
-	FAbilityUsableTypeInfo UsableTypeInfo;
+	FAbilityAdditionalCostInfo AdditionalCostInfo;
 
 	AStackableAbilityManager* StackableAbilityManager = AuraASC->FindAbilityManager<AStackableAbilityManager>();
 	if (StackableAbilityManager)
@@ -94,7 +94,7 @@ void UOverlayWidgetController::BindForUsableTypes(UAuraAbilitySystemComponent* A
 		// Stackable Ability로 등록되어있는지 확인, 필요한 함수를 바인드합니다.
 		if (StackableAbilityManager->CheckHasAbility(AbilityTag))
 		{
-			UsableTypeInfo.bIsStackable = true;
+			AdditionalCostInfo.bIsStackable = true;
 		}
 		StackableAbilityManager->OnStackCountChanged.BindLambda([this](FGameplayTag InAbilityTag, int32 StackCount)
 			{
@@ -108,10 +108,10 @@ void UOverlayWidgetController::BindForUsableTypes(UAuraAbilitySystemComponent* A
 
 	// 특별한 사용 타입이 하나라도 있으면 이 분기 안으로 들어갑니다.
 	// 현재는 스택형밖에 없습니다.
-	if (UsableTypeInfo.HasAnyTrue())
+	if (AdditionalCostInfo.HasAnyTrue())
 	{
-		OnAbilityUsableTypeDelegate.Broadcast(AbilityTag, UsableTypeInfo);
-		if (UsableTypeInfo.bIsStackable)
+		OnAbilityAdditionalCostDelegate.Broadcast(AbilityTag, AdditionalCostInfo);
+		if (AdditionalCostInfo.bIsStackable)
 		{
 			// Component의 충전 로직 첫 시작이 콜백 함수 바인드보다 먼저 이루어지기 때문에, 여기서 정보를 가져와 한 번 Broadcast해줍니다.
 			if (const FAbilityStackItem* Item = StackableAbilityManager->FindItem(AbilityTag))
