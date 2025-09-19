@@ -418,7 +418,18 @@ void UAuraAbilitySystemComponent::ServerSpendSpellPoint_Implementation(const FGa
 	// 부여된 Ability 중 매개변수로 들어온 AbilityTag와 일치하는 태그를 가진 Ability를 탐색합니다.
 	if (FGameplayAbilitySpec* AbilitySpec = GetGivenAbilitySpecFromAbilityTag(AbilityTag))
 	{
-		// 이 분기로 들어왔다면 SpellPoint를 반드시 소모해야 하는 상황입니다.
+		if (const UAbilityInfo* Info = UAuraAbilitySystemLibrary::GetAbilityInfo(GetAvatarActor()))
+		{
+			const FAuraAbilityInfo AbilityInfo = Info->FindAbilityInfoForTag(AbilityTag);
+			if (AbilityInfo.MaxLevel <= AbilitySpec->Level)
+			{
+				// Ability의 현재 레벨이 최대 레벨 이상인 경우 SpellPoint 사용을 중단합니다.
+				// 스패밍 방지를 위해 클라이언트도 현재 Ability 레벨을 참조해 SpendSpellPoint 버튼을 비활성화합니다.
+				return;
+			}
+		}
+		
+		// 로직 흐름이 여기로 내려왔다면 SpellPoint를 반드시 소모해야 하는 상황입니다.
 		if (GetAvatarActor()->Implements<ULevelableInterface>())
 		{
 			ILevelableInterface::Execute_AddToSpellPoints(GetAvatarActor(), -1);

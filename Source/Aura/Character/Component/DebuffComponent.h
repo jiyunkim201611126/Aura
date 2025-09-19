@@ -32,16 +32,15 @@ private:
 	void HitReactTagChanged(const FGameplayTag CallbackTag, int32 NewCount);
 	void BurnTagChanged(const FGameplayTag CallbackTag, int32 NewCount);
 	void StunTagChanged(const FGameplayTag CallbackTag, int32 NewCount);
-	
-	UFUNCTION()
-	void OnRep_Stunned();
+
+	void SetBlockInputState() const;
 
 public:
 	// AnimBP에서 참조하는 용도로 사용하는 bool 변수들입니다.
 	UPROPERTY(BlueprintReadOnly, Category = "Debuff")
 	bool bHitReacting = false;
 
-	UPROPERTY(ReplicatedUsing = OnRep_Stunned, BlueprintReadOnly, Category = "Debuff")
+	UPROPERTY(BlueprintReadOnly, Category = "Debuff")
 	bool bIsStunned = false;
 
 private:

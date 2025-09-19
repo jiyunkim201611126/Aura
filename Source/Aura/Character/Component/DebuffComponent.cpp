@@ -118,6 +118,8 @@ void UDebuffComponent::StunTagChanged(const FGameplayTag CallbackTag, int32 NewC
 	if (const AAuraCharacterBase* OwnerCharacter = GetPawn<AAuraCharacterBase>())
 	{
 		OwnerCharacter->GetCharacterMovement()->MaxWalkSpeed = bIsStunned ? 0.f : OwnerCharacter->BaseWalkSpeed;
+		SetBlockInputState();
+		return;
 	}
 
 	// AI 캐릭터의 동작입니다.
@@ -127,7 +129,7 @@ void UDebuffComponent::StunTagChanged(const FGameplayTag CallbackTag, int32 NewC
 	}
 }
 
-void UDebuffComponent::OnRep_Stunned()
+void UDebuffComponent::SetBlockInputState() const
 {
 	// 자신의 캐릭터가 아닌 경우 즉시 return합니다.
 	if (!GetPawn<APawn>() || !GetPawn<APawn>()->IsLocallyControlled())
@@ -144,14 +146,7 @@ void UDebuffComponent::OnRep_Stunned()
 		BlockedTags.AddTag(GameplayTags.Player_Block_InputHeld);
 		BlockedTags.AddTag(GameplayTags.Player_Block_InputPressed);
 		BlockedTags.AddTag(GameplayTags.Player_Block_InputReleased);
-		if (bIsStunned)
-		{
-			AuraASC->AddLooseGameplayTags(BlockedTags);
-		}
-		else
-		{
-			AuraASC->RemoveLooseGameplayTags(BlockedTags);
-		}
+		bIsStunned ? AuraASC->AddLooseGameplayTags(BlockedTags) : AuraASC->RemoveLooseGameplayTags(BlockedTags);
 	}
 }
 

@@ -42,6 +42,10 @@ UAuraAttributeSet::UAuraAttributeSet()
 	TagsToAttributes.Add(GameplayTags.Attributes_Resistance_Lightning, GetLightningResistanceAttribute);
 	TagsToAttributes.Add(GameplayTags.Attributes_Resistance_Arcane, GetArcaneResistanceAttribute);
 	TagsToAttributes.Add(GameplayTags.Attributes_Resistance_Physical, GetPhysicalResistanceAttribute);
+
+	// Combat/Defence Attribute
+	
+	TagsToAttributes.Add(GameplayTags.Attributes_Defence_DamageReduction, GetDamageReductionAttribute);
 }
 
 void UAuraAttributeSet::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -81,6 +85,10 @@ void UAuraAttributeSet::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 	DOREPLIFETIME_CONDITION_NOTIFY(UAuraAttributeSet, LightningResistance, COND_None, REPNOTIFY_Always);
 	DOREPLIFETIME_CONDITION_NOTIFY(UAuraAttributeSet, ArcaneResistance, COND_None, REPNOTIFY_Always);
 	DOREPLIFETIME_CONDITION_NOTIFY(UAuraAttributeSet, PhysicalResistance, COND_None, REPNOTIFY_Always);
+
+	// Combat/Defence Attribute
+	
+	DOREPLIFETIME_CONDITION_NOTIFY(UAuraAttributeSet, DamageReduction, COND_None, REPNOTIFY_Always);
 }
 
 void UAuraAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallbackData& Data)
@@ -195,8 +203,11 @@ void UAuraAttributeSet::SendXPEvent(const FEffectProperties& Props) const
 
 void UAuraAttributeSet::ApplyIncomingDamage(const FEffectProperties& Props, const FGameplayEffectModCallbackData& Data)
 {
-	const float LocalIncomingDamage = GetIncomingDamage();
+	float LocalIncomingDamage = GetIncomingDamage();
 	SetIncomingDamage(0.f);
+
+	LocalIncomingDamage *= 1.f - FMath::Clamp(GetDamageReduction(), 0.f, 1.f);
+	
 	if (LocalIncomingDamage > 0.f)
 	{
 		const float NewHealth = GetHealth() - LocalIncomingDamage;
@@ -396,4 +407,9 @@ void UAuraAttributeSet::OnRep_ArcaneResistance(const FGameplayAttributeData& Old
 void UAuraAttributeSet::OnRep_PhysicalResistance(const FGameplayAttributeData& OldPhysicalResistance) const
 {
 	GAMEPLAYATTRIBUTE_REPNOTIFY(UAuraAttributeSet, PhysicalResistance, OldPhysicalResistance);
+}
+
+void UAuraAttributeSet::OnRep_DamageReduction(const FGameplayAttributeData& OldDamageReduction) const
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UAuraAttributeSet, DamageReduction, OldDamageReduction);
 }

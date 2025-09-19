@@ -45,6 +45,9 @@ struct FAuraAbilityInfo
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	int32 LevelRequirement = 1;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	int32 MaxLevel = 10;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TSubclassOf<UGameplayAbility> Ability;

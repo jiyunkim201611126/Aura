@@ -16,6 +16,7 @@ void USpellMenuWidgetController::BindCallbacksToDependencies()
 			if (SelectedAbility.Ability.MatchesTagExact(AbilityTag))
 			{
 				SelectedAbility.Status = StatusTag;
+				SelectedAbility.CurrentLevel = AbilityLevel;
 				ShouldEnableButtons();
 			}
 			if (AbilityInfo)
@@ -72,12 +73,19 @@ void USpellMenuWidgetController::SpellGlobeSelected(const FGameplayTag& AbilityT
 		}
 		else
 		{
-			AbilityStatus = AuraAbilitySystemComponent->GetStatusFromSpec(*AbilitySpec);
+			if (AbilitySpec)
+			{
+				AbilityStatus = AuraAbilitySystemComponent->GetStatusFromSpec(*AbilitySpec);
+			}
 		}
 
 		// 선택된 SpellGlobe의 Ability와 그 상태를 멤버변수로 캐싱합니다.
 		SelectedAbility.Ability = AbilityTag;
 		SelectedAbility.Status = AbilityStatus;
+		if (AbilitySpec)
+		{
+			SelectedAbility.CurrentLevel = AbilitySpec->Level;
+		}
 
 		// 버튼들 상태 조작을 시작합니다.
 		ShouldEnableButtons();
@@ -95,6 +103,7 @@ void USpellMenuWidgetController::SpellGlobeDeselected()
 	
 	SelectedAbility.Ability = FAuraGameplayTags::Get().Abilities_None;
 	SelectedAbility.Status = FAuraGameplayTags::Get().Abilities_Status_Locked;
+	SelectedAbility.CurrentLevel = 0;
 
 	OnSpellMenuStatusChangedDelegate.Broadcast(false, false, FText(), FText());
 }
@@ -155,19 +164,21 @@ void USpellMenuWidgetController::ShouldEnableButtons()
 {
 	const FAuraGameplayTags GameplayTags = FAuraGameplayTags::Get();
 
+	FAuraAbilityInfo AuraAbilityInfo = AbilityInfo->FindAbilityInfoForTag(SelectedAbility.Ability);
+
 	bool bShouldEnableSpellPointsButton = false;
 	bool bShouldEnableEquipButton = false;
 	if (SelectedAbility.Status.MatchesTagExact(GameplayTags.Abilities_Status_Equipped))
 	{
 		bShouldEnableEquipButton = true;
-		if (CurrentSpellPoints > 0)
+		if (CurrentSpellPoints > 0 && AuraAbilityInfo.MaxLevel > SelectedAbility.CurrentLevel)
 		{
 			bShouldEnableSpellPointsButton = true;
 		}
 	}
 	else if (SelectedAbility.Status.MatchesTagExact(GameplayTags.Abilities_Status_Eligible))
 	{
-		if (CurrentSpellPoints > 0)
+		if (CurrentSpellPoints > 0 && AuraAbilityInfo.MaxLevel > SelectedAbility.CurrentLevel)
 		{
 			bShouldEnableSpellPointsButton = true;
 		}
@@ -175,11 +186,12 @@ void USpellMenuWidgetController::ShouldEnableButtons()
 	else if (SelectedAbility.Status.MatchesTagExact(GameplayTags.Abilities_Status_Unlocked))
 	{
 		bShouldEnableEquipButton = true;
-		if (CurrentSpellPoints > 0)
+		if (CurrentSpellPoints > 0 && AuraAbilityInfo.MaxLevel > SelectedAbility.CurrentLevel)
 		{
 			bShouldEnableSpellPointsButton = true;
 		}
 	}
+	
 	FText Description;
 	FText NextLevelDescription;
 	AuraAbilitySystemComponent->GetDescriptionsByAbilityTag(SelectedAbility.Ability, Description, NextLevelDescription, AbilityInfo);

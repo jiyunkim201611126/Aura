@@ -11,6 +11,7 @@ struct FSelectedAbility
 {
 	FGameplayTag Ability = FGameplayTag();
 	FGameplayTag Status = FGameplayTag();
+	int32 CurrentLevel = 0;
 };
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FOnSpellMenuStatusChangedSignature, bool, bSpendPointsButtonEnabled, bool, bEquipButtonEnabled, FText, DescriptionText, FText, NextLevelDescriptionText);

@@ -41,6 +41,8 @@ struct FAuraGameplayTags
 	FGameplayTag Attributes_Resistance_Lightning;
 	FGameplayTag Attributes_Resistance_Arcane;
 	FGameplayTag Attributes_Resistance_Physical;
+
+	FGameplayTag Attributes_Defence_DamageReduction;
 	
 	FGameplayTag Attributes_Meta_IncomingXP;
 	//~ End Attributes
@@ -67,13 +69,14 @@ struct FAuraGameplayTags
 	TMap<FGameplayTag, FGameplayTag> DamageTypesToResistances;
 	//~ End Damage Types
 
-	//~ Begin Debuff Types
+	//~ Begin Debuff
 	FGameplayTag Debuff_Types_Burn;
 	FGameplayTag Debuff_Types_Stun;
 	FGameplayTag Debuff_Types_Confuse;
 
+	// Set By Caller 용도의 태그입니다.
 	FGameplayTag Debuff_Damage;
-	//~ End Debuff Types
+	//~ End Debuff
 	
 	//~ Begin Abilities
 	FGameplayTag Abilities_None;
@@ -109,7 +112,7 @@ struct FAuraGameplayTags
 	FGameplayTag Abilities_Types_None;
 	//~ End Ability Types
 
-	//~Begin Effects
+	//~ Begin Effects
 	FGameplayTag Effects_HitReact;
 	FGameplayTag Effects_GrantHitReact;
 	//~ End Effects

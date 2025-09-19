@@ -64,7 +64,7 @@ public:
 	//~ Begin Object Interface
 	// 어떤 변수들이 Replicate될지, 어떻게 Replicate될지 지정하는 함수입니다.
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
-	//~ En Object Interface
+	//~ End Object Interface
 	
 	//~ Begin AttributeSet Interface
 	// GameplayEffect의 적용으로 인해 Attribute에 변동사항이 있으면 호출되는 함수입니다.
@@ -200,7 +200,7 @@ public:
 	
 	/**
 	 * Resistance Attributes
-	*/
+	 */
 	
 	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_FireResistance, Category = "Resistance Attributes")
 	FGameplayAttributeData FireResistance;
@@ -227,6 +227,17 @@ public:
 	void OnRep_PhysicalResistance(const FGameplayAttributeData& OldPhysicalResistance) const;
 
 	/**
+	 * Combat/Defence Attribute
+	 * 버프와 디버프에 의해 증감하는 값으로, 데미지 경감이나 이동 속도 증가 등 부가적인 효과를 구현하는 데에 사용되는 Attribute들입니다.
+	 */
+	
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_DamageReduction, Category = "Buff/Debuff Attributes")
+	FGameplayAttributeData DamageReduction;
+	ATTRIBUTE_ACCESSORS(UAuraAttributeSet, DamageReduction);
+	UFUNCTION()
+	void OnRep_DamageReduction(const FGameplayAttributeData& OldDamageReduction) const;
+
+	/**
 	 * Meta Attributes
 	 * 
 	 * 값 변화가 있을 때 위에서 선언한 Attribute에 바로 적용하는 게 아니라 중간다리 역할을 해주는 Attribute를 선언해 사용합니다.
@@ -245,10 +256,6 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = "Meta Attributes")
 	FGameplayAttributeData IncomingXP;
 	ATTRIBUTE_ACCESSORS(UAuraAttributeSet, IncomingXP);
-	
-	UPROPERTY(BlueprintReadOnly, Category = "Meta Attributes")
-	FGameplayAttributeData IncomingDebuff;
-	ATTRIBUTE_ACCESSORS(UAuraAttributeSet, IncomingDebuff);
 
 private:
 	bool bTopOffHealth = false;
