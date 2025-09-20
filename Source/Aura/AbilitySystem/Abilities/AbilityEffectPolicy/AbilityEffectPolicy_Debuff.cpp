@@ -40,7 +40,7 @@ TArray<FGameplayEffectSpecHandle> UAbilityEffectPolicy_Debuff::MakeDebuffSpecHan
 			continue;
 		}
 		
-		FGameplayEffectSpecHandle DebuffSpecHandle = ASC->MakeOutgoingSpec(DebuffEffectClass, 1.f, DebuffEffectContextHandle);
+		FGameplayEffectSpecHandle DebuffSpecHandle = ASC->MakeOutgoingSpec(EffectClass, 1.f, DebuffEffectContextHandle);
 		UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(DebuffSpecHandle, GameplayTags.Debuff_Damage, Data.DebuffDamage);
 		UAbilitySystemBlueprintLibrary::SetDuration(DebuffSpecHandle, Data.DebuffDuration);
 		DebuffSpecs.Add(DebuffSpecHandle);

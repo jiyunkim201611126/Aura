@@ -77,9 +77,10 @@ void UDebuffComponent::BurnTagChanged(const FGameplayTag CallbackTag, int32 NewC
 {
 	if (NewCount > 0)
 	{
-		if (UAuraNiagaraComponent* NiagaraComponent = CreateNiagaraComponent(CallbackTag))
+		ACharacter* Character = GetPawn<ACharacter>();
+		if (Character && !ICombatInterface::Execute_IsDead(Character))
 		{
-			if (const ACharacter* Character = GetPawn<ACharacter>())
+			if (UAuraNiagaraComponent* NiagaraComponent = CreateNiagaraComponent(CallbackTag))
 			{
 				const float CharacterHeight = Character->GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
 				NiagaraComponent->SetRelativeLocation(FVector(0.f, 0.f, CharacterHeight));
@@ -93,9 +94,10 @@ void UDebuffComponent::StunTagChanged(const FGameplayTag CallbackTag, int32 NewC
 	bIsStunned = NewCount > 0;
 	if (bIsStunned)
 	{
-		if (UAuraNiagaraComponent* NiagaraComponent = CreateNiagaraComponent(CallbackTag))
+		ACharacter* Character = GetPawn<ACharacter>();
+		if (Character && !ICombatInterface::Execute_IsDead(Character))
 		{
-			if (const ACharacter* Character = GetPawn<ACharacter>())
+			if (UAuraNiagaraComponent* NiagaraComponent = CreateNiagaraComponent(CallbackTag))
 			{
 				const float CharacterHeight = Character->GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
 				const float CharacterWidth = Character->GetCapsuleComponent()->GetScaledCapsuleRadius();

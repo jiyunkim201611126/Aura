@@ -34,9 +34,6 @@ public:
 	float KnockbackForceMagnitude = 100.f;
 
 protected:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Damage")
-	TSubclassOf<UGameplayEffect> DamageEffectClass;
-
 	// 데미지 타입과 그 속성 데미지
 	UPROPERTY(EditDefaultsOnly, Category = "Damage")
 	TMap<FGameplayTag, FScalableFloat> DamageTypes;

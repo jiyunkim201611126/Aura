@@ -206,6 +206,7 @@ void UAuraAttributeSet::ApplyIncomingDamage(const FEffectProperties& Props, cons
 	float LocalIncomingDamage = GetIncomingDamage();
 	SetIncomingDamage(0.f);
 
+	// 데미지 경감 수치를 적용합니다.
 	LocalIncomingDamage *= 1.f - FMath::Clamp(GetDamageReduction(), 0.f, 1.f);
 	
 	if (LocalIncomingDamage > 0.f)

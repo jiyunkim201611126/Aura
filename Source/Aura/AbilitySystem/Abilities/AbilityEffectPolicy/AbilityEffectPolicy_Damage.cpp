@@ -37,7 +37,7 @@ TArray<FGameplayEffectSpecHandle> UAbilityEffectPolicy_Damage::MakeDamageSpecHan
 		const float ScaledDamage = Pair.Value.GetValueAtLevel(OwningAbility->GetAbilityLevel());
 		
 		// 할당받은 DamageEffectClass를 기반으로 Projectile이 가질 GameplayEffectSpecHandle을 생성합니다.
-		FGameplayEffectSpecHandle DamageSpecHandle = ASC->MakeOutgoingSpec(DamageEffectClass, 1.f, DamageEffectContextHandle);
+		FGameplayEffectSpecHandle DamageSpecHandle = ASC->MakeOutgoingSpec(EffectClass, 1.f, DamageEffectContextHandle);
 		
 		// Spec 안에 SetByCallerMagnitudes라는 이름의 TMap이 있으며, 거기에 Tag를 키, Damage를 밸류로 값을 추가하는 함수입니다.
 		// 이 값은 GetSetByCallerMagnitude로 꺼내올 수 있습니다.

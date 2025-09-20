@@ -24,6 +24,8 @@ void UAuraPassiveAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handl
 			NiagaraComponent->RegisterComponent();
 		}
 	}
+
+	ApplyAllEffect(GetAvatarActorFromActorInfo());
 }
 
 void UAuraPassiveAbility::ReceiveDeactivate(const FGameplayTag& InAbilityTag)
@@ -35,7 +37,7 @@ void UAuraPassiveAbility::ReceiveDeactivate(const FGameplayTag& InAbilityTag)
 			NiagaraComponent->Deactivate();
 			NiagaraComponent->DestroyComponent();
 		}
-		
+	
 		EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, true);
 	}
 }

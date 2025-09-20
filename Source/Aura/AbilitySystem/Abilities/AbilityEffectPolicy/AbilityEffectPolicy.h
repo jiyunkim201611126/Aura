@@ -4,6 +4,7 @@
 #include "UObject/Object.h"
 #include "AbilityEffectPolicy.generated.h"
 
+class UGameplayEffect;
 class UGameplayAbility;
 
 /**
@@ -19,4 +20,8 @@ public:
 	virtual void EndAbility() PURE_VIRTUAL(...);
 	
 	virtual void ApplyAllEffect(UGameplayAbility* OwningAbility, AActor* TargetActor) PURE_VIRTUAL(...);
+
+protected:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	TSubclassOf<UGameplayEffect> EffectClass;
 };

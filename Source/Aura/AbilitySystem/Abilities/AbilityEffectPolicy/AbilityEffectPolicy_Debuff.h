@@ -22,6 +22,11 @@ struct FDebuffData
 	float DebuffDamage = 0.f;
 };
 
+/**
+ * Buff 관련 EffectPolicy의 경우 Buff 하나하나에 대응하는 클래스가 있으나, 이 클래스는 Debuff 범용 클래스입니다.
+ * 추후 Buff처럼 일대일 대응으로 리팩토링할 예정입니다.
+ */
+
 UCLASS()
 class AURA_API UAbilityEffectPolicy_Debuff : public UAbilityEffectPolicy
 {
@@ -38,9 +43,6 @@ public:
 	FGameplayEffectContextHandle DebuffEffectContextHandle;
 	
 protected:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Debuff")
-	TSubclassOf<UGameplayEffect> DebuffEffectClass;
-
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Debuff")
 	TArray<FDebuffData> DebuffData;
 };
