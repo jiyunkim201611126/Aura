@@ -1,9 +1,9 @@
-﻿#include "AbilityEffectPolicy_Combat_AbsorbHP.h"
+﻿#include "AbilityEffectPolicy_Combat_AbsorbMana.h"
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystemComponent.h"
 #include "Aura/Manager/AuraGameplayTags.h"
 
-void UAbilityEffectPolicy_Combat_AbsorbHP::ApplyEffect(UGameplayAbility* OwningAbility, AActor* TargetActor)
+void UAbilityEffectPolicy_Combat_AbsorbMana::ApplyEffect(UGameplayAbility* OwningAbility, AActor* TargetActor)
 {
 	if (EffectClass)
 	{
@@ -12,13 +12,13 @@ void UAbilityEffectPolicy_Combat_AbsorbHP::ApplyEffect(UGameplayAbility* OwningA
 		{
 			EffectContextHandle = AbilitySystemComponent->MakeEffectContext();
 			const FGameplayEffectSpecHandle EffectSpecHandle = AbilitySystemComponent->MakeOutgoingSpec(EffectClass, 1.f, EffectContextHandle);
-			EffectSpecHandle.Data.Get()->SetSetByCallerMagnitude(FAuraGameplayTags::Get().Attributes_Combat_AbsorbHealth, AbsorbHealthMagnitude);
+			EffectSpecHandle.Data.Get()->SetSetByCallerMagnitude(FAuraGameplayTags::Get().Attributes_Combat_AbsorbMana, AbsorbManaMagnitude);
 			ActiveEffectHandle = AbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*EffectSpecHandle.Data.Get());
 		}
 	}
 }
 
-void UAbilityEffectPolicy_Combat_AbsorbHP::EndAbility()
+void UAbilityEffectPolicy_Combat_AbsorbMana::EndAbility()
 {
 	if (ActiveEffectHandle.IsValid())
 	{

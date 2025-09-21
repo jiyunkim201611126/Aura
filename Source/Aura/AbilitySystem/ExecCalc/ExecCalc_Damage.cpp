@@ -50,6 +50,7 @@ struct AuraDamageStatics
 	FGameplayEffectAttributeCaptureDefinition TargetLightningResistance;
 	FGameplayEffectAttributeCaptureDefinition TargetArcaneResistance;
 	FGameplayEffectAttributeCaptureDefinition TargetPhysicalResistance;
+	FGameplayEffectAttributeCaptureDefinition TargetDamageReduction;
 
 	// 데미지 계산 시 편의성을 위해 선언, 각 Resistance의 키와 TargetResistance를 매칭시켜 저장 
 	TMap<FGameplayTag, FGameplayEffectAttributeCaptureDefinition> TagsToCaptureResistanceDefs;
@@ -65,7 +66,8 @@ struct AuraDamageStatics
 	TargetFireResistance(UAuraAttributeSet::GetFireResistanceAttribute(), EGameplayEffectAttributeCaptureSource::Target, false),
 	TargetLightningResistance(UAuraAttributeSet::GetLightningResistanceAttribute(), EGameplayEffectAttributeCaptureSource::Target, false),
 	TargetArcaneResistance(UAuraAttributeSet::GetArcaneResistanceAttribute(), EGameplayEffectAttributeCaptureSource::Target, false),
-	TargetPhysicalResistance(UAuraAttributeSet::GetPhysicalResistanceAttribute(), EGameplayEffectAttributeCaptureSource::Target, false)
+	TargetPhysicalResistance(UAuraAttributeSet::GetPhysicalResistanceAttribute(), EGameplayEffectAttributeCaptureSource::Target, false),
+	TargetDamageReduction(UAuraAttributeSet::GetDamageReductionAttribute(), EGameplayEffectAttributeCaptureSource::Target, false)
 	{
 		TagsToCaptureResistanceDefs.Add(FAuraGameplayTags::Get().Attributes_Resistance_Fire, TargetFireResistance);
 		TagsToCaptureResistanceDefs.Add(FAuraGameplayTags::Get().Attributes_Resistance_Lightning, TargetLightningResistance);
@@ -95,6 +97,7 @@ UExecCalc_Damage::UExecCalc_Damage()
 	RelevantAttributesToCapture.Add(DamageStatics().TargetLightningResistance);
 	RelevantAttributesToCapture.Add(DamageStatics().TargetArcaneResistance);
 	RelevantAttributesToCapture.Add(DamageStatics().TargetPhysicalResistance);
+	RelevantAttributesToCapture.Add(DamageStatics().TargetDamageReduction);
 }
 
 void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecutionParameters& ExecutionParams, FGameplayEffectCustomExecutionOutput& OutExecutionOutput) const
@@ -138,9 +141,10 @@ void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecuti
 	// 일치하는 데미지 타입 탐색 후 부여된 데미지에 따른 계산 진행
 	FGameplayTag DamageType;
 	float Damage = 0.f;
+
+	// 현재 데미지 타입과 일치하는 데미지를 탐색합니다.
 	for (auto& Pair : FAuraGameplayTags::Get().DamageTypesToResistances)
 	{
-		// 각 데미지 타입 모두 순회하며 현재 데미지 타입과 일치하는 경우 데미지로 할당합니다.
 		const FGameplayTag DamageTypeTag = Pair.Key;
 		const FGameplayTag ResistanceTypeTag = Pair.Value;
 		checkf(AuraDamageStatics().TagsToCaptureResistanceDefs.Contains(ResistanceTypeTag), TEXT("TagsToCaptureResistanceDefs doesn't contain Tag: [%s] in ExecCalc_Damage."), *ResistanceTypeTag.ToString());
@@ -149,15 +153,15 @@ void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecuti
 
 		if (DamageTypeValue > 0.f)
 		{
-			// Resistance Value 가져오기
+			// Resistance Value 가져오옵니다.
 			const FGameplayEffectAttributeCaptureDefinition Resistance = AuraDamageStatics().TagsToCaptureResistanceDefs[ResistanceTypeTag];
 			float ResistanceTypeValue = 0.f;
 			ExecutionParams.AttemptCalculateCapturedAttributeMagnitude(Resistance, EvaluationParameters, ResistanceTypeValue);
-			// Resistance는 음수일 가능성도 있으므로 Clamp하지 않음
+			// Resistance는 음수일 가능성도 있으므로 Clamp하지 않습니다.
 
 			DamageType = Pair.Key;
 
-			// 속성 데미지 계산 결과 반영
+			// 속성 데미지 계산 결과 반영 후 반복문을 빠져나갑니다.
 			DamageTypeValue *= ( 100.f - ResistanceTypeValue ) / 100.f;
 			Damage = DamageTypeValue;
 			break;
@@ -200,7 +204,7 @@ void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecuti
 	const float EffectiveArmorCoefficient = EffectiveArmorCurve->Eval(LevelGap);
 	const float CriticalHitDamageCoefficient = CriticalHitDamage->Eval(LevelGap);
 
-	// 데미지 계산 시작
+	// 데미지 계산을 시작합니다.
 	bool bBlocked = false;
 	bool bCritical = false;
 	
@@ -230,6 +234,11 @@ void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecuti
 
 	// Damage, Block 등 계산 결과를 Context에 기록
 	UAuraAbilitySystemLibrary::SetDamageDataContext(EffectContextHandle, UAuraAbilitySystemLibrary::ReplaceDamageTypeToEnum(DamageType), bBlocked, bCritical);
+	
+	// 데미지 경감 수치를 적용합니다.
+	float TargetDamageReduction = 0.f;
+	ExecutionParams.AttemptCalculateCapturedAttributeMagnitude(DamageStatics().TargetDamageReduction, EvaluationParameters, TargetDamageReduction);
+	Damage *= 1.f - FMath::Clamp(TargetDamageReduction, 0.f, 1.f);
 	
 	// IncomingDamage Attribute에 Damage만큼 Additive(더하기) 연산을 적용하라는 Modifier 데이터를 생성
 	const FGameplayModifierEvaluatedData EvaluatedData(UAuraAttributeSet::GetIncomingDamageAttribute(), EGameplayModOp::Additive, Damage);

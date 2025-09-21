@@ -2,10 +2,10 @@
 
 #include "CoreMinimal.h"
 #include "Aura/AbilitySystem/Abilities/AbilityEffectPolicy/AbilityEffectPolicy.h"
-#include "AbilityEffectPolicy_Combat_AbsorbHP.generated.h"
+#include "AbilityEffectPolicy_Combat_AbsorbMana.generated.h"
 
 UCLASS()
-class AURA_API UAbilityEffectPolicy_Combat_AbsorbHP : public UAbilityEffectPolicy
+class AURA_API UAbilityEffectPolicy_Combat_AbsorbMana : public UAbilityEffectPolicy
 {
 	GENERATED_BODY()
 
@@ -18,9 +18,10 @@ protected:
 	FActiveGameplayEffectHandle ActiveEffectHandle;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	float AbsorbHealthMagnitude;
+	float AbsorbManaMagnitude;
 
 private:
 	UPROPERTY()
 	TWeakObjectPtr<UAbilitySystemComponent> AbilitySystemComponent;
 };
+

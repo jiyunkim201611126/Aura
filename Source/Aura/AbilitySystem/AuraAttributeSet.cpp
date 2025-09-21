@@ -200,9 +200,6 @@ void UAuraAttributeSet::ApplyIncomingDamage(const FEffectProperties& Props, cons
 {
 	float LocalIncomingDamage = GetIncomingDamage();
 	SetIncomingDamage(0.f);
-
-	// 데미지 경감 수치를 적용합니다.
-	LocalIncomingDamage *= 1.f - FMath::Clamp(GetDamageReduction(), 0.f, 1.f);
 	
 	if (LocalIncomingDamage > 0.f)
 	{
@@ -254,7 +251,7 @@ void UAuraAttributeSet::ApplyIncomingDamage(const FEffectProperties& Props, cons
 			It->ClientSpawnDamageText(LocalIncomingDamage, Props.TargetAvatarActor, DamageData.bIsBlockedHit, DamageData.bIsCriticalHit, DamageData.DamageType);
 		}
 
-		// HP, MP 흡수 이벤트를 발생시킵니다.
+		// 데미지를 발생시킨 SourceASC에게 Absorb 태그가 부여되어 있는 경우 HP혹은 MP 흡수 이벤트를 발생시킵니다.
 		const FAuraGameplayTags AuraGameplayTags = FAuraGameplayTags::Get();
 		if (Props.SourceASC->HasMatchingGameplayTag(AuraGameplayTags.Buff_AbsorbHealth))
 		{
