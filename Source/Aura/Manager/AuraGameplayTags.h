@@ -41,6 +41,9 @@ struct FAuraGameplayTags
 	FGameplayTag Attributes_Resistance_Lightning;
 	FGameplayTag Attributes_Resistance_Arcane;
 	FGameplayTag Attributes_Resistance_Physical;
+	
+	FGameplayTag Attributes_Combat_AbsorbHealth;
+	FGameplayTag Attributes_Combat_AbsorbMana;
 
 	FGameplayTag Attributes_Defence_DamageReduction;
 	
@@ -77,6 +80,11 @@ struct FAuraGameplayTags
 	// Set By Caller 용도의 태그입니다.
 	FGameplayTag Debuff_Damage;
 	//~ End Debuff
+
+	//~ Begin Buff
+	FGameplayTag Buff_AbsorbHealth;
+	FGameplayTag Buff_AbsorbMana;
+	//~ End Buff
 	
 	//~ Begin Abilities
 	FGameplayTag Abilities_None;

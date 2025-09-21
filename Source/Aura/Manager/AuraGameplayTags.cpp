@@ -39,6 +39,10 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 		FName("Attributes.Secondary.MaxHealth"), FString("The maximum amount of Health obtainable"));
 	GameplayTags.Attributes_Secondary_MaxMana = UGameplayTagsManager::Get().AddNativeGameplayTag(
 		FName("Attributes.Secondary.MaxMana"), FString("The maximum amount of Mana obtainable"));
+	GameplayTags.Attributes_Combat_AbsorbHealth = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("Attributes.Combat.AbsorbHealth"), FString("The Percentage of absorbing Health"));
+	GameplayTags.Attributes_Combat_AbsorbMana = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("Attributes.Combat.AbsorbMana"), FString("The Percentage of absorbing Mana"));
 	GameplayTags.Attributes_Defence_DamageReduction = UGameplayTagsManager::Get().AddNativeGameplayTag(
 		FName("Attributes.Defence.DamageReduction"), FString("The Percentage of Damage reduction"));
 	
@@ -105,6 +109,13 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 	
 	GameplayTags.Debuff_Damage = UGameplayTagsManager::Get().AddNativeGameplayTag(
 		FName("Debuff.Damage"), FString("Debuff Damage"));
+
+	// Buffs
+	
+	GameplayTags.Buff_AbsorbHealth = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("Buff.AbsorbHealth"), FString("Absorb Health"));
+	GameplayTags.Buff_AbsorbMana = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("Buff.AbsorbMana"), FString("Absorb Mana"));
 	
 	// Abilities
 

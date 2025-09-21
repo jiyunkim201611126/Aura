@@ -27,13 +27,13 @@ void UAuraGameplayAbility::ApplyAllEffect(AActor* TargetActor)
 	}
 }
 
-FGameplayEffectContextHandle UAuraGameplayAbility::GetContextHandle(TSubclassOf<UAbilityEffectPolicy> PolicyClass) const
+FGameplayEffectContextHandle UAuraGameplayAbility::GetContextHandle(const TSubclassOf<UAbilityEffectPolicy> PolicyClass) const
 {
-	for (const UAbilityEffectPolicy* Policy : EffectPolicies)
+	for (const auto EffectPolicy : EffectPolicies)
 	{
-		if (Policy && Policy->GetClass() == PolicyClass)
+		if (EffectPolicy && EffectPolicy->GetClass() == PolicyClass)
 		{
-			return Policy->GetEffectContextHandle();
+			return EffectPolicy->GetEffectContextHandle();
 		}
 	}
 	return FGameplayEffectContextHandle();

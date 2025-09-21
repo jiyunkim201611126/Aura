@@ -88,6 +88,8 @@ void UAuraAttributeSet::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 
 	// Combat/Defence Attribute
 	
+	DOREPLIFETIME_CONDITION_NOTIFY(UAuraAttributeSet, AbsorbHealth, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(UAuraAttributeSet, AbsorbMana, COND_None, REPNOTIFY_Always);
 	DOREPLIFETIME_CONDITION_NOTIFY(UAuraAttributeSet, DamageReduction, COND_None, REPNOTIFY_Always);
 }
 
@@ -125,6 +127,23 @@ void UAuraAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallba
 	if (Data.EvaluatedData.Attribute == GetIncomingXPAttribute())
 	{
 		ApplyIncomingXP(Props);
+	}
+
+	
+	if (Data.EvaluatedData.Attribute == GetIncomingAbsorbingHealthAttribute())
+	{
+		const float LocalIncomingAbsorbingHealth = GetIncomingAbsorbingHealth() * GetAbsorbHealth();
+		SetIncomingAbsorbingHealth(0.f);
+		
+		SetHealth(FMath::Clamp(GetHealth() + LocalIncomingAbsorbingHealth, 0.f, GetMaxHealth()));
+	}
+	
+	if (Data.EvaluatedData.Attribute == GetIncomingAbsorbingManaAttribute())
+	{
+		const float LocalIncomingAbsorbingMana = GetIncomingAbsorbingMana() * GetAbsorbMana();
+		SetIncomingAbsorbingMana(0.f);
+		
+		SetMana(FMath::Clamp(GetMana() + LocalIncomingAbsorbingMana, 0.f, GetMaxMana()));
 	}
 }
 
@@ -175,30 +194,6 @@ void UAuraAttributeSet::SetEffectProperties(const FGameplayEffectModCallbackData
 		Props.TargetCharacter = Cast<ACharacter>(Props.TargetAvatarActor);
 		Props.TargetASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(Props.TargetAvatarActor);
 	}
-}
-
-void UAuraAttributeSet::SendXPEvent(const FEffectProperties& Props) const
-{
-	const ECharacterRank TargetRank = ICombatInterface::Execute_GetCharacterRank(Props.TargetAvatarActor);
-	// Rank가 None인 경우(소환된 하수인이거나, 경험치를 얻을 수 없는 적), 이벤트를 발생시키지 않습니다.
-	if (TargetRank == ECharacterRank::None)
-	{
-		return;
-	}
-	
-	// XP 변화량을 계산해 이벤트를 송신합니다.
-	const int32 TargetLevel = ICombatInterface::Execute_GetCharacterLevel(Props.TargetAvatarActor);
-	const int32 XPReward = UAuraAbilitySystemLibrary::GetXPRewardForRankAndLevel(Props.TargetAvatarActor, TargetRank, TargetLevel);
-
-	const FAuraGameplayTags& GameplayTags = FAuraGameplayTags::Get();
-	FGameplayEventData Payload;
-	Payload.EventTag = GameplayTags.Attributes_Meta_IncomingXP;
-	Payload.EventMagnitude = XPReward;
-	// 이벤트를 송신하는 함수입니다.
-	// 아래 구문을 기준으로 하면, SourceCharacter의 ASC에게 IncomingXP Tag를 식별자로 하여 이벤트를 발생시킵니다.
-	// Payload에 원하는 데이터를 담아 송신할 수 있습니다.
-	// 해당 이벤트는 이 Tag를 기준으로 WaitGameplayEvent를 호출한 Ability(GA_ListenForEvent)가 수신합니다.
-	UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(Props.SourceCharacter, GameplayTags.Attributes_Meta_IncomingXP, Payload);
 }
 
 void UAuraAttributeSet::ApplyIncomingDamage(const FEffectProperties& Props, const FGameplayEffectModCallbackData& Data)
@@ -258,6 +253,17 @@ void UAuraAttributeSet::ApplyIncomingDamage(const FEffectProperties& Props, cons
 		{
 			It->ClientSpawnDamageText(LocalIncomingDamage, Props.TargetAvatarActor, DamageData.bIsBlockedHit, DamageData.bIsCriticalHit, DamageData.DamageType);
 		}
+
+		// HP, MP 흡수 이벤트를 발생시킵니다.
+		const FAuraGameplayTags AuraGameplayTags = FAuraGameplayTags::Get();
+		if (Props.SourceASC->HasMatchingGameplayTag(AuraGameplayTags.Buff_AbsorbHealth))
+		{
+			SendEventWithTag(Props, AuraGameplayTags.Buff_AbsorbHealth, LocalIncomingDamage);
+		}
+		if (Props.SourceASC->HasMatchingGameplayTag(AuraGameplayTags.Buff_AbsorbMana))
+		{
+			SendEventWithTag(Props, AuraGameplayTags.Buff_AbsorbMana, LocalIncomingDamage);
+		}
 	}
 	else if (LocalIncomingDamage < 0.01f)
 	{
@@ -268,6 +274,30 @@ void UAuraAttributeSet::ApplyIncomingDamage(const FEffectProperties& Props, cons
 			It->ClientSpawnDamageText(LocalIncomingDamage, Props.TargetAvatarActor, false, false, EDamageTypeContext::None);
 		}
 	}
+}
+
+void UAuraAttributeSet::SendXPEvent(const FEffectProperties& Props) const
+{
+	const ECharacterRank TargetRank = ICombatInterface::Execute_GetCharacterRank(Props.TargetAvatarActor);
+	// Rank가 None인 경우(소환된 하수인이거나, 경험치를 얻을 수 없는 적), 이벤트를 발생시키지 않습니다.
+	if (TargetRank == ECharacterRank::None)
+	{
+		return;
+	}
+	
+	// XP 변화량을 계산해 이벤트를 송신합니다.
+	const int32 TargetLevel = ICombatInterface::Execute_GetCharacterLevel(Props.TargetAvatarActor);
+	const int32 XPReward = UAuraAbilitySystemLibrary::GetXPRewardForRankAndLevel(Props.TargetAvatarActor, TargetRank, TargetLevel);
+
+	const FAuraGameplayTags& GameplayTags = FAuraGameplayTags::Get();
+	FGameplayEventData Payload;
+	Payload.EventTag = GameplayTags.Attributes_Meta_IncomingXP;
+	Payload.EventMagnitude = XPReward;
+	// 이벤트를 송신하는 함수입니다.
+	// 아래 구문을 기준으로 하면, SourceCharacter의 ASC에게 IncomingXP Tag를 식별자로 하여 이벤트를 발생시킵니다.
+	// Payload에 원하는 데이터를 담아 송신할 수 있습니다.
+	// 해당 이벤트는 이 Tag를 기준으로 WaitGameplayEvent를 호출한 Ability(GA_ListenForEvent)가 수신합니다.
+	UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(Props.SourceCharacter, GameplayTags.Attributes_Meta_IncomingXP, Payload);
 }
 
 void UAuraAttributeSet::ApplyIncomingXP(const FEffectProperties& Props)
@@ -307,6 +337,14 @@ void UAuraAttributeSet::ApplyIncomingXP(const FEffectProperties& Props)
 		// XP 보상을 부여합니다.
 		ILevelableInterface::Execute_AddToXP(Props.SourceCharacter, LocalIncomingXP);
 	}
+}
+
+void UAuraAttributeSet::SendEventWithTag(const FEffectProperties& Props, const FGameplayTag& EventTag,const float Magnitude) const
+{
+	FGameplayEventData Payload;
+	Payload.EventTag = EventTag;
+	Payload.EventMagnitude = Magnitude;
+	UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(Props.SourceCharacter, EventTag, Payload);
 }
 
 void UAuraAttributeSet::OnRep_Health(const FGameplayAttributeData& OldHealth) const
@@ -408,6 +446,16 @@ void UAuraAttributeSet::OnRep_ArcaneResistance(const FGameplayAttributeData& Old
 void UAuraAttributeSet::OnRep_PhysicalResistance(const FGameplayAttributeData& OldPhysicalResistance) const
 {
 	GAMEPLAYATTRIBUTE_REPNOTIFY(UAuraAttributeSet, PhysicalResistance, OldPhysicalResistance);
+}
+
+void UAuraAttributeSet::OnRep_AbsorbHealth(const FGameplayAttributeData& OldAbsorbHP) const
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UAuraAttributeSet, AbsorbHealth, OldAbsorbHP);
+}
+
+void UAuraAttributeSet::OnRep_AbsorbMana(const FGameplayAttributeData& OldAbsorbMP) const
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UAuraAttributeSet, AbsorbMana, OldAbsorbMP);
 }
 
 void UAuraAttributeSet::OnRep_DamageReduction(const FGameplayAttributeData& OldDamageReduction) const

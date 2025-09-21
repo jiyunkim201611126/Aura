@@ -1,14 +1,11 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "ActiveGameplayEffectHandle.h"
 #include "Aura/AbilitySystem/Abilities/AbilityEffectPolicy/AbilityEffectPolicy.h"
-#include "AbilityEffectPolicy_Defence_DamageReduction.generated.h"
-
-class UGameplayEffect;
+#include "AbilityEffectPolicy_Combat_AbsorbHP.generated.h"
 
 UCLASS()
-class AURA_API UAbilityEffectPolicy_Defence_DamageReduction : public UAbilityEffectPolicy
+class AURA_API UAbilityEffectPolicy_Combat_AbsorbHP : public UAbilityEffectPolicy
 {
 	GENERATED_BODY()
 
@@ -17,14 +14,11 @@ public:
 	virtual void EndAbility() override;
 
 protected:
-	// Remove Effect할 때 추적 용도로 사용됩니다.
 	UPROPERTY()
 	FActiveGameplayEffectHandle ActiveEffectHandle;
 
-	// 데미지 경감 수치입니다.
-	// 레벨에 따라 다른 수치를 주고 싶다면 FScalableFloat으로 변경, DT를 할당하면 됩니다.
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	float DamageReductionMagnitude;
+	float AbsorbHealthMagnitude;
 
 private:
 	UPROPERTY()

@@ -49,7 +49,7 @@ public:
 protected:
 	// 매개변수로 들어온 AbilityEffectPolicy 클래스가 갖고 있는 GameplayEffectContextHandle을 가져오는 함수입니다.
 	// 반드시 Ability가 소유하고 있는 EffectPolicy만 사용해야 합니다.
-	// 블루프린트에선 템플릿 함수를 지원하지 않기 때문에, 매개변수로 클래스를 받아 C++에서 템플릿 함수를 통해 반환하는 것으로 우회합니다.
+	// 블루프린트에선 템플릿 함수를 지원하지 않기 때문에 Class를 매개변수로 받아 비슷한 동작을 하도록 구현합니다.
 	UFUNCTION(BlueprintPure)
 	FGameplayEffectContextHandle GetContextHandle(TSubclassOf<UAbilityEffectPolicy> PolicyClass) const;
 	
@@ -59,6 +59,23 @@ protected:
 	float GetCooldown(const int32 InLevel) const;
 	UFUNCTION(BlueprintPure)
 	FText GetDamageTexts(const int32 InLevel) const;
+
+	template<typename T>
+	T* GetEffectPoliciesOfClass() const
+	{
+		// T가 UAbilityEffectPolicy를 상속받지 않는 경우 오류를 발생시키는 구문입니다.
+		static_assert(TIsDerivedFrom<T, UAbilityEffectPolicy>::IsDerived, "T는 반드시 UAbilityEffectPolicy를 상속받아야 합니다.");
+
+		for (UAbilityEffectPolicy* Policy : EffectPolicies)
+		{
+			if (Policy && Policy->IsA<T>())
+			{
+				return Cast<T>(Policy);
+			}
+		}
+
+		return nullptr;
+	}
 
 private:
 	// TaggedMontages 중 랜덤하게 하나 가져오는 함수입니다.
@@ -89,23 +106,6 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Instanced, Category = "Effect")
 	TArray<TObjectPtr<UAbilityEffectPolicy>> EffectPolicies;
-
-	template<typename T>
-	T* GetEffectPoliciesOfClass() const
-	{
-		// T가 UAbilityEffectPolicy를 상속받지 않는 경우 오류를 발생시키는 구문입니다.
-		static_assert(TIsDerivedFrom<T, UAbilityEffectPolicy>::IsDerived, "T는 반드시 UAbilityEffectPolicy를 상속받아야 합니다.");
-
-		for (UAbilityEffectPolicy* Policy : EffectPolicies)
-		{
-			if (Policy && Policy->IsA<T>())
-			{
-				return Cast<T>(Policy);
-			}
-		}
-
-		return nullptr;
-	}
 
 protected:
 	// 이 아래로는 스택형 스킬을 구현하기 위한 구문입니다.
