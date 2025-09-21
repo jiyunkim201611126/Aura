@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
+#include "GameplayEffectTypes.h"
 #include "UObject/Object.h"
 #include "AbilityEffectPolicy.generated.h"
 
@@ -17,11 +18,14 @@ class AURA_API UAbilityEffectPolicy : public UObject
 	GENERATED_BODY()
 
 public:
+	virtual void ApplyEffect(UGameplayAbility* OwningAbility, AActor* TargetActor) PURE_VIRTUAL(...);
 	virtual void EndAbility() PURE_VIRTUAL(...);
-	
-	virtual void ApplyAllEffect(UGameplayAbility* OwningAbility, AActor* TargetActor) PURE_VIRTUAL(...);
+
+	FGameplayEffectContextHandle GetEffectContextHandle() const;
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TSubclassOf<UGameplayEffect> EffectClass;
+
+	FGameplayEffectContextHandle EffectContextHandle;
 };

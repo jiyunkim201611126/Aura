@@ -14,16 +14,14 @@ class AURA_API UAbilityEffectPolicy_Damage : public UAbilityEffectPolicy
 	GENERATED_BODY()
 
 public:
+	virtual void ApplyEffect(UGameplayAbility* OwningAbility, AActor* TargetActor) override;
 	virtual void EndAbility() override;
-	
-	virtual void ApplyAllEffect(UGameplayAbility* OwningAbility, AActor* TargetActor) override;
 
 	TArray<FGameplayEffectSpecHandle> MakeDamageSpecHandle(const UGameplayAbility* OwningAbility);
 	void CauseDamage(const UGameplayAbility* OwningAbility, AActor* TargetActor, const TArray<FGameplayEffectSpecHandle>& DamageSpecs);
 	FText GetDamageTexts(int32 InLevel);
-	
-	FGameplayEffectContextHandle DamageEffectContextHandle;
 
+public:
 	UPROPERTY(EditDefaultsOnly, Category = "Damage")
 	float DeathImpulseMagnitude = 500.f;
 

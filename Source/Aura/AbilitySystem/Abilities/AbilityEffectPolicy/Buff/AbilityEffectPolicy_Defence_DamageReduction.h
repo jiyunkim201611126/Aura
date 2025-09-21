@@ -13,9 +13,8 @@ class AURA_API UAbilityEffectPolicy_Defence_DamageReduction : public UAbilityEff
 	GENERATED_BODY()
 
 public:
+	virtual void ApplyEffect(UGameplayAbility* OwningAbility, AActor* TargetActor) override;
 	virtual void EndAbility() override;
-	
-	virtual void ApplyAllEffect(UGameplayAbility* OwningAbility, AActor* TargetActor) override;
 
 protected:
 	// 위 SpecHandle이 적용된 후 반환되는 구조체입니다.
@@ -25,7 +24,7 @@ protected:
 
 	// 데미지 경감 수치입니다.
 	// 레벨에 따라 다른 수치를 주고 싶다면 FScalableFloat으로 변경, DT를 할당하면 됩니다.
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	float DamageReductionMagnitude;
 
 private:

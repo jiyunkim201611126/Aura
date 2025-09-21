@@ -101,12 +101,12 @@ void UAuraProjectileSpell::SetHandlesToProjectile(AAuraProjectile* Projectile, c
 	// Ability를 소유한 AvatarActor의 AbilitySystemComponent 가져옵니다.
 	const UAbilitySystemComponent* SourceASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(GetAvatarActorFromActorInfo());
 
-	UAbilityEffectPolicy_Damage* DamageEffectPolicy = GetEffectPoliciesOfClass<UAbilityEffectPolicy_Damage>(EffectPolicies);
+	UAbilityEffectPolicy_Damage* DamageEffectPolicy = GetEffectPoliciesOfClass<UAbilityEffectPolicy_Damage>();
 
 	if (DamageEffectPolicy)
 	{
 		// Damage Context를 생성 및 초기화합니다.
-		FGameplayEffectContextHandle DamageEffectContextHandle = DamageEffectPolicy->DamageEffectContextHandle;
+		FGameplayEffectContextHandle DamageEffectContextHandle = DamageEffectPolicy->GetEffectContextHandle();
 		if (!DamageEffectContextHandle.IsValid())
 		{
 			DamageEffectContextHandle = SourceASC->MakeEffectContext();
@@ -128,12 +128,12 @@ void UAuraProjectileSpell::SetHandlesToProjectile(AAuraProjectile* Projectile, c
 		Projectile->DamageEffectSpecHandle = DamageEffectPolicy->MakeDamageSpecHandle(this);
 	}
 
-	UAbilityEffectPolicy_Debuff* DebuffEffectPolicy = GetEffectPoliciesOfClass<UAbilityEffectPolicy_Debuff>(EffectPolicies);
+	UAbilityEffectPolicy_Debuff* DebuffEffectPolicy = GetEffectPoliciesOfClass<UAbilityEffectPolicy_Debuff>();
 	
 	if (DebuffEffectPolicy)
 	{
 		// Debuff Context를 생성 및 초기화합니다.
-		FGameplayEffectContextHandle DebuffEffectContextHandle = DebuffEffectPolicy->DebuffEffectContextHandle;
+		FGameplayEffectContextHandle DebuffEffectContextHandle = DebuffEffectPolicy->GetEffectContextHandle();
 		
 		if (!DebuffEffectContextHandle.IsValid())
 		{

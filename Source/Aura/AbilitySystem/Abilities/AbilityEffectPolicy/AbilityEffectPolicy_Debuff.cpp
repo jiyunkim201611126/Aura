@@ -6,14 +6,14 @@
 #include "Aura/Interaction/CombatInterface.h"
 #include "Aura/Manager/AuraGameplayTags.h"
 
-void UAbilityEffectPolicy_Debuff::EndAbility()
-{
-	DebuffEffectContextHandle.Clear();
-}
-
-void UAbilityEffectPolicy_Debuff::ApplyAllEffect(UGameplayAbility* OwningAbility, AActor* TargetActor)
+void UAbilityEffectPolicy_Debuff::ApplyEffect(UGameplayAbility* OwningAbility, AActor* TargetActor)
 {
 	CauseDebuff(OwningAbility, TargetActor, MakeDebuffSpecHandle(OwningAbility));
+}
+
+void UAbilityEffectPolicy_Debuff::EndAbility()
+{
+	EffectContextHandle.Clear();
 }
 
 TArray<FGameplayEffectSpecHandle> UAbilityEffectPolicy_Debuff::MakeDebuffSpecHandle(const UGameplayAbility* OwningAbility)
@@ -24,9 +24,9 @@ TArray<FGameplayEffectSpecHandle> UAbilityEffectPolicy_Debuff::MakeDebuffSpecHan
 		return TArray<FGameplayEffectSpecHandle>();
 	}
 	
-	if (!DebuffEffectContextHandle.Get())
+	if (!EffectContextHandle.Get())
 	{
-		DebuffEffectContextHandle = ASC->MakeEffectContext();
+		EffectContextHandle = ASC->MakeEffectContext();
 	}
 	
 	const FAuraGameplayTags& GameplayTags = FAuraGameplayTags::Get();
@@ -40,7 +40,7 @@ TArray<FGameplayEffectSpecHandle> UAbilityEffectPolicy_Debuff::MakeDebuffSpecHan
 			continue;
 		}
 		
-		FGameplayEffectSpecHandle DebuffSpecHandle = ASC->MakeOutgoingSpec(EffectClass, 1.f, DebuffEffectContextHandle);
+		FGameplayEffectSpecHandle DebuffSpecHandle = ASC->MakeOutgoingSpec(EffectClass, 1.f, EffectContextHandle);
 		UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(DebuffSpecHandle, GameplayTags.Debuff_Damage, Data.DebuffDamage);
 		UAbilitySystemBlueprintLibrary::SetDuration(DebuffSpecHandle, Data.DebuffDuration);
 		DebuffSpecs.Add(DebuffSpecHandle);
@@ -52,11 +52,11 @@ TArray<FGameplayEffectSpecHandle> UAbilityEffectPolicy_Debuff::MakeDebuffSpecHan
 void UAbilityEffectPolicy_Debuff::CauseDebuff(const UGameplayAbility* OwningAbility, AActor* TargetActor, const TArray<FGameplayEffectSpecHandle>& DebuffSpecs)
 {
 	// 관련 Actor에 추가
-	if (DebuffEffectContextHandle.IsValid())
+	if (EffectContextHandle.IsValid())
 	{
 		TArray<TWeakObjectPtr<AActor>> TargetActors;
 		TargetActors.Add(TargetActor);
-		DebuffEffectContextHandle.AddActors(TargetActors);
+		EffectContextHandle.AddActors(TargetActors);
 	}
 	
 	for (auto& DebuffSpecHandle : DebuffSpecs)

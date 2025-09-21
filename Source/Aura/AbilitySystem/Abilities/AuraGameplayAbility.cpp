@@ -2,7 +2,6 @@
 
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AbilityEffectPolicy/AbilityEffectPolicy_Damage.h"
-#include "AbilityEffectPolicy/AbilityEffectPolicy_Debuff.h"
 #include "Aura/AbilitySystem/AuraAttributeSet.h"
 #include "Aura/Interaction/CombatInterface.h"
 #include "Aura/Interaction/EnemyInterface.h"
@@ -23,36 +22,34 @@ void UAuraGameplayAbility::ApplyAllEffect(AActor* TargetActor)
 	{
 		if (EffectPolicy && TargetActor)
 		{
-			EffectPolicy->ApplyAllEffect(this, TargetActor);
+			EffectPolicy->ApplyEffect(this, TargetActor);
 		}
 	}
 }
 
-FGameplayEffectContextHandle UAuraGameplayAbility::GetDamageContextHandle() const
+FGameplayEffectContextHandle UAuraGameplayAbility::GetContextHandle(TSubclassOf<UAbilityEffectPolicy> PolicyClass) const
 {
-	UAbilityEffectPolicy_Damage* DamageEffectPolicy = GetEffectPoliciesOfClass<UAbilityEffectPolicy_Damage>(EffectPolicies);
-	check(DamageEffectPolicy);
-	return DamageEffectPolicy->DamageEffectContextHandle;
+	for (const UAbilityEffectPolicy* Policy : EffectPolicies)
+	{
+		if (Policy && Policy->GetClass() == PolicyClass)
+		{
+			return Policy->GetEffectContextHandle();
+		}
+	}
+	return FGameplayEffectContextHandle();
 }
 
-FGameplayEffectContextHandle UAuraGameplayAbility::GetDebuffContextHandle() const
-{
-	UAbilityEffectPolicy_Debuff* DebuffEffectPolicy = GetEffectPoliciesOfClass<UAbilityEffectPolicy_Debuff>(EffectPolicies);
-	check(DebuffEffectPolicy);
-	return DebuffEffectPolicy->DebuffEffectContextHandle;
-}
-
-FText UAuraGameplayAbility::GetDescription_Implementation(int32 Level)
+FText UAuraGameplayAbility::GetDescription_Implementation(const int32 Level)
 {
 	return FAuraTextManager::GetText(EStringTableTextType::UI, DescriptionKey);
 }
 
-FText UAuraGameplayAbility::GetLockedDescription(int32 Level)
+FText UAuraGameplayAbility::GetLockedDescription(const int32 Level)
 {
-	return FText::Format(FAuraTextManager::GetText(EStringTableTextType::UI, TEXT("Abilities_Description_Locked")), Level);
+	return FText::Format(FAuraTextManager::GetText(EStringTableTextType::UI, TEXT("Abilities.Description.Locked")), Level);
 }
 
-float UAuraGameplayAbility::GetManaCost(int32 InLevel) const
+float UAuraGameplayAbility::GetManaCost(const int32 InLevel) const
 {
 	float ManaCost = 0.f;
 	if (const UGameplayEffect* CostEffect = GetCostGameplayEffect())
@@ -69,7 +66,7 @@ float UAuraGameplayAbility::GetManaCost(int32 InLevel) const
 	return ManaCost;
 }
 
-float UAuraGameplayAbility::GetCooldown(int32 InLevel) const
+float UAuraGameplayAbility::GetCooldown(const int32 InLevel) const
 {
 	float Cooldown = 0.f;
 	if (const UGameplayEffect* CooldownEffect = GetCooldownGameplayEffect())
@@ -79,9 +76,9 @@ float UAuraGameplayAbility::GetCooldown(int32 InLevel) const
 	return Cooldown;
 }
 
-FText UAuraGameplayAbility::GetDamageTexts(int32 InLevel) const
+FText UAuraGameplayAbility::GetDamageTexts(const int32 InLevel) const
 {
-	if (UAbilityEffectPolicy_Damage* DamagePolicy = GetEffectPoliciesOfClass<UAbilityEffectPolicy_Damage>(EffectPolicies))
+	if (UAbilityEffectPolicy_Damage* DamagePolicy = GetEffectPoliciesOfClass<UAbilityEffectPolicy_Damage>())
 	{
 		return DamagePolicy->GetDamageTexts(InLevel);
 	}

@@ -57,7 +57,7 @@ void UAbilityAdditionalCost_Stackable::ApplyCost(const UAuraGameplayAbility* Own
 
 FText UAbilityAdditionalCost_Stackable::GetDescription()
 {
-	return FText::Format(FAuraTextManager::GetText(EStringTableTextType::UI, FString("Abilities_Description_Stackable")), StackData.CurrentStack, StackData.MaxStack, StackData.RechargeTime);
+	return FText::Format(FAuraTextManager::GetText(EStringTableTextType::UI, FString("Abilities.Description.Stackable")), StackData.CurrentStack, StackData.MaxStack, StackData.RechargeTime);
 }
 
 AStackableAbilityManager* UAbilityAdditionalCost_Stackable::GetStackableAbilityManager(const UAuraGameplayAbility* OwningAbility) const

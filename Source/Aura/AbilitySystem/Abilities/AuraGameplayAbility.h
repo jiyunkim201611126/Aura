@@ -41,23 +41,24 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void ApplyAllEffect(AActor* TargetActor);
-	
-	UFUNCTION(BlueprintPure)
-	FGameplayEffectContextHandle GetDamageContextHandle() const;
-	UFUNCTION(BlueprintPure)
-	FGameplayEffectContextHandle GetDebuffContextHandle() const;
 
 	UFUNCTION(BlueprintNativeEvent)
-	FText GetDescription(int32 Level);
-	static FText GetLockedDescription(int32 Level);
+	FText GetDescription(const int32 Level);
+	static FText GetLockedDescription(const int32 Level);
 
 protected:
-	UFUNCTION(BlueprintCallable)
-	float GetManaCost(int32 InLevel = 1) const;
-	UFUNCTION(BlueprintCallable)
-	float GetCooldown(int32 InLevel = 1) const;
+	// 매개변수로 들어온 AbilityEffectPolicy 클래스가 갖고 있는 GameplayEffectContextHandle을 가져오는 함수입니다.
+	// 반드시 Ability가 소유하고 있는 EffectPolicy만 사용해야 합니다.
+	// 블루프린트에선 템플릿 함수를 지원하지 않기 때문에, 매개변수로 클래스를 받아 C++에서 템플릿 함수를 통해 반환하는 것으로 우회합니다.
 	UFUNCTION(BlueprintPure)
-	FText GetDamageTexts(int32 InLevel) const;
+	FGameplayEffectContextHandle GetContextHandle(TSubclassOf<UAbilityEffectPolicy> PolicyClass) const;
+	
+	UFUNCTION(BlueprintPure)
+	float GetManaCost(const int32 InLevel) const;
+	UFUNCTION(BlueprintPure)
+	float GetCooldown(const int32 InLevel) const;
+	UFUNCTION(BlueprintPure)
+	FText GetDamageTexts(const int32 InLevel) const;
 
 private:
 	// TaggedMontages 중 랜덤하게 하나 가져오는 함수입니다.
@@ -86,8 +87,25 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Description")
 	FString DescriptionKey;
 
-	UPROPERTY(EditDefaultsOnly, Instanced, Category = "Effect")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Instanced, Category = "Effect")
 	TArray<TObjectPtr<UAbilityEffectPolicy>> EffectPolicies;
+
+	template<typename T>
+	T* GetEffectPoliciesOfClass() const
+	{
+		// T가 UAbilityEffectPolicy를 상속받지 않는 경우 오류를 발생시키는 구문입니다.
+		static_assert(TIsDerivedFrom<T, UAbilityEffectPolicy>::IsDerived, "T는 반드시 UAbilityEffectPolicy를 상속받아야 합니다.");
+
+		for (UAbilityEffectPolicy* Policy : EffectPolicies)
+		{
+			if (Policy && Policy->IsA<T>())
+			{
+				return Cast<T>(Policy);
+			}
+		}
+
+		return nullptr;
+	}
 
 protected:
 	// 이 아래로는 스택형 스킬을 구현하기 위한 구문입니다.
@@ -116,20 +134,3 @@ private:
 	void SyncAbilityTagToAssetTags();
 #endif
 };
-
-template<typename T>
-T* GetEffectPoliciesOfClass(const TArray<TObjectPtr<UAbilityEffectPolicy>>& Policies)
-{
-	// T가 UAbilityEffectPolicy를 상속받지 않는 경우 오류를 발생시키는 구문입니다.
-	static_assert(TIsDerivedFrom<T, UAbilityEffectPolicy>::IsDerived, "T는 반드시 UAbilityEffectPolicy를 상속받아야 합니다.");
-
-	for (UAbilityEffectPolicy* Policy : Policies)
-	{
-		if (Policy && Policy->IsA<T>())
-		{
-			return Cast<T>(Policy);
-		}
-	}
-
-	return nullptr;
-}

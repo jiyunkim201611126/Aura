@@ -1,0 +1,8 @@
+Key,SourceString
+Abilities.Description.Locked,<Default>Spell Locked Until</>\r\n<Small>Level: </><LightYellow>{0}</>
+Damage.Fire,<Red>Fire Damage: {0}</>
+Damage.Lightning,<Yellow>Lightning Damage: {0}</>
+Abilities.Description.FireBolt,"<Title>FIRE BOLT</>\r\n<Small>Level: </><LightYellow>{0}</>\r\n<Small>Mana Cost: </><LightBlue>{1}</>\r\n<Small>Cooldown: </><LightGreen>{2}</>\r\n\r\n<Small>Damage</>\r\n{3}\r\n\r\n<Default>Launches </><Red>{4}</><Default> bolts of fire, exploding on impact and dealing fire damage with a chance to burn</>"
+Abilities.Description.Electrocute,Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum
+Abilities.Description.Stackable,<Small>Start Stack: </><Purple>{0}</>\r\n<Small>Max Stack: </><Purple>{1}</>\r\n<Small>Recharge Timer: </><Purple>{2}</>
+Abilities.Description.FireRain,"<Title>FIRE RAIN</>\r\n<Small>Level: </><LightYellow>{0}</>\r\n<Small>Mana Cost: </><LightBlue>{1}</>\r\n<Small>Cooldown: </><LightGreen>{2}</>\r\n\r\n<Small>Stackable Stats</>\r\n{3}\r\n\r\n<Small>Damage</>\r\n{4}\r\n\r\n<Default>Launches </><Red>{5}</><Default> bolts of fire, exploding on impact and dealing fire damage with a chance to burn</>"
