@@ -13,6 +13,7 @@
 #include "Aura/Actor/AuraDecal.h"
 #include "Aura/Actor/DamageTextActor.h"
 #include "Aura/Interaction/CombatInterface.h"
+#include "Components/DecalComponent.h"
 
 AAuraPlayerController::AAuraPlayerController()
 {
@@ -21,13 +22,17 @@ AAuraPlayerController::AAuraPlayerController()
 	Spline = CreateDefaultSubobject<USplineComponent>("Spline");
 }
 
-void AAuraPlayerController::ShowSkillPreview()
+void AAuraPlayerController::ShowSkillPreview_Implementation(UMaterialInterface* DecalMaterial)
 {
 	HideSkillPreview();
 	SkillPreview = GetWorld()->SpawnActor<AAuraDecal>(SkillPreviewClass);
+	if (SkillPreview && DecalMaterial)
+	{
+		SkillPreview->DecalComponent->SetMaterial(0, DecalMaterial);
+	}
 }
 
-void AAuraPlayerController::HideSkillPreview()
+void AAuraPlayerController::HideSkillPreview_Implementation()
 {
 	if (SkillPreview)
 	{

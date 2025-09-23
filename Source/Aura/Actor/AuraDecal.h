@@ -11,8 +11,7 @@ class AURA_API AAuraDecal : public AActor
 
 public:
 	AAuraDecal();
-
-protected:
+	
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UDecalComponent> DecalComponent;
 };

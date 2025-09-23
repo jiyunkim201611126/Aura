@@ -95,6 +95,7 @@ struct FAuraGameplayTags
 	FGameplayTag Abilities_Fire_FireBolt;
 	FGameplayTag Abilities_Fire_FireRain;
 	FGameplayTag Abilities_Lighting_Electrocute;
+	FGameplayTag Abilities_Arcane_ArcaneShards;
 
 	FGameplayTag Abilities_Passive_HaloOfProtection;
 	FGameplayTag Abilities_Passive_LifeSiphon;
@@ -105,6 +106,7 @@ struct FAuraGameplayTags
 	FGameplayTag Cooldown_Fire_FireBolt;
 	FGameplayTag Cooldown_Fire_FireRain;
 	FGameplayTag Cooldown_Lighting_Electrocute;
+	FGameplayTag Cooldown_Arcane_ArcaneShards;
 	//~ End Cooldown
 
 	//~ Begin Ability Status

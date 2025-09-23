@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Aura/Interaction/SkillPreviewInterface.h"
 #include "GameFramework/PlayerController.h"
 #include "AuraPlayerController.generated.h"
 
@@ -18,7 +19,7 @@ struct FInputActionValue;
 struct FGameplayTag;
 
 UCLASS()
-class AURA_API AAuraPlayerController : public APlayerController
+class AURA_API AAuraPlayerController : public APlayerController, public ISkillPreviewInterface
 {
 	GENERATED_BODY()
 
@@ -29,10 +30,10 @@ public:
 	UFUNCTION(Client, Reliable)
 	void ClientSpawnDamageText(float DamageAmount, AActor* TargetActor, bool bBlockedHit, bool bCriticalHit, const EDamageTypeContext DamageType);
 
-	UFUNCTION(BlueprintCallable)
-	void ShowSkillPreview();
-	UFUNCTION(BlueprintCallable)
-	void HideSkillPreview();
+	//~ Begin ISkillPreview Interface
+	virtual void ShowSkillPreview_Implementation(UMaterialInterface* DecalMaterial = nullptr) override;
+	virtual void HideSkillPreview_Implementation() override;
+	//~ End ISkillPreview Interface
 
 protected:
 	//~ Begin Actor Interface
