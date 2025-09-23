@@ -108,9 +108,6 @@ protected:
 	TArray<TObjectPtr<UAbilityEffectPolicy>> EffectPolicies;
 
 protected:
-	// 이 아래로는 스택형 스킬을 구현하기 위한 구문입니다.
-	// 아래 포인터 배열이 초기화되어선 안 되므로 반드시 Instanced per Actor로 설정해줍니다.
-
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Instanced, Category = "AdditionalCost")
 	TArray<TObjectPtr<UAbilityAdditionalCost>> AdditionalCosts;
 

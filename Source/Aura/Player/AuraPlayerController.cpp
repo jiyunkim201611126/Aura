@@ -10,6 +10,7 @@
 #include "NavigationPath.h"
 #include "NiagaraFunctionLibrary.h"
 #include "Aura/Aura.h"
+#include "Aura/Actor/AuraDecal.h"
 #include "Aura/Actor/DamageTextActor.h"
 #include "Aura/Interaction/CombatInterface.h"
 
@@ -18,6 +19,20 @@ AAuraPlayerController::AAuraPlayerController()
 	bReplicates = true;
 
 	Spline = CreateDefaultSubobject<USplineComponent>("Spline");
+}
+
+void AAuraPlayerController::ShowSkillPreview()
+{
+	HideSkillPreview();
+	SkillPreview = GetWorld()->SpawnActor<AAuraDecal>(SkillPreviewClass);
+}
+
+void AAuraPlayerController::HideSkillPreview()
+{
+	if (SkillPreview)
+	{
+		SkillPreview->Destroy();
+	}
 }
 
 void AAuraPlayerController::ClientSpawnDamageText_Implementation(float DamageAmount, AActor* TargetActor, bool bBlockedHit, bool bCriticalHit, const EDamageTypeContext DamageType)
@@ -329,4 +344,12 @@ UAuraAbilitySystemComponent* AAuraPlayerController::GetASC()
 		AuraAbilitySystemComponent = Cast<UAuraAbilitySystemComponent>(UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(GetPawn<APawn>()));
 	}
 	return AuraAbilitySystemComponent;
+}
+
+void AAuraPlayerController::UpdateSkillPreviewLocation()
+{
+	if (SkillPreview)
+	{
+		SkillPreview->SetActorLocation(CursorHit.ImpactPoint);
+	}
 }

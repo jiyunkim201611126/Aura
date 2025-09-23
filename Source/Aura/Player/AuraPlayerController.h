@@ -4,6 +4,7 @@
 #include "GameFramework/PlayerController.h"
 #include "AuraPlayerController.generated.h"
 
+class AAuraDecal;
 class ADamageTextActor;
 class UNiagaraSystem;
 enum class EDamageTypeContext : uint8;
@@ -27,6 +28,11 @@ public:
 	// Damage를 보여주는 위젯 컴포넌트를 스폰하는 함수입니다.
 	UFUNCTION(Client, Reliable)
 	void ClientSpawnDamageText(float DamageAmount, AActor* TargetActor, bool bBlockedHit, bool bCriticalHit, const EDamageTypeContext DamageType);
+
+	UFUNCTION(BlueprintCallable)
+	void ShowSkillPreview();
+	UFUNCTION(BlueprintCallable)
+	void HideSkillPreview();
 
 protected:
 	//~ Begin Actor Interface
@@ -98,4 +104,12 @@ private:
 
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<UNiagaraSystem> ClickNiagaraSystem;
+
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<AAuraDecal> SkillPreviewClass;
+
+	UPROPERTY()
+	TObjectPtr<AAuraDecal> SkillPreview;
+
+	void UpdateSkillPreviewLocation();
 };

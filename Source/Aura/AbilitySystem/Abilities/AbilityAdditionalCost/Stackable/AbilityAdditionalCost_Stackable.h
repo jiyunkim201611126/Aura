@@ -8,6 +8,11 @@
 class UAuraAbilitySystemComponent;
 struct FGameplayAbilityActorInfo;
 
+/**
+ * 해당 객체를 소유하는 Ability는 스택형 Ability로 전환됩니다.
+ * Instancing Policy가 Instanced Per Actor가 아닌 경우, ActorInfo가 nullptr이기 때문에 반드시 Instanced Per Actor로 설정해야 합니다. 
+ */
+
 UCLASS(BlueprintType, EditInlineNew)
 class AURA_API UAbilityAdditionalCost_Stackable : public UAbilityAdditionalCost
 {
