@@ -64,6 +64,8 @@ private:
 
 	UAuraAbilitySystemComponent* GetASC();
 
+	void UpdateSkillPreviewLocation() const;
+
 public:
 	FHitResult CursorHit;
 	
@@ -111,6 +113,4 @@ private:
 
 	UPROPERTY()
 	TObjectPtr<AAuraDecal> SkillPreview;
-
-	void UpdateSkillPreviewLocation();
 };

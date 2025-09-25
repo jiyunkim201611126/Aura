@@ -60,7 +60,6 @@ void UDebuffComponent::HitReactTagChanged(const FGameplayTag CallbackTag, int32 
 {
 	bHitReacting = NewCount > 0;
 
-	// 플레이어 캐릭터의 동작입니다.
 	if (const AAuraCharacterBase* OwnerCharacter = GetPawn<AAuraCharacterBase>())
 	{
 		OwnerCharacter->GetCharacterMovement()->MaxWalkSpeed = bHitReacting ? (OwnerCharacter->BaseWalkSpeed / 2.f) : OwnerCharacter->BaseWalkSpeed;
@@ -116,12 +115,10 @@ void UDebuffComponent::StunTagChanged(const FGameplayTag CallbackTag, int32 NewC
 		AbilitySystemComponent->CancelAbilities(&CancelAbilityTags);
 	}
 
-	// 플레이어 캐릭터의 동작입니다.
 	if (const AAuraCharacterBase* OwnerCharacter = GetPawn<AAuraCharacterBase>())
 	{
 		OwnerCharacter->GetCharacterMovement()->MaxWalkSpeed = bIsStunned ? 0.f : OwnerCharacter->BaseWalkSpeed;
 		SetBlockInputState();
-		return;
 	}
 
 	// AI 캐릭터의 동작입니다.

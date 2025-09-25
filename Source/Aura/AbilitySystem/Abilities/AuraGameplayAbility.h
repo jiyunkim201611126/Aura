@@ -35,6 +35,9 @@ class AURA_API UAuraGameplayAbility : public UGameplayAbility
 	GENERATED_BODY()
 
 public:
+	UFUNCTION(BlueprintCallable)
+	AController* GetController() const;
+	
 	// CombatTarget을 향해 몸을 돌리는 Enemy 전용 함수
 	UFUNCTION(BlueprintCallable)
 	void UpdateFacingToCombatTarget() const;

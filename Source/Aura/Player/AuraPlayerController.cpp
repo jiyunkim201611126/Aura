@@ -24,7 +24,7 @@ AAuraPlayerController::AAuraPlayerController()
 
 void AAuraPlayerController::ShowSkillPreview_Implementation(UMaterialInterface* DecalMaterial)
 {
-	HideSkillPreview();
+	Execute_HideSkillPreview(this);
 	SkillPreview = GetWorld()->SpawnActor<AAuraDecal>(SkillPreviewClass);
 	if (SkillPreview && DecalMaterial)
 	{
@@ -77,6 +77,7 @@ void AAuraPlayerController::PlayerTick(float DeltaTime)
 
 	CursorTrace();
 	AutoRun();
+	UpdateSkillPreviewLocation();
 }
 
 void AAuraPlayerController::OnPossess(APawn* InPawn)
@@ -351,10 +352,17 @@ UAuraAbilitySystemComponent* AAuraPlayerController::GetASC()
 	return AuraAbilitySystemComponent;
 }
 
-void AAuraPlayerController::UpdateSkillPreviewLocation()
+void AAuraPlayerController::UpdateSkillPreviewLocation() const
 {
 	if (SkillPreview)
 	{
-		SkillPreview->SetActorLocation(CursorHit.ImpactPoint);
+		if (CursorHit.GetActor() && CursorHit.GetActor()->IsA(APawn::StaticClass()))
+		{
+			SkillPreview->SetActorLocation(CursorHit.GetActor()->GetActorLocation());
+		}
+		else
+		{
+			SkillPreview->SetActorLocation(CursorHit.ImpactPoint);
+		}
 	}
 }

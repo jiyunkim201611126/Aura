@@ -8,6 +8,11 @@
 #include "Aura/Manager/AuraTextManager.h"
 #include "AbilityAdditionalCost/AbilityAdditionalCost.h"
 
+AController* UAuraGameplayAbility::GetController() const
+{
+	return Cast<APawn>(GetAvatarActorFromActorInfo())->GetController();
+}
+
 void UAuraGameplayAbility::UpdateFacingToCombatTarget() const
 {
 	UObject* SourceActor = GetAvatarActorFromActorInfo();
