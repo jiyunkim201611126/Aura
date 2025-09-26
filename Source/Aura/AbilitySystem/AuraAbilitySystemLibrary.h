@@ -7,6 +7,7 @@
 #include "Data/CharacterClassInfo.h"
 #include "AuraAbilitySystemLibrary.generated.h"
 
+enum class ECharacterRank : uint8;
 class AAuraHUD;
 class UOverlayWidgetController;
 class UAttributeMenuWidgetController;
@@ -65,8 +66,10 @@ public:
 	static EDebuffTypeContext ReplaceDebuffTypeToEnum(const FGameplayTag& DebuffTypeTag);
 	static FGameplayTag ReplaceDebuffTypeToTag(const EDebuffTypeContext DebuffTypeEnum);
 
-	static TArray<FVector> EvenlyRotatedVectors(const FVector& Forward, const FVector& Axis, const float Spread, const int32 NumOfVectors);
-	static TArray<FRotator> EvenlySpacedRotators(const FVector& Forward, const FVector& Axis, const float Spread, const int32 NumOfRotators);
+	UFUNCTION(BlueprintCallable, Category = "AuraAbilitySystemLibrary | GameplayMechanics")
+	static TArray<FVector> EvenlyRotatedVectors(UPARAM(ref) const FVector& Forward, UPARAM(ref) const FVector& Axis, const float Spread, const int32 NumOfVectors);
+	UFUNCTION(BlueprintCallable, Category = "AuraAbilitySystemLibrary | GameplayMechanics")
+	static TArray<FRotator> EvenlySpacedRotators(UPARAM(ref) const FVector& Forward, UPARAM(ref) const FVector& Axis, const float Spread, const int32 NumOfRotators);
 
 	// 구체 Collision과 겹쳐있는 모든 UCombatInterface 객체를 TArray<AActor*>로 반환해주는 함수
 	UFUNCTION(BlueprintCallable, Category = "AuraAbilitySystemLibrary | GameplayMechanics", meta = (WorldContext = "WorldContextObject"))
