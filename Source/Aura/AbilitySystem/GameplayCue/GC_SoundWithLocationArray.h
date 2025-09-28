@@ -1,12 +1,12 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameplayCueNotify_Burst.h"
+#include "GameplayCueNotify_Static.h"
 #include "Abilities/GameplayAbilityTargetTypes.h"
 #include "GC_SoundWithLocationArray.generated.h"
 
 UCLASS()
-class AURA_API UGC_SoundWithLocationArray : public UGameplayCueNotify_Burst
+class AURA_API UGC_SoundWithLocationArray : public UGameplayCueNotify_Static
 {
 	GENERATED_BODY()
 
