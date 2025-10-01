@@ -27,7 +27,7 @@ struct FDebuffData
  * 추후 Buff처럼 일대일 대응으로 리팩토링할 예정입니다.
  */
 
-UCLASS()
+UCLASS(Blueprintable)
 class AURA_API UAbilityEffectPolicy_Debuff : public UAbilityEffectPolicy
 {
 	GENERATED_BODY()

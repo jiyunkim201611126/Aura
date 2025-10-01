@@ -8,7 +8,7 @@
 
 class UGameplayEffect;
 
-UCLASS()
+UCLASS(Blueprintable)
 class AURA_API UAbilityEffectPolicy_Damage : public UAbilityEffectPolicy
 {
 	GENERATED_BODY()

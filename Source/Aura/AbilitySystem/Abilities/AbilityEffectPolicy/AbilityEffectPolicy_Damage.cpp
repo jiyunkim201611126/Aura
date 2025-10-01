@@ -36,7 +36,7 @@ TArray<FGameplayEffectSpecHandle> UAbilityEffectPolicy_Damage::MakeDamageSpecHan
 	{
 		const float ScaledDamage = Pair.Value.GetValueAtLevel(OwningAbility->GetAbilityLevel());
 		
-		// 할당받은 DamageEffectClass를 기반으로 Projectile이 가질 GameplayEffectSpecHandle을 생성합니다.
+		// 할당받은 DamageEffectClass를 기반으로 GameplayEffectSpecHandle을 생성합니다.
 		FGameplayEffectSpecHandle DamageSpecHandle = ASC->MakeOutgoingSpec(EffectClass, 1.f, EffectContextHandle);
 		
 		// Spec 안에 SetByCallerMagnitudes라는 이름의 TMap이 있으며, 거기에 Tag를 키, Damage를 밸류로 값을 추가하는 함수입니다.
@@ -61,7 +61,7 @@ void UAbilityEffectPolicy_Damage::CauseDamage(const UGameplayAbility* OwningAbil
 		if (const AActor* AvatarActor = OwningAbility->GetAvatarActorFromActorInfo())
 		{
 			// 여기선 사망 여부를 알 수 없으므로, DeathImpulse를 일단 세팅합니다.
-			UAuraAbilitySystemLibrary::SetDeathImpulse(EffectContextHandle,AvatarActor->GetActorForwardVector() * DeathImpulseMagnitude);
+			UAuraAbilitySystemLibrary::SetDeathImpulse(EffectContextHandle, AvatarActor->GetActorForwardVector() * DeathImpulseMagnitude);
 
 			// 넉백은 확률 계산 후 성공 시 세팅합니다.
 			if (FMath::FRandRange(0.f, 100.f) < KnockbackChance)

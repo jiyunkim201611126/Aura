@@ -83,7 +83,7 @@ float UAuraGameplayAbility::GetCooldown(const int32 InLevel) const
 
 FText UAuraGameplayAbility::GetDamageTexts(const int32 InLevel) const
 {
-	if (UAbilityEffectPolicy_Damage* DamagePolicy = GetEffectPoliciesOfClass<UAbilityEffectPolicy_Damage>())
+	if (UAbilityEffectPolicy_Damage* DamagePolicy = GetEffectPolicy<UAbilityEffectPolicy_Damage>())
 	{
 		return DamagePolicy->GetDamageTexts(InLevel);
 	}

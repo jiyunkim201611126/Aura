@@ -101,7 +101,7 @@ void UAuraProjectileSpell::SetHandlesToProjectile(AAuraProjectile* Projectile, c
 	// Ability를 소유한 AvatarActor의 AbilitySystemComponent 가져옵니다.
 	const UAbilitySystemComponent* SourceASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(GetAvatarActorFromActorInfo());
 
-	UAbilityEffectPolicy_Damage* DamageEffectPolicy = GetEffectPoliciesOfClass<UAbilityEffectPolicy_Damage>();
+	UAbilityEffectPolicy_Damage* DamageEffectPolicy = GetEffectPolicy<UAbilityEffectPolicy_Damage>();
 
 	if (DamageEffectPolicy)
 	{
@@ -128,7 +128,7 @@ void UAuraProjectileSpell::SetHandlesToProjectile(AAuraProjectile* Projectile, c
 		Projectile->DamageEffectSpecHandle = DamageEffectPolicy->MakeDamageSpecHandle(this);
 	}
 
-	UAbilityEffectPolicy_Debuff* DebuffEffectPolicy = GetEffectPoliciesOfClass<UAbilityEffectPolicy_Debuff>();
+	UAbilityEffectPolicy_Debuff* DebuffEffectPolicy = GetEffectPolicy<UAbilityEffectPolicy_Debuff>();
 	
 	if (DebuffEffectPolicy)
 	{

@@ -64,7 +64,7 @@ protected:
 	FText GetDamageTexts(const int32 InLevel) const;
 
 	template<typename T>
-	T* GetEffectPoliciesOfClass() const
+	T* GetEffectPolicy() const
 	{
 		// T가 UAbilityEffectPolicy를 상속받지 않는 경우 오류를 발생시키는 구문입니다.
 		static_assert(TIsDerivedFrom<T, UAbilityEffectPolicy>::IsDerived, "T는 반드시 UAbilityEffectPolicy를 상속받아야 합니다.");

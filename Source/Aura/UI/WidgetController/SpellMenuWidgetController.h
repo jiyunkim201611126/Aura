@@ -44,7 +44,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SpellRowGlobePressed(const FGameplayTag& InputTag, const FGameplayTag& AbilityType);
 
-	void OnAbilityEquipped(const FGameplayTag& AbilityTag, const FGameplayTag& InputTag, const FGameplayTag& StatusTag, const FGameplayTag& PreviousInputTag);
+	virtual void OnAbilityEquipped(const FGameplayTag& AbilityTag, const FGameplayTag& InputTag, const FGameplayTag& StatusTag, const FGameplayTag& PreviousInputTag) override;
 
 private:
 	// SpendPoints 버튼과 Equip 버튼 활성화 여부를 결정 및 델리게이트를 호출하는 함수입니다.
