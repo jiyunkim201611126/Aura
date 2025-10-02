@@ -24,7 +24,7 @@ struct FAbilityStackItem : public FFastArraySerializerItem
 	float RechargeTime = 0.f;
 	
 	// 충전 타이머가 시작돼야 함을 클라이언트에게 명시적으로 알려주기 위한 변수입니다.
-	// 이는 이벤트 중복을 방지하기 위해 작성되었습니다.
+	// 이는 클라이언트측의 이벤트 중복을 방지하기 위해 선언되었습니다.
 	UPROPERTY()
 	bool bShouldTimerStart = true;
 	

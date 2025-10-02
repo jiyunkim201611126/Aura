@@ -30,8 +30,11 @@ void AAuraCharacter::PossessedBy(AController* NewController)
 {
 	Super::PossessedBy(NewController);
 
-	// 서버의 Ability Actor 초기화 및 HUD 초기화
+	// PlayerState, PlayerController, 빙의할 Pawn(this)의 생성이 확실한 서버의 타이밍입니다.
+	// 따라서 이곳에서 InitAbilityActorInfo를 호출합니다.
 	InitAbilityActorInfo();
+
+	// 캐릭터의 초기 Ability를 부여합니다.
 	AddCharacterStartupAbilities();
 }
 
@@ -39,7 +42,8 @@ void AAuraCharacter::OnRep_PlayerState()
 {
 	Super::OnRep_PlayerState();
 
-	// 클라이언트의 Ability Actor 초기화 및 HUD 초기화
+	// PlayerState, PlayerController, 빙의할 Pawn(this)의 생성이 확실한 클라이언트의 타이밍입니다.
+	// 따라서 이곳에서 InitAbilityActorInfo를 호출합니다.
 	InitAbilityActorInfo();
 }
 

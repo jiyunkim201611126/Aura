@@ -12,6 +12,9 @@ void UAbilityAdditionalCost_Stackable::OnEquipAbility(const UAuraGameplayAbility
 	// 따라서 매개변수로 들어오는 OwningAbility로 Manager에게 접근합니다.
 	// DefaultToInstanced를 사용할 경우 Manager가 이 객체를 제대로 캐싱하지 못 하는 문제가 발생합니다.
 	// ASC에 Ability가 부여되면서 자동으로 인스턴스가 복제되면서 발생하는 것으로 추측됩니다.
+	const bool bCheckInstancingPolicy = OwningAbility->GetInstancingPolicy() == EGameplayAbilityInstancingPolicy::InstancedPerActor;
+	checkf(bCheckInstancingPolicy, TEXT("Stackable Ability의 Instancing Policy는 반드시 InstancedPerActor여야 합니다."));
+	
 	if (AStackableAbilityManager* Manager = ASC->FindOrAddAbilityManager<AStackableAbilityManager>())
 	{
 		if (Manager)

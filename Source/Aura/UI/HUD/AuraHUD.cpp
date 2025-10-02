@@ -41,7 +41,7 @@ void AAuraHUD::InitHUD(APlayerController* PC, APlayerState* PS, UAbilitySystemCo
 {
 	checkf(OverlayWidgetClass, TEXT("Overlay Widget Class uninitialized, pleas fill out BP_AuraHUD"));
 	checkf(OverlayWidgetControllerClass, TEXT("Overlay Widget Controller Class uninitialized, please fill out BP_AuraHUD"));
-	checkf(AttributeMenuWidgetControllerClass, TEXT("Attribute Menu Widget Controller Class uninitialized, please fill out BP_AuraHUD"));;
+	checkf(AttributeMenuWidgetControllerClass, TEXT("Attribute Menu Widget Controller Class uninitialized, please fill out BP_AuraHUD"));
 	checkf(SpellMenuWidgetControllerClass, TEXT("Spell Menu Widget Controller Class uninitialized, please fill out BP_AuraHUD"));
 
 	OverlayWidget = CreateWidget<UAuraUserWidget>(GetWorld(), OverlayWidgetClass);

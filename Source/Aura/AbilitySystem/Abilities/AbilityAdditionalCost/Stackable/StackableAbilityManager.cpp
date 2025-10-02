@@ -141,15 +141,8 @@ void AStackableAbilityManager::UnregisterAbility(const FGameplayTag& AbilityTag)
 	if (AbilityStacks.Items.IsValidIndex(Index))
 	{
 		StopRecharge(AbilityTag);
-
-		//AbilityStacks.Items.RemoveAtSwap(Index);
-		//AbilityStacks.MarkArrayDirty();
-
-		//TagToIndex.Empty(AbilityStacks.Items.Num());
-		for (int32 i = 0; i < AbilityStacks.Items.Num(); i++)
-		{
-			//TagToIndex.Add(AbilityStacks.Items[i].AbilityTag, i);
-		}
+		AbilityStacks.Items.RemoveAtSwap(Index);
+		AbilityStacks.MarkArrayDirty();
 	}
 }
 
