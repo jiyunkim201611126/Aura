@@ -19,20 +19,6 @@ bool FDamageDataContext::NetSerialize(FArchive& Ar, UPackageMap* Map, bool& bOut
 	return true;
 }
 
-bool FDebuffDataContext::NetSerialize(FArchive& Ar, UPackageMap* Map, bool& bOutSuccess)
-{
-	uint8 DebuffTypeByte = static_cast<uint8>(DebuffType);
-	Ar.SerializeBits(&DebuffTypeByte, 8);
-	DebuffType = static_cast<EDebuffTypeContext>(DebuffTypeByte);
-
-	Ar << DebuffDamage;
-	Ar << DebuffDuration;
-	Ar << DebuffFrequency;
-
-	bOutSuccess = true;
-	return true;
-}
-
 void FAuraGameplayEffectContext::SetDamageDataContext(const EDamageTypeContext DamageType, bool bIsBlocked, bool bIsCritical)
 {
 	DamageData.DamageType = DamageType;

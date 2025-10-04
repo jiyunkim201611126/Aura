@@ -51,41 +51,10 @@ enum class EDebuffTypeContext : uint8
 	Max
 };
 
-USTRUCT(BlueprintType)
-struct FDebuffDataContext
-{
-	GENERATED_BODY()
-	
-	UPROPERTY()
-	EDebuffTypeContext DebuffType = EDebuffTypeContext::None;
-
-	UPROPERTY()
-	float DebuffDamage = 0.f;
-
-	UPROPERTY()
-	float DebuffDuration = 0.f;
-
-	UPROPERTY()
-	float DebuffFrequency = 0.f;
-
-	bool NetSerialize(FArchive& Ar, UPackageMap* Map, bool& bOutSuccess);
-};
-
-template<>
-struct TStructOpsTypeTraits<FDebuffDataContext> : public TStructOpsTypeTraitsBase2<FDebuffDataContext>
-{
-	enum
-	{
-		WithNetSerialize = true
-	};
-};
-
 /**
- * GE가 어떻게 적용되었는지에 대해 추적하는 데에 사용할 수 있으며, 서버와 클라 간 데이터가 공유되는 클래스
- * GE가 적용될 때 Ability로 적용한 건지, 그렇다면 어떤 Ability인지, GE를 적용시킨 건 누구인지 등등을 확인할 수 있음
- * 이외에도 커스텀해 멤버 변수를 추가해 추적 가능
- * '런타임 중 로직 작성을 위해 활용할 수 있는 로그'라고 생각하면 됨
- * 내부에 Instigator와 EffectCauser는 각각 GE를 발생시킨 ASC의 OwnerActor와 AvatarActor로 할당되어있음
+ * GameplayEffect부여나 GameplayCue 재생 등 다양한 로직에서 서버와 클라이언트간 데이터 공유가 필요할 때 사용되는 구조체입니다. 
+ * 예를 들어 GE가 부여될 때 Ability로 적용한 건지, 그렇다면 어떤 Ability인지, GE를 적용시킨 건 누구인지 등등을 확인할 수 있습니다.
+ * 이외에도 커스텀해 멤버 변수를 추가해 사용할 수 있습니다.
  */
 
 USTRUCT(BlueprintType)

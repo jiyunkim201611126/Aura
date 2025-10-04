@@ -232,7 +232,7 @@ void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecuti
 	// EffectiveArmor: 5 / 결과: 데미지의 95%만 적용 (레벨 차이 10 미만인 경우만)
 	Damage *= FMath::Clamp(100 - EffectiveArmor * EffectiveArmorCoefficient, 0.f, 100.f) / 100.f;
 
-	// Damage, Block 등 계산 결과를 Context에 기록
+	// Damage, Block 등 계산 결과를 Context에 기록합니다.
 	UAuraAbilitySystemLibrary::SetDamageDataContext(EffectContextHandle, UAuraAbilitySystemLibrary::ReplaceDamageTypeToEnum(DamageType), bBlocked, bCritical);
 	
 	// 데미지 경감 수치를 적용합니다.
@@ -240,8 +240,8 @@ void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecuti
 	ExecutionParams.AttemptCalculateCapturedAttributeMagnitude(DamageStatics().TargetDamageReduction, EvaluationParameters, TargetDamageReduction);
 	Damage *= 1.f - FMath::Clamp(TargetDamageReduction, 0.f, 1.f);
 	
-	// IncomingDamage Attribute에 Damage만큼 Additive(더하기) 연산을 적용하라는 Modifier 데이터를 생성
+	// IncomingDamage Attribute에 Damage만큼 Additive(더하기) 연산을 적용하라는 Modifier 데이터를 생성합니다.
 	const FGameplayModifierEvaluatedData EvaluatedData(UAuraAttributeSet::GetIncomingDamageAttribute(), EGameplayModOp::Additive, Damage);
-	// 이번 ExecCalc의 결과로 Modifier를 Output에 추가 (실제 적용은 GAS가 처리하며, 해당 클래스는 계산만 수행)
+	// 이번 ExecCalc의 결과로 Modifier를 Output에 추가합니다. (실제 적용은 GAS가 처리하며, 해당 클래스는 계산만 수행)
 	OutExecutionOutput.AddOutputModifier(EvaluatedData);
 }
