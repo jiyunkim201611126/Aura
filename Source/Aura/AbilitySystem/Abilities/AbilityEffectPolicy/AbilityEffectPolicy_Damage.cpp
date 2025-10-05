@@ -95,7 +95,7 @@ FText UAbilityEffectPolicy_Damage::GetDamageTexts(int32 InLevel)
 		const float DamageValue = Damage.Value.GetValueAtLevel(InLevel);
 
 		// 태그 네임을 String으로 바꿔 그대로 String Table의 Key로 사용합니다.
-		// ToString으로 변환될 때 언더바(_)가 아닌 마침표(.)으로 변환되므로, String Table에서도 마침표로 Key를 작성합니다.. (예시: Damage.Fire)
+		// ToString으로 변환될 때 언더바(_)가 아닌 마침표(.)으로 변환되므로, String Table에서도 마침표로 Key를 작성합니다. (예시: Damage.Fire)
 		FString TextKey = DamageTag.GetTagName().ToString();
 		// 최대 소수점 1자리까지 표기합니다.
 		FNumberFormattingOptions FormattingOptions;

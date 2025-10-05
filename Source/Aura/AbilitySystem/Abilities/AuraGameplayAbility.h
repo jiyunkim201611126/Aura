@@ -38,7 +38,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	AController* GetController() const;
 	
-	// CombatTarget을 향해 몸을 돌리는 Enemy 전용 함수
+	// CombatTarget을 향해 몸을 돌리는 Enemy 전용 함수입니다.
 	UFUNCTION(BlueprintCallable)
 	void UpdateFacingToCombatTarget() const;
 
@@ -48,6 +48,10 @@ public:
 	UFUNCTION(BlueprintNativeEvent)
 	FText GetDescription(const int32 Level);
 	static FText GetLockedDescription(const int32 Level);
+
+	// Radial Damage를 가진 Ability만 사용하는 함수입니다.
+	UFUNCTION(BlueprintCallable)
+	void SetRadialOriginLocation(const FVector& RadialOriginLocation);
 
 protected:
 	// 매개변수로 들어온 AbilityEffectPolicy 클래스가 갖고 있는 GameplayEffectContextHandle을 가져오는 함수입니다.

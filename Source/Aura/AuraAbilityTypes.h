@@ -95,6 +95,7 @@ protected:
 	UPROPERTY()
 	FDamageDataContext DamageData;
 
+	// GameplayCue에서 여러 개의 효과를 한 번에 재생할 때 사용합니다.
 	UPROPERTY()
 	TArray<FVector_NetQuantize> Locations;
 };
