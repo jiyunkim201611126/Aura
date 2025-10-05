@@ -12,8 +12,6 @@ class AURA_API UAuraProjectileSpell : public UAuraGameplayAbility
 	GENERATED_BODY()
 
 public:
-	virtual FText GetDescription_Implementation(int32 Level) override;
-
 	UFUNCTION(BlueprintPure)
 	int32 GetProjectileNumsToSpawn(int32 Level) const;
 

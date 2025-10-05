@@ -45,6 +45,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void ApplyAllEffect(AActor* TargetActor);
 
+	// Ability에 대한 설명을 반환하는 함수로, 블루프린트 클래스에서 정의해야 합니다.
 	UFUNCTION(BlueprintNativeEvent)
 	FText GetDescription(const int32 Level);
 	static FText GetLockedDescription(const int32 Level);
@@ -107,9 +108,6 @@ protected:
 	// 애니메이션 몽타주 및 각종 필요 변수를 한 번 래핑한 구조체의 배열입니다.
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Montage")
 	TArray<FTaggedMontage> TaggedMontages;
-	
-	UPROPERTY(EditDefaultsOnly, Category = "Description")
-	FString DescriptionKey;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Instanced, Category = "Effect")
 	TArray<TObjectPtr<UAbilityEffectPolicy>> EffectPolicies;

@@ -4,7 +4,7 @@
 #include "Aura/AbilitySystem/Abilities/AbilityEffectPolicy/AbilityEffectPolicy.h"
 #include "AbilityEffectPolicy_Combat_AbsorbMana.generated.h"
 
-UCLASS()
+UCLASS(Blueprintable)
 class AURA_API UAbilityEffectPolicy_Combat_AbsorbMana : public UAbilityEffectPolicy
 {
 	GENERATED_BODY()

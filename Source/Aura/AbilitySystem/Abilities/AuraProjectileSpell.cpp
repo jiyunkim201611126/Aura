@@ -8,12 +8,6 @@
 #include "AbilityEffectPolicy/AbilityEffectPolicy_Debuff.h"
 #include "Aura/AbilitySystem/AuraAbilitySystemLibrary.h"
 #include "Aura/Interaction/EnemyInterface.h"
-#include "Aura/Manager/AuraTextManager.h"
-
-FText UAuraProjectileSpell::GetDescription_Implementation(const int32 Level)
-{
-	return FText::Format(FAuraTextManager::GetText(EStringTableTextType::UI, DescriptionKey), Level, -GetManaCost(Level), GetCooldown(Level), GetDamageTexts(Level), GetProjectileNumsToSpawn(Level));
-}
 
 int32 UAuraProjectileSpell::GetProjectileNumsToSpawn(const int32 Level) const
 {

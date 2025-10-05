@@ -5,9 +5,7 @@
 #include "Aura/AbilitySystem/Abilities/AbilityEffectPolicy/AbilityEffectPolicy.h"
 #include "AbilityEffectPolicy_Defence_DamageReduction.generated.h"
 
-class UGameplayEffect;
-
-UCLASS()
+UCLASS(Blueprintable)
 class AURA_API UAbilityEffectPolicy_Defence_DamageReduction : public UAbilityEffectPolicy
 {
 	GENERATED_BODY()

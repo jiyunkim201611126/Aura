@@ -38,7 +38,7 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Beam")
 	float SplashRadius = 500.f;
 
-	// 최대 추가 타격 가능한 적 수입니다.
-	UPROPERTY(EditDefaultsOnly, Category = "Beam")
+	// 최대 타격 가능한 적 수입니다.
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Beam")
 	int32 MaxHitTargets = 3;
 };

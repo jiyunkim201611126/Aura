@@ -47,7 +47,7 @@ FGameplayEffectContextHandle UAuraGameplayAbility::GetContextHandle(const TSubcl
 
 FText UAuraGameplayAbility::GetDescription_Implementation(const int32 Level)
 {
-	return FAuraTextManager::GetText(EStringTableTextType::UI, DescriptionKey);
+	return FText();
 }
 
 FText UAuraGameplayAbility::GetLockedDescription(const int32 Level)
