@@ -70,9 +70,3 @@ void UAuraBeamAbility::StoreAdditionalTargets(TArray<AActor*>& OutAdditionalTarg
 	UAuraAbilitySystemLibrary::GetOverlappedLivePawnsWithinRadius(GetAvatarActorFromActorInfo(), OverlappingActors, ActorsToIgnore, SplashRadius, SphereOrigin);
 	UAuraAbilitySystemLibrary::GetClosestTargets(NumOfHitTargets, OverlappingActors, OutAdditionalTargets, SphereOrigin);
 }
-
-void UAuraBeamAbility::CancelAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateCancelAbility)
-{
-	ApplyEndAbility();
-	Super::CancelAbility(Handle, ActorInfo, ActivationInfo, bReplicateCancelAbility);
-}

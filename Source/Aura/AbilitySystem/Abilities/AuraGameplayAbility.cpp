@@ -7,7 +7,7 @@
 #include "Aura/Interaction/EnemyInterface.h"
 #include "Aura/Manager/AuraTextManager.h"
 #include "AbilityAdditionalCost/AbilityAdditionalCost.h"
-#include "AbilityEffectPolicy/AbilityEffectPolicy_RadialDamage.h"
+#include "AbilityEffectPolicy/AbilityEffectPolicy_RadialFallOffDamage.h"
 
 AController* UAuraGameplayAbility::GetController() const
 {
@@ -57,7 +57,7 @@ FText UAuraGameplayAbility::GetLockedDescription(const int32 Level)
 
 void UAuraGameplayAbility::SetRadialOriginLocation(const FVector& RadialOriginLocation)
 {
-	if (UAbilityEffectPolicy_RadialDamage* RadialDamageEffectPolicy = GetEffectPolicy<UAbilityEffectPolicy_RadialDamage>())
+	if (UAbilityEffectPolicy_RadialFallOffDamage* RadialDamageEffectPolicy = GetEffectPolicy<UAbilityEffectPolicy_RadialFallOffDamage>())
 	{
 		RadialDamageEffectPolicy->SetRadialOriginLocation(RadialOriginLocation);
 	}

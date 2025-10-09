@@ -2,10 +2,10 @@
 
 #include "CoreMinimal.h"
 #include "AbilityEffectPolicy_Damage.h"
-#include "AbilityEffectPolicy_RadialDamage.generated.h"
+#include "AbilityEffectPolicy_RadialFallOffDamage.generated.h"
 
 UCLASS()
-class AURA_API UAbilityEffectPolicy_RadialDamage : public UAbilityEffectPolicy_Damage
+class AURA_API UAbilityEffectPolicy_RadialFallOffDamage : public UAbilityEffectPolicy_Damage
 {
 	GENERATED_BODY()
 
@@ -20,15 +20,15 @@ private:
 
 public:
 	// 최대 데미지로 적용될 수 있는 최대 거리입니다.
-	UPROPERTY(EditDefaultsOnly, Category = "RadialDamage")
+	UPROPERTY(EditDefaultsOnly, Category = "RadialFallOffDamage")
 	float RadialDamageInnerRadius = 0.f;
 
 	// 최소 데미지로 적용되기 시작하는 거리입니다.
-	UPROPERTY(EditDefaultsOnly, Category = "RadialDamage")
+	UPROPERTY(EditDefaultsOnly, Category = "RadialFallOffDamage")
 	float RadialDamageOuterRadius = 0.f;
 
 	// 최소 데미지 비율입니다.
-	UPROPERTY(EditDefaultsOnly, Category = "RadialDamage")
+	UPROPERTY(EditDefaultsOnly, Category = "RadialFallOffDamage")
 	float MinDamageRatio = 0.2f;
 
 	// Radial Origin Location 캐싱 용도의 Vector입니다.

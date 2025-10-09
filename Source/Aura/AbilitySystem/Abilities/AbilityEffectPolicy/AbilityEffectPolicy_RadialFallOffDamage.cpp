@@ -1,21 +1,21 @@
-﻿#include "AbilityEffectPolicy_RadialDamage.h"
+﻿#include "AbilityEffectPolicy_RadialFallOffDamage.h"
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystemComponent.h"
 #include "Abilities/GameplayAbility.h"
 
-void UAbilityEffectPolicy_RadialDamage::ApplyEffect(UGameplayAbility* OwningAbility, AActor* TargetActor)
+void UAbilityEffectPolicy_RadialFallOffDamage::ApplyEffect(UGameplayAbility* OwningAbility, AActor* TargetActor)
 {
 	checkf(RadialDamageOrigin != FVector::ZeroVector, TEXT("RadialDamage의 경우, Ability의 ApplyAllEffect 호출 전 SetRadialOrigin을 반드시 호출해야 합니다."));
 	
 	CauseDamage(OwningAbility, TargetActor, MakeDamageSpecHandleWithRadial(OwningAbility, TargetActor));
 }
 
-void UAbilityEffectPolicy_RadialDamage::SetRadialOriginLocation(const FVector& NewOriginLocation)
+void UAbilityEffectPolicy_RadialFallOffDamage::SetRadialOriginLocation(const FVector& NewOriginLocation)
 {
 	RadialDamageOrigin = NewOriginLocation;
 }
 
-TArray<FGameplayEffectSpecHandle> UAbilityEffectPolicy_RadialDamage::MakeDamageSpecHandleWithRadial(const UGameplayAbility* OwningAbility, const AActor* TargetActor)
+TArray<FGameplayEffectSpecHandle> UAbilityEffectPolicy_RadialFallOffDamage::MakeDamageSpecHandleWithRadial(const UGameplayAbility* OwningAbility, const AActor* TargetActor)
 {
 	const UAbilitySystemComponent* ASC = OwningAbility->GetAbilitySystemComponentFromActorInfo();
 	if (!ASC)
@@ -32,7 +32,7 @@ TArray<FGameplayEffectSpecHandle> UAbilityEffectPolicy_RadialDamage::MakeDamageS
 	const float TargetDist = FVector::Dist(RadialDamageOrigin, TargetActor->GetActorLocation());
 
 	// 데미지 감쇠율을 계산합니다.
-	const float RadialDamageRatio = CalculateFalloffRatio(TargetDist);
+	const float DamageRatio = CalculateFalloffRatio(TargetDist);
 	
 	TArray<FGameplayEffectSpecHandle> DamageSpecs;
 	for (TPair<FGameplayTag, FScalableFloat>& Pair : DamageTypes)
@@ -42,7 +42,7 @@ TArray<FGameplayEffectSpecHandle> UAbilityEffectPolicy_RadialDamage::MakeDamageS
 		FGameplayEffectSpecHandle DamageSpecHandle = ASC->MakeOutgoingSpec(EffectClass, 1.f, EffectContextHandle);
 		
 		// 감쇠율이 적용된 데미지를 주입합니다.
-		UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(DamageSpecHandle, Pair.Key, ScaledDamage * RadialDamageRatio);
+		UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(DamageSpecHandle, Pair.Key, ScaledDamage * DamageRatio);
 
 		DamageSpecs.Add(DamageSpecHandle);
 	}
@@ -50,7 +50,7 @@ TArray<FGameplayEffectSpecHandle> UAbilityEffectPolicy_RadialDamage::MakeDamageS
 	return DamageSpecs;
 }
 
-float UAbilityEffectPolicy_RadialDamage::CalculateFalloffRatio(const float TargetDist) const
+float UAbilityEffectPolicy_RadialFallOffDamage::CalculateFalloffRatio(const float TargetDist) const
 {
 	if (TargetDist < RadialDamageInnerRadius)
 	{
