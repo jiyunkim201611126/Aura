@@ -229,7 +229,9 @@ FGameplayTag UAuraAbilitySystemComponent::GetAbilityTagFromSpec(const FGameplayA
 	{
 		for (FGameplayTag Tag : AbilitySpec.Ability.Get()->GetAssetTags())
 		{
-			if (Tag.MatchesTag(FGameplayTag::RequestGameplayTag(FName("Abilities"))))
+			if (Tag.MatchesTag(FGameplayTag::RequestGameplayTag(FName("Abilities")))
+				&& !Tag.MatchesTag(FGameplayTag::RequestGameplayTag(FName("Abilities.Status")))
+				&& !Tag.MatchesTag(FGameplayTag::RequestGameplayTag(FName("Abilities.Types"))))
 			{
 				return Tag;
 			}

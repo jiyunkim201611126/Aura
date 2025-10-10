@@ -133,6 +133,8 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 		FName("Abilities.Fire.FireBolt"), FString("Fire Bolt Ability Tag"));
 	GameplayTags.Abilities_Fire_FireRain = UGameplayTagsManager::Get().AddNativeGameplayTag(
 		FName("Abilities.Fire.FireRain"), FString("Fire Rain Ability Tag"));
+	GameplayTags.Abilities_Fire_FireBlast = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("Abilities.Fire.FireBlast"), FString("Fire Blast Ability Tag"));
 	GameplayTags.Abilities_Lighting_Electrocute = UGameplayTagsManager::Get().AddNativeGameplayTag(
 		FName("Abilities.Lighting.Electrocute"), FString("Electrocute Ability Tag"));
 	GameplayTags.Abilities_Arcane_ArcaneShards = UGameplayTagsManager::Get().AddNativeGameplayTag(
@@ -151,6 +153,8 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 		FName("Cooldown.Fire.FireBolt"), FString("FireBolt Cooldown Tag"));
 	GameplayTags.Cooldown_Fire_FireRain = UGameplayTagsManager::Get().AddNativeGameplayTag(
 		FName("Cooldown.Fire.FireRain"), FString("FireRain Cooldown Tag"));
+	GameplayTags.Cooldown_Fire_FireBlast = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("Cooldown.Fire.FireBlast"), FString("FireBlast Cooldown Tag"));
 	GameplayTags.Cooldown_Lighting_Electrocute = UGameplayTagsManager::Get().AddNativeGameplayTag(
 		FName("Cooldown.Lighting.Electrocute"), FString("Electrocute Cooldown Tag"));
 	GameplayTags.Cooldown_Arcane_ArcaneShards = UGameplayTagsManager::Get().AddNativeGameplayTag(

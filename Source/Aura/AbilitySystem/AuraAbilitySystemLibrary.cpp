@@ -309,6 +309,32 @@ TArray<FRotator> UAuraAbilitySystemLibrary::EvenlySpacedRotators(const FVector& 
 	return ResultRotators;
 }
 
+TArray<FRotator> UAuraAbilitySystemLibrary::EvenlySpacedRotatorsWithCircle(const FVector& Forward, const FVector& Axis, const int32 NumOfRotators)
+{
+	const bool bEvenNumber = NumOfRotators / 2 == 0;
+	const float Spread = 360.f - (360.f / NumOfRotators);
+	FVector LeftOfSpread;
+	const float DeltaSpread = NumOfRotators > 1 ? Spread / (NumOfRotators - 1) : 0.f;
+	if (bEvenNumber)
+	{
+		LeftOfSpread = -Forward;
+	}
+	else
+	{
+		LeftOfSpread = Forward.RotateAngleAxis(-Spread / 2.f, Axis);
+	}
+	
+	TArray<FRotator> ResultRotators;
+	ResultRotators.Reserve(NumOfRotators);
+	for (int i = 0; i < NumOfRotators; i++)
+	{
+		const FVector Direction = NumOfRotators > 1 ? LeftOfSpread.RotateAngleAxis(DeltaSpread * i, FVector::UpVector) : Forward;
+		ResultRotators.Add(Direction.Rotation());
+	}
+
+	return ResultRotators;
+}
+
 void UAuraAbilitySystemLibrary::GetOverlappedLivePawnsWithinRadius(const UObject* WorldContextObject, TArray<AActor*>& OutOverlappingActors, const TArray<AActor*>& ActorsToIgnore, float Radius, const FVector& SphereOrigin)
 {
 	// 충돌 검사 조건 세부 설정하는 구조체

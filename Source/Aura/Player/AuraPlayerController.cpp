@@ -24,6 +24,11 @@ AAuraPlayerController::AAuraPlayerController()
 
 void AAuraPlayerController::ShowSkillPreview_Implementation(UMaterialInterface* DecalMaterial)
 {
+	if (!IsLocalController())
+	{
+		return;
+	}
+	
 	Execute_HideSkillPreview(this);
 	SkillPreview = GetWorld()->SpawnActor<AAuraDecal>(SkillPreviewClass);
 	if (SkillPreview && DecalMaterial)
@@ -34,6 +39,11 @@ void AAuraPlayerController::ShowSkillPreview_Implementation(UMaterialInterface* 
 
 void AAuraPlayerController::HideSkillPreview_Implementation()
 {
+	if (!IsLocalController())
+	{
+		return;
+	}
+	
 	if (SkillPreview)
 	{
 		SkillPreview->Destroy();

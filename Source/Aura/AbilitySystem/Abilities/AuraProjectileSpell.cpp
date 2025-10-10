@@ -32,18 +32,17 @@ void UAuraProjectileSpell::SetTarget(const FGameplayAbilityTargetDataHandle& Han
 	}
 }
 
-void UAuraProjectileSpell::SpawnProjectile(FVector& InProjectileSpawnLocation, FVector& InProjectileTargetLocation, const float PitchOverride)
+TArray<AAuraProjectile*> UAuraProjectileSpell::SpawnProjectile(FVector& InProjectileSpawnLocation, FVector& InProjectileTargetLocation, const float PitchOverride)
 {
 	if (!GetAvatarActorFromActorInfo()->HasAuthority())
 	{
-		return;
+		return TArray<AAuraProjectile*>();
 	}
 
 	// 스폰할 Projectile의 개수를 가져옵니다.
 	const int32 NumProjectilesToSpawn = GetProjectileNumsToSpawn(GetAbilityLevel());
 	
 	// Projectile이 스폰될 위치와 날아갈 방향을 결정합니다.
-	InProjectileSpawnLocation.Z = GetAvatarActorFromActorInfo()->GetActorLocation().Z;
 	const FVector Forward = InProjectileTargetLocation - InProjectileSpawnLocation;
 	
 	// ProjectileSpread가 중심각이 되는 부채꼴 모양으로 퍼지도록 계산합니다.
@@ -56,6 +55,35 @@ void UAuraProjectileSpell::SpawnProjectile(FVector& InProjectileSpawnLocation, F
 		}
 	}
 
+	return SpawnProjectile(NumProjectilesToSpawn, InProjectileSpawnLocation, InProjectileTargetLocation, Rotations);
+}
+
+TArray<AAuraProjectile*> UAuraProjectileSpell::SpawnProjectileWithCircle(FVector& InProjectileSpawnLocation, FVector& InProjectileTargetLocation, const float PitchOverride)
+{
+	if (!GetAvatarActorFromActorInfo()->HasAuthority())
+	{
+		return TArray<AAuraProjectile*>();
+	}
+
+	const int32 NumProjectilesToSpawn = GetProjectileNumsToSpawn(GetAbilityLevel());
+	
+	const FVector Forward = InProjectileTargetLocation - InProjectileSpawnLocation;
+	
+	// 투사체가 360도 내에서 균일하게 퍼지도록 Rotation을 계산합니다.
+	TArray<FRotator> Rotations = UAuraAbilitySystemLibrary::EvenlySpacedRotatorsWithCircle(Forward, FVector::UpVector, NumProjectilesToSpawn);
+	if (PitchOverride > 0.f)
+	{
+		for (auto& Rotation : Rotations)
+		{
+			Rotation.Pitch += PitchOverride;
+		}
+	}
+	
+	return SpawnProjectile(NumProjectilesToSpawn, InProjectileSpawnLocation, InProjectileTargetLocation, Rotations);
+}
+
+TArray<AAuraProjectile*> UAuraProjectileSpell::SpawnProjectile(int32 NumProjectilesToSpawn, const FVector& InProjectileSpawnLocation, const FVector& InProjectileTargetLocation, const TArray<FRotator>& Rotations)
+{
 	// SpawnActor는 생성 직후 BeginPlay까지 호출하지만 SpawnActorDeferred는 구성만 하고 생성은 대기합니다.
 	TArray<AAuraProjectile*> Projectiles;
 	Projectiles.Reserve(NumProjectilesToSpawn);
@@ -93,6 +121,8 @@ void UAuraProjectileSpell::SpawnProjectile(FVector& InProjectileSpawnLocation, F
 	// 타겟 추적 관련 변수를 초기화합니다.
 	ProjectileTargetLocation = FVector::ZeroVector;
 	HomingTarget = nullptr;
+
+	return Projectiles;
 }
 
 void UAuraProjectileSpell::SetHandlesToProjectile(AAuraProjectile* Projectile, const FVector& TargetLocation) const

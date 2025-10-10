@@ -57,9 +57,12 @@ public:
 private:
 	UPROPERTY(EditAnywhere)
 	float LifeSpan = 1.f;
+	
+	UPROPERTY(EditAnywhere)
+	bool bDestroyWithOverlap = true;
 
 	// 클라이언트가 투사체의 이펙트(사운드, 나이아가라)가 중복되거나 누락되지 않게 하기 위한 변수입니다.
-	bool bHit = false;
+	bool bShouldPlayFX = true;
 	
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<USphereComponent> Sphere;

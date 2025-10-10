@@ -70,6 +70,8 @@ public:
 	static TArray<FVector> EvenlyRotatedVectors(UPARAM(ref) const FVector& Forward, UPARAM(ref) const FVector& Axis, const float Spread, const int32 NumOfVectors);
 	UFUNCTION(BlueprintCallable, Category = "AuraAbilitySystemLibrary | GameplayMechanics")
 	static TArray<FRotator> EvenlySpacedRotators(UPARAM(ref) const FVector& Forward, UPARAM(ref) const FVector& Axis, const float Spread, const int32 NumOfRotators);
+	UFUNCTION(BlueprintCallable, Category = "AuraAbilitySystemLibrary | GameplayMechanics", meta = (ToolTip = "360도 내에서 개수에 따른 균일한 Rotator를 계산하는 함수입니다."))
+	static TArray<FRotator> EvenlySpacedRotatorsWithCircle(UPARAM(ref) const FVector& Forward, UPARAM(ref) const FVector& Axis, const int32 NumOfRotators);
 
 	// 구체 Collision과 겹쳐있는 모든 UCombatInterface 객체를 TArray<AActor*>로 반환해주는 함수입니다.
 	UFUNCTION(BlueprintCallable, Category = "AuraAbilitySystemLibrary | GameplayMechanics", meta = (WorldContext = "WorldContextObject"))

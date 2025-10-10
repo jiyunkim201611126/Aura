@@ -25,9 +25,15 @@ protected:
 	 * @param InProjectileSpawnLocation
 	 * @param InProjectileTargetLocation 이미 멤버변수 ProjectileTargetLocation이 있지만, AI의 해당 Ability 사용을 위해 매개변수로도 선언합니다.
 	 * @param PitchOverride 양수 입력 시 해당 각도만큼 위쪽으로 발사됩니다.
-	 */
+	*/
 	UFUNCTION(BlueprintCallable, Category = "Projectile")
-	void SpawnProjectile(UPARAM(ref) FVector& InProjectileSpawnLocation, UPARAM(ref) FVector& InProjectileTargetLocation, const float PitchOverride = 0.f);
+	TArray<AAuraProjectile*> SpawnProjectile(UPARAM(ref) FVector& InProjectileSpawnLocation, UPARAM(ref) FVector& InProjectileTargetLocation, const float PitchOverride = 0.f);
+
+	// EvenlySpacedRotators 대신 EvenlySpacedRotatorsWithCircle을 사용하는 함수입니다.
+	UFUNCTION(BlueprintCallable, Category = "Projectile")
+	TArray<AAuraProjectile*> SpawnProjectileWithCircle(UPARAM(ref) FVector& InProjectileSpawnLocation, UPARAM(ref) FVector& InProjectileTargetLocation, const float PitchOverride = 0.f);
+
+	TArray<AAuraProjectile*> SpawnProjectile(int32 NumProjectilesToSpawn, const FVector& InProjectileSpawnLocation, const FVector& InProjectileTargetLocation, const TArray<FRotator>& Rotations);
 
 	void SetHandlesToProjectile(AAuraProjectile* Projectile, const FVector& TargetLocation) const;
 
@@ -44,7 +50,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Projectile")
 	FScalableFloat NumOfProjectiles = 1.f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Projectile")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Projectile")
 	float ProjectileSpread = 30.f;
 
 	// 타겟을 추적할지 결정하는 변수입니다.

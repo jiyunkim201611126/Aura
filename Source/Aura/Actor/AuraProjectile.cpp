@@ -35,16 +35,20 @@ void AAuraProjectile::BeginPlay()
 	Super::BeginPlay();
 	SetLifeSpan(LifeSpan);
 	Sphere->OnComponentBeginOverlap.AddDynamic(this, &AAuraProjectile::OnSphereOverlap);
+	Sphere->OnComponentEndOverlap.AddDynamic(this, &AAuraProjectile::OnSphereEndOverlap);
 
-	if (UFXManagerSubsystem* FXManager = GetWorld()->GetGameInstance()->GetSubsystem<UFXManagerSubsystem>())
+	if (LoopingSoundTag.IsValid())
 	{
-		FXManager->AsyncGetSound(LoopingSoundTag, [this](USoundBase* LoopingSound)
+		if (UFXManagerSubsystem* FXManager = GetWorld()->GetGameInstance()->GetSubsystem<UFXManagerSubsystem>())
 		{
-			if (LoopingSound)
+			FXManager->AsyncGetSound(LoopingSoundTag, [this](USoundBase* LoopingSound)
 			{
-				LoopingSoundComponent = UGameplayStatics::SpawnSoundAttached(LoopingSound, GetRootComponent());
-			}
-		});
+				if (LoopingSound)
+				{
+					LoopingSoundComponent = UGameplayStatics::SpawnSoundAttached(LoopingSound, GetRootComponent());
+				}
+			});
+		}
 	}
 }
 
@@ -54,19 +58,19 @@ void AAuraProjectile::Destroyed()
 	{
 		return;
 	}
-	
-	// 클라이언트에서 bHit이 false라면 아직 사운드와 나이아가라가 재생되지 않은 상태입니다.
-	// 그 상태로 Destroyed 함수가 호출됐다면 사운드와 나이아가라를 재생해 줍니다.
-	if (!bHit)
-	{
-		PlayHitFXs();
-		bHit = true;
-	}
 
 	if (LoopingSoundComponent)
 	{
 		LoopingSoundComponent->Stop();
 		LoopingSoundComponent->DestroyComponent();
+	}
+	
+	// 클라이언트에서 bHit이 false라면 아직 사운드와 나이아가라가 재생되지 않은 상태입니다.
+	// 그 상태로 Destroyed 함수가 호출됐다면 사운드와 나이아가라를 재생해 줍니다.
+	if (bShouldPlayFX && bDestroyWithOverlap)
+	{
+		PlayHitFXs();
+		bShouldPlayFX = false;
 	}
 	
 	Super::Destroyed();
@@ -105,10 +109,17 @@ void AAuraProjectile::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, 
 		return;
 	}
 	
-	// 서버, 클라이언트 모두 사운드와 나이아가라 재생
-	if (!bHit)
+	// 서버, 클라이언트 모두 사운드와 나이아가라를 재생합니다.
+	if (bShouldPlayFX)
 	{
 		PlayHitFXs();
+
+		if (bDestroyWithOverlap)
+		{
+			// Overlap 이벤트 발생 시 파괴되는 Projectile인 경우 들어오는 분기입니다.
+			// 서버와 클라이언트 모두 Overlap 이벤트가 한 번 일어났음을 캐싱합니다.
+			bShouldPlayFX = false;
+		}
 	}
 
 	// 서버인 경우 데미지를 주며 Destroy 이벤트 바인드
@@ -143,35 +154,45 @@ void AAuraProjectile::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, 
 				}
 			}
 		}
-
-		// 스폰과 동시에 Overlap 이벤트가 일어난 경우 바로 Destroy되면서 액터가 클라이언트로 복제되지 않는 현상이 있음
-		// 따라서 0.05초의 딜레이를 주어 액터 스폰이 클라이언트로 복제되는 것을 보장
-		FTimerHandle TimerHandle;
-		GetWorld()->GetTimerManager().SetTimer(
-			TimerHandle,
-			FTimerDelegate::CreateLambda([this]()
-			{
-				Destroy();
-			}),
-			0.05f,
-			false
-		);
+		
+		if (bDestroyWithOverlap)
+		{
+			// 스폰과 동시에 Overlap 이벤트가 일어난 경우 바로 Destroy되면서 액터가 클라이언트로 복제되지 않는 현상이 있음
+			// 따라서 0.05초의 딜레이를 주어 액터 스폰이 클라이언트로 복제되는 것을 보장
+			FTimerHandle TimerHandle;
+			GetWorld()->GetTimerManager().SetTimer(
+				TimerHandle,
+				FTimerDelegate::CreateLambda([this]()
+				{
+					Destroy();
+				}),
+				0.05f,
+				false
+			);
+		}
 	}
-
-	// 기존 수명으로 인해 Destroy되면 원치 않는 Destroy가 발생할 수 있으므로 LifeSpan 초기화
-	SetLifeSpan(0.f);
-	// 서버와 클라이언트 모두 Overlap 이벤트가 한 번 일어났음을 저장
-	bHit = true;
-	// 더이상 Overlap 이벤트가 필요하지 않으므로 바인드 해제
-	Sphere->OnComponentBeginOverlap.Clear();
+	
+	if (bDestroyWithOverlap)
+	{
+		// 기존 수명으로 인해 Destroy되면 원치 않는 Destroy가 발생할 수 있으므로 LifeSpan 초기화
+		SetLifeSpan(0.f);
+		// 더이상 Overlap 이벤트가 필요하지 않으므로 바인드 해제
+		Sphere->OnComponentBeginOverlap.Clear();
+	}
 }
 
 void AAuraProjectile::PlayHitFXs() const
 {
 	if (UFXManagerSubsystem* FXManagerSubsystem = GetWorld()->GetGameInstance()->GetSubsystem<UFXManagerSubsystem>())
 	{
-		FXManagerSubsystem->AsyncPlaySoundAtLocation(ImpactSoundTag, GetActorLocation());
-		FXManagerSubsystem->AsyncSpawnNiagaraAtLocation(ImpactEffectTag, GetActorLocation());
+		if (ImpactSoundTag.IsValid())
+		{
+			FXManagerSubsystem->AsyncPlaySoundAtLocation(ImpactSoundTag, GetActorLocation());
+		}
+		if (ImpactEffectTag.IsValid())
+		{
+			FXManagerSubsystem->AsyncSpawnNiagaraAtLocation(ImpactEffectTag, GetActorLocation());
+		}
 	}
 }
 

@@ -94,6 +94,7 @@ struct FAuraGameplayTags
 	
 	FGameplayTag Abilities_Fire_FireBolt;
 	FGameplayTag Abilities_Fire_FireRain;
+	FGameplayTag Abilities_Fire_FireBlast;
 	FGameplayTag Abilities_Lighting_Electrocute;
 	FGameplayTag Abilities_Arcane_ArcaneShards;
 
@@ -105,6 +106,7 @@ struct FAuraGameplayTags
 	//~ Begin Cooldown
 	FGameplayTag Cooldown_Fire_FireBolt;
 	FGameplayTag Cooldown_Fire_FireRain;
+	FGameplayTag Cooldown_Fire_FireBlast;
 	FGameplayTag Cooldown_Lighting_Electrocute;
 	FGameplayTag Cooldown_Arcane_ArcaneShards;
 	//~ End Cooldown
