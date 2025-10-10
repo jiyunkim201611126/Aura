@@ -2,10 +2,11 @@
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystemComponent.h"
 #include "Abilities/GameplayAbility.h"
+#include "Aura/Manager/AuraTextManager.h"
 
 void UAbilityEffectPolicy_RadialFallOffDamage::ApplyEffect(UGameplayAbility* OwningAbility, AActor* TargetActor)
 {
-	checkf(RadialDamageOrigin != FVector::ZeroVector, TEXT("RadialDamage의 경우, Ability의 ApplyAllEffect 호출 전 SetRadialOrigin을 반드시 호출해야 합니다."));
+	checkf(RadialDamageOrigin != FVector::ZeroVector, TEXT("RadialFallOffDamage의 경우, ApplyEffect 호출 전 SetRadialOrigin을 반드시 호출해야 합니다."));
 	
 	CauseDamage(OwningAbility, TargetActor, MakeDamageSpecHandleWithRadial(OwningAbility, TargetActor));
 }
@@ -48,6 +49,40 @@ TArray<FGameplayEffectSpecHandle> UAbilityEffectPolicy_RadialFallOffDamage::Make
 	}
 	
 	return DamageSpecs;
+}
+
+FText UAbilityEffectPolicy_RadialFallOffDamage::GetDamageTexts(int32 InLevel)
+{
+	TArray<FText> FormattedTexts;
+
+	for (const auto& Damage : DamageTypes)
+	{
+		const FGameplayTag& DamageTag = Damage.Key;
+		const float DamageValue = Damage.Value.GetValueAtLevel(InLevel);
+
+		// 태그 네임을 String으로 바꿔 그대로 String Table의 Key로 사용합니다.
+		// ToString으로 변환될 때 언더바(_)가 아닌 마침표(.)으로 변환되므로, String Table에서도 마침표로 Key를 작성합니다. (예시: Damage.Fire)
+		FString TextKey = DamageTag.GetTagName().ToString();
+		// 최대 소수점 1자리까지 표기합니다.
+		FNumberFormattingOptions FormattingOptions;
+		FormattingOptions.MinimumFractionalDigits = 0;
+		FormattingOptions.MaximumFractionalDigits = 1;
+		FText DamageTypeText = FAuraTextManager::GetText(EStringTableTextType::UI, TextKey, FText::AsNumber(DamageValue, &FormattingOptions));
+		
+		FormattedTexts.Add(DamageTypeText);
+	}
+
+	// FallOff에 관련된 정보를 추가합니다.
+	const FText InnerRadiusText = FText::FromString(FString::Printf(TEXT("<Yellow>Inner Radius: %.0f</>"), RadialDamageInnerRadius));
+	const FText OuterRadiusText = FText::FromString(FString::Printf(TEXT("<Yellow>Outer Radius: %.0f</>"), RadialDamageOuterRadius));
+	const FText MinDamageRatioText = FText::FromString(FString::Printf(TEXT("<Yellow>Min Damage Ratio: %.0f%%</>"), MinDamageRatio * 100.f));
+
+	FormattedTexts.Add(InnerRadiusText);
+	FormattedTexts.Add(OuterRadiusText);
+	FormattedTexts.Add(MinDamageRatioText);
+
+	// 각 원소 사이마다 \n을 삽입해 반환합니다.
+	return FText::Join(FText::FromString(TEXT("\n")), FormattedTexts);
 }
 
 float UAbilityEffectPolicy_RadialFallOffDamage::CalculateFalloffRatio(const float TargetDist) const

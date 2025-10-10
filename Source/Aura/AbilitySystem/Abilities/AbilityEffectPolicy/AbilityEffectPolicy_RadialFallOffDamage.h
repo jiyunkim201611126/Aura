@@ -14,6 +14,8 @@ public:
 
 	void SetRadialOriginLocation(const FVector& NewOriginLocation);
 	TArray<FGameplayEffectSpecHandle> MakeDamageSpecHandleWithRadial(const UGameplayAbility* OwningAbility, const AActor* TargetActor);
+	
+	virtual FText GetDamageTexts(int32 InLevel) override;
 
 private:
 	float CalculateFalloffRatio(const float TargetDist) const;

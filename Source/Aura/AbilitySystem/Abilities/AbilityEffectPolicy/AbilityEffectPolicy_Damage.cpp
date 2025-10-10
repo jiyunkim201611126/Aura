@@ -106,5 +106,6 @@ FText UAbilityEffectPolicy_Damage::GetDamageTexts(int32 InLevel)
 		FormattedTexts.Add(DamageTypeText);
 	}
 	
+	// 각 원소 사이마다 \n을 삽입해 반환합니다.
 	return FText::Join(FText::FromString(TEXT("\n")), FormattedTexts);
 }

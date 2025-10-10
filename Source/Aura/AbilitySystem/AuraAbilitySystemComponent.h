@@ -48,7 +48,7 @@ public:
 
 	FGameplayAbilitySpec* GetGivenAbilitySpecFromAbilityTag(const FGameplayTag& AbilityTag);
 
-	bool GetDescriptionsByAbilityTag(const FGameplayTag& AbilityTag, FText& OutDescription, FText& OutNextLevelDescription, UAbilityInfo* AbilityInfo);
+	bool GetDescriptionsByAbilityTag(const FGameplayTag& AbilityTag, FText& OutDescription, FText& OutNextLevelDescription, UAbilityInfo* Info);
 
 	void UpgradeAttribute(const FGameplayTag& AttributeTag);
 

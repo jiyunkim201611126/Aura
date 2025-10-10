@@ -55,8 +55,8 @@ void AAuraProjectile::Destroyed()
 		return;
 	}
 	
-	// 클라이언트에서 bHit이 false라면 아직 사운드와 나이아가라가 재생되지 않은 상태
-	// 그 상태로 Destroyed 함수가 호출됐다면 사운드와 나이아가라를 재생해줌
+	// 클라이언트에서 bHit이 false라면 아직 사운드와 나이아가라가 재생되지 않은 상태입니다.
+	// 그 상태로 Destroyed 함수가 호출됐다면 사운드와 나이아가라를 재생해 줍니다.
 	if (!bHit)
 	{
 		PlayHitFXs();
@@ -76,7 +76,7 @@ void AAuraProjectile::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
-	if (ProjectileMovement->HomingTargetComponent.IsValid())
+	if (!ProjectileMovement->HomingTargetComponent.IsValid())
 	{
 		// 추적 중인 타겟이 사망한 경우 일반 Projectile로 변경합니다.
 		ProjectileMovement->bIsHomingProjectile = false;
@@ -86,7 +86,7 @@ void AAuraProjectile::Tick(float DeltaSeconds)
 
 void AAuraProjectile::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	// GameplayEffectSpec이 아직 유효하지 않을 때 Overlap되거나, Projectile을 발사한 캐릭터 자신이 부딪히면 이 이벤트를 무시함
+	// GameplayEffectSpec이 아직 유효하지 않을 때 Overlap되거나, Projectile을 발사한 캐릭터 자신이 부딪히면 이 이벤트를 무시합니다.
 	for (auto& FGameplayEffectSpecHandle : DamageEffectSpecHandle)
 	{
 		if (!FGameplayEffectSpecHandle.Data.IsValid() || FGameplayEffectSpecHandle.Data.Get()->GetContext().GetEffectCauser() == OtherActor)

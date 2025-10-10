@@ -317,7 +317,7 @@ FGameplayAbilitySpec* UAuraAbilitySystemComponent::GetGivenAbilitySpecFromAbilit
 	return nullptr;
 }
 
-bool UAuraAbilitySystemComponent::GetDescriptionsByAbilityTag(const FGameplayTag& AbilityTag, FText& OutDescription, FText& OutNextLevelDescription, UAbilityInfo* AbilityInfo)
+bool UAuraAbilitySystemComponent::GetDescriptionsByAbilityTag(const FGameplayTag& AbilityTag, FText& OutDescription, FText& OutNextLevelDescription, UAbilityInfo* Info)
 {
 	if (const FGameplayAbilitySpec* AbilitySpec = GetGivenAbilitySpecFromAbilityTag(AbilityTag))
 	{
@@ -338,7 +338,7 @@ bool UAuraAbilitySystemComponent::GetDescriptionsByAbilityTag(const FGameplayTag
 	}
 	else
 	{
-		OutDescription = UAuraGameplayAbility::GetLockedDescription(AbilityInfo->FindAbilityInfoForTag(AbilityTag).LevelRequirement);
+		OutDescription = UAuraGameplayAbility::GetLockedDescription(Info->FindAbilityInfoForTag(AbilityTag).LevelRequirement);
 	}
 	OutNextLevelDescription = FText();
 	return false;

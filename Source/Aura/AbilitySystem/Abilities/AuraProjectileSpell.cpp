@@ -27,6 +27,7 @@ void UAuraProjectileSpell::SetTarget(const FGameplayAbilityTargetDataHandle& Han
 		else
 		{
 			ProjectileTargetLocation = HitResult->Location;
+			HomingTarget = nullptr;
 		}
 	}
 }
@@ -88,6 +89,10 @@ void UAuraProjectileSpell::SpawnProjectile(FVector& InProjectileSpawnLocation, F
 			}
 		}
 	}
+
+	// 타겟 추적 관련 변수를 초기화합니다.
+	ProjectileTargetLocation = FVector::ZeroVector;
+	HomingTarget = nullptr;
 }
 
 void UAuraProjectileSpell::SetHandlesToProjectile(AAuraProjectile* Projectile, const FVector& TargetLocation) const

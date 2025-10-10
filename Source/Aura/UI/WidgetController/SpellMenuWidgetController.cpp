@@ -170,6 +170,7 @@ void USpellMenuWidgetController::ShouldEnableButtons()
 	bool bShouldEnableEquipButton = false;
 	if (SelectedAbility.Status.MatchesTagExact(GameplayTags.Abilities_Status_Equipped))
 	{
+		// 장착 중인 Ability인 경우 들어오는 분기입니다.
 		bShouldEnableEquipButton = true;
 		if (CurrentSpellPoints > 0 && AuraAbilityInfo.MaxLevel > SelectedAbility.CurrentLevel)
 		{
@@ -178,6 +179,7 @@ void USpellMenuWidgetController::ShouldEnableButtons()
 	}
 	else if (SelectedAbility.Status.MatchesTagExact(GameplayTags.Abilities_Status_Eligible))
 	{
+		// 미습득 상태인 Ability인 경우 들어오는 분기입니다.
 		if (CurrentSpellPoints > 0 && AuraAbilityInfo.MaxLevel > SelectedAbility.CurrentLevel)
 		{
 			bShouldEnableSpellPointsButton = true;
@@ -185,6 +187,7 @@ void USpellMenuWidgetController::ShouldEnableButtons()
 	}
 	else if (SelectedAbility.Status.MatchesTagExact(GameplayTags.Abilities_Status_Unlocked))
 	{
+		// 습득 상태인 Ability인 경우 들어오는 분기입니다.
 		bShouldEnableEquipButton = true;
 		if (CurrentSpellPoints > 0 && AuraAbilityInfo.MaxLevel > SelectedAbility.CurrentLevel)
 		{
