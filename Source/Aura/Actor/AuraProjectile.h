@@ -33,16 +33,17 @@ protected:
 	UFUNCTION()
 	void OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
-	void PlayHitFXs() const;
+	UFUNCTION(BlueprintCallable)
+	void PlayHitFXs();
 	
 public:
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<UProjectileMovementComponent> ProjectileMovement;
 
 	UPROPERTY()
 	FGameplayEffectContextHandle DamageEffectContextHandle;
 
-	UPROPERTY(BlueprintReadWrite, meta = (ExposeOnSpawn = true))
+	UPROPERTY()
 	TArray<FGameplayEffectSpecHandle> DamageEffectSpecHandle;
 
 	float DeathImpulseMagnitude = 0.f;
@@ -51,20 +52,17 @@ public:
 	UPROPERTY()
 	FGameplayEffectContextHandle DebuffEffectContextHandle;
 
-	UPROPERTY(BlueprintReadWrite, meta = (ExposeOnSpawn = true))
+	UPROPERTY()
 	TArray<FGameplayEffectSpecHandle> DebuffEffectSpecHandle;
 
-private:
-	UPROPERTY(EditAnywhere)
-	float LifeSpan = 1.f;
-	
+	// 한 번에 여러 개의 Projectile을 스폰하는 Ability의 경우 굉장히 시끄러우므로, 스폰 시점에 VolumeMultiplier를 설정하는 것으로 해결합니다.
+	float VolumeMultiplier = 1.f;
+
+private:	
 	UPROPERTY(EditAnywhere)
 	bool bDestroyWithOverlap = true;
-
-	// 클라이언트가 투사체의 이펙트(사운드, 나이아가라)가 중복되거나 누락되지 않게 하기 위한 변수입니다.
-	bool bShouldPlayFX = true;
 	
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<USphereComponent> Sphere;
 
 	UPROPERTY()

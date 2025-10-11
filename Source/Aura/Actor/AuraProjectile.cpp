@@ -14,6 +14,7 @@ AAuraProjectile::AAuraProjectile()
 {
 	PrimaryActorTick.bCanEverTick = false;
 	bReplicates = true;
+	InitialLifeSpan = 1.f;
 
 	Sphere = CreateDefaultSubobject<USphereComponent>("Sphere");
 	SetRootComponent(Sphere);
@@ -33,9 +34,7 @@ AAuraProjectile::AAuraProjectile()
 void AAuraProjectile::BeginPlay()
 {
 	Super::BeginPlay();
-	SetLifeSpan(LifeSpan);
 	Sphere->OnComponentBeginOverlap.AddDynamic(this, &AAuraProjectile::OnSphereOverlap);
-	Sphere->OnComponentEndOverlap.AddDynamic(this, &AAuraProjectile::OnSphereEndOverlap);
 
 	if (LoopingSoundTag.IsValid())
 	{
@@ -46,6 +45,7 @@ void AAuraProjectile::BeginPlay()
 				if (LoopingSound)
 				{
 					LoopingSoundComponent = UGameplayStatics::SpawnSoundAttached(LoopingSound, GetRootComponent());
+					LoopingSoundComponent->SetVolumeMultiplier(VolumeMultiplier);
 				}
 			});
 		}
@@ -65,13 +65,7 @@ void AAuraProjectile::Destroyed()
 		LoopingSoundComponent->DestroyComponent();
 	}
 	
-	// 클라이언트에서 bHit이 false라면 아직 사운드와 나이아가라가 재생되지 않은 상태입니다.
-	// 그 상태로 Destroyed 함수가 호출됐다면 사운드와 나이아가라를 재생해 줍니다.
-	if (bShouldPlayFX && bDestroyWithOverlap)
-	{
-		PlayHitFXs();
-		bShouldPlayFX = false;
-	}
+	PlayHitFXs();
 	
 	Super::Destroyed();
 }
@@ -109,17 +103,9 @@ void AAuraProjectile::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, 
 		return;
 	}
 	
-	// 서버, 클라이언트 모두 사운드와 나이아가라를 재생합니다.
-	if (bShouldPlayFX)
+	if (!bDestroyWithOverlap)
 	{
 		PlayHitFXs();
-
-		if (bDestroyWithOverlap)
-		{
-			// Overlap 이벤트 발생 시 파괴되는 Projectile인 경우 들어오는 분기입니다.
-			// 서버와 클라이언트 모두 Overlap 이벤트가 한 번 일어났음을 캐싱합니다.
-			bShouldPlayFX = false;
-		}
 	}
 
 	// 서버인 경우 데미지를 주며 Destroy 이벤트 바인드
@@ -181,13 +167,13 @@ void AAuraProjectile::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, 
 	}
 }
 
-void AAuraProjectile::PlayHitFXs() const
+void AAuraProjectile::PlayHitFXs()
 {
 	if (UFXManagerSubsystem* FXManagerSubsystem = GetWorld()->GetGameInstance()->GetSubsystem<UFXManagerSubsystem>())
 	{
 		if (ImpactSoundTag.IsValid())
 		{
-			FXManagerSubsystem->AsyncPlaySoundAtLocation(ImpactSoundTag, GetActorLocation());
+			FXManagerSubsystem->AsyncPlaySoundAtLocation(ImpactSoundTag, GetActorLocation(), FRotator::ZeroRotator, VolumeMultiplier);
 		}
 		if (ImpactEffectTag.IsValid())
 		{

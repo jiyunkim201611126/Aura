@@ -96,6 +96,7 @@ TArray<AAuraProjectile*> UAuraProjectileSpell::SpawnProjectile(int32 NumProjecti
 		Projectiles.Add(Projectile);
 		
 		SetHandlesToProjectile(Projectile, InProjectileTargetLocation);
+		Projectile->VolumeMultiplier = NumProjectilesToSpawn > 3 ? 0.5f : 1.f;
 		
 		Projectile->FinishSpawning(SpawnTransform);
 	}

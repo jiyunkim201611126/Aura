@@ -9,9 +9,9 @@ void UAbilityAdditionalCost_Stackable::OnEquipAbility(const UAuraGameplayAbility
 {
 	// Equip 시점에선 아직 Ability가 제대로 초기화되지 않아 Ability를 통해 ASC를 추적하는 데에 실패할 가능성이 있습니다.
 	// 또, UCLASS 매크로에서 DefaultToInstanced를 사용하지 않았기 때문에 런타임 중 값에 변화를 줄 수 없습니다.
-	// 따라서 매개변수로 들어오는 OwningAbility로 Manager에게 접근합니다.
 	// DefaultToInstanced를 사용할 경우 Manager가 이 객체를 제대로 캐싱하지 못 하는 문제가 발생합니다.
 	// ASC에 Ability가 부여되면서 자동으로 인스턴스가 복제되면서 발생하는 것으로 추측됩니다.
+	// 따라서 매개변수로 들어오는 ASC로 Manager에게 접근합니다.
 	const bool bCheckInstancingPolicy = OwningAbility->GetInstancingPolicy() == EGameplayAbilityInstancingPolicy::InstancedPerActor;
 	checkf(bCheckInstancingPolicy, TEXT("Stackable Ability의 Instancing Policy는 반드시 InstancedPerActor여야 합니다."));
 	
