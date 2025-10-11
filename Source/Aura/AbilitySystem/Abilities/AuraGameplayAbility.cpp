@@ -7,7 +7,6 @@
 #include "Aura/Interaction/EnemyInterface.h"
 #include "Aura/Manager/AuraTextManager.h"
 #include "AbilityAdditionalCost/AbilityAdditionalCost.h"
-#include "AbilityEffectPolicy/AbilityEffectPolicy_RadialFallOffDamage.h"
 
 AController* UAuraGameplayAbility::GetController() const
 {
@@ -22,13 +21,13 @@ void UAuraGameplayAbility::UpdateFacingToCombatTarget() const
 	ICombatInterface::Execute_UpdateFacingTarget(SourceActor, TargetLocation);
 }
 
-void UAuraGameplayAbility::ApplyAllEffect(AActor* TargetActor)
+void UAuraGameplayAbility::ApplyAllEffect(AActor* TargetActor, FEffectPolicyContext EffectPolicyContext)
 {
 	for (const auto EffectPolicy : EffectPolicies)
 	{
 		if (EffectPolicy && TargetActor)
 		{
-			EffectPolicy->ApplyEffect(this, TargetActor);
+			EffectPolicy->ApplyEffect(this, TargetActor, EffectPolicyContext);
 		}
 	}
 }
@@ -53,14 +52,6 @@ FText UAuraGameplayAbility::GetDescription_Implementation(const int32 Level)
 FText UAuraGameplayAbility::GetLockedDescription(const int32 Level)
 {
 	return FText::Format(FAuraTextManager::GetText(EStringTableTextType::UI, TEXT("Abilities.Description.Locked")), Level);
-}
-
-void UAuraGameplayAbility::SetRadialOriginLocation(const FVector& RadialOriginLocation)
-{
-	if (UAbilityEffectPolicy_RadialFallOffDamage* RadialDamageEffectPolicy = GetEffectPolicy<UAbilityEffectPolicy_RadialFallOffDamage>())
-	{
-		RadialDamageEffectPolicy->SetRadialOriginLocation(RadialOriginLocation);
-	}
 }
 
 float UAuraGameplayAbility::GetManaCost(const int32 InLevel) const

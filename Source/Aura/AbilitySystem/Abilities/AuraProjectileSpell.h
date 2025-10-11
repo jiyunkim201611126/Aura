@@ -35,8 +35,6 @@ protected:
 
 	TArray<AAuraProjectile*> SpawnProjectile(int32 NumProjectilesToSpawn, const FVector& InProjectileSpawnLocation, const FVector& InProjectileTargetLocation, const TArray<FRotator>& Rotations);
 
-	void SetHandlesToProjectile(AAuraProjectile* Projectile, const FVector& TargetLocation) const;
-
 protected:
 	UPROPERTY(BlueprintReadWrite)
 	FVector ProjectileTargetLocation;

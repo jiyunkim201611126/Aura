@@ -5,7 +5,7 @@
 #include "Abilities/GameplayAbility.h"
 #include "Aura/Manager/AuraGameplayTags.h"
 
-void UAbilityEffectPolicy_Defence_DamageReduction::ApplyEffect(UGameplayAbility* OwningAbility, AActor* TargetActor)
+void UAbilityEffectPolicy_Defence_DamageReduction::ApplyEffect(UGameplayAbility* OwningAbility, AActor* TargetActor, const FEffectPolicyContext& EffectPolicyContext)
 {
 	if (EffectClass)
 	{

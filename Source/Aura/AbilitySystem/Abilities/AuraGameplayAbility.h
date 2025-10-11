@@ -42,22 +42,24 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void UpdateFacingToCombatTarget() const;
 
+	/**
+	 * Ability가 소유하고 있는 EffectPolicy를 모두 순회하며 TargetActor에게 Effect를 부여하는 함수입니다.
+	 * 갖고 있는 Effect를 각각 다른 타이밍에 부여하고 싶다면 자식 클래스를 캐스팅해 ApplyEffect를 직접 호출해 사용합니다.
+	 */
 	UFUNCTION(BlueprintCallable)
-	void ApplyAllEffect(AActor* TargetActor);
+	void ApplyAllEffect(AActor* TargetActor, FEffectPolicyContext EffectPolicyContext = FEffectPolicyContext());
 
 	// Ability에 대한 설명을 반환하는 함수로, 블루프린트 클래스에서 정의해야 합니다.
 	UFUNCTION(BlueprintNativeEvent)
 	FText GetDescription(const int32 Level);
 	static FText GetLockedDescription(const int32 Level);
 
-	// Radial Damage를 가진 Ability만 사용하는 함수입니다.
-	UFUNCTION(BlueprintCallable)
-	void SetRadialOriginLocation(const FVector& RadialOriginLocation);
-
 protected:
-	// 매개변수로 들어온 AbilityEffectPolicy 클래스가 갖고 있는 GameplayEffectContextHandle을 가져오는 함수입니다.
-	// 반드시 Ability가 소유하고 있는 EffectPolicy만 사용해야 합니다.
-	// 블루프린트에선 템플릿 함수를 지원하지 않기 때문에 Class를 매개변수로 받아 비슷한 동작을 하도록 구현합니다.
+	/**
+	 * 매개변수로 들어온 AbilityEffectPolicy 클래스가 갖고 있는 GameplayEffectContextHandle을 가져오는 함수입니다.
+	 * 반드시 Ability가 소유하고 있는 EffectPolicy만 사용해야 합니다.
+	 * 블루프린트에선 템플릿 함수를 지원하지 않기 때문에 Class를 매개변수로 받아 비슷한 동작을 하도록 구현합니다.
+	 */ 
 	UFUNCTION(BlueprintPure)
 	FGameplayEffectContextHandle GetContextHandle(TSubclassOf<UAbilityEffectPolicy> PolicyClass) const;
 	

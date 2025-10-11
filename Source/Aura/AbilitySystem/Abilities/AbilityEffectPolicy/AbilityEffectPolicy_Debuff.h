@@ -33,7 +33,7 @@ class AURA_API UAbilityEffectPolicy_Debuff : public UAbilityEffectPolicy
 	GENERATED_BODY()
 
 public:
-	virtual void ApplyEffect(UGameplayAbility* OwningAbility, AActor* TargetActor) override;
+	virtual void ApplyEffect(UGameplayAbility* OwningAbility, AActor* TargetActor, const FEffectPolicyContext& EffectPolicyContext) override;
 	virtual void EndAbility() override;
 	
 	TArray<FGameplayEffectSpecHandle> MakeDebuffSpecHandle(const UGameplayAbility* OwningAbility);

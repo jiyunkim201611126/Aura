@@ -6,7 +6,7 @@
 #include "Aura/Interaction/CombatInterface.h"
 #include "Aura/Manager/AuraTextManager.h"
 
-void UAbilityEffectPolicy_Damage::ApplyEffect(UGameplayAbility* OwningAbility, AActor* TargetActor)
+void UAbilityEffectPolicy_Damage::ApplyEffect(UGameplayAbility* OwningAbility, AActor* TargetActor, const FEffectPolicyContext& EffectPolicyContext)
 {
 	CauseDamage(OwningAbility, TargetActor, MakeDamageSpecHandle(OwningAbility));
 }
@@ -24,12 +24,7 @@ TArray<FGameplayEffectSpecHandle> UAbilityEffectPolicy_Damage::MakeDamageSpecHan
 		return TArray<FGameplayEffectSpecHandle>();
 	}
 	
-	if (!EffectContextHandle.Get())
-	{
-		// EffectContext를 생성 및 할당합니다.
-		// MakeEffectContext 함수는 자동으로 OwnerActor를 Instigator로, AvatarActor를 EffectCauser로 할당합니다.
-		EffectContextHandle = ASC->MakeEffectContext();
-	}
+	MakeEffectContextHandle(OwningAbility);
 	
 	TArray<FGameplayEffectSpecHandle> DamageSpecs;
 	for (TPair<FGameplayTag, FScalableFloat>& Pair : DamageTypes)

@@ -5,8 +5,8 @@
 #include "Kismet/GameplayStatics.h"
 #include "Components/AudioComponent.h"
 #include "AbilitySystemBlueprintLibrary.h"
-#include "AbilitySystemComponent.h"
 #include "Aura/AbilitySystem/AuraAbilitySystemLibrary.h"
+#include "Aura/AbilitySystem/Abilities/AbilityEffectPolicy/AbilityEffectPolicy.h"
 #include "Aura/Interaction/CombatInterface.h"
 #include "Aura/Manager/FXManagerSubsystem.h"
 
@@ -84,15 +84,6 @@ void AAuraProjectile::Tick(float DeltaSeconds)
 
 void AAuraProjectile::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	// GameplayEffectSpec이 아직 유효하지 않을 때 Overlap되거나, Projectile을 발사한 캐릭터 자신이 부딪히면 이 이벤트를 무시합니다.
-	for (auto& FGameplayEffectSpecHandle : DamageEffectSpecHandle)
-	{
-		if (!FGameplayEffectSpecHandle.Data.IsValid() || FGameplayEffectSpecHandle.Data.Get()->GetContext().GetEffectCauser() == OtherActor)
-		{
-			return;
-		}
-	}
-
 	if (OtherActor->Implements<UCombatInterface>() && ICombatInterface::Execute_IsDead(OtherActor))
 	{
 		return;
@@ -108,43 +99,22 @@ void AAuraProjectile::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, 
 		PlayHitFXs();
 	}
 
-	// 서버인 경우 데미지를 주며 Destroy 이벤트 바인드
+	// 서버인 경우 Effect를 부여합니다.
 	if (HasAuthority())
 	{
-		// Overlap 대상에게 데미지 부여
-		if (UAbilitySystemComponent* TargetASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(OtherActor))
+		// Overlap 대상에게 Effect 부여합니다.
+		for (const auto EffectPolicy : EffectPolicies)
 		{
-			TArray<TWeakObjectPtr<AActor>> TargetActors;
-			TargetActors.Add(OtherActor);
-			
-			if (DamageEffectContextHandle.IsValid() && DamageEffectSpecHandle.Num() > 0)
-			{
-				DamageEffectContextHandle.AddActors(TargetActors);
-				UAuraAbilitySystemLibrary::SetDeathImpulse(DamageEffectContextHandle, GetActorForwardVector() * DeathImpulseMagnitude);
-				if (KnockbackForceMagnitude > 0.f)
-				{
-					UAuraAbilitySystemLibrary::SetKnockbackForce(DamageEffectContextHandle, GetActorForwardVector() * KnockbackForceMagnitude);
-				}
-				for (auto& FGameplayEffectSpecHandle : DamageEffectSpecHandle)
-				{
-					TargetASC->ApplyGameplayEffectSpecToSelf(*FGameplayEffectSpecHandle.Data.Get());
-				}
-			}
-
-			if (DebuffEffectContextHandle.IsValid() && DebuffEffectSpecHandle.Num() > 0)
-			{
-				DebuffEffectContextHandle.AddActors(TargetActors);
-				for (auto& FGameplayEffectSpecHandle : DebuffEffectSpecHandle)
-				{
-					TargetASC->ApplyGameplayEffectSpecToSelf(*FGameplayEffectSpecHandle.Data.Get());
-				}
-			}
+			// RadialFallOffDamage를 갖고 있을 수 있으므로, 그에 필요한 변수를 할당해 부여합니다.
+			FEffectPolicyContext EffectPolicyContext;
+			EffectPolicyContext.OriginVector = GetActorLocation();
+			EffectPolicy->ApplyEffect(OwningAbility.Get(), OtherActor, EffectPolicyContext);
 		}
 		
 		if (bDestroyWithOverlap)
 		{
-			// 스폰과 동시에 Overlap 이벤트가 일어난 경우 바로 Destroy되면서 액터가 클라이언트로 복제되지 않는 현상이 있음
-			// 따라서 0.05초의 딜레이를 주어 액터 스폰이 클라이언트로 복제되는 것을 보장
+			// 스폰과 동시에 Overlap 이벤트가 일어난 경우 바로 Destroy되면서 액터가 클라이언트로 복제되지 않는 현상이 있습니다.
+			// 따라서 0.05초의 딜레이를 주어 액터 스폰이 클라이언트로 복제되는 것을 보장합니다.
 			FTimerHandle TimerHandle;
 			GetWorld()->GetTimerManager().SetTimer(
 				TimerHandle,
@@ -167,7 +137,7 @@ void AAuraProjectile::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, 
 	}
 }
 
-void AAuraProjectile::PlayHitFXs()
+void AAuraProjectile::PlayHitFXs() const
 {
 	if (UFXManagerSubsystem* FXManagerSubsystem = GetWorld()->GetGameInstance()->GetSubsystem<UFXManagerSubsystem>())
 	{

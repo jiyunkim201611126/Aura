@@ -3,7 +3,7 @@
 #include "AbilitySystemComponent.h"
 #include "Aura/Manager/AuraGameplayTags.h"
 
-void UAbilityEffectPolicy_Combat_AbsorbHealth::ApplyEffect(UGameplayAbility* OwningAbility, AActor* TargetActor)
+void UAbilityEffectPolicy_Combat_AbsorbHealth::ApplyEffect(UGameplayAbility* OwningAbility, AActor* TargetActor, const FEffectPolicyContext& EffectPolicyContext)
 {
 	if (EffectClass)
 	{

@@ -5,6 +5,7 @@
 #include "GameplayEffectTypes.h"
 #include "AuraProjectile.generated.h"
 
+class UAbilityEffectPolicy;
 class USphereComponent;
 class UProjectileMovementComponent;
 class UNiagaraSystem;
@@ -33,32 +34,22 @@ protected:
 	UFUNCTION()
 	void OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
-	UFUNCTION(BlueprintCallable)
-	void PlayHitFXs();
+	void PlayHitFXs() const;
 	
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<UProjectileMovementComponent> ProjectileMovement;
 
 	UPROPERTY()
-	FGameplayEffectContextHandle DamageEffectContextHandle;
+	TWeakObjectPtr<UGameplayAbility> OwningAbility;
 
 	UPROPERTY()
-	TArray<FGameplayEffectSpecHandle> DamageEffectSpecHandle;
-
-	float DeathImpulseMagnitude = 0.f;
-	float KnockbackForceMagnitude = 0.f;
-
-	UPROPERTY()
-	FGameplayEffectContextHandle DebuffEffectContextHandle;
-
-	UPROPERTY()
-	TArray<FGameplayEffectSpecHandle> DebuffEffectSpecHandle;
+	TArray<TObjectPtr<UAbilityEffectPolicy>> EffectPolicies;
 
 	// 한 번에 여러 개의 Projectile을 스폰하는 Ability의 경우 굉장히 시끄러우므로, 스폰 시점에 VolumeMultiplier를 설정하는 것으로 해결합니다.
 	float VolumeMultiplier = 1.f;
 
-private:	
+private:
 	UPROPERTY(EditAnywhere)
 	bool bDestroyWithOverlap = true;
 	

@@ -4,8 +4,6 @@
 #include "Aura/Interaction/CombatInterface.h"
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystemComponent.h"
-#include "AbilityEffectPolicy/AbilityEffectPolicy_Damage.h"
-#include "AbilityEffectPolicy/AbilityEffectPolicy_Debuff.h"
 #include "Aura/AbilitySystem/AuraAbilitySystemLibrary.h"
 #include "Aura/Interaction/EnemyInterface.h"
 
@@ -94,8 +92,9 @@ TArray<AAuraProjectile*> UAuraProjectileSpell::SpawnProjectile(int32 NumProjecti
 		SpawnTransform.SetRotation(Rotation.Quaternion());
 		AAuraProjectile* Projectile = GetWorld()->SpawnActorDeferred<AAuraProjectile>(ProjectileClass, SpawnTransform, GetAvatarActorFromActorInfo(), Cast<APawn>(GetOwningActorFromActorInfo()), ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
 		Projectiles.Add(Projectile);
-		
-		SetHandlesToProjectile(Projectile, InProjectileTargetLocation);
+
+		Projectile->OwningAbility = this;
+		Projectile->EffectPolicies = EffectPolicies;
 		Projectile->VolumeMultiplier = NumProjectilesToSpawn > 3 ? 0.5f : 1.f;
 		
 		Projectile->FinishSpawning(SpawnTransform);
@@ -124,56 +123,4 @@ TArray<AAuraProjectile*> UAuraProjectileSpell::SpawnProjectile(int32 NumProjecti
 	HomingTarget = nullptr;
 
 	return Projectiles;
-}
-
-void UAuraProjectileSpell::SetHandlesToProjectile(AAuraProjectile* Projectile, const FVector& TargetLocation) const
-{
-	// Ability를 소유한 AvatarActor의 AbilitySystemComponent 가져옵니다.
-	const UAbilitySystemComponent* SourceASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(GetAvatarActorFromActorInfo());
-
-	UAbilityEffectPolicy_Damage* DamageEffectPolicy = GetEffectPolicy<UAbilityEffectPolicy_Damage>();
-
-	if (DamageEffectPolicy)
-	{
-		// Damage Context를 생성 및 초기화합니다.
-		FGameplayEffectContextHandle DamageEffectContextHandle = DamageEffectPolicy->GetEffectContextHandle();
-		if (!DamageEffectContextHandle.IsValid())
-		{
-			DamageEffectContextHandle = SourceASC->MakeEffectContext();
-			DamageEffectContextHandle.SetAbility(this);
-			FHitResult HitResult;
-			HitResult.Location = TargetLocation;
-			DamageEffectContextHandle.AddHitResult(HitResult);
-		}
-		
-		Projectile->DamageEffectContextHandle = DamageEffectContextHandle;
-		Projectile->DeathImpulseMagnitude = DamageEffectPolicy->DeathImpulseMagnitude;
-
-		if (FMath::FRandRange(0.f, 100.f) < DamageEffectPolicy->KnockbackChance)
-		{
-			Projectile->KnockbackForceMagnitude = DamageEffectPolicy->KnockbackForceMagnitude;
-		}
-
-		// 적중 시 데미지를 줄 수 있도록 Projectile에 Spec을 할당합니다.
-		Projectile->DamageEffectSpecHandle = DamageEffectPolicy->MakeDamageSpecHandle(this);
-	}
-
-	UAbilityEffectPolicy_Debuff* DebuffEffectPolicy = GetEffectPolicy<UAbilityEffectPolicy_Debuff>();
-	
-	if (DebuffEffectPolicy)
-	{
-		// Debuff Context를 생성 및 초기화합니다.
-		FGameplayEffectContextHandle DebuffEffectContextHandle = DebuffEffectPolicy->GetEffectContextHandle();
-		
-		if (!DebuffEffectContextHandle.IsValid())
-		{
-			DebuffEffectContextHandle = SourceASC->MakeEffectContext();
-			DebuffEffectContextHandle.SetAbility(this);
-		}
-
-		Projectile->DebuffEffectContextHandle = DebuffEffectContextHandle;
-
-		// 적중 시 디버프를 줄 수 있도록 Projectile에 Spec을 할당합니다.
-		Projectile->DebuffEffectSpecHandle = DebuffEffectPolicy->MakeDebuffSpecHandle(this);
-	}
 }

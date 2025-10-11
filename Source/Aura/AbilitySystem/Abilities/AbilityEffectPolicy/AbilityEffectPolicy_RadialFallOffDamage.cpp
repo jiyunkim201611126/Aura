@@ -4,16 +4,10 @@
 #include "Abilities/GameplayAbility.h"
 #include "Aura/Manager/AuraTextManager.h"
 
-void UAbilityEffectPolicy_RadialFallOffDamage::ApplyEffect(UGameplayAbility* OwningAbility, AActor* TargetActor)
+void UAbilityEffectPolicy_RadialFallOffDamage::ApplyEffect(UGameplayAbility* OwningAbility, AActor* TargetActor, const FEffectPolicyContext& EffectPolicyContext)
 {
-	checkf(RadialDamageOrigin != FVector::ZeroVector, TEXT("RadialFallOffDamage의 경우, ApplyEffect 호출 전 SetRadialOrigin을 반드시 호출해야 합니다."));
-	
+	RadialDamageOrigin = EffectPolicyContext.OriginVector;
 	CauseDamage(OwningAbility, TargetActor, MakeDamageSpecHandleWithRadial(OwningAbility, TargetActor));
-}
-
-void UAbilityEffectPolicy_RadialFallOffDamage::SetRadialOriginLocation(const FVector& NewOriginLocation)
-{
-	RadialDamageOrigin = NewOriginLocation;
 }
 
 TArray<FGameplayEffectSpecHandle> UAbilityEffectPolicy_RadialFallOffDamage::MakeDamageSpecHandleWithRadial(const UGameplayAbility* OwningAbility, const AActor* TargetActor)
@@ -23,11 +17,8 @@ TArray<FGameplayEffectSpecHandle> UAbilityEffectPolicy_RadialFallOffDamage::Make
 	{
 		return TArray<FGameplayEffectSpecHandle>();
 	}
-	
-	if (!EffectContextHandle.Get())
-	{
-		EffectContextHandle = ASC->MakeEffectContext();
-	}
+
+	MakeEffectContextHandle(OwningAbility);
 
 	// 데미지 원점으로부터 타겟까지 거리를 계산합니다.
 	const float TargetDist = FVector::Dist(RadialDamageOrigin, TargetActor->GetActorLocation());

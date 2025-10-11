@@ -6,7 +6,7 @@
 #include "Aura/Interaction/CombatInterface.h"
 #include "Aura/Manager/AuraGameplayTags.h"
 
-void UAbilityEffectPolicy_Debuff::ApplyEffect(UGameplayAbility* OwningAbility, AActor* TargetActor)
+void UAbilityEffectPolicy_Debuff::ApplyEffect(UGameplayAbility* OwningAbility, AActor* TargetActor, const FEffectPolicyContext& EffectPolicyContext)
 {
 	CauseDebuff(OwningAbility, TargetActor, MakeDebuffSpecHandle(OwningAbility));
 }
@@ -24,10 +24,7 @@ TArray<FGameplayEffectSpecHandle> UAbilityEffectPolicy_Debuff::MakeDebuffSpecHan
 		return TArray<FGameplayEffectSpecHandle>();
 	}
 	
-	if (!EffectContextHandle.Get())
-	{
-		EffectContextHandle = ASC->MakeEffectContext();
-	}
+	MakeEffectContextHandle(OwningAbility);
 	
 	const FAuraGameplayTags& GameplayTags = FAuraGameplayTags::Get();
 	TArray<FGameplayEffectSpecHandle> DebuffSpecs;

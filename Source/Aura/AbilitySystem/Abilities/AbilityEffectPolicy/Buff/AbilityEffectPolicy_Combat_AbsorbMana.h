@@ -10,7 +10,7 @@ class AURA_API UAbilityEffectPolicy_Combat_AbsorbMana : public UAbilityEffectPol
 	GENERATED_BODY()
 
 public:
-	virtual void ApplyEffect(UGameplayAbility* OwningAbility, AActor* TargetActor) override;
+	virtual void ApplyEffect(UGameplayAbility* OwningAbility, AActor* TargetActor, const FEffectPolicyContext& EffectPolicyContext) override;
 	virtual void EndAbility() override;
 
 protected:
