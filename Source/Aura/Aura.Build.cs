@@ -22,6 +22,7 @@ public class Aura : ModuleRules
 			
 			"GameplayAbilities",
 			"MotionWarping",
+			"ModelViewViewModel",
 		});
 
 		PrivateDependencyModuleNames.AddRange(new string[]
