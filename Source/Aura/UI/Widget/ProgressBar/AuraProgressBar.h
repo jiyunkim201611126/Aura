@@ -29,10 +29,10 @@ protected:
 	void InterpGhostBar();
 
 private:
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true", BindWidget = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true", BindWidget = "true"))
 	TObjectPtr<UProgressBar> FrontProgressBar;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true", BindWidget = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true", BindWidget = "true"))
 	TObjectPtr<UProgressBar> GhostProgressBar;
 
 	FTimerHandle GhostPercentSetTimerHandle;
