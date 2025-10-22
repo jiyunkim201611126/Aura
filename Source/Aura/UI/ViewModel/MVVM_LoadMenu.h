@@ -6,6 +6,12 @@
 
 class UMVVM_LoadSlot;
 
+/**
+ * MVVM 패턴의 핵심 클래스로, 해당 클래스는 LoadMenu의 동작을 총괄하는 ViewModel입니다.
+ * 참조 관계 자체는 View가 ViewModel을 참조하도록 되어있습니다.
+ * 플레이어가 View를 조작하면 ViewModel의 함수가 호출되어, 적절한 델리게이트를 통해 콜백 함수를 호출합니다.
+ * 해당 콜백은 View로 전달되어 화면에 표시됩니다.
+ */
 UCLASS()
 class AURA_API UMVVM_LoadMenu : public UMVVMViewModelBase
 {
@@ -15,16 +21,19 @@ public:
 	void InitializeLoadSlot();
 
 	UFUNCTION(BlueprintPure)
-	UMVVM_LoadSlot* GetLoadSlotViewModelByIndex(int32 Index);
+	UMVVM_LoadSlot* GetLoadSlotViewModelByIndex(int32 SlotIndex);
 
+	// 빈 슬롯의 버튼을 클릭하면 호출되는 함수입니다.
 	UFUNCTION(BlueprintCallable)
-	void NewGameButtonPressed(int32 Slot);
+	void NewGameButtonPressed(int32 SlotIndex);
 
+	// 신규 슬롯 할당을 위해 버튼을 클릭하면 호출되는 함수입니다.
 	UFUNCTION(BlueprintCallable)
-	void NewSlotButtonPressed(int32 Slot, const FText& EnteredName);
-	
+	void NewSlotButtonPressed(int32 SlotIndex, const FString& EnteredName);
+
+	// 데이터가 할당된 슬롯의 버튼을 클릭하면 호출되는 함수입니다.
 	UFUNCTION(BlueprintCallable)
-	void SelectSlotButtonPressed(int32 Slot);
+	void SelectSlotButtonPressed(int32 SlotIndex);
 
 public:
 	UPROPERTY(EditDefaultsOnly)
@@ -32,14 +41,5 @@ public:
 
 private:
 	UPROPERTY()
-	TArray<TObjectPtr<UMVVM_LoadSlot>> LoadSlots;
-
-	UPROPERTY()
-	TObjectPtr<UMVVM_LoadSlot> LoadSlot_0;
-	
-	UPROPERTY()
-	TObjectPtr<UMVVM_LoadSlot> LoadSlot_1;
-	
-	UPROPERTY()
-	TObjectPtr<UMVVM_LoadSlot> LoadSlot_2;
+	TArray<TObjectPtr<UMVVM_LoadSlot>> LoadSlotViewModels;
 };
