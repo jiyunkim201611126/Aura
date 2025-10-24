@@ -4,6 +4,7 @@
 #include "GameFramework/GameModeBase.h"
 #include "AuraGameModeBase.generated.h"
 
+class ULoadMenuSaveGame;
 class USaveGame;
 class UMVVM_LoadSlot;
 class UEliminateRewardInfo;
@@ -17,6 +18,7 @@ class AURA_API AAuraGameModeBase : public AGameModeBase
 	
 public:
 	void SaveSlotData(UMVVM_LoadSlot* LoadSlotViewModel, const int32 SlotIndex) const;
+	ULoadMenuSaveGame* GetSaveSlotData(const FString& SlotName, int32 SlotIndex) const;
 
 public:
 	UPROPERTY(EditDefaultsOnly, Category = "Character Class Defaults")

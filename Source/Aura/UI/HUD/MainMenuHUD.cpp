@@ -14,4 +14,7 @@ void AMainMenuHUD::BeginPlay()
 	MainMenuWidget = CreateWidget<UMainMenuWidget>(GetWorld(), MainMenuWidgetClass);
 	MainMenuWidget->AddToViewport();
 	MainMenuWidget->LoadMenu->BlueprintInitializeWidget();
+
+	// 기존에 저장된 데이터가 있다면 Slot에 표시합니다.
+	LoadMenuViewModel->LoadData();
 }

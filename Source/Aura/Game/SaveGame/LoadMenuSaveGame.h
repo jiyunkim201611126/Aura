@@ -4,6 +4,14 @@
 #include "GameFramework/SaveGame.h"
 #include "LoadMenuSaveGame.generated.h"
 
+UENUM(BlueprintType)
+enum class ESaveSlotStatus : uint8
+{
+	Vacant,
+	EnterName,
+	Taken,
+};
+
 UCLASS()
 class AURA_API ULoadMenuSaveGame : public USaveGame
 {
@@ -11,11 +19,8 @@ class AURA_API ULoadMenuSaveGame : public USaveGame
 
 public:
 	UPROPERTY()
-	FString SlotName = FString();
-
-	UPROPERTY()
-	int32 SlotIndex = 0;
-
-	UPROPERTY()
 	FString PlayerName = FString("Default Name");
+
+	UPROPERTY()
+	ESaveSlotStatus SaveSlotStatus = ESaveSlotStatus::Vacant;
 };

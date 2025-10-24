@@ -4,6 +4,8 @@
 #include "MVVMViewModelBase.h"
 #include "MVVM_LoadSlot.generated.h"
 
+enum class ESaveSlotStatus : uint8;
+
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FSetWidgetSwitcherIndex, int32, WidgetSwitcherIndex);
 
 UCLASS()
@@ -22,7 +24,7 @@ public:
 	FString LoadSlotName;
 
 	UPROPERTY()
-	int32 SlotIndex;
+	ESaveSlotStatus LoadSlotStatus;
 
 	/** Field Notifies */
 
