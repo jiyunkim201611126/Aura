@@ -46,6 +46,12 @@ void UMVVM_LoadMenu::NewSlotButtonPressed(int32 SlotIndex, const FString& Entere
 
 void UMVVM_LoadMenu::SelectSlotButtonPressed(int32 SlotIndex)
 {
+	int32 TempIndex = 0;
+	for (auto LoadSlotViewModel : LoadSlotViewModels)
+	{
+		// 선택한 Slot 외 다른 Slot들은 Button이 활성화되도록 알려줍니다.
+		LoadSlotViewModel->EnableSelectSlotButton.Broadcast(SlotIndex != TempIndex++);
+	}
 }
 
 void UMVVM_LoadMenu::LoadData()

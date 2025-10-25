@@ -8,7 +8,7 @@ class UMVVM_LoadSlot;
 
 /**
  * MVVM 플러그인의 핵심 클래스로, 해당 클래스는 LoadMenu의 동작을 총괄하는 ViewModel입니다.
- * 참조 관계 자체는 View가 ViewModel을 참조하도록 되어있습니다.
+ * 참조 관계는 View가 ViewModel을 참조하도록 되어있습니다.
  * 플레이어가 View를 조작하면 ViewModel의 함수가 호출되어, 적절한 델리게이트를 통해 콜백 함수를 호출합니다.
  * 해당 콜백은 View로 전달되어 화면에 표시됩니다.
  */
