@@ -46,6 +46,8 @@ void UMVVM_LoadMenu::NewSlotButtonPressed(int32 SlotIndex, const FString& Entere
 
 void UMVVM_LoadMenu::SelectSlotButtonPressed(int32 SlotIndex)
 {
+	OnSlotSelected.Broadcast();
+	
 	int32 TempIndex = 0;
 	for (auto LoadSlotViewModel : LoadSlotViewModels)
 	{
