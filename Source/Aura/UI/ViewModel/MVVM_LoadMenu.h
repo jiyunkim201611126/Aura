@@ -44,6 +44,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SelectSlotButtonPressed(int32 SlotIndex);
 
+	UFUNCTION(BlueprintCallable)
+	void DeleteButtonPressed();
+
 	void LoadData();
 
 public:
@@ -57,4 +60,7 @@ protected:
 private:
 	UPROPERTY()
 	TArray<TObjectPtr<UMVVM_LoadSlot>> LoadSlotViewModels;
+
+	UPROPERTY()
+	int32 SelectedSlotIndex = INDEX_NONE;
 };

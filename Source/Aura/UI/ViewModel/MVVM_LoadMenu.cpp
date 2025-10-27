@@ -54,6 +54,26 @@ void UMVVM_LoadMenu::SelectSlotButtonPressed(int32 SlotIndex)
 		// 선택한 Slot 외 다른 Slot들은 Button이 활성화되도록 알려줍니다.
 		LoadSlotViewModel->EnableSelectSlotButton.Broadcast(SlotIndex != TempIndex++);
 	}
+
+	SelectedSlotIndex = SlotIndex;
+}
+
+void UMVVM_LoadMenu::DeleteButtonPressed()
+{
+	// 선택된 Slot이 있는지 확인합니다.
+	if (SelectedSlotIndex != INDEX_NONE)
+	{
+		// 저장된 데이터를 삭제합니다.
+		UMVVM_LoadSlot* SelectedSlotViewModel = LoadSlotViewModels[SelectedSlotIndex];
+		AAuraGameModeBase::DeleteSlot(SelectedSlotViewModel->LoadSlotName, SelectedSlotIndex);
+
+		// 슬롯을 초기화합니다.
+		SelectedSlotViewModel->LoadSlotStatus = ESaveSlotStatus::Vacant;
+		SelectedSlotViewModel->InitializeSlot();
+		SelectedSlotViewModel->EnableSelectSlotButton.Broadcast(true);
+
+		SelectedSlotIndex = INDEX_NONE;
+	}
 }
 
 void UMVVM_LoadMenu::LoadData()

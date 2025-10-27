@@ -33,7 +33,7 @@ public:
 	UPROPERTY()
 	FString LoadSlotName;
 
-	// 현재 LoadSlot의 상탤르 나타내는 변수입니다.
+	// 현재 LoadSlot의 상태를 나타내는 변수입니다.
 	UPROPERTY()
 	ESaveSlotStatus LoadSlotStatus;
 
