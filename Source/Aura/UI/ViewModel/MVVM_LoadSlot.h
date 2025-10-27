@@ -42,9 +42,17 @@ public:
 	 * 아래 선언된 멤버변수들은 View 클래스인 블루프린트 위젯에서 참조할 수 있습니다.
 	 * 참조되는 모습은 플러그인을 통해 UI로 확인할 수 있으며, 위젯의 어떤 요소가 영향을 받을지나 어떤 함수를 통해 반영할지 결정할 수 있습니다.
 	 */
-
-	UPROPERTY(BlueprintReadOnly, FieldNotify, Setter, Getter)
-	FString PlayerName;
+	
 	void SetPlayerName(const FString& InPlayerName);
 	FString GetPlayerName() const { return PlayerName; };
+	
+	void SetMapName(const FString& InMapName);
+	FString GetMapName() const { return MapName; };
+
+private:
+	UPROPERTY(BlueprintReadOnly, FieldNotify, Setter, Getter, meta = (AllowPrivateAccess = true))
+	FString PlayerName;
+	
+	UPROPERTY(BlueprintReadOnly, FieldNotify, Setter, Getter, meta = (AllowPrivateAccess = true))
+	FString MapName;
 };

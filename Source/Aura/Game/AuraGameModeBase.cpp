@@ -4,7 +4,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "SaveGame/LoadMenuSaveGame.h"
 
-void AAuraGameModeBase::SaveSlotData(UMVVM_LoadSlot* LoadSlotViewModel, const int32 SlotIndex) const
+void AAuraGameModeBase::SaveSlotData(const UMVVM_LoadSlot* LoadSlotViewModel, const int32 SlotIndex) const
 {
 	// 기존 저장된 데이터를 제거합니다.
 	if (UGameplayStatics::DoesSaveGameExist(LoadSlotViewModel->LoadSlotName, SlotIndex))
@@ -15,7 +15,8 @@ void AAuraGameModeBase::SaveSlotData(UMVVM_LoadSlot* LoadSlotViewModel, const in
 	// 새로운 저장 데이터를 생성합니다.
 	USaveGame* SaveGameObject = UGameplayStatics::CreateSaveGameObject(LoadMenuSaveGameClass);
 	ULoadMenuSaveGame* LoadMenuSaveGame = Cast<ULoadMenuSaveGame>(SaveGameObject);
-	LoadMenuSaveGame->PlayerName = LoadSlotViewModel->PlayerName;
+	LoadMenuSaveGame->PlayerName = LoadSlotViewModel->GetPlayerName();
+	LoadMenuSaveGame->MapName = LoadSlotViewModel->GetMapName();
 	LoadMenuSaveGame->SaveSlotStatus = LoadSlotViewModel->LoadSlotStatus;
 
 	UGameplayStatics::SaveGameToSlot(LoadMenuSaveGame, LoadSlotViewModel->LoadSlotName, SlotIndex);
@@ -43,4 +44,11 @@ void AAuraGameModeBase::DeleteSlot(const FString& SlotName, int32 SlotIndex)
 	{
 		UGameplayStatics::DeleteGameInSlot(SlotName, SlotIndex);
 	}
+}
+
+void AAuraGameModeBase::BeginPlay()
+{
+	Super::BeginPlay();
+
+	Maps.Add(DefaultMapName, DefaultMap);
 }

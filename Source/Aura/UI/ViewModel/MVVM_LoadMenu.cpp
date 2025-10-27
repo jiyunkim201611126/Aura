@@ -36,6 +36,7 @@ void UMVVM_LoadMenu::NewSlotButtonPressed(int32 SlotIndex, const FString& Entere
 	// 입력된 이름을 저장합니다.
 	AAuraGameModeBase* AuraGameMode = Cast<AAuraGameModeBase>(UGameplayStatics::GetGameMode(this));
 
+	LoadSlotViewModels[SlotIndex]->SetMapName(AuraGameMode->DefaultMapName);
 	LoadSlotViewModels[SlotIndex]->SetPlayerName(EnteredName);
 	LoadSlotViewModels[SlotIndex]->LoadSlotStatus = ESaveSlotStatus::Taken;
 
@@ -89,6 +90,7 @@ void UMVVM_LoadMenu::LoadData()
 		ESaveSlotStatus SaveSlotStatus = SaveObject->SaveSlotStatus;
 		
 		LoadSlotViewModel->SetPlayerName(PlayerName);
+		LoadSlotViewModel->SetMapName(SaveObject->MapName);
 		LoadSlotViewModel->LoadSlotStatus = SaveSlotStatus;
 		LoadSlotViewModel->InitializeSlot();
 	}
