@@ -77,6 +77,15 @@ void UMVVM_LoadMenu::DeleteButtonPressed()
 	}
 }
 
+void UMVVM_LoadMenu::PlayButtonPressed()
+{
+	if (SelectedSlotIndex != INDEX_NONE)
+	{
+		AAuraGameModeBase* AuraGameMode = Cast<AAuraGameModeBase>(UGameplayStatics::GetGameMode(this));
+		AuraGameMode->TravelToMap(LoadSlotViewModels[SelectedSlotIndex]);
+	}
+}
+
 void UMVVM_LoadMenu::LoadData()
 {
 	// SlotName과 Index에 해당하는 SaveGame을 가져와 LoadSlot에 표시합니다.
