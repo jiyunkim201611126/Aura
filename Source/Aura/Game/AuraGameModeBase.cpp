@@ -3,7 +3,7 @@
 #include "Aura/UI/ViewModel/MVVM_LoadSlot.h"
 #include "GameFramework/PlayerStart.h"
 #include "Kismet/GameplayStatics.h"
-#include "SaveGame/AuraGameInstance.h"
+#include "AuraGameInstance.h"
 #include "SaveGame/LoadMenuSaveGame.h"
 
 void AAuraGameModeBase::SaveSlotData(const UMVVM_LoadSlot* LoadSlotViewModel, const int32 SlotIndex) const
@@ -19,6 +19,7 @@ void AAuraGameModeBase::SaveSlotData(const UMVVM_LoadSlot* LoadSlotViewModel, co
 	ULoadMenuSaveGame* LoadMenuSaveGame = Cast<ULoadMenuSaveGame>(SaveGameObject);
 	LoadMenuSaveGame->PlayerName = LoadSlotViewModel->GetPlayerName();
 	LoadMenuSaveGame->MapName = LoadSlotViewModel->GetMapName();
+	LoadMenuSaveGame->PlayerStartTag = LoadSlotViewModel->PlayerStartTag;
 	LoadMenuSaveGame->SaveSlotStatus = LoadSlotViewModel->LoadSlotStatus;
 
 	UGameplayStatics::SaveGameToSlot(LoadMenuSaveGame, LoadSlotViewModel->LoadSlotName, SlotIndex);

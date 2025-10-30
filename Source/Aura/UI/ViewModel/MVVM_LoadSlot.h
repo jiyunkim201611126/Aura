@@ -37,6 +37,9 @@ public:
 	UPROPERTY()
 	ESaveSlotStatus LoadSlotStatus;
 
+	UPROPERTY()
+	FName PlayerStartTag;
+
 	/**
 	 * Field Notifies
 	 * 아래 선언된 멤버변수들은 View 클래스인 블루프린트 위젯에서 참조할 수 있습니다.

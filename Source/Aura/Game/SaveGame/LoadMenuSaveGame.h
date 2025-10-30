@@ -25,5 +25,8 @@ public:
 	FString MapName = FString("Default Map Name");
 
 	UPROPERTY()
+	FName PlayerStartTag;
+
+	UPROPERTY()
 	ESaveSlotStatus SaveSlotStatus = ESaveSlotStatus::Vacant;
 };
