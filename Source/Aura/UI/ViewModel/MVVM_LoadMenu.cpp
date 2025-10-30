@@ -2,6 +2,7 @@
 
 #include "MVVM_LoadSlot.h"
 #include "Aura/Game/AuraGameModeBase.h"
+#include "Aura/Game/SaveGame/AuraGameInstance.h"
 #include "Aura/Game/SaveGame/LoadMenuSaveGame.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -36,13 +37,21 @@ void UMVVM_LoadMenu::NewSlotButtonPressed(int32 SlotIndex, const FString& Entere
 	// 입력된 이름을 저장합니다.
 	AAuraGameModeBase* AuraGameMode = Cast<AAuraGameModeBase>(UGameplayStatics::GetGameMode(this));
 
-	LoadSlotViewModels[SlotIndex]->SetMapName(AuraGameMode->DefaultMapName);
-	LoadSlotViewModels[SlotIndex]->SetPlayerName(EnteredName);
-	LoadSlotViewModels[SlotIndex]->LoadSlotStatus = ESaveSlotStatus::Taken;
+	UMVVM_LoadSlot* LoadSlotViewModel = LoadSlotViewModels[SlotIndex];
 
-	AuraGameMode->SaveSlotData(LoadSlotViewModels[SlotIndex], SlotIndex);
+	LoadSlotViewModel->SetMapName(AuraGameMode->DefaultMapName);
+	LoadSlotViewModel->SetPlayerName(EnteredName);
+	LoadSlotViewModel->LoadSlotStatus = ESaveSlotStatus::Taken;
 
-	LoadSlotViewModels[SlotIndex]->InitializeSlot();
+	AuraGameMode->SaveSlotData(LoadSlotViewModel, SlotIndex);
+
+	LoadSlotViewModel->InitializeSlot();
+
+	// GameInstance에 게임 저장 및 로드를 위해 필요한 값을 캐싱합니다.
+	UAuraGameInstance* AuraGameInstance = Cast<UAuraGameInstance>(AuraGameMode->GetGameInstance());
+	AuraGameInstance->LoadSlotName = LoadSlotViewModel->LoadSlotName;
+	AuraGameInstance->LoadSlotIndex = SlotIndex;
+	AuraGameInstance->PlayerStartTag = AuraGameMode->DefaultPlayerStartTag;
 }
 
 void UMVVM_LoadMenu::SelectSlotButtonPressed(int32 SlotIndex)

@@ -21,10 +21,11 @@ public:
 	ULoadMenuSaveGame* GetSaveSlotData(const FString& SlotName, int32 SlotIndex) const;
 	static void DeleteSlot(const FString& SlotName, int32 SlotIndex);
 
-	void TravelToMap(UMVVM_LoadSlot* LoadSlotViewModel);
+	void TravelToMap(const UMVVM_LoadSlot* LoadSlotViewModel);
 
 protected:
 	virtual void BeginPlay() override;
+	virtual AActor* ChoosePlayerStart_Implementation(AController* Player) override;
 
 public:
 	UPROPERTY(EditDefaultsOnly, Category = "Character Class Defaults")
@@ -44,6 +45,9 @@ public:
 
 	UPROPERTY(EditDefaultsOnly)
 	TSoftObjectPtr<UWorld> DefaultMap;
+
+	UPROPERTY(EditDefaultsOnly)
+	FName DefaultPlayerStartTag;
 
 private:
 	UPROPERTY(EditDefaultsOnly, meta = (AllowPrivateAccess = true))

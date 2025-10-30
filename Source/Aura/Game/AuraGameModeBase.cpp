@@ -1,7 +1,9 @@
 #include "AuraGameModeBase.h"
 
 #include "Aura/UI/ViewModel/MVVM_LoadSlot.h"
+#include "GameFramework/PlayerStart.h"
 #include "Kismet/GameplayStatics.h"
+#include "SaveGame/AuraGameInstance.h"
 #include "SaveGame/LoadMenuSaveGame.h"
 
 void AAuraGameModeBase::SaveSlotData(const UMVVM_LoadSlot* LoadSlotViewModel, const int32 SlotIndex) const
@@ -46,7 +48,7 @@ void AAuraGameModeBase::DeleteSlot(const FString& SlotName, int32 SlotIndex)
 	}
 }
 
-void AAuraGameModeBase::TravelToMap(UMVVM_LoadSlot* LoadSlotViewModel)
+void AAuraGameModeBase::TravelToMap(const UMVVM_LoadSlot* LoadSlotViewModel)
 {
 	const FString SlotName = LoadSlotViewModel->LoadSlotName;
 	
@@ -58,4 +60,31 @@ void AAuraGameModeBase::BeginPlay()
 	Super::BeginPlay();
 
 	Maps.Add(DefaultMapName, DefaultMap);
+}
+
+AActor* AAuraGameModeBase::ChoosePlayerStart_Implementation(AController* Player)
+{
+	UAuraGameInstance* AuraGameInstance = Cast<UAuraGameInstance>(GetGameInstance());
+	
+	TArray<AActor*> Actors;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), APlayerStart::StaticClass(), Actors);
+
+	if (Actors.Num() > 0)
+	{
+		AActor* SelectedActor = Actors[0];
+		for (AActor* Actor : Actors)
+		{
+			if (APlayerStart* PlayerStart = Cast<APlayerStart>(Actor))
+			{
+				// PlayerStart의 Tag 중 GameInstance에 캐싱된 Tag와 일치하는 PlayerStart를 탐색합니다. 
+				if (PlayerStart->PlayerStartTag == AuraGameInstance->PlayerStartTag)
+				{
+					SelectedActor = PlayerStart;
+					break;
+				}
+			}
+		}
+		return SelectedActor;
+	}
+	return nullptr;
 }
