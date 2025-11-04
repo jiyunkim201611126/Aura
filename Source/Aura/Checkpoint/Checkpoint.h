@@ -17,6 +17,7 @@ public:
 protected:
 	//~ Begin AActor Interface
 	virtual void BeginPlay() override;
+	virtual void Destroyed() override;
 	//~ End of AActor Interface
 	
 	UFUNCTION()

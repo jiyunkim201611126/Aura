@@ -20,6 +20,8 @@ public:
 	void SaveSlotData(const UMVVM_LoadSlot* LoadSlotViewModel, const int32 SlotIndex) const;
 	ULoadMenuSaveGame* GetSaveSlotData(const FString& SlotName, int32 SlotIndex) const;
 	static void DeleteSlot(const FString& SlotName, int32 SlotIndex);
+	ULoadMenuSaveGame* RetrieveInGameSaveData() const;
+	void SaveInGameProgressData(ULoadMenuSaveGame* SaveGameObject) const;
 
 	void TravelToMap(const UMVVM_LoadSlot* LoadSlotViewModel);
 

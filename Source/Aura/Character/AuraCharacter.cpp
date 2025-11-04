@@ -1,11 +1,14 @@
 #include "AuraCharacter.h"
 #include "Aura/AbilitySystem/AuraAbilitySystemComponent.h"
+#include "Aura/Game/AuraGameModeBase.h"
+#include "Aura/Game/SaveGame/LoadMenuSaveGame.h"
 #include "Aura/Player/AuraPlayerState.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Aura/Player/AuraPlayerController.h"
 #include "Aura/UI/HUD/AuraHUD.h"
 #include "Aura/Manager/PawnManagerSubsystem.h"
 #include "Aura/Manager/FXManagerSubsystem.h"
+#include "Kismet/GameplayStatics.h"
 
 AAuraCharacter::AAuraCharacter()
 {
@@ -155,6 +158,21 @@ void AAuraCharacter::AddToSpellPoints_Implementation(const int32 InSpellPoints)
 void AAuraCharacter::LevelUp_Implementation()
 {
 	MulticastLevelUpParticles();
+}
+
+void AAuraCharacter::SaveProgress_Implementation(const FName& CheckpointTag)
+{
+	const AAuraGameModeBase* AuraGameMode = Cast<AAuraGameModeBase>(UGameplayStatics::GetGameMode(this));
+	if (AuraGameMode)
+	{
+		ULoadMenuSaveGame* SaveData = AuraGameMode->RetrieveInGameSaveData();
+		if (SaveData)
+		{
+			SaveData->PlayerStartTag = CheckpointTag;
+
+			AuraGameMode->SaveInGameProgressData(SaveData);
+		}
+	}
 }
 
 void AAuraCharacter::InitAbilityActorInfo()

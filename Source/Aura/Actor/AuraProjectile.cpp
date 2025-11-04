@@ -67,6 +67,8 @@ void AAuraProjectile::Destroyed()
 	
 	PlayHitFXs();
 	
+	Sphere->OnComponentBeginOverlap.Clear();
+	
 	Super::Destroyed();
 }
 
@@ -99,10 +101,10 @@ void AAuraProjectile::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, 
 		PlayHitFXs();
 	}
 
-	// 서버인 경우 Effect를 부여합니다.
+	// 서버인 경우 들어가는 분기입니다.
 	if (HasAuthority())
 	{
-		// Overlap 대상에게 Effect 부여합니다.
+		// Overlap 대상에게 Effect를 부여합니다.
 		for (const auto EffectPolicy : EffectPolicies)
 		{
 			// RadialFallOffDamage를 갖고 있을 수 있으므로, 그에 필요한 변수를 할당해 부여합니다.
@@ -130,9 +132,9 @@ void AAuraProjectile::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, 
 	
 	if (bDestroyWithOverlap)
 	{
-		// 기존 수명으로 인해 Destroy되면 원치 않는 Destroy가 발생할 수 있으므로 LifeSpan 초기화
+		// 기존 수명으로 인해 Destroy되면 원치 않는 Destroy가 발생할 수 있으므로 LifeSpan을 초기화합니다.
 		SetLifeSpan(0.f);
-		// 더이상 Overlap 이벤트가 필요하지 않으므로 바인드 해제
+		// 더이상 Overlap 이벤트가 필요하지 않으므로 바인드를 해제합니다.
 		Sphere->OnComponentBeginOverlap.Clear();
 	}
 }

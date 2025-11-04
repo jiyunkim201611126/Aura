@@ -31,8 +31,8 @@ class AURA_API UAbilityEffectPolicy : public UObject
 	GENERATED_BODY()
 
 public:
-	virtual void ApplyEffect(UGameplayAbility* OwningAbility, AActor* TargetActor, const FEffectPolicyContext& EffectPolicyContext) PURE_VIRTUAL(...);
-	virtual void EndAbility() PURE_VIRTUAL(...);
+	virtual void ApplyEffect(UGameplayAbility* OwningAbility, AActor* TargetActor, const FEffectPolicyContext& EffectPolicyContext) PURE_VIRTUAL(UAbilityEffectPolicy::ApplyEffect, );
+	virtual void EndAbility() PURE_VIRTUAL(UAbilityEffectPolicy::EndAbility, );
 	
 	void MakeEffectContextHandle(const UGameplayAbility* OwningAbility);
 

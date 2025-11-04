@@ -3,12 +3,13 @@
 #include "CoreMinimal.h"
 #include "AuraCharacterBase.h"
 #include "Aura/Interaction/LevelableInterface.h"
+#include "Aura/Interaction/SaveGameInterface.h"
 #include "AuraCharacter.generated.h"
 
 class UNiagaraComponent;
 
 UCLASS()
-class AURA_API AAuraCharacter : public AAuraCharacterBase, public ILevelableInterface
+class AURA_API AAuraCharacter : public AAuraCharacterBase, public ILevelableInterface, public ISaveGameInterface
 {
 	GENERATED_BODY()
 
@@ -36,6 +37,10 @@ public:
 	virtual int32 GetSpellPoints_Implementation() const override;
 	virtual void LevelUp_Implementation() override;
 	//~ End ILevelable Interface
+
+	//~ Begin ISaveGame Interface
+	virtual void SaveProgress_Implementation(const FName& CheckpointTag) override;
+	//~ End of ISaveGame Interface
 
 protected:
 	//~ Begin AActor Interface
