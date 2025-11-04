@@ -12,8 +12,10 @@
 #include "Aura/Aura.h"
 #include "Aura/Actor/AuraDecal.h"
 #include "Aura/Actor/DamageTextActor.h"
+#include "Aura/Game/AuraGameModeBase.h"
 #include "Aura/Interaction/CombatInterface.h"
 #include "Components/DecalComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 AAuraPlayerController::AAuraPlayerController()
 {
@@ -48,6 +50,19 @@ void AAuraPlayerController::HideSkillPreview_Implementation()
 	{
 		SkillPreview->Destroy();
 	}
+}
+
+void AAuraPlayerController::Server_RequestTravel_Implementation(const FString& MapName)
+{
+	AAuraGameModeBase* AuraGameMode = Cast<AAuraGameModeBase>(GetWorld()->GetAuthGameMode());
+
+	const TSoftObjectPtr<UWorld> MapToTravel = AuraGameMode->GetMap(MapName);
+	Client_ResponseTravel(MapToTravel);
+}
+
+void AAuraPlayerController::Client_ResponseTravel_Implementation(const TSoftObjectPtr<UWorld>& MapToTravel)
+{
+	UGameplayStatics::OpenLevelBySoftObjectPtr(GetWorld(), MapToTravel);
 }
 
 void AAuraPlayerController::ClientSpawnDamageText_Implementation(float DamageAmount, AActor* TargetActor, bool bBlockedHit, bool bCriticalHit, const EDamageTypeContext DamageType)
@@ -96,7 +111,10 @@ void AAuraPlayerController::OnPossess(APawn* InPawn)
 
 	if (HasAuthority())
 	{
-		Cast<ICombatInterface>(InPawn)->RegisterPawn();
+		if (ICombatInterface* Combat = Cast<ICombatInterface>(InPawn))
+		{
+			Combat->RegisterPawn();
+		}
 	}
 }
 
@@ -104,7 +122,10 @@ void AAuraPlayerController::OnUnPossess()
 {
 	if (HasAuthority())
 	{
-		Cast<ICombatInterface>(GetPawn())->UnregisterPawn();
+		if (ICombatInterface* Combat = Cast<ICombatInterface>(GetPawn()))
+		{
+			Combat->UnregisterPawn();
+		}
 	}
 	
 	Super::OnUnPossess();

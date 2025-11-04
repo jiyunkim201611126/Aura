@@ -17,13 +17,7 @@ class AURA_API AAuraGameModeBase : public AGameModeBase
 	GENERATED_BODY()
 	
 public:
-	void SaveSlotData(const UMVVM_LoadSlot* LoadSlotViewModel, const int32 SlotIndex) const;
-	ULoadMenuSaveGame* GetSaveSlotData(const FString& SlotName, int32 SlotIndex) const;
-	static void DeleteSlot(const FString& SlotName, int32 SlotIndex);
-	ULoadMenuSaveGame* RetrieveInGameSaveData() const;
-	void SaveInGameProgressData(ULoadMenuSaveGame* SaveGameObject) const;
-
-	void TravelToMap(const UMVVM_LoadSlot* LoadSlotViewModel);
+	TSoftObjectPtr<UWorld> GetMap(const FString& MapName);
 
 protected:
 	virtual void BeginPlay() override;
@@ -43,13 +37,7 @@ public:
 	TMap<FString, TSoftObjectPtr<UWorld>> Maps;
 
 	UPROPERTY(EditDefaultsOnly)
-	FString DefaultMapName;
-
-	UPROPERTY(EditDefaultsOnly)
 	TSoftObjectPtr<UWorld> DefaultMap;
-
-	UPROPERTY(EditDefaultsOnly)
-	FName DefaultPlayerStartTag;
 
 private:
 	UPROPERTY(EditDefaultsOnly, meta = (AllowPrivateAccess = true))

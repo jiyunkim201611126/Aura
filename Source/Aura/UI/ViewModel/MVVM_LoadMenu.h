@@ -48,7 +48,7 @@ public:
 	void DeleteButtonPressed();
 	
 	UFUNCTION(BlueprintCallable)
-	void PlayButtonPressed();
+	void PlayButtonPressed(APlayerController* PlayerController);
 
 	void LoadData();
 

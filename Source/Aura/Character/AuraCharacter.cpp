@@ -1,6 +1,5 @@
 #include "AuraCharacter.h"
 #include "Aura/AbilitySystem/AuraAbilitySystemComponent.h"
-#include "Aura/Game/AuraGameModeBase.h"
 #include "Aura/Game/SaveGame/LoadMenuSaveGame.h"
 #include "Aura/Player/AuraPlayerState.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -8,7 +7,7 @@
 #include "Aura/UI/HUD/AuraHUD.h"
 #include "Aura/Manager/PawnManagerSubsystem.h"
 #include "Aura/Manager/FXManagerSubsystem.h"
-#include "Kismet/GameplayStatics.h"
+#include "Aura/Manager/SaveManagerSubsystem.h"
 
 AAuraCharacter::AAuraCharacter()
 {
@@ -162,15 +161,15 @@ void AAuraCharacter::LevelUp_Implementation()
 
 void AAuraCharacter::SaveProgress_Implementation(const FName& CheckpointTag)
 {
-	const AAuraGameModeBase* AuraGameMode = Cast<AAuraGameModeBase>(UGameplayStatics::GetGameMode(this));
-	if (AuraGameMode)
+	USaveManagerSubsystem* SaveManagerSubsystem = GetWorld()->GetGameInstance()->GetSubsystem<USaveManagerSubsystem>();
+	if (SaveManagerSubsystem)
 	{
-		ULoadMenuSaveGame* SaveData = AuraGameMode->RetrieveInGameSaveData();
+		ULoadMenuSaveGame* SaveData = SaveManagerSubsystem->RetrieveInGameSaveData();
 		if (SaveData)
 		{
 			SaveData->PlayerStartTag = CheckpointTag;
 
-			AuraGameMode->SaveInGameProgressData(SaveData);
+			SaveManagerSubsystem->SaveInGameProgressData(SaveData);
 		}
 	}
 }

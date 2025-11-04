@@ -40,6 +40,7 @@ void ACheckpoint::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AAct
 	{
 		if (OtherPawn->IsLocallyControlled() && OtherPawn->Implements<USaveGameInterface>())
 		{
+			// Checkpoint의 StartTag를 저장합니다. 
 			ISaveGameInterface::Execute_SaveProgress(OtherPawn, PlayerStartTag);
 			
 			ActiveGlowEffects();

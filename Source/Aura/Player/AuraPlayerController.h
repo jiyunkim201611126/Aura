@@ -35,6 +35,12 @@ public:
 	virtual void HideSkillPreview_Implementation() override;
 	//~ End ISkillPreview Interface
 
+	UFUNCTION(Server, Reliable)
+	void Server_RequestTravel(const FString& MapName);
+
+	UFUNCTION(Client, Reliable)
+	void Client_ResponseTravel(const TSoftObjectPtr<UWorld>& MapToTravel);
+
 protected:
 	//~ Begin Actor Interface
 	virtual void BeginPlay() override;
