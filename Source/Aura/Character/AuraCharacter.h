@@ -50,6 +50,8 @@ protected:
 	//~ Begin APawn Interface
 	virtual void PossessedBy(AController* NewController) override;
 	//~ End APawn Interface
+
+	void LoadProgress();
 	
 	// 게임 시작 시 Attribute를 초기화하는 함수
 	void InitializeDefaultAttributes() const;

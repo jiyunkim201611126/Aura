@@ -9,7 +9,8 @@
 class UAbilitySystemComponent;
 class UAttributeSet;
 
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnPlayerStatChanged, int32 /* Stat Value */);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnPlayerStatChanged, int32 /* StatValue */);
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnLevelChanged, int32 /* NewLevel */, bool /* bLevelUp */);
 
 UCLASS()
 class AURA_API AAuraPlayerState : public APlayerState, public IAbilitySystemInterface
@@ -30,7 +31,7 @@ public:
 	void SetPlayerLevel(int32 InLevel);
 	void SetXP(const int32 InXP);
 	void SetAttributePoints(const int32 InAttributePoints);
-	void SetToSpellPoints(const int32 InSpellPoints);
+	void SetSpellPoints(const int32 InSpellPoints);
 
 	void AddToLevel(int32 InLevel);
 	void AddToXP(const int32 InXP);
@@ -39,7 +40,7 @@ public:
 
 public:
 	FOnPlayerStatChanged OnXPChangedDelegate;
-	FOnPlayerStatChanged OnLevelChangedDelegate;
+	FOnLevelChanged OnLevelChangedDelegate;
 	FOnPlayerStatChanged OnAttributePointsChangedDelegate;
 	FOnPlayerStatChanged OnSpellPointsChangedDelegate;
 
@@ -65,7 +66,7 @@ private:
 	// 3. PlayerState에서 XP 변경 시 이 순서를 통해 전파됩니다.
 	
 	UPROPERTY(VisibleAnywhere, ReplicatedUsing = OnRep_Level)
-	int32 Level = 1;
+	int32 Level = 0;
 
 	UFUNCTION()
 	void OnRep_Level(int32 OldLevel);

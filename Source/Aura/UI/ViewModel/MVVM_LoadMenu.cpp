@@ -2,7 +2,7 @@
 
 #include "MVVM_LoadSlot.h"
 #include "Aura/Game/AuraGameInstance.h"
-#include "Aura/Game/SaveGame/LoadMenuSaveGame.h"
+#include "Aura/Game/SaveGame/AuraSaveGame.h"
 #include "Aura/Manager/SaveManagerSubsystem.h"
 #include "Aura/Player/AuraPlayerController.h"
 
@@ -114,7 +114,7 @@ void UMVVM_LoadMenu::LoadData()
 	int32 TempIndex = 0;
 	for (auto LoadSlotViewModel : LoadSlotViewModels)
 	{
-		ULoadMenuSaveGame* SaveObject = SaveManagerSubsystem->GetSaveSlotData(LoadSlotViewModel->LoadSlotName, TempIndex++);
+		UAuraSaveGame* SaveObject = SaveManagerSubsystem->GetSaveSlotData(LoadSlotViewModel->LoadSlotName, TempIndex++);
 		
 		ESaveSlotStatus SaveSlotStatus = SaveObject->SaveSlotStatus;
 		const FString PlayerName = SaveObject->PlayerName;

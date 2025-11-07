@@ -4,7 +4,7 @@
 #include "GameFramework/GameModeBase.h"
 #include "AuraGameModeBase.generated.h"
 
-class ULoadMenuSaveGame;
+class UAuraSaveGame;
 class USaveGame;
 class UMVVM_LoadSlot;
 class UEliminateRewardInfo;

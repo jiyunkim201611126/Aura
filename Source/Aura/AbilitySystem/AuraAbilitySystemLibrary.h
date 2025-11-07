@@ -7,6 +7,7 @@
 #include "Data/CharacterClassInfo.h"
 #include "AuraAbilitySystemLibrary.generated.h"
 
+class UAuraSaveGame;
 enum class ECharacterRank : uint8;
 class AAuraHUD;
 class UOverlayWidgetController;
@@ -36,11 +37,17 @@ public:
 	UFUNCTION(BlueprintPure, Category = "AuraAbilitySystemLibrary | WidgetController", meta = (WorldContext = "WorldContextObject"))
 	static USpellMenuWidgetController* GetSpellMenuWidgetController(const UObject* WorldContextObject);
 
-	// 적 캐릭터 직업군별로 Attribute를 초기화하는 함수
+	// 적 캐릭터의 직업군별로 Attribute를 초기화하는 함수입니다.
 	UFUNCTION(BlueprintCallable, Category = "AuraAbilitySystemLibrary | CahracterClassDefaults", meta = (WorldContext = "WorldContextObject"))
 	static void InitializeDefaultAttributes(const UObject* WorldContextObject, ECharacterClass CharacterClass, float Level, UAbilitySystemComponent* ASC);
 
-	// 게임 시작 시 모든 캐릭터가 기본으로 사용하는 Ability(HitReact 등)를 장착시키는 함수
+	UFUNCTION(BlueprintCallable, Category = "AuraAbilitySystemLibrary | CahracterClassDefaults", meta = (WorldContext = "WorldContextObject"))
+	static void InitializeAttributesFromSaveData(const UObject* WorldContextObject, UAbilitySystemComponent* ASC, UAuraSaveGame* SaveData);
+
+	/**
+	 * 게임 시작 시 모든 캐릭터가 기본으로 사용하는 범용 Ability를 장착시키는 함수입니다.
+	 * 기존엔 HitReact와 CommonAttack이 이에 해당됐으나 확장성을 위해 해당 Ability들도 캐릭터마다 1:1 대응하도록 변경했습니다.
+	 */
 	UFUNCTION(BlueprintCallable, Category = "AuraAbilitySystemLibrary | CahracterClassDefaults", meta = (WorldContext = "WorldContextObject"))
 	static void AddCommonAbilities(const UObject* WorldContextObject, UAbilitySystemComponent* ASC, ECharacterClass CharacterClass);
 	

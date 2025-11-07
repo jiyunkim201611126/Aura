@@ -5,7 +5,7 @@
 #include "SaveManagerSubsystem.generated.h"
 
 class UMVVM_LoadSlot;
-class ULoadMenuSaveGame;
+class UAuraSaveGame;
 class USaveGame;
 
 UCLASS(config = Game)
@@ -15,10 +15,10 @@ class AURA_API USaveManagerSubsystem : public UGameInstanceSubsystem
 
 public:
 	void SaveSlotData(const UMVVM_LoadSlot* LoadSlotViewModel, const int32 SlotIndex) const;
-	ULoadMenuSaveGame* GetSaveSlotData(const FString& SlotName, int32 SlotIndex) const;
+	UAuraSaveGame* GetSaveSlotData(const FString& SlotName, int32 SlotIndex) const;
 	void DeleteSlot(const FString& SlotName, int32 SlotIndex) const;
-	ULoadMenuSaveGame* RetrieveInGameSaveData() const;
-	void SaveInGameProgressData(ULoadMenuSaveGame* SaveGameObject) const;
+	UAuraSaveGame* RetrieveInGameSaveData() const;
+	void SaveInGameProgressData(UAuraSaveGame* SaveGameObject) const;
 
 public:
 	UPROPERTY()

@@ -1,7 +1,7 @@
 ﻿#include "SaveManagerSubsystem.h"
 
 #include "Aura/Game/AuraGameInstance.h"
-#include "Aura/Game/SaveGame/LoadMenuSaveGame.h"
+#include "Aura/Game/SaveGame/AuraSaveGame.h"
 #include "Aura/UI/ViewModel/MVVM_LoadSlot.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -15,7 +15,7 @@ void USaveManagerSubsystem::SaveSlotData(const UMVVM_LoadSlot* LoadSlotViewModel
 
 	// 새로운 저장 데이터를 생성합니다.
 	USaveGame* SaveGameObject = UGameplayStatics::CreateSaveGameObject(LoadMenuSaveGameClass);
-	ULoadMenuSaveGame* LoadMenuSaveGame = Cast<ULoadMenuSaveGame>(SaveGameObject);
+	UAuraSaveGame* LoadMenuSaveGame = Cast<UAuraSaveGame>(SaveGameObject);
 	LoadMenuSaveGame->SaveSlotStatus = LoadSlotViewModel->LoadSlotStatus;
 	LoadMenuSaveGame->PlayerName = LoadSlotViewModel->GetPlayerName();
 	LoadMenuSaveGame->MapName = LoadSlotViewModel->GetMapName();
@@ -24,7 +24,7 @@ void USaveManagerSubsystem::SaveSlotData(const UMVVM_LoadSlot* LoadSlotViewModel
 	UGameplayStatics::SaveGameToSlot(LoadMenuSaveGame, LoadSlotViewModel->LoadSlotName, SlotIndex);
 }
 
-ULoadMenuSaveGame* USaveManagerSubsystem::GetSaveSlotData(const FString& SlotName, int32 SlotIndex) const
+UAuraSaveGame* USaveManagerSubsystem::GetSaveSlotData(const FString& SlotName, int32 SlotIndex) const
 {
 	// 기존에 저장 데이터가 없다면 생성, 있다면 해당 데이터를 반환합니다.
 	USaveGame* SaveGameObject;
@@ -36,7 +36,7 @@ ULoadMenuSaveGame* USaveManagerSubsystem::GetSaveSlotData(const FString& SlotNam
 	{
 		SaveGameObject = UGameplayStatics::CreateSaveGameObject(LoadMenuSaveGameClass);
 	}
-	ULoadMenuSaveGame* LoadMenuSaveGame = Cast<ULoadMenuSaveGame>(SaveGameObject);
+	UAuraSaveGame* LoadMenuSaveGame = Cast<UAuraSaveGame>(SaveGameObject);
 	return LoadMenuSaveGame;
 }
 
@@ -48,7 +48,7 @@ void USaveManagerSubsystem::DeleteSlot(const FString& SlotName, int32 SlotIndex)
 	}
 }
 
-ULoadMenuSaveGame* USaveManagerSubsystem::RetrieveInGameSaveData() const
+UAuraSaveGame* USaveManagerSubsystem::RetrieveInGameSaveData() const
 {
 	const UAuraGameInstance* AuraGameInstance = Cast<UAuraGameInstance>(GetGameInstance());
 
@@ -58,7 +58,7 @@ ULoadMenuSaveGame* USaveManagerSubsystem::RetrieveInGameSaveData() const
 	return GetSaveSlotData(InGameLoadSlotName, InGameLoadSlotIndex);
 }
 
-void USaveManagerSubsystem::SaveInGameProgressData(ULoadMenuSaveGame* SaveGameObject) const
+void USaveManagerSubsystem::SaveInGameProgressData(UAuraSaveGame* SaveGameObject) const
 {
 	UAuraGameInstance* AuraGameInstance = Cast<UAuraGameInstance>(GetGameInstance());
 

@@ -2,7 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/SaveGame.h"
-#include "LoadMenuSaveGame.generated.h"
+#include "AuraSaveGame.generated.h"
 
 UENUM(BlueprintType)
 enum class ESaveSlotStatus : uint8
@@ -13,13 +13,16 @@ enum class ESaveSlotStatus : uint8
 };
 
 UCLASS()
-class AURA_API ULoadMenuSaveGame : public USaveGame
+class AURA_API UAuraSaveGame : public USaveGame
 {
 	GENERATED_BODY()
 
 public:
 	UPROPERTY()
 	ESaveSlotStatus SaveSlotStatus = ESaveSlotStatus::Vacant;
+
+	UPROPERTY()
+	bool bFirstTimeLoadIn = true;
 	
 	UPROPERTY()
 	FString PlayerName = FString("Default Name");
@@ -34,7 +37,7 @@ public:
 	/** Player Info */
 	
 	UPROPERTY()
-	int32 PlayerLevel = 0;
+	int32 PlayerLevel = 1;
 
 	UPROPERTY()
 	int32 XP = 0;

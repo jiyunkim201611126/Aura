@@ -48,6 +48,7 @@ struct FAbilityAdditionalCostInfo
 };
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAttributeChangedSignature, float, NewValue);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnLevelChangedSignature, int32, NewLevel, bool, bLevelUp);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMessageWidgetRowSignature, FUIWidgetRow, Row);
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnAbilityAdditionalCostSignature, FGameplayTag, InAbilityTag, const FAbilityAdditionalCostInfo&, Info);
@@ -96,7 +97,7 @@ public:
 	FOnAttributeChangedSignature OnXPBarPercentChangedDelegate;
 
 	UPROPERTY(BlueprintAssignable, Category = "GAS | Level")
-	FOnPlayerStatChangedSignature OnPlayerLevelChangedDelegate;
+	FOnLevelChangedSignature OnPlayerLevelChangedDelegate;
 
 	UPROPERTY(BlueprintAssignable, Category = "GAS | AbilityIcon")
 	FOnAbilityAdditionalCostSignature OnAbilityAdditionalCostDelegate;
