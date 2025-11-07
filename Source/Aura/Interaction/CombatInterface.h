@@ -31,7 +31,7 @@ class AURA_API ICombatInterface
 
 public:
 	// PawnManagerSubsystem에 Pawn을 등록 및 해제하는 함수입니다.
-	// Controller만 해도 작동엔 문제가 없으나, 멀티플레이 환경에서 강제종료 등의 상황 발생 시 문제가 생길 수 있으므로 Controller와 Character가 모두 한 번씩 호출합니다.
+	// Controller에서만 호출해도 작동엔 문제가 없으나, 멀티플레이 환경에서 강제종료 등의 상황 발생 시 문제가 생길 수 있으므로 Controller와 Character가 모두 한 번씩 호출합니다.
 	virtual void RegisterPawn();
 	virtual void UnregisterPawn();
 

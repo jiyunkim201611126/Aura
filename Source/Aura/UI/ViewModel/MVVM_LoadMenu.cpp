@@ -116,13 +116,14 @@ void UMVVM_LoadMenu::LoadData()
 	{
 		ULoadMenuSaveGame* SaveObject = SaveManagerSubsystem->GetSaveSlotData(LoadSlotViewModel->LoadSlotName, TempIndex++);
 		
-		const FString PlayerName = SaveObject->PlayerName;
 		ESaveSlotStatus SaveSlotStatus = SaveObject->SaveSlotStatus;
+		const FString PlayerName = SaveObject->PlayerName;
 		
+		LoadSlotViewModel->LoadSlotStatus = SaveSlotStatus;
 		LoadSlotViewModel->SetPlayerName(PlayerName);
 		LoadSlotViewModel->SetMapName(SaveObject->MapName);
 		LoadSlotViewModel->PlayerStartTag = SaveObject->PlayerStartTag;
-		LoadSlotViewModel->LoadSlotStatus = SaveSlotStatus;
+		
 		LoadSlotViewModel->InitializeSlot();
 	}
 }

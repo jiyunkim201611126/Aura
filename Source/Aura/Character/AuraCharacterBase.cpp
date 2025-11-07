@@ -32,7 +32,10 @@ void AAuraCharacterBase::BeginPlay()
 {
 	Super::BeginPlay();
 
-	RegisterPawn();
+	if (HasAuthority())
+	{
+		RegisterPawn();
+	}
 }
 
 void AAuraCharacterBase::PossessedBy(AController* NewController)
@@ -62,8 +65,10 @@ FVector AAuraCharacterBase::GetCombatSocketLocation_Implementation(FName SocketN
 
 void AAuraCharacterBase::Die(const FVector& Impulse)
 {
-	// 서버에서만 호출되는 함수임이 명확하므로 권한 확인 필요 없이 등록 해제
-	UnregisterPawn();
+	if (HasAuthority())
+	{
+		UnregisterPawn();
+	}
 	MulticastDeath(Impulse);
 	AbilitySystemComponent->CancelAllAbilities();
 }

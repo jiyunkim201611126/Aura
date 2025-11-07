@@ -16,10 +16,10 @@ void USaveManagerSubsystem::SaveSlotData(const UMVVM_LoadSlot* LoadSlotViewModel
 	// 새로운 저장 데이터를 생성합니다.
 	USaveGame* SaveGameObject = UGameplayStatics::CreateSaveGameObject(LoadMenuSaveGameClass);
 	ULoadMenuSaveGame* LoadMenuSaveGame = Cast<ULoadMenuSaveGame>(SaveGameObject);
+	LoadMenuSaveGame->SaveSlotStatus = LoadSlotViewModel->LoadSlotStatus;
 	LoadMenuSaveGame->PlayerName = LoadSlotViewModel->GetPlayerName();
 	LoadMenuSaveGame->MapName = LoadSlotViewModel->GetMapName();
 	LoadMenuSaveGame->PlayerStartTag = LoadSlotViewModel->PlayerStartTag;
-	LoadMenuSaveGame->SaveSlotStatus = LoadSlotViewModel->LoadSlotStatus;
 
 	UGameplayStatics::SaveGameToSlot(LoadMenuSaveGame, LoadSlotViewModel->LoadSlotName, SlotIndex);
 }
