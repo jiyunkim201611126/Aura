@@ -39,6 +39,10 @@ public:
 	void AddToSpellPoints(const int32 InSpellPoints);
 
 public:
+	/**
+	 * WidgetController 클래스가 콜백을 걸어두는 델리게이트입니다.
+	 * Set 함수 혹은 Add 함수를 통해 값이 변경되면 리슨 서버와 클라이언트 모두 해당 델리게이트로 콜백을 호출합니다.
+	 */
 	FOnPlayerStatChanged OnXPChangedDelegate;
 	FOnLevelChanged OnLevelChangedDelegate;
 	FOnPlayerStatChanged OnAttributePointsChangedDelegate;
@@ -59,12 +63,8 @@ protected:
 	TObjectPtr<UAttributeSet> AttributeSet;
 
 private:
-	// PlayerState -> WidgetController -> Widget 로 로직 흐름을 구성했습니다.
-	// 위 흐름은 델리게이트를 통해 제어됩니다.
-	// 1. WidgetController가 PlayerState의 델리게이트에 콜백 바인드
-	// 2. Widget이 WidgetController의 델리게이트에 콜백 바인드
-	// 3. PlayerState에서 XP 변경 시 이 순서를 통해 전파됩니다.
-	
+	// Level의 초기값을 0으로 설정해, Level의 값 변동 시 게임 시작 시점인지 레벨업 시점인지 클라이언트도 파악할 수 있도록 합니다.
+	// 예시) [0 -> 4]: Level 4 플레이어 접속 / [4 -> 5]: Level 4 플레이어 레벨업
 	UPROPERTY(VisibleAnywhere, ReplicatedUsing = OnRep_Level)
 	int32 Level = 0;
 

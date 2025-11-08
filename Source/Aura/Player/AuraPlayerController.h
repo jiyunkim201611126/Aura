@@ -26,6 +26,12 @@ class AURA_API AAuraPlayerController : public APlayerController, public ISkillPr
 public:
 	AAuraPlayerController();
 
+	UFUNCTION(Server, Reliable)
+	void ServerRequestTravel(const FString& MapName);
+
+	UFUNCTION(Client, Reliable)
+	void ClientResponseTravel(const TSoftObjectPtr<UWorld>& MapToTravel);
+
 	// Damage를 보여주는 위젯 컴포넌트를 스폰하는 함수입니다.
 	UFUNCTION(Client, Reliable)
 	void ClientSpawnDamageText(float DamageAmount, AActor* TargetActor, bool bBlockedHit, bool bCriticalHit, const EDamageTypeContext DamageType);
@@ -34,12 +40,6 @@ public:
 	virtual void ShowSkillPreview_Implementation(UMaterialInterface* DecalMaterial = nullptr) override;
 	virtual void HideSkillPreview_Implementation() override;
 	//~ End ISkillPreview Interface
-
-	UFUNCTION(Server, Reliable)
-	void Server_RequestTravel(const FString& MapName);
-
-	UFUNCTION(Client, Reliable)
-	void Client_ResponseTravel(const TSoftObjectPtr<UWorld>& MapToTravel);
 
 protected:
 	//~ Begin Actor Interface

@@ -15,13 +15,43 @@
 #include "Aura/Game/AuraGameModeBase.h"
 #include "Aura/Interaction/CombatInterface.h"
 #include "Components/DecalComponent.h"
-#include "Kismet/GameplayStatics.h"
 
 AAuraPlayerController::AAuraPlayerController()
 {
 	bReplicates = true;
 
 	Spline = CreateDefaultSubobject<USplineComponent>("Spline");
+}
+
+void AAuraPlayerController::ServerRequestTravel_Implementation(const FString& MapName)
+{
+	AAuraGameModeBase* AuraGameMode = Cast<AAuraGameModeBase>(GetWorld()->GetAuthGameMode());
+
+	const TSoftObjectPtr<UWorld> MapToTravel = AuraGameMode->GetMap(MapName);
+	ClientResponseTravel(MapToTravel);
+}
+
+void AAuraPlayerController::ClientResponseTravel_Implementation(const TSoftObjectPtr<UWorld>& MapToTravel)
+{
+	FString MapPath = MapToTravel.GetLongPackageName();
+	if (HasAuthority())
+	{
+		MapPath.Append("?listen");
+	}
+	
+	ClientTravel(MapPath, TRAVEL_Absolute);
+}
+
+void AAuraPlayerController::ClientSpawnDamageText_Implementation(float DamageAmount, AActor* TargetActor, bool bBlockedHit, bool bCriticalHit, const EDamageTypeContext DamageType)
+{
+	if (TargetActor && DamageTextClass && IsLocalController())
+	{
+		if (ADamageTextActor* DamageText = GetWorld()->SpawnActor<ADamageTextActor>(DamageTextClass))
+		{
+			DamageText->SetActorTransform(TargetActor->GetActorTransform());
+			DamageText->InitDamageText(DamageAmount, bBlockedHit, bCriticalHit, DamageType);
+		}
+	}
 }
 
 void AAuraPlayerController::ShowSkillPreview_Implementation(UMaterialInterface* DecalMaterial)
@@ -49,31 +79,6 @@ void AAuraPlayerController::HideSkillPreview_Implementation()
 	if (SkillPreview)
 	{
 		SkillPreview->Destroy();
-	}
-}
-
-void AAuraPlayerController::Server_RequestTravel_Implementation(const FString& MapName)
-{
-	AAuraGameModeBase* AuraGameMode = Cast<AAuraGameModeBase>(GetWorld()->GetAuthGameMode());
-
-	const TSoftObjectPtr<UWorld> MapToTravel = AuraGameMode->GetMap(MapName);
-	Client_ResponseTravel(MapToTravel);
-}
-
-void AAuraPlayerController::Client_ResponseTravel_Implementation(const TSoftObjectPtr<UWorld>& MapToTravel)
-{
-	UGameplayStatics::OpenLevelBySoftObjectPtr(GetWorld(), MapToTravel);
-}
-
-void AAuraPlayerController::ClientSpawnDamageText_Implementation(float DamageAmount, AActor* TargetActor, bool bBlockedHit, bool bCriticalHit, const EDamageTypeContext DamageType)
-{
-	if (TargetActor && DamageTextClass && IsLocalController())
-	{
-		if (ADamageTextActor* DamageText = GetWorld()->SpawnActor<ADamageTextActor>(DamageTextClass))
-		{
-			DamageText->SetActorTransform(TargetActor->GetActorTransform());
-			DamageText->InitDamageText(DamageAmount, bBlockedHit, bCriticalHit, DamageType);
-		}
 	}
 }
 

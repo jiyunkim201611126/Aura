@@ -2,6 +2,7 @@
 #include "Aura/AbilitySystem/AuraAbilitySystemComponent.h"
 #include "Aura/AbilitySystem/AuraAbilitySystemLibrary.h"
 #include "Aura/AbilitySystem/AuraAttributeSet.h"
+#include "Aura/AbilitySystem/Data/AbilityInfo.h"
 #include "Aura/Game/SaveGame/AuraSaveGame.h"
 #include "Aura/Player/AuraPlayerState.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -38,37 +39,6 @@ void AAuraCharacter::PossessedBy(AController* NewController)
 	// 따라서 이곳에서 InitAbilityActorInfo를 호출합니다.
 	InitAbilityActorInfo();
 	LoadProgress();
-}
-
-void AAuraCharacter::LoadProgress()
-{
-	USaveManagerSubsystem* SaveManagerSubsystem = GetWorld()->GetGameInstance()->GetSubsystem<USaveManagerSubsystem>();
-	if (SaveManagerSubsystem)
-	{
-		UAuraSaveGame* SaveData = SaveManagerSubsystem->RetrieveInGameSaveData();
-		if (SaveData)
-		{
-			if (SaveData->bFirstTimeLoadIn)
-			{
-				// 캐릭터 첫 생성 시 들어오는 분기입니다.
-				InitializeDefaultAttributes();
-				AddCharacterStartupAbilities();
-			}
-			else
-			{
-				// 저장된 데이터를 불러올 때 들어오는 분기입니다.
-				if (AAuraPlayerState* AuraPlayerState = Cast<AAuraPlayerState>(GetPlayerState()))
-				{
-					AuraPlayerState->SetPlayerLevel(SaveData->PlayerLevel);
-					AuraPlayerState->SetXP(SaveData->XP);
-					AuraPlayerState->SetSpellPoints(SaveData->SpellPoints);
-					AuraPlayerState->SetAttributePoints(SaveData->AttributePoints);
-				}
-				
-				UAuraAbilitySystemLibrary::InitializeAttributesFromSaveData(this, AbilitySystemComponent, SaveData);
-			}
-		}
-	}
 }
 
 void AAuraCharacter::OnRep_PlayerState()
@@ -212,8 +182,59 @@ void AAuraCharacter::SaveProgress_Implementation(const FName& CheckpointTag)
 			SaveData->Resilience = UAuraAttributeSet::GetResilienceAttribute().GetNumericValue(GetAttributeSet());
 			SaveData->Vigor = UAuraAttributeSet::GetVigorAttribute().GetNumericValue(GetAttributeSet());
 
+			if (HasAuthority())
+			{
+				UAuraAbilitySystemComponent* AuraASC = Cast<UAuraAbilitySystemComponent>(GetAbilitySystemComponent());
+				
+				for (const FGameplayAbilitySpec& AbilitySpec : AuraASC->GetActivatableAbilities())
+				{
+					FGameplayTag AbilityTag = AuraASC->GetAbilityTagFromSpec(AbilitySpec);
+					UAbilityInfo* AbilityInfo = UAuraAbilitySystemLibrary::GetAbilityInfo(this);
+					FAuraAbilityInfo AbilityInfoStruct = AbilityInfo->FindAbilityInfoForTag(AbilityTag);
+					
+					FSavedAbility SavedAbility;
+					SavedAbility.AbilityTag = AbilityTag;
+					SavedAbility.AbilityStatus = AbilityInfoStruct.StatusTag;
+					SavedAbility.InputTag = AbilityInfoStruct.InputTag;
+					SavedAbility.AbilityLevel = AbilitySpec.Level;
+
+					SaveData->SavedAbilities.Add(SavedAbility);
+				}
+			}
+
 			SaveData->bFirstTimeLoadIn = false;
 			SaveManagerSubsystem->SaveInGameProgressData(SaveData);
+		}
+	}
+}
+
+void AAuraCharacter::LoadProgress()
+{
+	USaveManagerSubsystem* SaveManagerSubsystem = GetWorld()->GetGameInstance()->GetSubsystem<USaveManagerSubsystem>();
+	if (SaveManagerSubsystem)
+	{
+		UAuraSaveGame* SaveData = SaveManagerSubsystem->RetrieveInGameSaveData();
+		if (SaveData)
+		{
+			if (AAuraPlayerState* AuraPlayerState = Cast<AAuraPlayerState>(GetPlayerState()))
+			{
+				AuraPlayerState->SetPlayerLevel(SaveData->PlayerLevel);
+				AuraPlayerState->SetXP(SaveData->XP);
+				AuraPlayerState->SetSpellPoints(SaveData->SpellPoints);
+				AuraPlayerState->SetAttributePoints(SaveData->AttributePoints);
+			}
+			
+			if (SaveData->bFirstTimeLoadIn)
+			{
+				// 캐릭터 첫 생성 시 들어오는 분기입니다.
+				InitializeDefaultAttributes();
+				AddCharacterStartupAbilities();
+			}
+			else
+			{
+				// 저장된 데이터를 불러올 때 들어오는 분기입니다.
+				UAuraAbilitySystemLibrary::InitializeAttributesFromSaveData(this, AbilitySystemComponent, SaveData);
+			}
 		}
 	}
 }

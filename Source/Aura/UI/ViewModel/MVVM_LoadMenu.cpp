@@ -34,25 +34,21 @@ void UMVVM_LoadMenu::NewGameButtonPressed(int32 SlotIndex)
 
 void UMVVM_LoadMenu::NewSlotButtonPressed(int32 SlotIndex, const FString& EnteredName)
 {
-	// 입력된 이름을 저장합니다.
 	USaveManagerSubsystem* SaveManagerSubsystem = GetWorld()->GetGameInstance()->GetSubsystem<USaveManagerSubsystem>();
 	
 	UMVVM_LoadSlot* LoadSlotViewModel = LoadSlotViewModels[SlotIndex];
 
-	LoadSlotViewModel->SetMapName(SaveManagerSubsystem->DefaultMapName);
+	// 새로운 슬롯을 생성 및 표시할 데이터를 할당합니다.
+	// 할당된 데이터는 MVVM 플러그인 통해 View에 반영됩니다.
 	LoadSlotViewModel->SetPlayerName(EnteredName);
+	LoadSlotViewModel->SetPlayerLevel(1);
+	LoadSlotViewModel->SetMapName(SaveManagerSubsystem->DefaultMapName);
 	LoadSlotViewModel->PlayerStartTag = SaveManagerSubsystem->DefaultPlayerStartTag;
 	LoadSlotViewModel->LoadSlotStatus = ESaveSlotStatus::Taken;
 
 	SaveManagerSubsystem->SaveSlotData(LoadSlotViewModel, SlotIndex);
 
 	LoadSlotViewModel->InitializeSlot();
-
-	// 게임 저장 및 로드를 위해 필요한 값을 GameInstance에 캐싱합니다.
-	UAuraGameInstance* AuraGameInstance = Cast<UAuraGameInstance>(GetWorld()->GetGameInstance());
-	AuraGameInstance->LoadSlotName = LoadSlotViewModel->LoadSlotName;
-	AuraGameInstance->LoadSlotIndex = SlotIndex;
-	AuraGameInstance->PlayerStartTag = SaveManagerSubsystem->DefaultPlayerStartTag;
 }
 
 void UMVVM_LoadMenu::SelectSlotButtonPressed(int32 SlotIndex)
@@ -90,11 +86,13 @@ void UMVVM_LoadMenu::DeleteButtonPressed()
 
 void UMVVM_LoadMenu::PlayButtonPressed(APlayerController* PlayerController)
 {
+	 // 해당 함수가 호출된 상황에서 RPC를 활용하기에 가장 적절한 객체가 PlayerController라고 판단되어, Widget으로부터 전달받아 활용합니다.
 	if (PlayerController && SelectedSlotIndex != INDEX_NONE)
 	{
 		if (AAuraPlayerController* AuraPlayerController = Cast<AAuraPlayerController>(PlayerController))
 		{
 			// 게임 저장 및 로드를 위해 필요한 값을 GameInstance에 캐싱합니다.
+			// 캐싱된 정보는 레벨 이동 시 서버가 GameMode에서 접근해 활용합니다.
 			UAuraGameInstance* AuraGameInstance = Cast<UAuraGameInstance>(GetWorld()->GetGameInstance());
 			UMVVM_LoadSlot* SelectedSlotViewModel = LoadSlotViewModels[SelectedSlotIndex];
 			AuraGameInstance->PlayerStartTag = SelectedSlotViewModel->PlayerStartTag;
@@ -102,7 +100,7 @@ void UMVVM_LoadMenu::PlayButtonPressed(APlayerController* PlayerController)
 			AuraGameInstance->LoadSlotIndex = SelectedSlotIndex;
 
 			// 서버에 레벨 이동을 요청합니다.
-			AuraPlayerController->Server_RequestTravel(SelectedSlotViewModel->GetMapName());
+			AuraPlayerController->ServerRequestTravel(SelectedSlotViewModel->GetMapName());
 		}
 	}
 }
@@ -110,19 +108,20 @@ void UMVVM_LoadMenu::PlayButtonPressed(APlayerController* PlayerController)
 void UMVVM_LoadMenu::LoadData()
 {
 	// SlotName과 Index에 해당하는 SaveGame을 가져와 LoadSlot에 표시합니다.
-	USaveManagerSubsystem* SaveManagerSubsystem = GetWorld()->GetGameInstance()->GetSubsystem<USaveManagerSubsystem>();
+	const USaveManagerSubsystem* SaveManagerSubsystem = GetWorld()->GetGameInstance()->GetSubsystem<USaveManagerSubsystem>();
 	int32 TempIndex = 0;
-	for (auto LoadSlotViewModel : LoadSlotViewModels)
+	for (const auto LoadSlotViewModel : LoadSlotViewModels)
 	{
-		UAuraSaveGame* SaveObject = SaveManagerSubsystem->GetSaveSlotData(LoadSlotViewModel->LoadSlotName, TempIndex++);
-		
-		ESaveSlotStatus SaveSlotStatus = SaveObject->SaveSlotStatus;
-		const FString PlayerName = SaveObject->PlayerName;
+		const UAuraSaveGame* SaveData = SaveManagerSubsystem->GetSaveSlotData(LoadSlotViewModel->LoadSlotName, TempIndex++);
+
+		const ESaveSlotStatus SaveSlotStatus = SaveData->SaveSlotStatus;
+		const FString PlayerName = SaveData->PlayerName;
 		
 		LoadSlotViewModel->LoadSlotStatus = SaveSlotStatus;
 		LoadSlotViewModel->SetPlayerName(PlayerName);
-		LoadSlotViewModel->SetMapName(SaveObject->MapName);
-		LoadSlotViewModel->PlayerStartTag = SaveObject->PlayerStartTag;
+		LoadSlotViewModel->SetPlayerLevel(SaveData->PlayerLevel);
+		LoadSlotViewModel->SetMapName(SaveData->MapName);
+		LoadSlotViewModel->PlayerStartTag = SaveData->PlayerStartTag;
 		
 		LoadSlotViewModel->InitializeSlot();
 	}
