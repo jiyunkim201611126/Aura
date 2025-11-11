@@ -27,14 +27,12 @@ void UAuraAbilitySystemComponent::AddCharacterAbilitiesFromSaveData(UAuraSaveGam
 	
 	for (const FSavedAbility& Data : SaveData->SavedAbilities)
 	{
+		const FAuraGameplayTags& AuraGameplayTags = FAuraGameplayTags::Get();
+
 		const FAuraAbilityInfo AbilityInfoStruct = AbilityInfo->FindAbilityInfoForTag(Data.AbilityTag);
 		const TSubclassOf<UGameplayAbility> StartupAbilityClass = AbilityInfoStruct.Ability;
 		FGameplayAbilitySpec LoadedAbilitySpec = FGameplayAbilitySpec(StartupAbilityClass, Data.AbilityLevel);
-
-		LoadedAbilitySpec.GetDynamicSpecSourceTags().AddTag(Data.InputTag);
 		LoadedAbilitySpec.GetDynamicSpecSourceTags().AddTag(Data.AbilityStatus);
-
-		const FAuraGameplayTags& AuraGameplayTags = FAuraGameplayTags::Get();
 
 		const bool bIsActiveAbility = AbilityInfoStruct.AbilityType == AuraGameplayTags.Abilities_Types_Active;
 		const bool bIsEquippedAbility = Data.AbilityStatus == AuraGameplayTags.Abilities_Status_Equipped;
@@ -50,10 +48,17 @@ void UAuraAbilitySystemComponent::AddCharacterAbilitiesFromSaveData(UAuraSaveGam
 			// Equip된 Ability인 경우 장착과 동시에 발동하며, 그렇지 않은 경우 Ability 부여만 진행합니다.
 			bIsEquippedAbility ? GiveAbilityAndActivateOnce(LoadedAbilitySpec) : GiveAbility(LoadedAbilitySpec);
 		}
-		
-		if (Data.InputTag.IsValid())
+
+		if (bIsEquippedAbility && Data.InputTag.IsValid())
 		{
+			// 장착된 Ability인 경우 해당하는 InputTag에 장착합니다.
+			LoadedAbilitySpec.GetDynamicSpecSourceTags().AddTag(Data.InputTag);
 			ServerEquipAbility(Data.AbilityTag, Data.InputTag);
+		}
+		else
+		{
+			// 장착하지 않은 Ability도 UI 표시를 위해 콜백을 호출합니다.
+			OnAbilityEquipped.Broadcast(Data.AbilityTag, FGameplayTag(), Data.AbilityStatus, FGameplayTag());
 		}
 	}
 }

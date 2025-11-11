@@ -183,6 +183,8 @@ void AAuraCharacter::SaveProgress_Implementation(const FName& CheckpointTag)
 			SaveData->Vigor = UAuraAttributeSet::GetVigorAttribute().GetNumericValue(GetAttributeSet());
 
 			UAuraAbilitySystemComponent* AuraASC = Cast<UAuraAbilitySystemComponent>(GetAbilitySystemComponent());
+
+			SaveData->SavedAbilities.Empty();
 			
 			for (const FGameplayAbilitySpec& AbilitySpec : AuraASC->GetActivatableAbilities())
 			{
@@ -195,20 +197,8 @@ void AAuraCharacter::SaveProgress_Implementation(const FName& CheckpointTag)
 				NewSavedAbility.AbilityStatus = StatusTag;
 				NewSavedAbility.InputTag = InputTag;
 				NewSavedAbility.AbilityLevel = AbilitySpec.Level;
-
-				// 저장된 Abilities 데이터 내에 동일한 Ability가 존재하는지 탐색합니다.
-				// 해당 로직은 오버로드된 연산자를 통해 수행됩니다.
-				const int32 SavedAbilityIndex = SaveData->SavedAbilities.Find(NewSavedAbility);
-				if (SavedAbilityIndex != INDEX_NONE)
-				{
-					// 동일한 Ability가 있는 경우 들어오는 분기입니다.
-					SaveData->SavedAbilities[SavedAbilityIndex] = NewSavedAbility;
-				}
-				else
-				{
-					// 동일한 Ability가 존재하지 않는 경우 들어오는 분기입니다.
-					SaveData->SavedAbilities.Add(NewSavedAbility);
-				}
+				
+				SaveData->SavedAbilities.AddUnique(NewSavedAbility);
 			}
 
 			SaveData->bFirstTimeLoadIn = false;
