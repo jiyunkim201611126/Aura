@@ -33,6 +33,11 @@ struct FSavedAbility
 	int32 AbilityLevel = 0;
 };
 
+inline bool operator==(const FSavedAbility& Left, const FSavedAbility& Right)
+{
+	return Left.AbilityTag.MatchesTagExact(Right.AbilityTag);
+}
+
 UCLASS()
 class AURA_API UAuraSaveGame : public USaveGame
 {
@@ -85,5 +90,6 @@ public:
 
 	/** Abilities */
 
+	UPROPERTY()
 	TArray<FSavedAbility> SavedAbilities;
 };

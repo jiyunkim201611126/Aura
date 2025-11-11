@@ -59,9 +59,9 @@ protected:
 
 	virtual void InitAbilityActorInfo();
 
-	// GameplayEffect를 본인에게 적용하는 함수
+	// GameplayEffect를 본인에게 적용하는 함수입니다.
 	void ApplyEffectToSelf(TSubclassOf<UGameplayEffect> GameplayEffectClass, float Level) const;
-	// 적(BeginPlay)과 플레이어 캐릭터(Possess)가 Ability를 장착하는 함수
+	// 적(BeginPlay)과 플레이어 캐릭터(Possess)가 Ability를 장착하는 함수입니다.
 	virtual void AddCharacterStartupAbilities() const;
 	
 	void Dissolve();

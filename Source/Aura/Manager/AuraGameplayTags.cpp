@@ -139,6 +139,9 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 		FName("Abilities.Lighting.Electrocute"), FString("Electrocute Ability Tag"));
 	GameplayTags.Abilities_Arcane_ArcaneShards = UGameplayTagsManager::Get().AddNativeGameplayTag(
 		FName("Abilities.Arcane.ArcaneShards"), FString("ArcaneShards Ability Tag"));
+
+	GameplayTags.Abilities_Passive_ListenForEvent = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("Abilities.Passive.ListenForEvent"), FString("Listen For Event Ability Tag"));
 	
 	GameplayTags.Abilities_Passive_HaloOfProtection = UGameplayTagsManager::Get().AddNativeGameplayTag(
 		FName("Abilities.Passive.HaloOfProtection"), FString("Halo Of Protection Ability Tag"));

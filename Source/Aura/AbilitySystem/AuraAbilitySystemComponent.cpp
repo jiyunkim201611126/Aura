@@ -5,6 +5,7 @@
 #include "Abilities/AuraGameplayAbility.h"
 #include "Aura/Interaction/LevelableInterface.h"
 #include "AuraAbilitySystemLibrary.h"
+#include "Aura/Game/SaveGame/AuraSaveGame.h"
 #include "Data/AbilityInfo.h"
 #include "Net/UnrealNetwork.h"
 
@@ -20,26 +21,59 @@ void UAuraAbilitySystemComponent::GetLifetimeReplicatedProps(TArray<FLifetimePro
 	DOREPLIFETIME_CONDITION(UAuraAbilitySystemComponent, AdditionalCostManagers, COND_OwnerOnly);
 }
 
-void UAuraAbilitySystemComponent::AddCharacterAbilities(const TArray<TSubclassOf<UGameplayAbility>>& StartupAbilities)
+void UAuraAbilitySystemComponent::AddCharacterAbilitiesFromSaveData(UAuraSaveGame* SaveData)
+{	
+	UAbilityInfo* AbilityInfo = UAuraAbilitySystemLibrary::GetAbilityInfo(GetAvatarActor());
+	
+	for (const FSavedAbility& Data : SaveData->SavedAbilities)
+	{
+		const FAuraAbilityInfo AbilityInfoStruct = AbilityInfo->FindAbilityInfoForTag(Data.AbilityTag);
+		const TSubclassOf<UGameplayAbility> StartupAbilityClass = AbilityInfoStruct.Ability;
+		FGameplayAbilitySpec LoadedAbilitySpec = FGameplayAbilitySpec(StartupAbilityClass, Data.AbilityLevel);
+
+		LoadedAbilitySpec.GetDynamicSpecSourceTags().AddTag(Data.InputTag);
+		LoadedAbilitySpec.GetDynamicSpecSourceTags().AddTag(Data.AbilityStatus);
+
+		const FAuraGameplayTags& AuraGameplayTags = FAuraGameplayTags::Get();
+
+		const bool bIsActiveAbility = AbilityInfoStruct.AbilityType == AuraGameplayTags.Abilities_Types_Active;
+		const bool bIsEquippedAbility = Data.AbilityStatus == AuraGameplayTags.Abilities_Status_Equipped;
+		
+		if (bIsActiveAbility)
+		{
+			// 액티브 Ability인 경우 들어오는 분기입니다.
+			GiveAbility(LoadedAbilitySpec);
+		}
+		else
+		{
+			// 패시브 Ability인 경우 들어오는 분기입니다.
+			// Equip된 Ability인 경우 장착과 동시에 발동하며, 그렇지 않은 경우 Ability 부여만 진행합니다.
+			bIsEquippedAbility ? GiveAbilityAndActivateOnce(LoadedAbilitySpec) : GiveAbility(LoadedAbilitySpec);
+		}
+		
+		if (Data.InputTag.IsValid())
+		{
+			ServerEquipAbility(Data.AbilityTag, Data.InputTag);
+		}
+	}
+}
+
+void UAuraAbilitySystemComponent::AddCharacterAbilities(const TArray<TSubclassOf<UGameplayAbility>>& InAbilities)
 {
-	for (TSubclassOf<UGameplayAbility> AbilityClass : StartupAbilities)
+	for (TSubclassOf<UGameplayAbility> AbilityClass : InAbilities)
 	{
 		FGameplayAbilitySpec AbilitySpec = FGameplayAbilitySpec(AbilityClass, 1);
 		if (const UAuraGameplayAbility* AuraAbility = Cast<UAuraGameplayAbility>(AbilitySpec.Ability))
-		{
-			// 어떤 Input에 의해 작동할 Ability인지 DynamicTag로 추가합니다.
-			// DynamicTag는 AssetTag와 달리 런타임 중 자유롭게 Tag를 추가 및 제거할 수 있습니다.
-			//AbilitySpec.GetDynamicSpecSourceTags().AddTag(AuraAbility->StartupInputTag);
-			
+		{			
 			// Ability를 미장착 상태로 변경합니다.
 			AbilitySpec.GetDynamicSpecSourceTags().AddTag(FAuraGameplayTags::Get().Abilities_Status_Unlocked);
 			
 			// Ability를 부여합니다.
 			// 부여란 Ability를 ASC에 등록하는 행위이며, 사용은 못 하는 상태일 수 있습니다.
-			// 장착이란 Ability를 사용 가능한 상태로 바꾸는 행위입니다.
 			GiveAbility(AbilitySpec);
 
 			// Ability를 장착합니다.
+			// 장착이란 Ability를 사용 가능한 상태로 바꾸는 행위입니다.
 			ServerEquipAbility(GetAbilityTagFromSpec(AbilitySpec), AuraAbility->StartupInputTag);
 			
 			// 부여된 Ability를 HUD에 스킬 아이콘으로 표시하기 위해 델리게이트를 Broadcast합니다.
@@ -49,13 +83,12 @@ void UAuraAbilitySystemComponent::AddCharacterAbilities(const TArray<TSubclassOf
 	}
 }
 
-void UAuraAbilitySystemComponent::AddCharacterPassiveAbilities(const TArray<TSubclassOf<UGameplayAbility>>& StartupAbilities)
+void UAuraAbilitySystemComponent::AddAbilities(const TArray<TSubclassOf<UGameplayAbility>>& InAbilities)
 {
-	for (TSubclassOf<UGameplayAbility> AbilityClass : StartupAbilities)
+	for (TSubclassOf<UGameplayAbility> AbilityClass : InAbilities)
 	{
 		FGameplayAbilitySpec AbilitySpec = FGameplayAbilitySpec(AbilityClass, 1);
-		// PassiveAbility이므로, 부여와 동시에 발동합니다.
-		GiveAbilityAndActivateOnce(AbilitySpec);
+		GiveAbility(AbilitySpec);
 			
 		if (UAuraGameplayAbility* Ability = Cast<UAuraGameplayAbility>(AbilitySpec.Ability))
 		{
@@ -64,12 +97,14 @@ void UAuraAbilitySystemComponent::AddCharacterPassiveAbilities(const TArray<TSub
 	}
 }
 
-void UAuraAbilitySystemComponent::AddAbilities(const TArray<TSubclassOf<UGameplayAbility>>& Abilities)
+void UAuraAbilitySystemComponent::AddCharacterPassiveAbilities(const TArray<TSubclassOf<UGameplayAbility>>& InAbilities)
 {
-	for (TSubclassOf<UGameplayAbility> AbilityClass : Abilities)
+	for (TSubclassOf<UGameplayAbility> AbilityClass : InAbilities)
 	{
 		FGameplayAbilitySpec AbilitySpec = FGameplayAbilitySpec(AbilityClass, 1);
-		GiveAbility(AbilitySpec);
+		AbilitySpec.GetDynamicSpecSourceTags().AddTag(FAuraGameplayTags::Get().Abilities_Status_Equipped);
+		// PassiveAbility이므로, 부여와 동시에 발동합니다.
+		GiveAbilityAndActivateOnce(AbilitySpec);
 			
 		if (UAuraGameplayAbility* Ability = Cast<UAuraGameplayAbility>(AbilitySpec.Ability))
 		{

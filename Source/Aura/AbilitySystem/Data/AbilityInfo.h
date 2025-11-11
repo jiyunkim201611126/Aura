@@ -14,7 +14,7 @@ class UGameplayAbility;
  * 예) 캐릭터 직업 Tag 선언 후, FindAbilityInfoForTag에서 매개변수로 함께 받아 탐색
  * 캐릭터 직업을 Tag로 선언한다면, enum과 달리 '다중 직업'이나 '타 직업 스킬 사용 시 패널티' 등의 구현에도 용이합니다.
  * 
- * 단, InputTag의 경우 런타임 중 변화하므로 DataAsset에서 초기화하지 않습니다.
+ * 단, 런타임 중 변화하는 Tag인 경우 DataAsset에서 초기화하지 않습니다.
  */
 
 USTRUCT(BlueprintType)

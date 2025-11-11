@@ -86,7 +86,7 @@ struct FAuraGameplayTags
 	FGameplayTag Buff_AbsorbMana;
 	//~ End Buff
 	
-	//~ Begin Abilities
+	//~ Begin Abilities	
 	FGameplayTag Abilities_None;
 	FGameplayTag Abilities_Attack;
 	FGameplayTag Abilities_HitReact;
@@ -98,6 +98,8 @@ struct FAuraGameplayTags
 	FGameplayTag Abilities_Lighting_Electrocute;
 	FGameplayTag Abilities_Arcane_ArcaneShards;
 
+	FGameplayTag Abilities_Passive_ListenForEvent;
+	
 	FGameplayTag Abilities_Passive_HaloOfProtection;
 	FGameplayTag Abilities_Passive_LifeSiphon;
 	FGameplayTag Abilities_Passive_ManaSiphon;

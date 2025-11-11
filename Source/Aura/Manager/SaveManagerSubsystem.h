@@ -8,6 +8,12 @@ class UMVVM_LoadSlot;
 class UAuraSaveGame;
 class USaveGame;
 
+/**
+ * 저장 및 불러오기는 모두 서버의 로직상에서 이루어집니다.
+ * 즉, 클라이언트는 저장된 데이터를 갖지 못 합니다.
+ * 테스트 환경에서는 서버와 클라이언트가 같은 기기이므로 작동상에 문제는 없습니다.
+ * 실제 멀티플레이 환경에선 클라이언트가 Widget에 저장된 데이터를 표시하지 못 하므로, 이를 RPC로 보내주거나 따로 저장하게 만들 필요가 있습니다.
+ */
 UCLASS(config = Game)
 class AURA_API USaveManagerSubsystem : public UGameInstanceSubsystem
 {

@@ -182,23 +182,32 @@ void AAuraCharacter::SaveProgress_Implementation(const FName& CheckpointTag)
 			SaveData->Resilience = UAuraAttributeSet::GetResilienceAttribute().GetNumericValue(GetAttributeSet());
 			SaveData->Vigor = UAuraAttributeSet::GetVigorAttribute().GetNumericValue(GetAttributeSet());
 
-			if (HasAuthority())
+			UAuraAbilitySystemComponent* AuraASC = Cast<UAuraAbilitySystemComponent>(GetAbilitySystemComponent());
+			
+			for (const FGameplayAbilitySpec& AbilitySpec : AuraASC->GetActivatableAbilities())
 			{
-				UAuraAbilitySystemComponent* AuraASC = Cast<UAuraAbilitySystemComponent>(GetAbilitySystemComponent());
+				const FGameplayTag AbilityTag = AuraASC->GetAbilityTagFromSpec(AbilitySpec);
+				const FGameplayTag StatusTag = AuraASC->GetStatusFromSpec(AbilitySpec);
+				const FGameplayTag InputTag = AuraASC->GetInputTagFromAbilityTag(AbilityTag);
 				
-				for (const FGameplayAbilitySpec& AbilitySpec : AuraASC->GetActivatableAbilities())
-				{
-					FGameplayTag AbilityTag = AuraASC->GetAbilityTagFromSpec(AbilitySpec);
-					UAbilityInfo* AbilityInfo = UAuraAbilitySystemLibrary::GetAbilityInfo(this);
-					FAuraAbilityInfo AbilityInfoStruct = AbilityInfo->FindAbilityInfoForTag(AbilityTag);
-					
-					FSavedAbility SavedAbility;
-					SavedAbility.AbilityTag = AbilityTag;
-					SavedAbility.AbilityStatus = AbilityInfoStruct.StatusTag;
-					SavedAbility.InputTag = AbilityInfoStruct.InputTag;
-					SavedAbility.AbilityLevel = AbilitySpec.Level;
+				FSavedAbility NewSavedAbility;
+				NewSavedAbility.AbilityTag = AbilityTag;
+				NewSavedAbility.AbilityStatus = StatusTag;
+				NewSavedAbility.InputTag = InputTag;
+				NewSavedAbility.AbilityLevel = AbilitySpec.Level;
 
-					SaveData->SavedAbilities.Add(SavedAbility);
+				// 저장된 Abilities 데이터 내에 동일한 Ability가 존재하는지 탐색합니다.
+				// 해당 로직은 오버로드된 연산자를 통해 수행됩니다.
+				const int32 SavedAbilityIndex = SaveData->SavedAbilities.Find(NewSavedAbility);
+				if (SavedAbilityIndex != INDEX_NONE)
+				{
+					// 동일한 Ability가 있는 경우 들어오는 분기입니다.
+					SaveData->SavedAbilities[SavedAbilityIndex] = NewSavedAbility;
+				}
+				else
+				{
+					// 동일한 Ability가 존재하지 않는 경우 들어오는 분기입니다.
+					SaveData->SavedAbilities.Add(NewSavedAbility);
 				}
 			}
 
@@ -233,6 +242,11 @@ void AAuraCharacter::LoadProgress()
 			else
 			{
 				// 저장된 데이터를 불러올 때 들어오는 분기입니다.
+				if (UAuraAbilitySystemComponent* AuraASC = Cast<UAuraAbilitySystemComponent>(GetAbilitySystemComponent()))
+				{
+					AuraASC->AddCharacterAbilitiesFromSaveData(SaveData);
+				}
+				
 				UAuraAbilitySystemLibrary::InitializeAttributesFromSaveData(this, AbilitySystemComponent, SaveData);
 			}
 		}
