@@ -1,18 +1,22 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
+#include "Aura/Interaction/SavedActorInterface.h"
 #include "GameFramework/PlayerStart.h"
 #include "Checkpoint.generated.h"
 
 class USphereComponent;
 
 UCLASS()
-class AURA_API ACheckpoint : public APlayerStart
+class AURA_API ACheckpoint : public APlayerStart, public ISavedActorInterface
 {
 	GENERATED_BODY()
 
 public:
 	ACheckpoint(const FObjectInitializer& ObjectInitializer);
+
+	UPROPERTY(BlueprintReadOnly, SaveGame)
+	bool bReached = false;
 
 protected:
 	//~ Begin AActor Interface

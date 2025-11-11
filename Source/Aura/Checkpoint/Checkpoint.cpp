@@ -25,11 +25,13 @@ void ACheckpoint::BeginPlay()
 	Super::BeginPlay();
 
 	Sphere->OnComponentBeginOverlap.AddDynamic(this, &ThisClass::OnSphereOverlap);
+	RegisterSavedActor(this);
 }
 
 void ACheckpoint::Destroyed()
 {
 	Sphere->OnComponentBeginOverlap.Clear();
+	UnregisterSavedActor(this);
 	
 	Super::Destroyed();
 }

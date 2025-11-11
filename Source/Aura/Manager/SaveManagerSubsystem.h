@@ -4,6 +4,7 @@
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "SaveManagerSubsystem.generated.h"
 
+class ISavedActorInterface;
 class UMVVM_LoadSlot;
 class UAuraSaveGame;
 class USaveGame;
@@ -26,6 +27,13 @@ public:
 	UAuraSaveGame* RetrieveInGameSaveData() const;
 	void SaveInGameProgressData(UAuraSaveGame* SaveGameObject) const;
 
+	void AddActorToSave(ISavedActorInterface* ActorToSave);
+	void RemoveActorToSave(ISavedActorInterface* ActorToSave);
+
+	// 월드 내에 ISaveActorInterface를 상속받아 구현된 Actor의 정보를 직렬화해 저장 및 불러오는 함수입니다.
+	void SaveWorldState(const UWorld* InWorld);
+	void LoadWorldState(const UWorld* InWorld);
+
 public:
 	UPROPERTY()
 	FString DefaultMapName = TEXT("First Dungeon");
@@ -36,4 +44,8 @@ public:
 private:
 	UPROPERTY(Config)
 	TSubclassOf<USaveGame> LoadMenuSaveGameClass;
+
+	// 레벨 내의 저장할 액터를 빠르게 추적하기 위해 캐싱해두는 변수입니다.
+	UPROPERTY()
+	TArray<TWeakObjectPtr<ISavedActorInterface>> ActorToSaveInCurrentLevel;
 };
