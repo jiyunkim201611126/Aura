@@ -39,6 +39,11 @@ void AAuraCharacter::PossessedBy(AController* NewController)
 	// 따라서 이곳에서 InitAbilityActorInfo를 호출합니다.
 	InitAbilityActorInfo();
 	LoadProgress();
+	
+	if (USaveManagerSubsystem* SaveManagerSubsystem = GetWorld()->GetGameInstance()->GetSubsystem<USaveManagerSubsystem>())
+	{
+		SaveManagerSubsystem->LoadWorldState(GetWorld());
+	}
 }
 
 void AAuraCharacter::OnRep_PlayerState()

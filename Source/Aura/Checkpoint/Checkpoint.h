@@ -15,8 +15,10 @@ class AURA_API ACheckpoint : public APlayerStart, public ISavedActorInterface
 public:
 	ACheckpoint(const FObjectInitializer& ObjectInitializer);
 
-	UPROPERTY(BlueprintReadOnly, SaveGame)
-	bool bReached = false;
+	//~ Begin ISavedActorInterface
+	virtual bool ShouldLoadTransform_Implementation() override { return false; }
+	virtual void LoadActor_Implementation() override;
+	//~ End of ISavedActorInterface
 
 protected:
 	//~ Begin AActor Interface
@@ -31,6 +33,10 @@ protected:
 	void CheckpointReached(UMaterialInstanceDynamic* DynamicMaterialInstance);
 
 	void ActiveGlowEffects();
+
+public:
+	UPROPERTY(BlueprintReadOnly, SaveGame)
+	bool bReached = false;
 
 private:
 	UPROPERTY(VisibleAnywhere)

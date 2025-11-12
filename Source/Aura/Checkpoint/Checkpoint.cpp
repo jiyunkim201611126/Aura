@@ -1,6 +1,7 @@
 ﻿#include "Checkpoint.h"
 
 #include "Aura/Interaction/SaveGameInterface.h"
+#include "Aura/Manager/SaveManagerSubsystem.h"
 #include "Components/SphereComponent.h"
 
 ACheckpoint::ACheckpoint(const FObjectInitializer& ObjectInitializer)
@@ -20,18 +21,24 @@ ACheckpoint::ACheckpoint(const FObjectInitializer& ObjectInitializer)
 	Sphere->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
 }
 
+void ACheckpoint::LoadActor_Implementation()
+{
+	if (bReached)
+	{
+		ActiveGlowEffects();
+	}
+}
+
 void ACheckpoint::BeginPlay()
 {
 	Super::BeginPlay();
 
 	Sphere->OnComponentBeginOverlap.AddDynamic(this, &ThisClass::OnSphereOverlap);
-	RegisterSavedActor(this);
 }
 
 void ACheckpoint::Destroyed()
 {
 	Sphere->OnComponentBeginOverlap.Clear();
-	UnregisterSavedActor(this);
 	
 	Super::Destroyed();
 }
@@ -42,14 +49,16 @@ void ACheckpoint::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AAct
 	{
 		if (OtherPawn->IsLocallyControlled() && OtherPawn->Implements<USaveGameInterface>())
 		{
-			// Checkpoint의 StartTag를 저장합니다. 
+			// 저장 로직을 수행합니다.
 			ISaveGameInterface::Execute_SaveProgress(OtherPawn, PlayerStartTag);
 			
+			bReached = true;
+			if (USaveManagerSubsystem* SaveManagerSubsystem = GetWorld()->GetGameInstance()->GetSubsystem<USaveManagerSubsystem>())
+			{
+				SaveManagerSubsystem->SaveWorldState(GetWorld());
+			}
+			
 			ActiveGlowEffects();
-	
-			// 이미 한 번 작동한 Checkpoint이므로, SphereComponent가 더이상 이벤트를 발생시킬 수 없도록 설정합니다.
-			Sphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-			Sphere->OnComponentBeginOverlap.Clear();
 		}
 	}
 }

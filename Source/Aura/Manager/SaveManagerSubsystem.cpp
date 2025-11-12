@@ -1,5 +1,6 @@
 ﻿#include "SaveManagerSubsystem.h"
 
+#include "EngineUtils.h"
 #include "Aura/Game/AuraGameInstance.h"
 #include "Aura/Game/SaveGame/AuraSaveGame.h"
 #include "Aura/Interaction/SavedActorInterface.h"
@@ -36,44 +37,48 @@ void USaveManagerSubsystem::SaveWorldState(const UWorld* InWorld)
 
 	if (UAuraSaveGame* SaveData = GetSaveSlotData(AuraGameInstance->LoadSlotName, AuraGameInstance->LoadSlotIndex))
 	{
-		FSavedMap* SavedMap = SaveData->GetSavedMapWithMapName(WorldName);
-		if (SavedMap == nullptr)
+		// 저장된 데이터에서 현재 맵에 대한 저장 데이터가 있는지 확인합니다.
+		FSavedMap SavedMap = SaveData->GetSavedMapWithMapName(WorldName);
+		if (!SaveData->HasSavedMapWithMapName(WorldName))
 		{
-			SavedMap->MapAssetName = WorldName;
-			SaveData->SavedMaps.Add(*SavedMap);
+			// 현재 맵에 대한 저장 데이터가 없다면 추가합니다.
+			SavedMap.MapAssetName = WorldName;
+			SaveData->SavedMaps.Add(SavedMap);
 		}
 
-		SavedMap->SavedActors.Empty();
+		// 우선 저장된 Actor를 전부 제거합니다.
+		SavedMap.SavedActors.Empty();
 
-		for (TWeakObjectPtr<ISavedActorInterface> ActorToSave : ActorToSaveInCurrentLevel)
+		// 월드 내에 존재하는 Actor를 모두 순회합니다.
+		for (FActorIterator It(InWorld); It; ++It)
 		{
-			if (!ActorToSave.IsValid())
+			AActor* Actor = *It;
+
+			if (!IsValid(Actor) || !Actor->Implements<USavedActorInterface>())
 			{
 				continue;
 			}
 			
-			if (AActor* Actor = Cast<AActor>(ActorToSave.Get()))
-			{
-				FSavedActor SavedActor;
-				SavedActor.ActorName = Actor->GetFName();
-				SavedActor.Transform = Actor->GetTransform();
+			// Actor에 대한 데이터를 직렬화 및 저장합니다.
+			FSavedActor SavedActor;
+			SavedActor.ActorName = Actor->GetFName();
+			SavedActor.Transform = Actor->GetTransform();
 
-				FMemoryWriter MemoryWriter(SavedActor.Bytes);
+			FMemoryWriter MemoryWriter(SavedActor.Bytes);
 
-				FObjectAndNameAsStringProxyArchive Archive(MemoryWriter, true);
-				Archive.ArIsSaveGame = true;
+			FObjectAndNameAsStringProxyArchive Archive(MemoryWriter, true);
+			Archive.ArIsSaveGame = true;
+			Actor->Serialize(Archive);
 
-				Actor->Serialize(Archive);
-
-				SavedMap->SavedActors.AddUnique(SavedActor);
-			}
+			SavedMap.SavedActors.AddUnique(SavedActor);
 		}
 
+		// 맵에 대한 저장 데이터를 방금 저장한 데이터로 덮어씌웁니다.
 		for (FSavedMap& MapToReplace : SaveData->SavedMaps)
 		{
 			if (MapToReplace.MapAssetName == WorldName)
 			{
-				MapToReplace = *SavedMap;
+				MapToReplace = SavedMap;
 			}
 		}
 
@@ -97,22 +102,34 @@ void USaveManagerSubsystem::LoadWorldState(const UWorld* InWorld)
 			UE_LOG(LogTemp, Error, TEXT("저장된 데이터를 불러오는 데에 실패했습니다."));
 			return;
 		}
-		
-		for (TWeakObjectPtr<ISavedActorInterface> ActorToSave : ActorToSaveInCurrentLevel)
+
+		// 월드 내에 존재하는 Actor를 모두 순회합니다.
+		for (FActorIterator It(InWorld); It; ++It)
 		{
-			if (!ActorToSave.IsValid())
+			AActor* Actor = *It;
+
+			if (!IsValid(Actor) || !Actor->Implements<USavedActorInterface>())
 			{
 				continue;
 			}
-
-			if (AActor* Actor = Cast<AActor>(ActorToSave.Get()))
+			
+			// Actor에 대한 정보를 역직렬화해 불러옵니다.
+			for (const FSavedActor& SavedActor : SaveData->GetSavedMapWithMapName(WorldName).SavedActors)
 			{
-				for (FSavedActor SavedActor : SaveData->GetSavedMapWithMapName(WorldName)->SavedActors)
+				if (SavedActor.ActorName == Actor->GetFName())
 				{
-					if (SavedActor.ActorName == Actor->GetFName())
+					if (ISavedActorInterface::Execute_ShouldLoadTransform(Actor))
 					{
-						
+						Actor->SetActorTransform(SavedActor.Transform);
 					}
+
+					FMemoryReader MemoryReader(SavedActor.Bytes);
+
+					FObjectAndNameAsStringProxyArchive Archive(MemoryReader, true);
+					Archive.ArIsSaveGame = true;
+					Actor->Serialize(Archive);
+
+					ISavedActorInterface::Execute_LoadActor(Actor);
 				}
 			}
 		}
@@ -163,20 +180,4 @@ void USaveManagerSubsystem::SaveInGameProgressData(UAuraSaveGame* SaveGameObject
 	AuraGameInstance->PlayerStartTag = SaveGameObject->PlayerStartTag;
 
 	UGameplayStatics::SaveGameToSlot(SaveGameObject, InGameLoadSlotName, InGameLoadSlotIndex);
-}
-
-void USaveManagerSubsystem::AddActorToSave(ISavedActorInterface* ActorToSave)
-{
-	if (ActorToSave)
-	{
-		ActorToSaveInCurrentLevel.Add(ActorToSave);
-	}
-}
-
-void USaveManagerSubsystem::RemoveActorToSave(ISavedActorInterface* ActorToSave)
-{
-	if (ActorToSave)
-	{
-		ActorToSaveInCurrentLevel.RemoveSingleSwap(ActorToSave);
-	}
 }
