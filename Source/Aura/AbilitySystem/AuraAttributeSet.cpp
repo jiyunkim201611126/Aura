@@ -156,7 +156,7 @@ void UAuraAttributeSet::PostAttributeChange(const FGameplayAttribute& Attribute,
 		SetHealth(GetMaxHealth());
 		bTopOffHealth = false;
 	}
-	if (Attribute == GetHealthAttribute() && bTopOffMana)
+	if (Attribute == GetMaxManaAttribute() && bTopOffMana)
 	{
 		SetMana(GetMaxMana());
 		bTopOffMana = false;
@@ -321,12 +321,12 @@ void UAuraAttributeSet::ApplyIncomingXP(const FEffectProperties& Props)
 				ILevelableInterface::Execute_AddToAttributePoints(Props.SourceCharacter, AttributePointsReward);
 				ILevelableInterface::Execute_AddToSpellPoints(Props.SourceCharacter, SpellPointsReward);
 			}
-
-			ILevelableInterface::Execute_AddToLevel(Props.SourceCharacter, NumLevelUps);
-
+			
 			// 레벨에 따른 MaxHealth와 MaxMana 반영 이후 Health, Mana를 최대치로 회복하기 위해 기록해둡니다. 
 			bTopOffHealth = true;
 			bTopOffMana = true;
+
+			ILevelableInterface::Execute_AddToLevel(Props.SourceCharacter, NumLevelUps);
 			
 			ILevelableInterface::Execute_LevelUp(Props.SourceCharacter);
 		}

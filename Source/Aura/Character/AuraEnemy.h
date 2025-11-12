@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "AuraCharacterBase.h"
 #include "Aura/Interaction/EnemyInterface.h"
+#include "Aura/Interaction/HighlightInterface.h"
 #include "Aura/UI/WidgetController/OverlayWidgetController.h"
 #include "AuraEnemy.generated.h"
 
@@ -11,7 +12,7 @@ class UBehaviorTree;
 class AAuraAIController;
 
 UCLASS()
-class AURA_API AAuraEnemy : public AAuraCharacterBase, public IEnemyInterface
+class AURA_API AAuraEnemy : public AAuraCharacterBase, public IHighlightInterface, public IEnemyInterface
 {
 	GENERATED_BODY()
 
@@ -20,36 +21,39 @@ public:
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
-	//~ Begin Enemy Interface
+	//~ Begin IHighlightInterface
 	virtual void HighlightActor() override;
 	virtual void UnHighlightActor() override;
+	//~ End of IHighlightInterface
+	
+	//~ Begin IEnemyInterface
 	virtual void SetCombatTarget_Implementation(AActor* InCombatTarget) override;
 	virtual AActor* GetCombatTarget_Implementation() const override;
 	virtual void ShouldPlaySpawnAnimation() override;
-	//~ End Enemy Interface
+	//~ End of IEnemyInterface
 
-	//~ Begin Combat Interface
+	//~ Begin ICombatInterface
 	virtual void RegisterPawn() override;
 	virtual void UnregisterPawn() override;
 	virtual int32 GetCharacterLevel_Implementation() override;
 	virtual void Die(const FVector& Impulse) override;
-	//~ End Combat Interface
+	//~ End of ICombatInterface
 
 	virtual void MulticastDeath_Implementation(const FVector& Impulse) override;
 	
 protected:
-	//~ Begin Actor Interface
+	//~ Begin AActor Interface
 	virtual void BeginPlay() override;
-	//~ End Actor Interface
+	//~ End of AActor Interface
 	
-	//~ Begin Pawn Interface
+	//~ Begin APawn Interface
 	virtual void PossessedBy(AController* NewController) override;
-	//~ End Pawn Interface
+	//~ End of APawn Interface
 
-	//~ Begin AuraCharacterBase Interface
+	//~ Begin AAuraCharacterBase Interface
 	virtual void InitAbilityActorInfo() override;
 	virtual void AddCharacterStartupAbilities() const override;
-	//~ End AuraCharacterBase Interface
+	//~ End of AAuraCharacterBase Interface
 
 private:
 	UFUNCTION()

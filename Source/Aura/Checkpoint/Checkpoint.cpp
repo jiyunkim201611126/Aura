@@ -1,5 +1,6 @@
 ﻿#include "Checkpoint.h"
 
+#include "Aura/Aura.h"
 #include "Aura/Interaction/SaveGameInterface.h"
 #include "Aura/Manager/SaveManagerSubsystem.h"
 #include "Components/SphereComponent.h"
@@ -13,6 +14,7 @@ ACheckpoint::ACheckpoint(const FObjectInitializer& ObjectInitializer)
 	CheckpointMesh->SetupAttachment(GetRootComponent());
 	CheckpointMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	CheckpointMesh->SetCollisionResponseToAllChannels(ECR_Block);
+	CheckpointMesh->CustomDepthStencilValue = CUSTOM_DEPTH_TAN;
 
 	Sphere = CreateDefaultSubobject<USphereComponent>("Sphere");
 	Sphere->SetupAttachment(CheckpointMesh);
@@ -27,6 +29,16 @@ void ACheckpoint::LoadActor_Implementation()
 	{
 		ActiveGlowEffects();
 	}
+}
+
+void ACheckpoint::HighlightActor()
+{
+	CheckpointMesh->SetRenderCustomDepth(true);
+}
+
+void ACheckpoint::UnHighlightActor()
+{
+	CheckpointMesh->SetRenderCustomDepth(false);
 }
 
 void ACheckpoint::BeginPlay()
@@ -49,6 +61,11 @@ void ACheckpoint::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AAct
 	{
 		if (OtherPawn->IsLocallyControlled() && OtherPawn->Implements<USaveGameInterface>())
 		{
+			if (!bReached)
+			{
+				ActiveGlowEffects();
+			}
+			
 			// 저장 로직을 수행합니다.
 			ISaveGameInterface::Execute_SaveProgress(OtherPawn, PlayerStartTag);
 			
@@ -57,8 +74,6 @@ void ACheckpoint::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AAct
 			{
 				SaveManagerSubsystem->SaveWorldState(GetWorld());
 			}
-			
-			ActiveGlowEffects();
 		}
 	}
 }

@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
+#include "Aura/Interaction/HighlightInterface.h"
 #include "Aura/Interaction/SavedActorInterface.h"
 #include "GameFramework/PlayerStart.h"
 #include "Checkpoint.generated.h"
@@ -8,7 +9,7 @@
 class USphereComponent;
 
 UCLASS()
-class AURA_API ACheckpoint : public APlayerStart, public ISavedActorInterface
+class AURA_API ACheckpoint : public APlayerStart, public ISavedActorInterface, public IHighlightInterface
 {
 	GENERATED_BODY()
 
@@ -19,6 +20,11 @@ public:
 	virtual bool ShouldLoadTransform_Implementation() override { return false; }
 	virtual void LoadActor_Implementation() override;
 	//~ End of ISavedActorInterface
+	
+	//~ Begin IHighlightInterface
+	virtual void HighlightActor() override;
+	virtual void UnHighlightActor() override;
+	//~ End of IHighlightInterface
 
 protected:
 	//~ Begin AActor Interface

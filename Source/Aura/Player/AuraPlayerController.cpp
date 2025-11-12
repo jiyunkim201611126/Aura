@@ -14,6 +14,7 @@
 #include "Aura/Actor/DamageTextActor.h"
 #include "Aura/Game/AuraGameModeBase.h"
 #include "Aura/Interaction/CombatInterface.h"
+#include "Aura/Interaction/HighlightInterface.h"
 #include "Components/DecalComponent.h"
 
 AAuraPlayerController::AAuraPlayerController()
@@ -153,8 +154,6 @@ void AAuraPlayerController::SetupInputComponent()
 
 void AAuraPlayerController::CursorTrace()
 {
-	// 커서 아래의 적을 하이라이팅하며 그 위치를 멤버변수로 캐싱하는 함수입니다.
-
 	// CursorTrace가 Block된 상태라면 모두 UnHighlight합니다.
 	if (GetASC() && GetASC()->HasMatchingGameplayTag(FAuraGameplayTags::Get().Player_Block_CursorTrace))
 	{
@@ -211,8 +210,15 @@ void AAuraPlayerController::AbilityInputTagPressed(FGameplayTag InputTag)
 	// RMB Input인 경우 들어가는 분기입니다.
 	if (InputTag.MatchesTagExact(FAuraGameplayTags::Get().InputTag_RMB))
 	{
-		// 현재 마우스 아래에 Enemy가 존재하면 bTargeting를 true로 할당합니다.
-		bTargeting = ThisActor ? true : false;
+		// 현재 마우스 아래의 대상에 따라 값을 지정합니다.
+		if (ThisActor)
+		{
+			TargetingStatus = ThisActor.GetObject()->Implements<UEnemyInterface>() ? ETargetingStatus::TargetingEnemy : ETargetingStatus::TargetingNonEnemy;
+		}
+		else
+		{
+			TargetingStatus = ETargetingStatus::TargetingNonEnemy;
+		}
 		// 꾹 누른 시간을 0으로 초기화합니다.
 		FollowTime = 0.f;
 		return;
@@ -245,7 +251,7 @@ void AAuraPlayerController::AbilityInputTagHeld(FGameplayTag InputTag)
 	}
 
 	// RMB Input인 경우 여기에 도달합니다.
-	if (bTargeting || bShiftKeyDown)
+	if (TargetingStatus == ETargetingStatus::TargetingEnemy || bShiftKeyDown)
 	{
 		// 마우스 아래 Enemy가 있거나 Shift를 누른 상태면 Ability를 사용합니다.
 		if (GetASC())
@@ -296,7 +302,7 @@ void AAuraPlayerController::AbilityInputTagReleased(FGameplayTag InputTag)
 	// RMB Input인 경우 여기에 도달합니다.
 
 	// 커서 아래에 적이 없으며 Shift를 누른 상태가 아니면 들어가는 분기입니다.
-	if (!bTargeting && !bShiftKeyDown)
+	if (TargetingStatus != ETargetingStatus::TargetingEnemy && !bShiftKeyDown)
 	{
 		// 마우스 아래 Enemy가 없으면 Move를 원한다고 간주합니다.
 		const APawn* ControlledPawn = GetPawn();
@@ -330,7 +336,7 @@ void AAuraPlayerController::AbilityInputTagReleased(FGameplayTag InputTag)
 		}
 		// 관련 변수 초기화
 		FollowTime = 0.f;
-		bTargeting = false;
+		TargetingStatus = ETargetingStatus::NotTargeting;
 	}
 }
 

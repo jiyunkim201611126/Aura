@@ -116,7 +116,7 @@ void UAuraAbilitySystemLibrary::InitializeAttributesFromSaveData(const UObject* 
 
 	FGameplayEffectContextHandle SecondaryAttributesContextHandle = ASC->MakeEffectContext();
 	SecondaryAttributesContextHandle.AddSourceObject(SourceAvatarActor);
-	const FGameplayEffectSpecHandle SecondaryAttributesSpecHandle = ASC->MakeOutgoingSpec(CharacterClassInfo->SecondaryAttribute, 1.f, SecondaryAttributesContextHandle);
+	const FGameplayEffectSpecHandle SecondaryAttributesSpecHandle = ASC->MakeOutgoingSpec(CharacterClassInfo->SecondaryAttribute_Infinite, 1.f, SecondaryAttributesContextHandle);
 	ASC->ApplyGameplayEffectSpecToSelf(*SecondaryAttributesSpecHandle.Data.Get());
 
 	FGameplayEffectContextHandle VitalAttributesContextHandle = ASC->MakeEffectContext();

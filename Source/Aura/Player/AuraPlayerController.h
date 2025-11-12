@@ -8,15 +8,23 @@
 class AAuraDecal;
 class ADamageTextActor;
 class UNiagaraSystem;
-enum class EDamageTypeContext : uint8;
 class UInputMappingContext;
 class UInputAction;
-class IEnemyInterface;
+class IHighlightInterface;
 class UAuraInputConfig;
 class UAuraAbilitySystemComponent;
 class USplineComponent;
 struct FInputActionValue;
 struct FGameplayTag;
+enum class EDamageTypeContext : uint8;
+
+UENUM()
+enum class ETargetingStatus : uint8
+{
+	TargetingEnemy,
+	TargetingNonEnemy,
+	NotTargeting,
+};
 
 UCLASS()
 class AURA_API AAuraPlayerController : public APlayerController, public ISkillPreviewInterface
@@ -39,24 +47,25 @@ public:
 	//~ Begin ISkillPreview Interface
 	virtual void ShowSkillPreview_Implementation(UMaterialInterface* DecalMaterial = nullptr) override;
 	virtual void HideSkillPreview_Implementation() override;
-	//~ End ISkillPreview Interface
+	//~ End of ISkillPreview Interface
 
 protected:
-	//~ Begin Actor Interface
+	//~ Begin AActor Interface
 	virtual void BeginPlay() override;
-	//~ End Actor Interface
+	//~ End of AActor Interface
 	
-	//~ Begin Controller Interface
+	//~ Begin AController Interface
 	virtual void PlayerTick(float DeltaTime) override;
 	virtual void OnPossess(APawn* InPawn) override;
 	virtual void OnUnPossess() override;
-	//~ End Controller Interface
+	//~ End of AController Interface
 
-	//~ Begin PlayerController Interface
+	//~ Begin APlayerController Interface
 	virtual void SetupInputComponent() override;
-	//~ End APlayerController Interface
+	//~ End of APlayerController Interface
 
 private:
+	// 커서 아래의 대상을 하이라이팅하며, 그 대상을 멤버변수로 캐싱하는 함수입니다.
 	void CursorTrace();
 
 	void AbilityInputTagPressed(FGameplayTag InputTag);
@@ -79,8 +88,8 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Input")
 	TObjectPtr<UInputMappingContext> AuraContext;
 
-	TScriptInterface<IEnemyInterface> LastActor;
-	TScriptInterface<IEnemyInterface> ThisActor;
+	TScriptInterface<IHighlightInterface> LastActor;
+	TScriptInterface<IHighlightInterface> ThisActor;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	TObjectPtr<UAuraInputConfig> InputConfig;
@@ -100,7 +109,7 @@ private:
 	FVector CachedDestination = FVector::ZeroVector;
 	float FollowTime = 0.f;
 	float ShortPressThreshold = 0.5f;
-	bool bTargeting = false;
+	ETargetingStatus TargetingStatus = ETargetingStatus::NotTargeting;
 	bool bAutoRunning = false;
 	float AutoRunAcceptanceRadius = 50.f;
 
