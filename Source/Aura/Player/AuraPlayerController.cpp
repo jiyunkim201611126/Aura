@@ -12,6 +12,7 @@
 #include "Aura/Aura.h"
 #include "Aura/Actor/AuraDecal.h"
 #include "Aura/Actor/DamageTextActor.h"
+#include "Aura/Game/AuraGameInstance.h"
 #include "Aura/Game/AuraGameModeBase.h"
 #include "Aura/Interaction/CombatInterface.h"
 #include "Aura/Interaction/HighlightInterface.h"
@@ -24,6 +25,11 @@ AAuraPlayerController::AAuraPlayerController()
 	Spline = CreateDefaultSubobject<USplineComponent>("Spline");
 }
 
+void AAuraPlayerController::ServerRequestTravelWithMapAsset_Implementation(const TSoftObjectPtr<UWorld>& MapToTravel, FName PlayerStartTag)
+{
+	ClientResponseTravel(MapToTravel, PlayerStartTag);
+}
+
 void AAuraPlayerController::ServerRequestTravel_Implementation(const FString& MapName)
 {
 	AAuraGameModeBase* AuraGameMode = Cast<AAuraGameModeBase>(GetWorld()->GetAuthGameMode());
@@ -32,12 +38,16 @@ void AAuraPlayerController::ServerRequestTravel_Implementation(const FString& Ma
 	ClientResponseTravel(MapToTravel);
 }
 
-void AAuraPlayerController::ClientResponseTravel_Implementation(const TSoftObjectPtr<UWorld>& MapToTravel)
+void AAuraPlayerController::ClientResponseTravel_Implementation(const TSoftObjectPtr<UWorld>& MapToTravel, FName PlayerStartTag)
 {
 	FString MapPath = MapToTravel.GetLongPackageName();
 	if (HasAuthority())
 	{
 		MapPath.Append("?listen");
+		if (UAuraGameInstance* AuraGameInstance = Cast<UAuraGameInstance>(GetGameInstance()))
+		{
+			AuraGameInstance->PlayerStartTag = PlayerStartTag;
+		}
 	}
 	
 	ClientTravel(MapPath, TRAVEL_Absolute);

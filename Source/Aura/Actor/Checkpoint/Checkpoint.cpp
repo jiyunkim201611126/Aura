@@ -14,7 +14,9 @@ ACheckpoint::ACheckpoint(const FObjectInitializer& ObjectInitializer)
 	CheckpointMesh->SetupAttachment(GetRootComponent());
 	CheckpointMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	CheckpointMesh->SetCollisionResponseToAllChannels(ECR_Block);
+	
 	CheckpointMesh->CustomDepthStencilValue = CUSTOM_DEPTH_TAN;
+	CheckpointMesh->MarkRenderStateDirty();
 
 	Sphere = CreateDefaultSubobject<USphereComponent>("Sphere");
 	Sphere->SetupAttachment(CheckpointMesh);
@@ -45,12 +47,18 @@ void ACheckpoint::BeginPlay()
 {
 	Super::BeginPlay();
 
-	Sphere->OnComponentBeginOverlap.AddDynamic(this, &ThisClass::OnSphereOverlap);
+	if (Sphere)
+	{
+		Sphere->OnComponentBeginOverlap.AddDynamic(this, &ThisClass::OnSphereOverlap);
+	}
 }
 
 void ACheckpoint::Destroyed()
 {
-	Sphere->OnComponentBeginOverlap.Clear();
+	if (Sphere)
+	{
+		Sphere->OnComponentBeginOverlap.Clear();
+	}
 	
 	Super::Destroyed();
 }

@@ -37,8 +37,11 @@ public:
 	UFUNCTION(Server, Reliable)
 	void ServerRequestTravel(const FString& MapName);
 
+	UFUNCTION(Server, Reliable)
+	void ServerRequestTravelWithMapAsset(const TSoftObjectPtr<UWorld>& MapToTravel, FName PlayerStartTag);
+
 	UFUNCTION(Client, Reliable)
-	void ClientResponseTravel(const TSoftObjectPtr<UWorld>& MapToTravel);
+	void ClientResponseTravel(const TSoftObjectPtr<UWorld>& MapToTravel, FName PlayerStartTag = FName());
 
 	// Damage를 보여주는 위젯 컴포넌트를 스폰하는 함수입니다.
 	UFUNCTION(Client, Reliable)
