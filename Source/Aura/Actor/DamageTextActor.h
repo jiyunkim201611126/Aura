@@ -4,6 +4,7 @@
 #include "GameFramework/Actor.h"
 #include "DamageTextActor.generated.h"
 
+class UProjectileMovementComponent;
 enum class EDamageTypeContext : uint8;
 
 UCLASS()
@@ -20,7 +21,6 @@ public:
 protected:
 	//~ Begin Actor Interface
 	virtual void BeginPlay() override;
-	virtual void Tick(float DeltaSeconds) override;
 	//~ End Actor Interface
 	
 private:
@@ -29,16 +29,7 @@ private:
 private:
 	UPROPERTY(EditDefaultsOnly)
 	float InitialSpeed = 100.0f;
-
-	UPROPERTY(EditDefaultsOnly)
-	float Gravity = 400.0f;
-
-	UPROPERTY(EditDefaultsOnly)
-	float DescentGravityScale = 0.5f;
-
-	// 현재 속도입니다.
-	FVector Velocity;
 	
-	// 하강 상태 여부입니다.
-	bool bIsFalling = false;
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<UProjectileMovementComponent> ProjectileMovement;
 };
