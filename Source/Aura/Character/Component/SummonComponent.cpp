@@ -42,19 +42,19 @@ void USummonComponent::AddMinion(AActor* InMinion)
 	if (!CurrentMinions.Contains(InMinion))
 	{
 		CurrentMinions.Add(InMinion);
-		InMinion->OnDestroyed.AddDynamic(this, &ThisClass::RemoveMinion);
+		InMinion->OnEndPlay.AddDynamic(this, &ThisClass::RemoveMinion);
 	}
 }
 
-void USummonComponent::RemoveMinion(AActor* DestroyedActor)
+void USummonComponent::RemoveMinion(AActor* InMinion, EEndPlayReason::Type EndPlayReason)
 {
-	if (!DestroyedActor || !GetOwner()->HasAuthority())
+	if (!InMinion || !GetOwner()->HasAuthority())
 	{
 		return;
 	}
 	
-	if (CurrentMinions.Contains(DestroyedActor))
+	if (CurrentMinions.Contains(InMinion))
 	{
-		CurrentMinions.Remove(DestroyedActor);
+		CurrentMinions.Remove(InMinion);
 	}
 }

@@ -40,6 +40,8 @@ public:
 	//~ End of ICombatInterface
 
 	virtual void MulticastDeath_Implementation(const FVector& Impulse) override;
+
+	void SetLevel(int32 InLevel);
 	
 protected:
 	//~ Begin AActor Interface
@@ -68,6 +70,10 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FOnAttributeChangedSignature OnMaxHealthChanged;
 
+	UPROPERTY()
+	TObjectPtr<AAuraAIController> AuraAIController;
+
+protected:
 	// Die 함수 호출 시 해당 시간 이후 객체가 파괴됩니다.
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat")
 	float LifeSpan = 5.f;
@@ -81,16 +87,6 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<UWidgetComponent> HealthBar;
 
-	/**
-	 * AI
-	 */
-	
-	UPROPERTY()
-	TObjectPtr<AAuraAIController> AuraAIController;
-
-	UPROPERTY(EditAnywhere, Category = "AI")
-	TObjectPtr<UBehaviorTree> BehaviorTree;
-
 	// 해당 거리 안으로 캐릭터가 접근하면 AgroBehaviorTree가 실행됩니다.
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AI")
 	float AgroRange = 1000.f;
@@ -102,6 +98,9 @@ public:
 	// Range Attack이라면 Projectile의 LifeSpan을 생각해 설정해줍니다.
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AI")
 	float CombatRange = 150.f;
+
+	UPROPERTY(EditAnywhere, Category = "AI")
+	TObjectPtr<UBehaviorTree> BehaviorTree;
 	
 	// 메인 BT 안에 서브로 들어가는 Tree들입니다.
 	// 기본값은 메인 BT에서 직접 할당하기 때문에, 범용 SubTree를 사용하는 경우 값을 할당하지 않습니다.

@@ -45,14 +45,17 @@ void AAuraProjectile::BeginPlay()
 				if (LoopingSound)
 				{
 					LoopingSoundComponent = UGameplayStatics::SpawnSoundAttached(LoopingSound, GetRootComponent());
-					LoopingSoundComponent->SetVolumeMultiplier(VolumeMultiplier);
+					if (LoopingSoundComponent)
+					{
+						LoopingSoundComponent->SetVolumeMultiplier(VolumeMultiplier);
+					}
 				}
 			});
 		}
 	}
 }
 
-void AAuraProjectile::Destroyed()
+void AAuraProjectile::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	if (!GetWorld() || !GetWorld()->GetGameInstance())
 	{
@@ -69,7 +72,7 @@ void AAuraProjectile::Destroyed()
 	
 	Sphere->OnComponentBeginOverlap.Clear();
 	
-	Super::Destroyed();
+	Super::EndPlay(EndPlayReason);
 }
 
 void AAuraProjectile::Tick(float DeltaSeconds)

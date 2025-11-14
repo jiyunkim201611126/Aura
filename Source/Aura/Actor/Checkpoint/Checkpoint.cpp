@@ -59,14 +59,14 @@ void ACheckpoint::BeginPlay()
 	}
 }
 
-void ACheckpoint::Destroyed()
+void ACheckpoint::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	if (Sphere)
 	{
 		Sphere->OnComponentBeginOverlap.Clear();
 	}
 	
-	Super::Destroyed();
+	Super::EndPlay(EndPlayReason);
 }
 
 void ACheckpoint::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)

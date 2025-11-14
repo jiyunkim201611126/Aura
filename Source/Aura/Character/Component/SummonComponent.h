@@ -24,7 +24,7 @@ public:
 	void AddMinion(AActor* InMinion);
 
 	UFUNCTION()
-	void RemoveMinion(AActor* DestroyedActor);
+	void RemoveMinion(AActor* InMinion, EEndPlayReason::Type EndPlayReason);
 
 protected:
 	//~ Begin ActorComponent Interface

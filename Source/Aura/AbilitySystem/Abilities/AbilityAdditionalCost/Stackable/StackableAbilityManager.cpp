@@ -80,11 +80,11 @@ void AStackableAbilityManager::BeginPlay()
 	SetActorEnableCollision(false);
 }
 
-void AStackableAbilityManager::Destroyed()
+void AStackableAbilityManager::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	OnStackCountChanged.Unbind();
 	OnStackTimerStarted.Unbind();
-	Super::Destroyed();
+	Super::EndPlay(EndPlayReason);
 }
 
 void AStackableAbilityManager::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const

@@ -27,7 +27,7 @@ public:
 protected:
 	//~ Begin Actor Interface
 	virtual void BeginPlay() override;
-	virtual void Destroyed() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	virtual void Tick(float DeltaSeconds) override;
 	//~ End Actor Interface
 

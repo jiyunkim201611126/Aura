@@ -121,6 +121,11 @@ void AAuraEnemy::MulticastDeath_Implementation(const FVector& Impulse)
 	Super::MulticastDeath_Implementation(Impulse);
 }
 
+void AAuraEnemy::SetLevel(int32 InLevel)
+{
+	Level = InLevel;
+}
+
 void AAuraEnemy::BeginPlay()
 {
 	Super::BeginPlay();
